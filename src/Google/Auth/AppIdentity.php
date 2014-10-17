@@ -32,8 +32,6 @@ class Google_Auth_AppIdentity extends Google_Auth_Abstract
   const CACHE_PREFIX = "Google_Auth_AppIdentity::";
   const CACHE_LIFETIME = 1500;
   private $key = null;
-  private $cache;
-  private $io;
   private $token = false;
   private $tokenScopes = false;
 
