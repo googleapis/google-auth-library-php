@@ -32,9 +32,9 @@ abstract class Google_IO_Abstract
   private static $ENTITY_HTTP_METHODS = array("POST" => null, "PUT" => null);
 
   /** @var Google_Cache */
-  protected $cache
+  protected $cache;
 
-  public function __construct($timeout, Google_Cache $cache)
+  public function __construct($timeout, Google_Cache_Abstract $cache)
   {
     if ($timeout > 0) {
       $this->setTimeout($timeout);
