@@ -23,10 +23,6 @@ require_once realpath(dirname(__FILE__) . '/../../../autoload.php');
  */
 class Google_Cache_Null extends Google_Cache_Abstract
 {
-  public function __construct(Google_Client $client)
-  {
-
-  }
 
    /**
    * @inheritDoc

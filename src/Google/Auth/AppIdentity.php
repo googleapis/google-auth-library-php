@@ -32,14 +32,10 @@ class Google_Auth_AppIdentity extends Google_Auth_Abstract
   const CACHE_PREFIX = "Google_Auth_AppIdentity::";
   const CACHE_LIFETIME = 1500;
   private $key = null;
-  private $client;
+  private $cache;
+  private $io;
   private $token = false;
   private $tokenScopes = false;
-
-  public function __construct(Google_Client $client, $config = null)
-  {
-    $this->client = $client;
-  }
 
   /**
    * Retrieve an access token for the scopes supplied.
@@ -49,8 +45,7 @@ class Google_Auth_AppIdentity extends Google_Auth_Abstract
     if ($this->token && $this->tokenScopes == $scopes) {
       return $this->token;
     }
-    $memcache = new Memcached();
-    $this->token = $memcache->get(self::CACHE_PREFIX . $scopes);
+    $this->token = $this->cache->get(self::CACHE_PREFIX . $scopes);
     if (!$this->token) {
       $this->token = AppIdentityService::getAccessToken($scopes);
       if ($this->token) {
@@ -60,7 +55,7 @@ class Google_Auth_AppIdentity extends Google_Auth_Abstract
         } else if (is_array($scopes)) {
           $memcache_key .= implode(":", $scopes);
         }
-        $memcache->set($memcache_key, $this->token, self::CACHE_LIFETIME);
+        $this->cache->set($memcache_key, $this->token, self::CACHE_LIFETIME);
       }
     }
     $this->tokenScopes = $scopes;

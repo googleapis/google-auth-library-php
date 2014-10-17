@@ -25,6 +25,35 @@ require_once realpath(dirname(__FILE__) . '/../../../autoload.php');
 abstract class Google_Auth_Abstract
 {
   /**
+   * @var Google_Cache_Abstract The cache
+   */
+  protected $cache;
+
+  /**
+   * @var Google_IO_Abstract The IO handler
+   */
+  protected $io;
+
+  /**
+   * @var array Configuration options for this specific class
+   */
+  private $config;
+
+  public function __construct(Google_Cache_Abstract $cache,
+                              Google_IO_Abstract $io,
+                              array $config = array())
+  {
+    $this->cache = $cache;
+    $this->io = $io;
+    $this->config = $config;
+  }
+
+  protected function getConfig($name)
+  {
+    return $this->config[$name];
+  }
+
+  /**
    * An utility function that first calls $this->auth->sign($request) and then
    * executes makeRequest() on that signed request. Used for when a request
    * should be authenticated

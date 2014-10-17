@@ -48,17 +48,28 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   private $token = array();
 
   /**
-   * @var Google_Client the base client
-   */
-  private $client;
-
-  /**
    * Instantiates the class, but does not initiate the login flow, leaving it
    * to the discretion of the caller.
    */
-  public function __construct(Google_Client $client)
+  public function __construct(Google_Cache_Abstract $cache,
+                              Google_IO_Abstract $io,
+                              array $config)
   {
-    $this->client = $client;
+    foreach(array(
+        'redirect_uri',
+        'client_id',
+        'client_secret',
+        'access_type',
+        'request_visible_actions',
+        'federated_signon_certs_url') as $key)
+    {
+      if(!key_exists($key, $config))
+      {
+        throw new Google_Auth_Exception(
+            'Missing OAuth2 config option: ' . $key);
+      }
+    }
+    parent::__construct($cache, $io, $config);
   }
 
   /**
@@ -74,7 +85,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   public function authenticatedRequest(Google_Http_Request $request)
   {
     $request = $this->sign($request);
-    return $this->client->getIo()->makeRequest($request);
+    return $this->io->makeRequest($request);
   }
 
   /**
@@ -97,13 +108,13 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
         array(
           'code' => $code,
           'grant_type' => 'authorization_code',
-          'redirect_uri' => $this->client->getClassConfig($this, 'redirect_uri'),
-          'client_id' => $this->client->getClassConfig($this, 'client_id'),
-          'client_secret' => $this->client->getClassConfig($this, 'client_secret')
+          'redirect_uri' => $this->getConfig($this, 'redirect_uri'),
+          'client_id' => $this->getConfig($this, 'client_id'),
+          'client_secret' => $this->getConfig($this, 'client_secret')
         )
     );
     $request->disableGzip();
-    $response = $this->client->getIo()->makeRequest($request);
+    $response = $this->io->makeRequest($request);
 
     if ($response->getResponseHttpCode() == 200) {
       $this->setAccessToken($response->getResponseBody());
@@ -138,10 +149,10 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   {
     $params = array(
         'response_type' => 'code',
-        'redirect_uri' => $this->client->getClassConfig($this, 'redirect_uri'),
-        'client_id' => $this->client->getClassConfig($this, 'client_id'),
+        'redirect_uri' => $this->getConfig($this, 'redirect_uri'),
+        'client_id' => $this->getConfig($this, 'client_id'),
         'scope' => $scope,
-        'access_type' => $this->client->getClassConfig($this, 'access_type'),
+        'access_type' => $this->getConfig($this, 'access_type'),
     );
 
     $params = $this->maybeAddParam($params, 'approval_prompt');
@@ -153,7 +164,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
 
     // If the list of scopes contains plus.login, add request_visible_actions
     // to auth URL.
-    $rva = $this->client->getClassConfig($this, 'request_visible_actions');
+    $rva = $this->getConfig($this, 'request_visible_actions');
     if (strpos($scope, 'plus.login') && strlen($rva) > 0) {
         $params['request_visible_actions'] = $rva;
     }
@@ -214,8 +225,8 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   public function sign(Google_Http_Request $request)
   {
     // add the developer key to the request before signing it
-    if ($this->client->getClassConfig($this, 'developer_key')) {
-      $request->setQueryParam('key', $this->client->getClassConfig($this, 'developer_key'));
+    if ($this->getConfig($this, 'developer_key')) {
+      $request->setQueryParam('key', $this->getConfig($this, 'developer_key'));
     }
 
     // Cannot sign the request without an OAuth access token.
@@ -257,8 +268,8 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   {
     $this->refreshTokenRequest(
         array(
-          'client_id' => $this->client->getClassConfig($this, 'client_id'),
-          'client_secret' => $this->client->getClassConfig($this, 'client_secret'),
+          'client_id' => $this->getConfig($this, 'client_id'),
+          'client_secret' => $this->getConfig($this, 'client_secret'),
           'refresh_token' => $refreshToken,
           'grant_type' => 'refresh_token'
         )
@@ -282,7 +293,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
       // We can check whether we have a token available in the
       // cache. If it is expired, we can retrieve a new one from
       // the assertion.
-      $token = $this->client->getCache()->get($cacheKey);
+      $token = $this->cache->get($cacheKey);
       if ($token) {
         $this->setAccessToken($token);
       }
@@ -301,7 +312,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
 
     if ($cacheKey) {
       // Attempt to cache the token.
-      $this->client->getCache()->set(
+      $this->cache->set(
           $cacheKey,
           $this->getAccessToken()
       );
@@ -317,7 +328,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
         $params
     );
     $http->disableGzip();
-    $request = $this->client->getIo()->makeRequest($http);
+    $request = $this->io->makeRequest($http);
 
     $code = $request->getResponseHttpCode();
     $body = $request->getResponseBody();
@@ -368,7 +379,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
         "token=$token"
     );
     $request->disableGzip();
-    $response = $this->client->getIo()->makeRequest($request);
+    $response = $this->io->makeRequest($request);
     $code = $response->getResponseHttpCode();
     if ($code == 200) {
       $this->token = null;
@@ -401,7 +412,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   private function getFederatedSignOnCerts()
   {
     return $this->retrieveCertsFromLocation(
-        $this->client->getClassConfig($this, 'federated_signon_certs_url')
+        $this->getConfig($this, 'federated_signon_certs_url')
     );
   }
 
@@ -428,7 +439,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
     }
 
     // This relies on makeRequest caching certificate responses.
-    $request = $this->client->getIo()->makeRequest(
+    $request = $this->io->makeRequest(
         new Google_Http_Request(
             $url
         )
@@ -463,7 +474,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
     }
     $certs = $this->getFederatedSignonCerts();
     if (!$audience) {
-      $audience = $this->client->getClassConfig($this, 'client_id');
+      $audience = $this->getConfig($this, 'client_id');
     }
 
     return $this->verifySignedJwtWithCerts($id_token, $certs, $audience, self::OAUTH2_ISSUER);
@@ -607,7 +618,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
    */
   private function maybeAddParam($params, $name)
   {
-    $param = $this->client->getClassConfig($this, $name);
+    $param = $this->getConfig($this, $name);
     if ($param != '') {
       $params[$name] = $param;
     }

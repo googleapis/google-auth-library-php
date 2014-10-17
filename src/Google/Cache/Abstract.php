@@ -22,8 +22,6 @@
  */
 abstract class Google_Cache_Abstract
 {
-  
-  abstract public function __construct(Google_Client $client);
 
   /**
    * Retrieves the data for the given key, or false if they

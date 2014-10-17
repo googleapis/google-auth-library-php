@@ -27,11 +27,15 @@ require_once realpath(dirname(__FILE__) . '/../../../autoload.php');
 class Google_Auth_Simple extends Google_Auth_Abstract
 {
   private $key = null;
-  private $client;
 
-  public function __construct(Google_Client $client, $config = null)
+  public __construct(Google_Cache_Abstract $cache,
+                     Google_IO_Abstract $io,
+                     array $config)
   {
-    $this->client = $client;
+    if(!has_key('developer_key', $config)) {
+      throw Google_Auth_Exception(
+          'Missing \'developer_key\' option in $config');
+    }
   }
 
   /**
@@ -52,7 +56,7 @@ class Google_Auth_Simple extends Google_Auth_Abstract
 
   public function sign(Google_Http_Request $request)
   {
-    $key = $this->client->getClassConfig($this, 'developer_key');
+    $key = $this->getConfig('developer_key');
     if ($key) {
       $request->setQueryParam('key', $key);
     }

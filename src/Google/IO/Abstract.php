@@ -31,16 +31,15 @@ abstract class Google_IO_Abstract
   );
   private static $ENTITY_HTTP_METHODS = array("POST" => null, "PUT" => null);
 
-  /** @var Google_Client */
-  protected $client;
+  /** @var Google_Cache */
+  protected $cache
 
-  public function __construct(Google_Client $client)
+  public function __construct($timeout, Google_Cache $cache)
   {
-    $this->client = $client;
-    $timeout = $client->getClassConfig('Google_IO_Abstract', 'request_timeout_seconds');
     if ($timeout > 0) {
       $this->setTimeout($timeout);
     }
+    $this->cache = $cache;
   }
 
   /**
@@ -55,13 +54,13 @@ abstract class Google_IO_Abstract
    * @param $options
    */
   abstract public function setOptions($options);
-  
+
   /**
    * Set the maximum request time in seconds.
    * @param $timeout in seconds
    */
   abstract public function setTimeout($timeout);
-  
+
   /**
    * Get the maximum request time in seconds.
    * @return timeout in seconds
@@ -90,13 +89,13 @@ abstract class Google_IO_Abstract
   {
     // Determine if the request is cacheable.
     if (Google_Http_CacheParser::isResponseCacheable($request)) {
-      $this->client->getCache()->set($request->getCacheKey(), $request);
+      $this->cache->set($request->getCacheKey(), $request);
       return true;
     }
 
     return false;
   }
-  
+
   /**
    * Execute an HTTP Request
    *
@@ -152,7 +151,7 @@ abstract class Google_IO_Abstract
       return false;
     }
 
-    return $this->client->getCache()->get($request->getCacheKey());
+    return $this->cache->get($request->getCacheKey());
   }
 
   /**
