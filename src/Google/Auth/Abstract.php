@@ -61,5 +61,10 @@ abstract class Google_Auth_Abstract
    * @return Google_Http_Request $request
    */
   abstract public function authenticatedRequest(Google_Http_Request $request);
-  abstract public function sign(Google_Http_Request $request);
+  public function sign(Google_Http_Request $request) {
+    $request->setRequestHeaders($this->apply(array()));
+    return $request;
+  }
+
+  abstract public function apply(array $headers);
 }

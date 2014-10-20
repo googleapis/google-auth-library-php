@@ -228,10 +228,13 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
     if ($this->getConfig($this, 'developer_key')) {
       $request->setQueryParam('key', $this->getConfig($this, 'developer_key'));
     }
+    return parent::sign($request);
+  }
 
+  public function apply(array $headers) {
     // Cannot sign the request without an OAuth access token.
     if (null == $this->token && null == $this->assertionCredentials) {
-      return $request;
+      return $headers;
     }
 
     // Check if the token is set to expire in the next 30 seconds
@@ -250,13 +253,8 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
         $this->refreshToken($this->token['refresh_token']);
       }
     }
-
-    // Add the OAuth2 header to the request
-    $request->setRequestHeaders(
-        array('Authorization' => 'Bearer ' . $this->token['access_token'])
-    );
-
-    return $request;
+    headers['Authorization'] = 'Bearer ' + $this->token['access_token'];
+    return $headers;
   }
 
   /**

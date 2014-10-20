@@ -76,17 +76,14 @@ class Google_Auth_AppIdentity extends Google_Auth_Abstract
     return $this->io->makeRequest($request);
   }
 
-  public function sign(Google_Http_Request $request)
+  public function apply(array $headers)
   {
     if (!$this->token) {
-      // No token, so nothing to do.
-      return $request;
+      return $headers;
     }
-    // Add the OAuth2 header to the request
-    $request->setRequestHeaders(
-        array('Authorization' => 'Bearer ' . $this->token['access_token'])
-    );
 
-    return $request;
+    $headers['Authorization'] = 'Bearer ' . $this->token['access_token'];
+
+    return $headers
   }
 }

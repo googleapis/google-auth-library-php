@@ -62,4 +62,8 @@ class Google_Auth_Simple extends Google_Auth_Abstract
     }
     return $request;
   }
+
+  public function apply(array $headers) {
+    return $headers;
+  }
 }
