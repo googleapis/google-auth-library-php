@@ -73,22 +73,6 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   }
 
   /**
-   * Perform an authenticated / signed apiHttpRequest.
-   * This function takes the apiHttpRequest, calls apiAuth->sign on it
-   * (which can modify the request in what ever way fits the auth mechanism)
-   * and then calls apiCurlIO::makeRequest on the signed request
-   *
-   * @param Google_Http_Request $request
-   * @return Google_Http_Request The resulting HTTP response including the
-   * responseHttpCode, responseHeaders and responseBody.
-   */
-  public function authenticatedRequest(Google_Http_Request $request)
-  {
-    $request = $this->sign($request);
-    return $this->io->makeRequest($request);
-  }
-
-  /**
    * @param string $code
    * @throws Google_Auth_Exception
    * @return string
@@ -231,7 +215,13 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
     return parent::sign($request);
   }
 
-  public function apply(array $headers) {
+  /**
+   * Add the authorization header with the auth token if this has one, and
+   * refresh that token if necessary
+   * @param array $headers The headers to add auth information to
+   * @return array $headers
+   */
+  public function addAuthHeaders(array $headers) {
     // Cannot sign the request without an OAuth access token.
     if (null == $this->token && null == $this->assertionCredentials) {
       return $headers;

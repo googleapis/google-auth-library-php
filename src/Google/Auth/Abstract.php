@@ -58,13 +58,30 @@ abstract class Google_Auth_Abstract
    * executes makeRequest() on that signed request. Used for when a request
    * should be authenticated
    * @param Google_Http_Request $request
+   * @return Google_Http_Request The resulting HTTP response including the
+   * responseHttpCode, responseHeaders and responseBody.
+   */
+  public function authenticatedRequest(Google_Http_Request $request)
+  {
+    $request = $this->sign($request);
+    return $this->io->makeRequest($request);
+  }
+
+  /**
+   * Modify the request by adding the relevant auth headers
+   * @param Google_Http_Request $request
    * @return Google_Http_Request $request
    */
-  abstract public function authenticatedRequest(Google_Http_Request $request);
   public function sign(Google_Http_Request $request) {
     $request->setRequestHeaders($this->apply(array()));
     return $request;
   }
 
-  abstract public function apply(array $headers);
+  /**
+   * Adds any headers required to authenticate with this method to the given
+   * array of headers
+   * @param array $headers The headers to add auth information to
+   * @return array $headers
+   */
+  abstract public function addAuthHeaders(array $headers);
 }
