@@ -38,22 +38,6 @@ class Google_Auth_Simple extends Google_Auth_Abstract
     }
   }
 
-  /**
-   * Perform an authenticated / signed apiHttpRequest.
-   * This function takes the apiHttpRequest, calls apiAuth->sign on it
-   * (which can modify the request in what ever way fits the auth mechanism)
-   * and then calls apiCurlIO::makeRequest on the signed request
-   *
-   * @param Google_Http_Request $request
-   * @return Google_Http_Request The resulting HTTP response including the
-   * responseHttpCode, responseHeaders and responseBody.
-   */
-  public function authenticatedRequest(Google_Http_Request $request)
-  {
-    $request = $this->sign($request);
-    return $this->io->makeRequest($request);
-  }
-
   public function sign(Google_Http_Request $request)
   {
     $key = $this->getConfig('developer_key');
@@ -61,5 +45,15 @@ class Google_Auth_Simple extends Google_Auth_Abstract
       $request->setQueryParam('key', $key);
     }
     return $request;
+  }
+
+  /**
+   * No-op. This authentication method does not use headers, so no headers are
+   * added.
+   * @param array $headers
+   * @return array $headers
+   */
+  public function addAuthHeaders(array $headers) {
+    return $headers;
   }
 }

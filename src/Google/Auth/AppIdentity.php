@@ -61,32 +61,19 @@ class Google_Auth_AppIdentity extends Google_Auth_Abstract
   }
 
   /**
-   * Perform an authenticated / signed apiHttpRequest.
-   * This function takes the apiHttpRequest, calls apiAuth->sign on it
-   * (which can modify the request in what ever way fits the auth mechanism)
-   * and then calls apiCurlIO::makeRequest on the signed request
-   *
-   * @param Google_Http_Request $request
-   * @return Google_Http_Request The resulting HTTP response including the
-   * responseHttpCode, responseHeaders and responseBody.
+   * Adds the 'Authorization' header to the given array of headers, if this
+   * has a token.
+   * @param array $headers the headers to add to
+   * @return array $headers
    */
-  public function authenticatedRequest(Google_Http_Request $request)
-  {
-    $request = $this->sign($request);
-    return $this->io->makeRequest($request);
-  }
-
-  public function sign(Google_Http_Request $request)
+  public function addAuthHeaders(array $headers)
   {
     if (!$this->token) {
-      // No token, so nothing to do.
-      return $request;
+      return $headers;
     }
-    // Add the OAuth2 header to the request
-    $request->setRequestHeaders(
-        array('Authorization' => 'Bearer ' . $this->token['access_token'])
-    );
 
-    return $request;
+    $headers['Authorization'] = 'Bearer ' . $this->token['access_token'];
+
+    return $headers
   }
 }

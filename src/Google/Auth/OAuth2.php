@@ -55,37 +55,11 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
                               Google_IO_Abstract $io,
                               array $config)
   {
-    foreach(array(
-        'redirect_uri',
-        'client_id',
-        'client_secret',
-        'access_type',
-        'request_visible_actions',
-        'federated_signon_certs_url') as $key)
-    {
-      if(!key_exists($key, $config))
-      {
-        throw new Google_Auth_Exception(
-            'Missing OAuth2 config option: ' . $key);
-      }
-    }
-    parent::__construct($cache, $io, $config);
-  }
-
-  /**
-   * Perform an authenticated / signed apiHttpRequest.
-   * This function takes the apiHttpRequest, calls apiAuth->sign on it
-   * (which can modify the request in what ever way fits the auth mechanism)
-   * and then calls apiCurlIO::makeRequest on the signed request
-   *
-   * @param Google_Http_Request $request
-   * @return Google_Http_Request The resulting HTTP response including the
-   * responseHttpCode, responseHeaders and responseBody.
-   */
-  public function authenticatedRequest(Google_Http_Request $request)
-  {
-    $request = $this->sign($request);
-    return $this->io->makeRequest($request);
+    $config_default = array(
+        'access_type' => 'online',
+        'federated_signon_certs_url' =>
+        'https://www.googleapis.com/oauth2/v1/certs');
+    parent::__construct($cache, $io, array_merge($config_default, $config));
   }
 
   /**
@@ -149,10 +123,10 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   {
     $params = array(
         'response_type' => 'code',
-        'redirect_uri' => $this->getConfig($this, 'redirect_uri'),
-        'client_id' => $this->getConfig($this, 'client_id'),
+        'redirect_uri' => $this->getConfig('redirect_uri'),
+        'client_id' => $this->getConfig('client_id'),
         'scope' => $scope,
-        'access_type' => $this->getConfig($this, 'access_type'),
+        'access_type' => $this->getConfig('access_type'),
     );
 
     $params = $this->maybeAddParam($params, 'approval_prompt');
@@ -164,7 +138,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
 
     // If the list of scopes contains plus.login, add request_visible_actions
     // to auth URL.
-    $rva = $this->getConfig($this, 'request_visible_actions');
+    $rva = $this->getConfig('request_visible_actions');
     if (strpos($scope, 'plus.login') && strlen($rva) > 0) {
         $params['request_visible_actions'] = $rva;
     }
@@ -225,13 +199,22 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   public function sign(Google_Http_Request $request)
   {
     // add the developer key to the request before signing it
-    if ($this->getConfig($this, 'developer_key')) {
-      $request->setQueryParam('key', $this->getConfig($this, 'developer_key'));
+    if ($this->getConfig('developer_key')) {
+      $request->setQueryParam('key', $this->getConfig('developer_key'));
     }
+    return parent::sign($request);
+  }
 
+  /**
+   * Add the authorization header with the auth token if this has one, and
+   * refresh that token if necessary
+   * @param array $headers The headers to add auth information to
+   * @return array $headers
+   */
+  public function addAuthHeaders(array $headers) {
     // Cannot sign the request without an OAuth access token.
     if (null == $this->token && null == $this->assertionCredentials) {
-      return $request;
+      return $headers;
     }
 
     // Check if the token is set to expire in the next 30 seconds
@@ -250,13 +233,8 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
         $this->refreshToken($this->token['refresh_token']);
       }
     }
-
-    // Add the OAuth2 header to the request
-    $request->setRequestHeaders(
-        array('Authorization' => 'Bearer ' . $this->token['access_token'])
-    );
-
-    return $request;
+    $headers['Authorization'] = 'Bearer ' . $this->token['access_token'];
+    return $headers;
   }
 
   /**
@@ -268,8 +246,8 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
   {
     $this->refreshTokenRequest(
         array(
-          'client_id' => $this->getConfig($this, 'client_id'),
-          'client_secret' => $this->getConfig($this, 'client_secret'),
+          'client_id' => $this->getConfig('client_id'),
+          'client_secret' => $this->getConfig('client_secret'),
           'refresh_token' => $refreshToken,
           'grant_type' => 'refresh_token'
         )
@@ -618,7 +596,7 @@ class Google_Auth_OAuth2 extends Google_Auth_Abstract
    */
   private function maybeAddParam($params, $name)
   {
-    $param = $this->getConfig($this, $name);
+    $param = $this->getConfig($name);
     if ($param != '') {
       $params[$name] = $param;
     }
