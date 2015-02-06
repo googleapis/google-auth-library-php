@@ -36,13 +36,13 @@ class Simple implements SubscriberInterface
    * Create a new Simple plugin.
    *
    * The configuration array expects one option
-   * - developer_key: required, otherwise InvalidArgumentException is thrown
+   * - key: required, otherwise InvalidArgumentException is thrown
    *
    * @param array $config Configuration array
    */
-  public function __construct($config)
+  public function __construct(array $config)
   {
-    $this->config = Collection::fromConfig($config, [], ['developer_key']);
+    $this->config = Collection::fromConfig($config, [], ['key']);
   }
 
   /* Implements SubscriberInterface */
@@ -57,8 +57,8 @@ class Simple implements SubscriberInterface
    *   use GuzzleHttp\Client;
    *   use Google\Auth\Simple;
    *
-   *   $my_developer_key = 'is not the same as yours';
-   *   $simple = new Simple(['developer_key' => $my_developer_key]);
+   *   $my_key = 'is not the same as yours';
+   *   $simple = new Simple(['key' => $my_key]);
    *   $client = new Client([
    *      'base_url' => 'https://www.googleapis.com/discovery/v1/',
    *      'defaults' => ['auth' => 'simple']
