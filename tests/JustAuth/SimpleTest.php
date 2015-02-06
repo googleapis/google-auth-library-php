@@ -30,31 +30,31 @@ class SimpleTest extends \PHPUnit_Framework_TestCase
    */
   public function testRequiresADeveloperKey()
   {
-    new Simple(['not_developer_key' => 'a test key']);
+    new Simple(['not_key' => 'a test key']);
   }
 
   public function testSubscribesToEvents()
   {
-    $events = (new Simple(['developer_key' => 'a test key']))->getEvents();
+    $events = (new Simple(['key' => 'a test key']))->getEvents();
     $this->assertArrayHasKey('before', $events);
   }
 
   public function testAddsTheKeyToTheQuery()
   {
-    $s = new Simple(['developer_key' => 'test_key']);
+    $s = new Simple(['key' => 'test_key']);
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'simple']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $s->onBefore($before);
     $this->assertCount(1, $request->getQuery());
-    $this->assertTrue($request->getQuery()->hasKey('developer_key'));
-    $this->assertSame($request->getQuery()->get('developer_key'), 'test_key');
+    $this->assertTrue($request->getQuery()->hasKey('key'));
+    $this->assertSame($request->getQuery()->get('key'), 'test_key');
   }
 
-  public function testOnlyTouchesWhenAuthConfigIsOauth()
+  public function testOnlyTouchesWhenAuthConfigIsSimple()
   {
-    $s = new Simple(['developer_key' => 'test_key']);
+    $s = new Simple(['key' => 'test_key']);
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'notsimple']);

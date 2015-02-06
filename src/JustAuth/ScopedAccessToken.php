@@ -23,12 +23,12 @@ use GuzzleHttp\Event\SubscriberInterface;
 use GuzzleHttp\Event\BeforeEvent;
 
 /**
- * ScopedAccessToken is a Guzzle Subscriber that adds an Authorisation header
+ * ScopedAccessToken is a Guzzle Subscriber that adds an Authorization header
  * provided by a closure.
  *
- * The closure returns an access token, taking either single string scope or
- * any array of strings as its value.  If provided, a cache will be used to
- * preserve the access token for a given lifetime.
+ * The closure returns an access token, taking the scope, either a single
+ * string or an array of strings, as its value.  If provided, a cache will be
+ * used to preserve the access token for a given lifetime.
  *
  * Requests will be accessed with the authorization header:
  *
@@ -58,7 +58,7 @@ class ScopedAccessToken implements SubscriberInterface
    * @param cacheConfig configuration for the cache when it's present
    * @param object $cache an implementation of CacheInterface
    */
-  public function __construct($tokenFunc, $scopes, $cacheConfig, $cache=NULL)
+  public function __construct($tokenFunc, $scopes, array $cacheConfig, $cache=NULL)
   {
     if (!is_callable($tokenFunc)) {
       throw new \InvalidArgumentException(
