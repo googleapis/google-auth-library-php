@@ -30,14 +30,6 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
   /**
    * @expectedException InvalidArgumentException
    */
-  public function testRequiresACallable()
-  {
-    new ScopedAccessToken('not a callable', self::TEST_SCOPE, array());
-  }
-
-  /**
-   * @expectedException InvalidArgumentException
-   */
   public function testRequiresScopeAsAStringOrArray()
   {
     $fakeAuthFunc = function ($unused_scopes) {

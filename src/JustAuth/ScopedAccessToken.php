@@ -58,14 +58,10 @@ class ScopedAccessToken implements SubscriberInterface
    * @param cacheConfig configuration for the cache when it's present
    * @param object $cache an implementation of CacheInterface
    */
-  public function __construct($tokenFunc, $scopes, array $cacheConfig, $cache=NULL)
+  public function __construct(callable $tokenFunc, $scopes, array $cacheConfig,
+                              CacheInterface $cache=NULL)
   {
-    if (!is_callable($tokenFunc)) {
-      throw new \InvalidArgumentException(
-          'wants a callable, got ' . $tokenFunc);
-    }
     $this->tokenFunc = $tokenFunc;
-
     if (!(is_string($scopes) || is_array($scopes))) {
       throw new \InvalidArgumentException(
           'wants scope should be string or array');
