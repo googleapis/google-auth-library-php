@@ -386,7 +386,7 @@ class OAuth2
    * Gets the authorization server's HTTP endpoint capable of issuing tokens
    * and refreshing expired tokens.
    */
-  public function getTokenCredentialUri($uri)
+  public function getTokenCredentialUri()
   {
     return $this->tokenCredentialUri;
   }
@@ -403,7 +403,7 @@ class OAuth2
   /**
    * Gets the redirection URI used in the initial request.
    */
-  public function getRedirectUri($uri)
+  public function getRedirectUri()
   {
     return $this->redirectUri;
   }
