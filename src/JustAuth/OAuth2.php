@@ -17,8 +17,11 @@
 
 namespace Google\Auth;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Collection;
 use GuzzleHttp\Query;
+use GuzzleHttp\Message\ResponseInterface;
 use GuzzleHttp\Url;
 use JWT;
 
@@ -34,6 +37,7 @@ class OAuth2
 
   const DEFAULT_EXPIRY_MINUTES = 60;
   const DEFAULT_SKEW = 60;
+  const JWT_URN = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
 
   /**
    * TODO: determine known methods from the keys of JWT::methods
@@ -321,35 +325,124 @@ class OAuth2
   }
 
  /**
+  * Generates a request for token credentials.
+  *
+  * @param $client GuzzleHttp\ClientInterface the optional client.
+  * @return GuzzleHttp\RequestInterface the authorization Url.
+  */
+  public function generateCredentialsRequest(ClientInterface $client = null)
+  {
+    $uri = $this->getTokenCredentialUri();
+    if (is_null($uri)) {
+      throw new \DomainException('No token credential URI was set.');
+    }
+    if (is_null($client)) {
+      $client = new Client();
+    }
+    $grantType = $this->getGrantType();
+    $params = array('grant_type' => $grantType);
+    switch($grantType) {
+      case 'authorization_code':
+        $params['code'] = $this->getCode();
+        $params['redirect_uri'] = $this->getRedirectUri();
+        break;
+      case 'password':
+        $params['username'] = $this->getUsername();
+        $params['password'] = $this->getPassword();
+        break;
+      case 'refresh_token':
+        $params['refresh_token'] = $this->getRefreshToken();
+        break;
+      case self::JWT_URN:
+        $params['assertion'] = $this->toJwt();
+        break;
+      default:
+        if (!is_null($this->getRedirectUri())) {
+          # Grant type was supposed to be 'authorization_code', as there
+          # is a redirect URI.
+          throw new \DomainException('Missing authorization code');
+        }
+        unset($params['grant_type']);
+        if (!is_null($grantType)) {
+          $params['grant_type'] = strval($grantType);
+        }
+        $params = array_merge($params, $this->getExtensionParams());
+    }
+    $request = $client->createRequest('POST', $uri);
+    $request->addHeader('Cache-Control', 'no-store');
+    $request->addHeader('Content-Type', 'application/x-www-form-urlencoded');
+    $request->getBody()->replaceFields($params);
+    return $request;
+  }
+
+ /**
+  * Fetchs the auth tokens based on the current state.
+  *
+  * @param $client GuzzleHttp\ClientInterface the optional client.
+  * @return array the response
+  */
+  public function fetchAuthToken(ClientInterface $client = null)
+  {
+    if (is_null($client)) {
+      $client = new Client();
+    }
+    $resp = $client->send($this->generateCredentialsRequest($client));
+    $creds = $this->parseTokenResponse($resp);
+    $this->updateToken($creds);
+    return $creds;
+  }
+
+ /**
+  * Parses the fetched tokens.
+  *
+  * @param $resp GuzzleHttp\Message\ReponseInterface the response.
+  * @return array the tokens parsed from the response body.
+  */
+  public function parseTokenResponse(ResponseInterface $resp)
+  {
+    $body = $resp->getBody()->getContents();
+    if ($resp->hasHeader('Content-Type') &&
+        $resp->getHeader('Content-Type') == 'application/x-www-form-urlencoded') {
+      $res = array();
+      parse_str($body, $res);
+      return $res;
+    } else {
+      // Assume it's JSON; if it's not there needs to be an exception, so
+      // we use the json decode exception instead of adding a new one.
+      return $resp->json();
+    }
+  }
+
+ /**
   * Updates an OAuth 2.0 client.
   *
   * @example
   *   client.updateToken([
-  *     'refreshToken' => 'n4E9O119d',
-  *     'accessToken' => 'FJQbwq9',
-  *     'expiresIn' => 3600
+  *     'refresh_token' => 'n4E9O119d',
+  *     'access_token' => 'FJQbwq9',
+  *     'expires_in' => 3600
   *   ])
   *
   * @param array options
   *  The configuration parameters related to the token.
   *
-  *  - refreshToken
+  *  - refresh_token
   *    The refresh token associated with the access token
   *    to be refreshed.
   *
-  *  - accessToken
+  *  - access_token
   *    The current access token for this client.
   *
-  *  - idToken
+  *  - id_token
   *    The current ID token for this client.
   *
-  *  - expiresIn
+  *  - expires_in
   *    The time in seconds until access token expiration.
   *
-  *  - expiresAt
+  *  - expires_at
   *    The time as an integer number of seconds since the Epoch
   *
-  *  - issuedAt
+  *  - issued_at
   *    The timestamp that the token was issued at.
   */
   public function updateToken(array $config)
@@ -357,15 +450,16 @@ class OAuth2
     $opts = Collection::fromConfig($config, [
         'extensionParams' => []
     ], []);
-    $this->setExpiresAt($opts->get('expiresAt'));
-    $this->setExpiresIn($opts->get('expiresIn'));
+    $this->setExpiresAt($opts->get('expires'));
+    $this->setExpiresAt($opts->get('expires_at'));
+    $this->setExpiresIn($opts->get('expires_in'));
     // By default, the token is issued at `Time.now` when `expiresIn` is set,
     // but this can be used to supply a more precise time.
-    $this->setIssuedAt($opts->get('issuedAt'));
+    $this->setIssuedAt($opts->get('issued_at'));
 
-    $this->setAccessToken($opts->get('accessToken'));
-    $this->setIdToken($opts->get('idToken'));
-    $this->setRefreshToken($opts->get('refreshToken'));
+    $this->setAccessToken($opts->get('access_token'));
+    $this->setIdToken($opts->get('id_token'));
+    $this->setRefreshToken($opts->get('refresh_token'));
   }
 
   /**
@@ -534,7 +628,7 @@ class OAuth2
     } else if (!is_null($this->username) && !is_null($this->password)) {
       return 'password';
     } else if (!is_null($this->issuer) && !is_null($this->signingKey)) {
-      return 'urn:ietf:params:oauth:grant-type:jwt-bearer';
+      return self::JWT_URN;
     } else {
       return null;
     }
