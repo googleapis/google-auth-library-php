@@ -19,6 +19,7 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\OAuth2;
 use GuzzleHttp\Url;
+use JWT;
 
 class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
 {
@@ -304,5 +305,97 @@ class OAuth2GeneralTest extends \PHPUnit_Framework_TestCase
       $this->assertEquals($a, $o->getSigningAlgorithm());
     }
   }
+}
 
+class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
+{
+  private $signingMinimal = [
+      'signingKey' => 'example_key',
+      'signingAlgorithm' => 'HS256',
+      'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+      'issuer' => 'app@example.com',
+      'audience' => 'accounts.google.com',
+      'clientId' => 'aClientID'
+  ];
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingAudience()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['audience']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingIssuer()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['issuer']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingScope()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['scope']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingSigningKey()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['signingKey']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingSigningAlgorithm()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['signingAlgorithm']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  public function testCanHS256EncodeAValidPayload()
+  {
+    $testConfig = $this->signingMinimal;
+    $o = new OAuth2($testConfig);
+    $payload = $o->toJwt();
+    $roundTrip = JWT::decode($payload, $testConfig['signingKey']) ;
+    $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
+    $this->assertEquals($roundTrip->aud, $testConfig['audience']);
+    $this->assertEquals($roundTrip->scope, $testConfig['scope']);
+  }
+
+  public function testCanRS256EncodeAValidPayload()
+  {
+    $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+    $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+    $testConfig = $this->signingMinimal;
+    $o = new OAuth2($testConfig);
+    $o->setSigningAlgorithm('RS256');
+    $o->setSigningKey($privateKey);
+    $payload = $o->toJwt();
+    $roundTrip = JWT::decode($payload, $publicKey) ;
+    $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
+    $this->assertEquals($roundTrip->aud, $testConfig['audience']);
+    $this->assertEquals($roundTrip->scope, $testConfig['scope']);
+  }
 }

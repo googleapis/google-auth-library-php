@@ -20,6 +20,7 @@ namespace Google\Auth;
 use GuzzleHttp\Collection;
 use GuzzleHttp\Query;
 use GuzzleHttp\Url;
+use JWT;
 
 /**
  * OAuth2 supports authentication by OAuth2 2-legged flows.
@@ -30,7 +31,9 @@ use GuzzleHttp\Url;
  */
 class OAuth2
 {
+
   const DEFAULT_EXPIRY_MINUTES = 60;
+  const DEFAULT_SKEW = 60;
 
   /**
    * TODO: determine known methods from the keys of JWT::methods
@@ -273,6 +276,48 @@ class OAuth2
     $this->setScope($opts->get('scope'));
     $this->setExtensionParams($opts->get('extensionParams'));
     $this->updateToken($config);
+  }
+
+ /**
+  * Obtains the encoded jwt from the instance data.
+  *
+  * @param $config array optional configuration parameters
+  */
+  public function toJwt(array $config = null)
+  {
+    if (is_null($this->getSigningKey())) {
+      throw new \DomainException('No signing key available');
+    }
+    if (is_null($this->getSigningAlgorithm())) {
+      throw new \DomainException('No signing algorithm specified');
+    }
+    $now = time();
+    if (is_null($config)) {
+      $config = [];
+    }
+    $opts = Collection::fromConfig($config, [
+        'skew' => self::DEFAULT_SKEW,
+    ], []);
+    $assertion = [
+        'iss' => $this->getIssuer(),
+        'scope' => $this->getScope(),
+        'aud' => $this->getAudience(),
+        'exp' => ($now + $this->getExpiry()),
+        'iat' => ($now - $opts->get('skew'))
+    ];
+    foreach ($assertion as $k => $v) {
+      if (is_null($v)) {
+        throw new \DomainException($k . ' should not be null');
+      }
+    }
+    if (!(is_null($this->getPerson()))) {
+      $assertion['prn'] = $this->getPerson();
+    }
+    if (!(is_null($this->getSub()))) {
+      $assertion['sub'] = $this->getSub();
+    }
+    return JWT::encode($assertion, $this->getSigningKey(),
+                       $this->getSigningAlgorithm());
   }
 
  /**
