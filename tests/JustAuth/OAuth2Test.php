@@ -637,3 +637,89 @@ class OAuth2FetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals('a_refresh_token', $o->getRefreshToken());
   }
 }
+
+class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
+{
+  private $publicKey;
+  private $privateKey;
+  private $verifyIdTokenMinimal = [
+      'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+      'audience' => 'myaccount.on.host.issuer.com',
+      'issuer' => 'an.issuer.com',
+      'clientId' => 'myaccount.on.host.issuer.com'
+  ];
+
+  public function setUp()
+  {
+    $this->publicKey =
+        file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+    $this->privateKey =
+        file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+  }
+
+  /**
+   * @expectedException UnexpectedValueException
+   */
+  public function testFailsIfIdTokenIsInvalid()
+  {
+    $testConfig = $this->verifyIdTokenMinimal;
+    $not_a_jwt = 'not a jot';
+    $o = new OAuth2($testConfig);
+    $o->setIdToken($not_a_jwt);
+    $o->verifyIdToken($this->publicKey);
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsIfAudienceIsMissing()
+  {
+    $testConfig = $this->verifyIdTokenMinimal;
+    $now = time();
+    $origIdToken = [
+        'issuer' => $testConfig['issuer'],
+        'exp' => $now + 65, // arbitrary
+        'iat' => $now,
+    ];
+    $o = new OAuth2($testConfig);
+    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+    $o->setIdToken($jwtIdToken);
+    $o->verifyIdToken($this->publicKey);
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsIfAudienceIsWrong()
+  {
+    $now = time();
+    $testConfig = $this->verifyIdTokenMinimal;
+    $origIdToken = [
+        'aud' => 'a different audience',
+        'iss' => $testConfig['issuer'],
+        'exp' => $now + 65, // arbitrary
+        'iat' => $now,
+    ];
+    $o = new OAuth2($testConfig);
+    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+    $o->setIdToken($jwtIdToken);
+    $o->verifyIdToken($this->publicKey);
+  }
+
+  public function testShouldReturnAValidIdToken()
+  {
+    $testConfig = $this->verifyIdTokenMinimal;
+    $now = time();
+    $origIdToken = [
+        'aud' => $testConfig['audience'],
+        'iss' => $testConfig['issuer'],
+        'exp' => $now + 65, // arbitrary
+        'iat' => $now,
+    ];
+    $o = new OAuth2($testConfig);
+    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+    $o->setIdToken($jwtIdToken);
+    $roundTrip = $o->verifyIdToken($this->publicKey);
+    $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
+  }
+}

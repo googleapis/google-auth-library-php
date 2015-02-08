@@ -283,6 +283,34 @@ class OAuth2
   }
 
  /**
+  * Verifies the idToken if present.
+  *
+  * - if none is present, return null
+  * - if present, but invalid, raises DomainException.
+  * - otherwise returns the payload in the idtoken as a PHP object.
+  *
+  * if $publicKey is null, the key is decoded without being verified.
+  *
+  * @param $publicKey the publicKey to use to authenticate the token
+  */
+  public function verifyIdToken($publicKey = null)
+  {
+    $idToken = $this->getIdToken();
+    if (is_null($idToken)) {
+      return null;
+    }
+
+    $resp = JWT::decode($idToken, $publicKey, !is_null($publicKey));
+    if (!property_exists($resp, 'aud')) {
+      throw new \DomainException('No audience found the id token');
+    }
+    if ($resp->aud != $this->getAudience()) {
+      throw new \DomainException('Wrong audience present in the id token');
+    }
+    return $resp;
+  }
+
+ /**
   * Obtains the encoded jwt from the instance data.
   *
   * @param $config array optional configuration parameters
