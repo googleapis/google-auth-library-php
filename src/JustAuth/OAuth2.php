@@ -120,7 +120,7 @@ class OAuth2
   /**
    * The target user for assertions.
    */
-  private $person;
+  private $principal;
 
   /**
    * The target sub when issuing assertions.
@@ -231,7 +231,7 @@ class OAuth2
    * - audience
    *   Target audience for assertions
    *
-   * - person
+   * - principal
    *   Target user for assertions
    *
    * - expiry
@@ -271,7 +271,7 @@ class OAuth2
     $this->setClientId($opts->get('clientId'));
     $this->setClientSecret($opts->get('clientSecret'));
     $this->setIssuer($opts->get('issuer'));
-    $this->setPerson($opts->get('person'));
+    $this->setPrincipal($opts->get('principal'));
     $this->setSub($opts->get('sub'));
     $this->setExpiry($opts->get('expiry'));
     $this->setAudience($opts->get('audience'));
@@ -314,8 +314,8 @@ class OAuth2
         throw new \DomainException($k . ' should not be null');
       }
     }
-    if (!(is_null($this->getPerson()))) {
-      $assertion['prn'] = $this->getPerson();
+    if (!(is_null($this->getPrincipal()))) {
+      $assertion['prn'] = $this->getPrincipal();
     }
     if (!(is_null($this->getSub()))) {
       $assertion['sub'] = $this->getSub();
@@ -765,37 +765,17 @@ class OAuth2
   /**
    * Gets the target user for the assertions.
    */
-  public function getPerson()
-  {
-    return $this->person;
-  }
-
-  /**
-   * Gets the target user for the assertions.
-   *
-   * This refers to the same value as getPerson.
-   */
   public function getPrincipal()
   {
-    return $this->person;
+    return $this->principal;
   }
 
   /**
    * Sets the target user for the assertions.
    */
-  public function setPerson($person)
+  public function setPrincipal($p)
   {
-    $this->person = $person;
-  }
-
-  /**
-   * Sets the target user for the assertions.
-   *
-   * This sets the same value as setPerson.
-   */
-  public function setPrincipal($person)
-  {
-    $this->person = $person;
+    $this->principal = $p;
   }
 
   /**
