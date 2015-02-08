@@ -1,13 +1,14 @@
 {
   "name": "google/auth",
   "type": "library",
-  "description": "Authentication library for Google APIs",
+  "description": "Google Auth Library for PHP",
   "keywords": ["google", "oauth2", "authentication"],
-  "homepage": "http://developers.google.com/api-client-library/php",
+  "homepage": "http://github.com/google/google-auth-library-php",
   "license": "Apache-2.0",
   "require": {
-    "php": ">=5.3",
-    "guzzlehttp/guzzle": "5.2.*"
+    "firebase/php-jwt": "dev-master",
+    "guzzlehttp/guzzle": "5.2.*",
+    "php": ">=5.3"
   },
   "require-dev": {
     "phpunit/phpunit": "3.7.*"
