@@ -29,7 +29,17 @@ interface FetchAuthTokenInterface
   * Fetchs the auth tokens based on the current state.
   *
   * @param $client GuzzleHttp\ClientInterface the optional client.
-  * @return array the response
+  * @return array a hash of auth tokens
   */
   public function fetchAuthToken(ClientInterface $client = null);
+
+
+ /**
+  * Obtains a key that can used to cache the results of #fetchAuthToken.
+  *
+  * If the value is empty, the auth token is not cached.
+  *
+  * @return string a key that may be used to cache the auth token.
+  */
+  public function getCacheKey();
 }

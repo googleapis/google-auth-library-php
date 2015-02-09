@@ -421,6 +421,24 @@ class OAuth2 implements FetchAuthTokenInterface
   }
 
  /**
+  * Obtains a key that can used to cache the results of #fetchAuthToken.
+  *
+  * The key is derived from the scopes.
+  *
+  * @return string a key that may be used to cache the auth token.
+  */
+  public function getCacheKey() {
+    if (is_string($this->scope)) {
+      return $this->scope;
+    } else if (is_array($this->scope)) {
+      return implode(":", $this->scope);
+    }
+
+    // If scope has not set, return null to indicate no caching.
+    return null;
+  }
+
+ /**
   * Parses the fetched tokens.
   *
   * @param $resp GuzzleHttp\Message\ReponseInterface the response.

@@ -224,6 +224,33 @@ class OAuth2GrantTypeTest extends \PHPUnit_Framework_TestCase
   }
 }
 
+class OAuth2GetCacheKeyTest extends \PHPUnit_Framework_TestCase
+{
+  private $minimal = [
+      'clientID' => 'aClientID'
+  ];
+
+  public function testIsNullWithNoScopes()
+  {
+    $o = new OAuth2($this->minimal);
+    $this->assertNull($o->getCacheKey());
+  }
+
+  public function testIsScopeIfSingleScope()
+  {
+    $o = new OAuth2($this->minimal);
+    $o->setScope('test/scope/1');
+    $this->assertEquals('test/scope/1', $o->getCacheKey());
+  }
+
+  public function testIsAllScopesWhenScopeIsArray()
+  {
+    $o = new OAuth2($this->minimal);
+    $o->setScope(['test/scope/1', 'test/scope/2']);
+    $this->assertEquals('test/scope/1:test/scope/2', $o->getCacheKey());
+  }
+}
+
 class OAuth2TimingTest extends \PHPUnit_Framework_TestCase
 {
   private $minimal = [
