@@ -29,10 +29,13 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
       'clientId' => 'aClientID'
   ];
 
+  /**
+   * @expectedException InvalidArgumentException
+   */
   public function testIsNullIfAuthorizationUriIsNull()
   {
     $o = new OAuth2([]);
-    $this->assertNull($o->getAuthorizationUri());
+    $this->assertNull($o->buildFullAuthorizationUri());
   }
 
   /**
@@ -44,7 +47,7 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
         'authorizationUri' => 'https://accounts.test.org/auth/url',
         'redirectUri' => 'https://accounts.test.org/redirect/url'
     ]);
-    $o->getAuthorizationUri();
+    $o->buildFullAuthorizationUri();
   }
 
   /**
@@ -56,7 +59,7 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
         'authorizationUri' => 'https://accounts.test.org/auth/url',
         'clientId' => 'aClientID'
     ]);
-    $o->getAuthorizationUri();
+    $o->buildFullAuthorizationUri();
   }
 
   /**
@@ -68,7 +71,7 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
         'authorizationUri' => 'https://accounts.test.org/auth/url',
         'clientId' => 'aClientID'
     ]);
-    $o->getAuthorizationUri([
+    $o->buildFullAuthorizationUri([
         'approvalPrompt' => 'an approval prompt',
         'prompt' => 'a prompt',
     ]);
@@ -84,7 +87,7 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
         'redirectUri' => 'https://accounts.test.org/redirect/url',
         'clientId' => 'aClientID'
     ]);
-    $o->getAuthorizationUri();
+    $o->buildFullAuthorizationUri();
   }
 
   /**
@@ -97,13 +100,13 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
         'redirectUri' => '/redirect/url',
         'clientId' => 'aClientID'
     ]);
-    $o->getAuthorizationUri();
+    $o->buildFullAuthorizationUri();
   }
 
   public function testHasDefaultXXXTypeParams()
   {
     $o = new OAuth2($this->minimal);
-    $q = $o->getAuthorizationUri()->getQuery();
+    $q = $o->buildFullAuthorizationUri()->getQuery();
     $this->assertEquals('code', $q->get('response_type'));
     $this->assertEquals('offline', $q->get('access_type'));
   }
@@ -114,7 +117,7 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
         'authorizationUri' => Url::fromString('https://another/uri')
     ]);
     $o = new OAuth2($config);
-    $this->assertEquals('/uri', $o->getAuthorizationUri()->getPath());
+    $this->assertEquals('/uri', $o->buildFullAuthorizationUri()->getPath());
   }
 
   public function testCanOverrideParams()
@@ -128,7 +131,7 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
     ];
     $config = array_merge($this->minimal, ['state' => 'the_state']);
     $o = new OAuth2($config);
-    $q = $o->getAuthorizationUri($overrides)->getQuery();
+    $q = $o->buildFullAuthorizationUri($overrides)->getQuery();
     $this->assertEquals('o_access_type', $q->get('access_type'));
     $this->assertEquals('o_client_id', $q->get('client_id'));
     $this->assertEquals('o_redirect_uri', $q->get('redirect_uri'));
@@ -140,14 +143,14 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
   {
     $with_strings = array_merge($this->minimal, ['scope' => 'scope1 scope2']);
     $o = new OAuth2($with_strings);
-    $q = $o->getAuthorizationUri()->getQuery();
+    $q = $o->buildFullAuthorizationUri()->getQuery();
     $this->assertEquals('scope1 scope2', $q->get('scope'));
 
     $with_array = array_merge($this->minimal, [
         'scope' => ['scope1', 'scope2']
     ]);
     $o = new OAuth2($with_array);
-    $q = $o->getAuthorizationUri()->getQuery();
+    $q = $o->buildFullAuthorizationUri()->getQuery();
     $this->assertEquals('scope1 scope2', $q->get('scope'));
   }
 

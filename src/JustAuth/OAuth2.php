@@ -324,15 +324,16 @@ class OAuth2
   }
 
   /**
-   * Returns the authorization Uri that the user should be redirected to.
+   * Builds the authorization Uri that the user should be redirected to.
    *
    * @param $config configuration options that customize the return url
    * @return GuzzleHttp::Url the authorization Url.
    */
-  public function getAuthorizationUri(array $config = null)
+  public function buildFullAuthorizationUri(array $config = null)
   {
-    if (is_null($this->authorizationUri)) {
-      return null;
+    if (is_null($this->getAuthorizationUri())) {
+      throw new \InvalidArgumentException(
+          'requires an authorizationUri to have been set');
     }
     $defaults = [
         'response_type' => 'code',
@@ -363,7 +364,7 @@ class OAuth2
     // Construct the uri object; return it if it is valid.
     $result = $this->authorizationUri;
     if (is_string($result)) {
-      $result = Url::fromString($this->authorizationUri);
+      $result = Url::fromString($this->getAuthorizationUri());
     }
     $result->getQuery()->merge($params);
     if ($result->getScheme() != 'https') {
@@ -380,6 +381,15 @@ class OAuth2
   public function setAuthorizationUri($uri)
   {
     $this->authorizationUri = $this->coerceUri($uri);
+  }
+
+  /**
+   * Gets the authorization server's HTTP endpoint capable of authenticating
+   * the end-user and obtaining authorization.
+   */
+  public function getAuthorizationUri()
+  {
+    return $this->authorizationUri;
   }
 
   /**
