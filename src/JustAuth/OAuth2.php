@@ -30,7 +30,7 @@ use GuzzleHttp\Url;
  */
 class OAuth2
 {
-  const DEFAULT_EXPIRY = 60;
+  const DEFAULT_EXPIRY_MINUTES = 60;
 
   /**
    * TODO: determine known methods from the keys of JWT::methods
@@ -252,7 +252,7 @@ class OAuth2
   public function __construct(array $config)
   {
     $opts = Collection::fromConfig($config, [
-        'expiry' => self::DEFAULT_EXPIRY,
+        'expiry' => self::DEFAULT_EXPIRY_MINUTES,
         'extensionParams' => []
     ], []);
     $this->setAuthorizationUri($opts->get('authorizationUri'));
