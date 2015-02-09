@@ -793,9 +793,9 @@ class OAuth2
    */
   public function isExpired()
   {
-    $tooLate = $this->getExpiresAt();
+    $expiration = $this->getExpiresAt();
     $now = time();
-    return (!is_null($tooLate) && $now >= $tooLate);
+    return (!is_null($expiration) && $now >= $expiration);
   }
 
   /**
