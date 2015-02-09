@@ -32,7 +32,7 @@ use JWT;
  * - service account authorization
  * - authorization where a user already has an access token
  */
-class OAuth2
+class OAuth2 implements FetchAuthTokenInterface
 {
 
   const DEFAULT_EXPIRY_MINUTES = 60;
