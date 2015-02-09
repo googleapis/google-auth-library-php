@@ -22,7 +22,7 @@ use GuzzleHttp\Query;
 use GuzzleHttp\Url;
 
 /**
- * OAuth2Credentials supports authentication by OAuth2 2-legged flows.
+ * OAuth2 supports authentication by OAuth2 2-legged flows.
  *
  * It primary supports
  * - service account authorization
