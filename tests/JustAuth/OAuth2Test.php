@@ -117,7 +117,7 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals('/uri', $o->getAuthorizationUri()->getPath());
   }
 
-  public function testHasCanOverrideParams()
+  public function testCanOverrideParams()
   {
     $overrides = [
         'access_type' => 'o_access_type',
