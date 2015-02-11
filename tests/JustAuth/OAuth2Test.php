@@ -18,7 +18,12 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\OAuth2;
+use GuzzleHttp\Client;
+use GuzzleHttp\Message\Response;
+use GuzzleHttp\Stream\Stream;
+use GuzzleHttp\Subscriber\Mock;
 use GuzzleHttp\Url;
+use JWT;
 
 class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
 {
@@ -304,5 +309,417 @@ class OAuth2GeneralTest extends \PHPUnit_Framework_TestCase
       $this->assertEquals($a, $o->getSigningAlgorithm());
     }
   }
+}
 
+class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
+{
+  private $signingMinimal = [
+      'signingKey' => 'example_key',
+      'signingAlgorithm' => 'HS256',
+      'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+      'issuer' => 'app@example.com',
+      'audience' => 'accounts.google.com',
+      'clientId' => 'aClientID'
+  ];
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingAudience()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['audience']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingIssuer()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['issuer']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingScope()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['scope']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingSigningKey()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['signingKey']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsWithMissingSigningAlgorithm()
+  {
+    $testConfig = $this->signingMinimal;
+    unset($testConfig['signingAlgorithm']);
+    $o = new OAuth2($testConfig);
+    $o->toJwt();
+  }
+
+  public function testCanHS256EncodeAValidPayload()
+  {
+    $testConfig = $this->signingMinimal;
+    $o = new OAuth2($testConfig);
+    $payload = $o->toJwt();
+    $roundTrip = JWT::decode($payload, $testConfig['signingKey']) ;
+    $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
+    $this->assertEquals($roundTrip->aud, $testConfig['audience']);
+    $this->assertEquals($roundTrip->scope, $testConfig['scope']);
+  }
+
+  public function testCanRS256EncodeAValidPayload()
+  {
+    $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+    $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+    $testConfig = $this->signingMinimal;
+    $o = new OAuth2($testConfig);
+    $o->setSigningAlgorithm('RS256');
+    $o->setSigningKey($privateKey);
+    $payload = $o->toJwt();
+    $roundTrip = JWT::decode($payload, $publicKey) ;
+    $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
+    $this->assertEquals($roundTrip->aud, $testConfig['audience']);
+    $this->assertEquals($roundTrip->scope, $testConfig['scope']);
+  }
+}
+
+class OAuth2GenerateAccessTokenRequestTest extends \PHPUnit_Framework_TestCase
+{
+  private $tokenRequestMinimal = [
+      'tokenCredentialUri' => 'https://tokens_r_us/test',
+      'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+      'issuer' => 'app@example.com',
+      'audience' => 'accounts.google.com',
+      'clientId' => 'aClientID'
+  ];
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsIfNoTokenCredentialUri()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    unset($testConfig['tokenCredentialUri']);
+    $o = new OAuth2($testConfig);
+    $o->generateCredentialsRequest();
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsIfAuthorizationCodeIsMissing()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    $testConfig['redirectUri'] = 'https://has/redirect/uri';
+    $o = new OAuth2($testConfig);
+    $o->generateCredentialsRequest();
+  }
+
+  public function testGeneratesAuthorizationCodeRequests()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    $testConfig['redirectUri'] = 'https://has/redirect/uri';
+    $o = new OAuth2($testConfig);
+    $o->setCode('an_auth_code');
+
+    // Generate the request and confirm that it's correct.
+    $req = $o->generateCredentialsRequest();
+    $this->assertInstanceOf('GuzzleHttp\Message\RequestInterface', $req);
+    $this->assertEquals('POST', $req->getMethod());
+    $fields = $req->getBody()->getFields();
+    $this->assertEquals('authorization_code', $fields['grant_type']);
+    $this->assertEquals('an_auth_code', $fields['code']);
+  }
+
+  public function testGeneratesPasswordRequests()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    $o = new OAuth2($testConfig);
+    $o->setUsername('a_username');
+    $o->setPassword('a_password');
+
+    // Generate the request and confirm that it's correct.
+    $req = $o->generateCredentialsRequest();
+    $this->assertInstanceOf('GuzzleHttp\Message\RequestInterface', $req);
+    $this->assertEquals('POST', $req->getMethod());
+    $fields = $req->getBody()->getFields();
+    $this->assertEquals('password', $fields['grant_type']);
+    $this->assertEquals('a_password', $fields['password']);
+    $this->assertEquals('a_username', $fields['username']);
+  }
+
+  public function testGeneratesRefreshTokenRequests()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    $o = new OAuth2($testConfig);
+    $o->setRefreshToken('a_refresh_token');
+
+    // Generate the request and confirm that it's correct.
+    $req = $o->generateCredentialsRequest();
+    $this->assertInstanceOf('GuzzleHttp\Message\RequestInterface', $req);
+    $this->assertEquals('POST', $req->getMethod());
+    $fields = $req->getBody()->getFields();
+    $this->assertEquals('refresh_token', $fields['grant_type']);
+    $this->assertEquals('a_refresh_token', $fields['refresh_token']);
+  }
+
+  public function testGeneratesAssertionRequests()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    $o = new OAuth2($testConfig);
+    $o->setSigningKey('a_key');
+    $o->setSigningAlgorithm('HS256');
+
+    // Generate the request and confirm that it's correct.
+    $req = $o->generateCredentialsRequest();
+    $this->assertInstanceOf('GuzzleHttp\Message\RequestInterface', $req);
+    $this->assertEquals('POST', $req->getMethod());
+    $fields = $req->getBody()->getFields();
+    $this->assertEquals(OAuth2::JWT_URN, $fields['grant_type']);
+    $this->assertTrue(array_key_exists('assertion', $fields));
+  }
+
+  public function testGeneratesExtendedRequests()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    $o = new OAuth2($testConfig);
+    $o->setGrantType('urn:my_test_grant_type');
+    $o->setExtensionParams(['my_param' => 'my_value']);
+
+    // Generate the request and confirm that it's correct.
+    $req = $o->generateCredentialsRequest();
+    $this->assertInstanceOf('GuzzleHttp\Message\RequestInterface', $req);
+    $this->assertEquals('POST', $req->getMethod());
+    $fields = $req->getBody()->getFields();
+    $this->assertEquals('my_value', $fields['my_param']);
+    $this->assertEquals('urn:my_test_grant_type', $fields['grant_type']);
+  }
+}
+
+class OAuth2FetchAuthTokenTest extends \PHPUnit_Framework_TestCase
+{
+  private $fetchAuthTokenMinimal = [
+      'tokenCredentialUri' => 'https://tokens_r_us/test',
+      'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+      'signingKey' => 'example_key',
+      'signingAlgorithm' => 'HS256',
+      'issuer' => 'app@example.com',
+      'audience' => 'accounts.google.com',
+      'clientId' => 'aClientID'
+  ];
+
+  private function mockPluginWithCode($code)
+  {
+    $plugin = new Mock();
+    $plugin->addResponse(new Response($code));
+    return $plugin;
+  }
+
+  /**
+   * @expectedException GuzzleHttp\Exception\ClientException
+   */
+  public function testFailsOn400()
+  {
+    $testConfig = $this->fetchAuthTokenMinimal;
+    $client = new Client();
+    $client->getEmitter()->attach($this->mockPluginWithCode(400));
+    $o = new OAuth2($testConfig);
+    $o->fetchAuthToken($client);
+  }
+
+  /**
+   * @expectedException GuzzleHttp\Exception\ServerException
+   */
+  public function testFailsOn500()
+  {
+    $testConfig = $this->fetchAuthTokenMinimal;
+    $client = new Client();
+    $client->getEmitter()->attach($this->mockPluginWithCode(500));
+    $o = new OAuth2($testConfig);
+    $o->fetchAuthToken($client);
+  }
+
+  /**
+   * @expectedException GuzzleHttp\Exception\ParseException
+   */
+  public function testFailsOnNoContentTypeIfResponseIsNotJSON()
+  {
+    $testConfig = $this->fetchAuthTokenMinimal;
+    $notJson = '{"foo": , this is cannot be passed as json" "bar"}';
+    $client = new Client();
+    $plugin = new Mock();
+    $plugin->addResponse(new Response(200, [], Stream::factory($notJson)));
+    $client->getEmitter()->attach($plugin);
+    $o = new OAuth2($testConfig);
+    $o->fetchAuthToken($client);
+  }
+
+  public function testFetchesJsonResponseOnNoContentTypeOK()
+  {
+    $testConfig = $this->fetchAuthTokenMinimal;
+    $json = '{"foo": "bar"}';
+    $client = new Client();
+    $plugin = new Mock();
+    $plugin->addResponse(new Response(200, [], Stream::factory($json)));
+    $client->getEmitter()->attach($plugin);
+    $o = new OAuth2($testConfig);
+    $tokens = $o->fetchAuthToken($client);
+    $this->assertEquals($tokens['foo'], 'bar');
+  }
+
+  public function testFetchesFromFormEncodedResponseOK()
+  {
+    $testConfig = $this->fetchAuthTokenMinimal;
+    $json = 'foo=bar&spice=nice';
+    $client = new Client();
+    $plugin = new Mock();
+    $plugin->addResponse(new Response(
+        200,
+        ['Content-Type' => 'application/x-www-form-urlencoded'],
+        Stream::factory($json)));
+    $client->getEmitter()->attach($plugin);
+    $o = new OAuth2($testConfig);
+    $tokens = $o->fetchAuthToken($client);
+    $this->assertEquals($tokens['foo'], 'bar');
+    $this->assertEquals($tokens['spice'], 'nice');
+  }
+
+  public function testUpdatesTokenFieldsOnFetch()
+  {
+    $testConfig = $this->fetchAuthTokenMinimal;
+    $wanted_updates = [
+        'expires_at' => '1',
+        'expires_in' => '57',
+        'issued_at' => '2',
+        'access_token' => 'an_access_token',
+        'id_token' => 'an_id_token',
+        'refresh_token' => 'a_refresh_token',
+    ];
+    $json = json_encode($wanted_updates);
+    $client = new Client();
+    $plugin = new Mock();
+    $plugin->addResponse(new Response(200, [], Stream::factory($json)));
+    $client->getEmitter()->attach($plugin);
+    $o = new OAuth2($testConfig);
+    $this->assertNull($o->getExpiresAt());
+    $this->assertNull($o->getExpiresIn());
+    $this->assertNull($o->getIssuedAt());
+    $this->assertNull($o->getAccessToken());
+    $this->assertNull($o->getIdToken());
+    $this->assertNull($o->getRefreshToken());
+    $tokens = $o->fetchAuthToken($client);
+    $this->assertEquals(1, $o->getExpiresAt());
+    $this->assertEquals(57, $o->getExpiresIn());
+    $this->assertEquals(2, $o->getIssuedAt());
+    $this->assertEquals('an_access_token', $o->getAccessToken());
+    $this->assertEquals('an_id_token', $o->getIdToken());
+    $this->assertEquals('a_refresh_token', $o->getRefreshToken());
+  }
+}
+
+class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
+{
+  private $publicKey;
+  private $privateKey;
+  private $verifyIdTokenMinimal = [
+      'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+      'audience' => 'myaccount.on.host.issuer.com',
+      'issuer' => 'an.issuer.com',
+      'clientId' => 'myaccount.on.host.issuer.com'
+  ];
+
+  public function setUp()
+  {
+    $this->publicKey =
+        file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+    $this->privateKey =
+        file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+  }
+
+  /**
+   * @expectedException UnexpectedValueException
+   */
+  public function testFailsIfIdTokenIsInvalid()
+  {
+    $testConfig = $this->verifyIdTokenMinimal;
+    $not_a_jwt = 'not a jot';
+    $o = new OAuth2($testConfig);
+    $o->setIdToken($not_a_jwt);
+    $o->verifyIdToken($this->publicKey);
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsIfAudienceIsMissing()
+  {
+    $testConfig = $this->verifyIdTokenMinimal;
+    $now = time();
+    $origIdToken = [
+        'issuer' => $testConfig['issuer'],
+        'exp' => $now + 65, // arbitrary
+        'iat' => $now,
+    ];
+    $o = new OAuth2($testConfig);
+    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+    $o->setIdToken($jwtIdToken);
+    $o->verifyIdToken($this->publicKey);
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsIfAudienceIsWrong()
+  {
+    $now = time();
+    $testConfig = $this->verifyIdTokenMinimal;
+    $origIdToken = [
+        'aud' => 'a different audience',
+        'iss' => $testConfig['issuer'],
+        'exp' => $now + 65, // arbitrary
+        'iat' => $now,
+    ];
+    $o = new OAuth2($testConfig);
+    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+    $o->setIdToken($jwtIdToken);
+    $o->verifyIdToken($this->publicKey);
+  }
+
+  public function testShouldReturnAValidIdToken()
+  {
+    $testConfig = $this->verifyIdTokenMinimal;
+    $now = time();
+    $origIdToken = [
+        'aud' => $testConfig['audience'],
+        'iss' => $testConfig['issuer'],
+        'exp' => $now + 65, // arbitrary
+        'iat' => $now,
+    ];
+    $o = new OAuth2($testConfig);
+    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+    $o->setIdToken($jwtIdToken);
+    $roundTrip = $o->verifyIdToken($this->publicKey);
+    $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
+  }
 }
