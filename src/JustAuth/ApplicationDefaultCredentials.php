@@ -41,7 +41,7 @@ use GuzzleHttp\ClientInterface;
  *
  *   $client = new Client([
  *      'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
- *      'defaults' => ['auth' => 'fetch_auth_token']  // authorize all requests
+ *      'defaults' => ['auth' => 'google_auth']  // authorize all requests
  *   ]);
  *   $fetcher = ApplicationDefaultCredentials::getFetcher(
  *       'https://www.googleapis.com/auth/taskqueue');

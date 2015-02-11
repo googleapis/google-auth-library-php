@@ -38,7 +38,7 @@ use GuzzleHttp\Exception\ServerException;
  *   $scoped = new AuthTokenFetcher($gce);
  *   $client = new Client([
  *      'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
- *      'defaults' => ['auth' => 'fetch_auth_token']
+ *      'defaults' => ['auth' => 'google_auth']
  *   ]);
  *   $client->getEmitter()->attach($gce);
  *   $res = $client->('myproject/taskqueues/myqueue');
