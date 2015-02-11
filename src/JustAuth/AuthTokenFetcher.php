@@ -87,16 +87,16 @@ class AuthTokenFetcher implements SubscriberInterface
    *                                  [ 'prefix' => 'OAuth2::' ]);
    *   $client = new Client([
    *      'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
-   *      'defaults' => ['auth' => 'fetch_auth_token']
+   *      'defaults' => ['auth' => 'google_auth']
    *   ]);
    *
    *   $res = $client->('myproject/taskqueues/myqueue');
    */
   public function onBefore(BeforeEvent $event)
   {
-    // Requests using "auth"="fetch_auth_token" will be authorized.
+    // Requests using "auth"="google_auth" will be authorized.
     $request = $event->getRequest();
-    if ($request->getConfig()['auth'] != 'fetch_auth_token') {
+    if ($request->getConfig()['auth'] != 'google_auth') {
       return;
     }
 

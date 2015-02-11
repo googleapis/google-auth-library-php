@@ -53,7 +53,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
     $s = new AuthTokenFetcher($this->mockFetcher, array());
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'not_fetch_auth_token']);
+                                      ['auth' => 'not_google_auth']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $s->onBefore($before);
     $this->assertSame($request->getHeader('Authorization'), '');
@@ -71,7 +71,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
     $a = new AuthTokenFetcher($this->mockFetcher, array());
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'fetch_auth_token']);
+                                      ['auth' => 'google_auth']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $a->onBefore($before);
     $this->assertSame($request->getHeader('Authorization'),
@@ -90,7 +90,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
     $a = new AuthTokenFetcher($this->mockFetcher, array());
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'fetch_auth_token']);
+                                      ['auth' => 'google_auth']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $a->onBefore($before);
     $this->assertSame($request->getHeader('Authorization'), '');
@@ -118,7 +118,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
     $a = new AuthTokenFetcher($this->mockFetcher, array(), $this->mockCache);
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'fetch_auth_token']);
+                                      ['auth' => 'google_auth']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $a->onBefore($before);
     $this->assertSame($request->getHeader('Authorization'),
@@ -152,7 +152,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
                               $this->mockCache);
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'fetch_auth_token']);
+                                      ['auth' => 'google_auth']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $a->onBefore($before);
     $this->assertSame($request->getHeader('Authorization'),
@@ -191,7 +191,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
 
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'fetch_auth_token']);
+                                      ['auth' => 'google_auth']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $a->onBefore($before);
     $this->assertSame($request->getHeader('Authorization'),
