@@ -26,8 +26,8 @@ use GuzzleHttp\Event\BeforeEvent;
  * AuthTokenFetcher is a Guzzle Subscriber that adds an Authorization header
  * provided by an object implementing FetchAuthTokenInterface.
  *
- * The fetchAuthToken of the method of the FetchAuthTokenInterface is used to
- * obtain a hash; a value in that hash is added as the authorization header.
+ * The FetchAuthTokenInterface#fetchAuthToken is used to obtain a hash; one of
+ * the values value in that hash is added as the authorization header.
  *
  * Requests will be accessed with the authorization header:
  *
@@ -49,12 +49,13 @@ class AuthTokenFetcher implements SubscriberInterface
   /**
    * Creates a new AuthTokenFetcher plugin.
    *
-   * @param object $fetcher an implementation of FetchAuthTokenInterface
-   * @param cacheConfig configuration for the cache when it's present
-   * @param object $cache an implementation of CacheInterface
+   * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
+   * @param array $cacheConfig configures the cache
+   * @param CacheInterface $cache (optional) caches the token.
    */
-  public function __construct(FetchAuthTokenInterface $fetcher, array $cacheConfig,
-                              CacheInterface $cache=NULL)
+  public function __construct(FetchAuthTokenInterface $fetcher,
+                              array $cacheConfig = null,
+                              CacheInterface $cache = null)
   {
     $this->fetcher = $fetcher;
     if (!is_null($cache)) {
