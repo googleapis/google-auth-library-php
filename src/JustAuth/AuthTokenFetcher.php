@@ -101,6 +101,11 @@ class AuthTokenFetcher implements SubscriberInterface
     }
 
     // Use the cached value if its available.
+    //
+    // TODO: correct caching; update the call to setCachedValue to set the expiry
+    // to the value returned with the auth token.
+    //
+    // TODO: correct caching; enable the cache to be cleared.
     $cached = $this->getCachedValue();
     if (!is_null($cached)) {
       $request->setHeader('Authorization', 'Bearer ' . $cached);
