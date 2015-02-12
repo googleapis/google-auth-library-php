@@ -32,7 +32,7 @@ use JWT;
  * - service account authorization
  * - authorization where a user already has an access token
  */
-class OAuth2
+class OAuth2 implements FetchAuthTokenInterface
 {
 
   const DEFAULT_EXPIRY_MINUTES = 60;
@@ -418,6 +418,24 @@ class OAuth2
     $creds = $this->parseTokenResponse($resp);
     $this->updateToken($creds);
     return $creds;
+  }
+
+ /**
+  * Obtains a key that can used to cache the results of #fetchAuthToken.
+  *
+  * The key is derived from the scopes.
+  *
+  * @return string a key that may be used to cache the auth token.
+  */
+  public function getCacheKey() {
+    if (is_string($this->scope)) {
+      return $this->scope;
+    } else if (is_array($this->scope)) {
+      return implode(":", $this->scope);
+    }
+
+    // If scope has not set, return null to indicate no caching.
+    return null;
   }
 
  /**

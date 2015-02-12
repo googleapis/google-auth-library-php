@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2010 Google Inc.
+ * Copyright 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,6 @@ use GuzzleHttp\Transaction;
 class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
 {
   const TEST_SCOPE = 'https://www.googleapis.com/auth/cloud-taskqueue';
-
-  /**
-   * @expectedException InvalidArgumentException
-   */
-  public function testRequiresACallable()
-  {
-    new ScopedAccessToken('not a callable', self::TEST_SCOPE, array());
-  }
 
   /**
    * @expectedException InvalidArgumentException
