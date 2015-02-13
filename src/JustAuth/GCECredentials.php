@@ -97,7 +97,15 @@ class GCECredentials implements FetchAuthTokenInterface
     }
     $checkUri = 'http://' . self::METADATA_IP;
     try {
-      $resp = $client->get($checkUri);
+      // Comment from: oauth2client/client.py
+      //
+      // Note: the explicit `timeout` below is a workaround. The underlying
+      // issue is that resolving an unknown host on some networks will take
+      // 20-30 seconds; making this timeout short fixes the issue, but
+      // could lead to false negatives in the event that we are on GCE, but
+      // the metadata resolution was particularly slow. The latter case is
+      // "unlikely".
+      $resp = $client->get($checkUri, ['timeout' => 0.1]);
       return $resp->getHeader(self::FLAVOR_HEADER) == 'Google';
     } catch (ClientException $e) {
       return false;
