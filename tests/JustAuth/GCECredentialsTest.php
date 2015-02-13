@@ -57,10 +57,10 @@ class GCECredentialsOnGCETest extends \PHPUnit_Framework_TestCase
 
 class GCECredentialsGetCacheKeyTest extends \PHPUnit_Framework_TestCase
 {
-  public function testShouldBeNull()
+  public function testShouldBeGCE()
   {
     $g = new GCECredentials();
-    $this->assertNull($g->getCacheKey());
+    $this->assertEquals('GCE', $g->getCacheKey());
   }
 }
 

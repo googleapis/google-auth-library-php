@@ -141,13 +141,9 @@ class GCECredentials implements FetchAuthTokenInterface
   /**
    * Implements FetchAuthTokenInterface#getCacheKey.
    *
-   * Returns null to indicate the token should never be cached; on compute
-   * engine the key is readily availble at low latency so caching should be
-   * unnecessary.
-   *
-   * @return null
+   * @return 'GCE'
    */
   public function getCacheKey() {
-    return null;
+    return 'GCE';
   }
 }
