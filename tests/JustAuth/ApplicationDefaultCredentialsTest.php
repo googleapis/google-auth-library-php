@@ -93,7 +93,8 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
     ]);
     $client->getEmitter()->attach($plugin);
     $this->assertNotNull(
-        ApplicationDefaultCredentials::get('a scope', $client));
+        ApplicationDefaultCredentials::get('a scope', $client)
+    );
   }
 }
 
@@ -111,7 +112,7 @@ class ADCGetFetcherTest extends \PHPUnit_Framework_TestCase
     if ($this->originalHome != getenv('HOME')) {
       putenv('HOME=' . $this->originalHome);
     }
-    putenv(ServiceAccountCredentials::ENV_VAR);  // removes it from
+    putenv(ServiceAccountCredentials::ENV_VAR);  // removes it if assigned
   }
 
   /**
