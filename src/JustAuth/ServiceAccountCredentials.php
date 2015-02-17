@@ -181,6 +181,6 @@ class ServiceAccountCredentials implements FetchAuthTokenInterface
   */
   public function getCacheKey()
   {
-    return $this->auth->getCacheKey();
+    return $this->auth->getIssuer() . ':' . $this->auth->getCacheKey();
   }
 }

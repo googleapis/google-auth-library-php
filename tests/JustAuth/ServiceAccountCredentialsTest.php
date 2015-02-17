@@ -46,7 +46,10 @@ class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
         $scope,
         Stream::factory(json_encode($testJson)));
     $o = new OAuth2(['scope' => $scope]);
-    $this->assertSame($o->getCacheKey(), $sa->getCacheKey());
+    $this->assertSame(
+        $testJson['client_email'] . ':' . $o->getCacheKey(),
+        $sa->getCacheKey()
+    );
   }
 }
 
@@ -61,7 +64,8 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
     $notAnArrayOrString = new \stdClass();
     $sa = new ServiceAccountCredentials(
         $notAnArrayOrString,
-        Stream::factory(json_encode($testJson)));
+        Stream::factory(json_encode($testJson))
+    );
   }
 
   /**
@@ -74,7 +78,8 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
     $scope = ['scope/1', 'scope/2'];
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory(json_encode($testJson)));
+        Stream::factory(json_encode($testJson))
+    );
   }
 
   /**
@@ -87,7 +92,8 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
     $scope = ['scope/1', 'scope/2'];
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory(json_encode($testJson)));
+        Stream::factory(json_encode($testJson))
+    );
   }
 
   /**
@@ -103,7 +109,8 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
   {
     $keyFile = __DIR__ . '/fixtures' . '/private.json';
     $this->assertNotNull(
-        new ServiceAccountCredentials('scope/1', null, $keyFile));
+        new ServiceAccountCredentials('scope/1', null, $keyFile)
+    );
   }
 }
 
@@ -156,14 +163,16 @@ class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
   public function testIsNullIfFileDoesNotExist()
   {
     $this->assertNull(
-        ServiceAccountCredentials::fromWellKnownFile('a scope'));
+        ServiceAccountCredentials::fromWellKnownFile('a scope')
+    );
   }
 
   public function testSucceedIfFileIsPresent()
   {
     putenv('HOME=' . __DIR__ . '/fixtures');
     $this->assertNotNull(
-        ServiceAccountCredentials::fromWellKnownFile('a scope'));
+        ServiceAccountCredentials::fromWellKnownFile('a scope')
+    );
   }
 }
 
@@ -195,7 +204,8 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $client->getEmitter()->attach(new Mock([new Response(400)]));
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory(json_encode($testJson)));
+        Stream::factory(json_encode($testJson))
+    );
     $sa->fetchAuthToken($client);
   }
 
@@ -210,7 +220,8 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $client->getEmitter()->attach(new Mock([new Response(500)]));
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory(json_encode($testJson)));
+        Stream::factory(json_encode($testJson))
+    );
     $sa->fetchAuthToken($client);
   }
 
@@ -224,7 +235,8 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $client->getEmitter()->attach(new Mock([$testResponse]));
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory($testJsonText));
+        Stream::factory($testJsonText)
+    );
     $tokens = $sa->fetchAuthToken($client);
     $this->assertEquals($testJson, $tokens);
   }
