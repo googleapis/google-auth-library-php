@@ -158,7 +158,7 @@ class ServiceAccountCredentials implements FetchAuthTokenInterface
           'json key is missing the private_key field');
     }
     $this->auth = new OAuth2([
-        'audience' => self::TOKEN_CREDENTIAL_URI,  // TODO: confirm this
+        'audience' => self::TOKEN_CREDENTIAL_URI,
         'issuer' => $jsonKey['client_email'],
         'scope' => $scope,
         'signingAlgorithm' => 'RS256',
