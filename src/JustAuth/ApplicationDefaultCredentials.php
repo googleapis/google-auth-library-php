@@ -65,7 +65,7 @@ class ApplicationDefaultCredentials
    * in this environment.
    *
    * If supplied, $scope is used to in creating the credentials instance if
-   * this does not fallback to the compute engine defaults.
+   * this does not fallback to the Compute Engine defaults.
    *
    * @param string|array scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
