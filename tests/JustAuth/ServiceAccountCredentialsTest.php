@@ -141,7 +141,7 @@ class SACFromEnvTest extends \PHPUnit_Framework_TestCase
 
 class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
 {
-  var $originalHome;
+  private $originalHome;
 
   protected function setUp()
   {

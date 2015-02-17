@@ -27,7 +27,7 @@ use GuzzleHttp\Subscriber\Mock;
 
 class ADCGetTest extends \PHPUnit_Framework_TestCase
 {
-  var $originalHome;
+  private $originalHome;
 
   protected function setUp()
   {
@@ -99,7 +99,7 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
 
 class ADCGetFetcherTest extends \PHPUnit_Framework_TestCase
 {
-  var $originalHome;
+  private $originalHome;
 
   protected function setUp()
   {
