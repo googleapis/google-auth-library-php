@@ -119,7 +119,7 @@ class GCECredentials implements FetchAuthTokenInterface
   /**
    * Implements FetchAuthTokenInterface#fetchAuthToken.
    *
-   * Fetchs the auth tokens from the GCE metadata host if it is available.
+   * Fetches the auth tokens from the GCE metadata host if it is available.
    * If $client is not specified a new GuzzleHttp\Client instance is used.
    *
    * @param $client GuzzleHttp\ClientInterface optional client.
@@ -141,9 +141,9 @@ class GCECredentials implements FetchAuthTokenInterface
   /**
    * Implements FetchAuthTokenInterface#getCacheKey.
    *
-   * @return 'GCE'
+   * @return 'GOOGLE_AUTH_PHP_GCE'
    */
   public function getCacheKey() {
-    return 'GCE';
+    return 'GOOGLE_AUTH_PHP_GCE';
   }
 }
