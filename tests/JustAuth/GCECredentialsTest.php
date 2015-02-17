@@ -57,10 +57,10 @@ class GCECredentialsOnGCETest extends \PHPUnit_Framework_TestCase
 
 class GCECredentialsGetCacheKeyTest extends \PHPUnit_Framework_TestCase
 {
-  public function testShouldBeGCE()
+  public function testShouldNotBeEmpty()
   {
     $g = new GCECredentials();
-    $this->assertEquals('GOOGLE_AUTH_PHP_GCE', $g->getCacheKey());
+    $this->assertNotEmpty($g->getCacheKey());
   }
 }
 
