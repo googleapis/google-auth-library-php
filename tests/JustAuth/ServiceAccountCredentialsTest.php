@@ -30,7 +30,7 @@ function createTestJson()
   return [
       'private_key_id' => 'key123',
       'private_key' => 'privatekey',
-      'client_email' => 'hello@youarecool.com',
+      'client_email' => 'test@example.com',
       'client_id' => 'client123',
       'type' => 'service_account'
   ];
@@ -96,14 +96,12 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
   public function testFailsToInitalizeFromANonExistentFile()
   {
     $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
-    $testJson = createTestJson();
     new ServiceAccountCredentials('scope/1', null, $keyFile);
   }
 
   public function testInitalizeFromAFile()
   {
     $keyFile = __DIR__ . '/fixtures' . '/private.json';
-    $testJson = createTestJson();
     $this->assertNotNull(
         new ServiceAccountCredentials('scope/1', null, $keyFile));
   }
