@@ -127,6 +127,9 @@ class GCECredentials implements FetchAuthTokenInterface
    */
   public function fetchAuthToken(ClientInterface $client = null)
   {
+    if (is_null($client)) {
+      $client = new Client();
+    }
     if (!$this->hasCheckedOnGce) {
       $this->isOnGce = self::onGce($client);
     }
