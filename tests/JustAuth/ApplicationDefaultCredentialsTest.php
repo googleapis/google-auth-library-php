@@ -49,20 +49,24 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
   {
     $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
     putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-    ApplicationDefaultCredentials::get('a scope');
+    ApplicationDefaultCredentials::getCredentials('a scope');
   }
 
   public function testLoadsOKIfEnvSpecifiedIsValid()
   {
     $keyFile = __DIR__ . '/fixtures' . '/private.json';
     putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-    $this->assertNotNull(ApplicationDefaultCredentials::get('a scope'));
+    $this->assertNotNull(
+        ApplicationDefaultCredentials::getCredentials('a scope')
+    );
   }
 
   public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
   {
     putenv('HOME=' . __DIR__ . '/fixtures');
-    $this->assertNotNull(ApplicationDefaultCredentials::get('a scope'));
+    $this->assertNotNull(
+        ApplicationDefaultCredentials::getCredentials('a scope')
+    );
   }
 
   /**
@@ -73,7 +77,7 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
     $client = new Client();
     // simulate not being GCE by return 500
     $client->getEmitter()->attach(new Mock([new Response(500)]));
-    ApplicationDefaultCredentials::get('a scope', $client);
+    ApplicationDefaultCredentials::getCredentials('a scope', $client);
   }
 
   public function testSuccedsIfNoDefaultFilesButIsOnGCE()
@@ -93,7 +97,7 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
     ]);
     $client->getEmitter()->attach($plugin);
     $this->assertNotNull(
-        ApplicationDefaultCredentials::get('a scope', $client)
+        ApplicationDefaultCredentials::getCredentials('a scope', $client)
     );
   }
 }

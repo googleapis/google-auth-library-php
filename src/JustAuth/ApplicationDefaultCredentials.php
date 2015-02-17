@@ -51,44 +51,6 @@ use GuzzleHttp\ClientInterface;
  */
 class ApplicationDefaultCredentials
 {
-  private static function notFound()
-  {
-    $msg = 'Could not load the default credentials. Browse to ';
-    $msg .= 'https://developers.google.com';
-    $msg .= '/accounts/docs/application-default-credentials';
-    $msg .= ' for more information' ;
-    return $msg;
-  }
-
-  /**
-   * Obtains the default FetchAuthTokenInterface implementation to use
-   * in this environment.
-   *
-   * If supplied, $scope is used to in creating the credentials instance if
-   * this does not fallback to the Compute Engine defaults.
-   *
-   * @param string|array scope the scope of the access request, expressed
-   *   either as an Array or as a space-delimited String.
-   *
-   * @param $client GuzzleHttp\ClientInterface optional client.
-   * @throws DomainException if no implementation can be obtained.
-   */
-  public static function get($scope = null, $client = null)
-  {
-    $creds = ServiceAccountCredentials::fromEnv($scope);
-    if (!is_null($creds)) {
-      return $creds;
-    }
-    $creds = ServiceAccountCredentials::fromWellKnownFile($scope);
-    if (!is_null($creds)) {
-      return $creds;
-    }
-    if (!GCECredentials::onGce($client)) {
-      throw new \DomainException(self::notFound());
-    }
-    return new GCECredentials();
-  }
-
   /**
    * Obtains an AuthTokenFetcher that uses the default FetchAuthTokenInterface
    * implementation to use in this environment.
@@ -110,7 +72,45 @@ class ApplicationDefaultCredentials
       array $cacheConfig = null,
       CacheInterface $cache = null)
   {
-    $creds = self::get($scope, $client);
+    $creds = self::getCredentials($scope, $client);
     return new AuthTokenFetcher($creds, $cacheConfig, $cache);
+  }
+
+  /**
+   * Obtains the default FetchAuthTokenInterface implementation to use
+   * in this environment.
+   *
+   * If supplied, $scope is used to in creating the credentials instance if
+   * this does not fallback to the Compute Engine defaults.
+   *
+   * @param string|array scope the scope of the access request, expressed
+   *   either as an Array or as a space-delimited String.
+   *
+   * @param $client GuzzleHttp\ClientInterface optional client.
+   * @throws DomainException if no implementation can be obtained.
+   */
+  public static function getCredentials($scope = null, $client = null)
+  {
+    $creds = ServiceAccountCredentials::fromEnv($scope);
+    if (!is_null($creds)) {
+      return $creds;
+    }
+    $creds = ServiceAccountCredentials::fromWellKnownFile($scope);
+    if (!is_null($creds)) {
+      return $creds;
+    }
+    if (!GCECredentials::onGce($client)) {
+      throw new \DomainException(self::notFound());
+    }
+    return new GCECredentials();
+  }
+
+  private static function notFound()
+  {
+    $msg = 'Could not load the default credentials. Browse to ';
+    $msg .= 'https://developers.google.com';
+    $msg .= '/accounts/docs/application-default-credentials';
+    $msg .= ' for more information' ;
+    return $msg;
   }
 }
