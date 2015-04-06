@@ -292,15 +292,16 @@ class OAuth2 implements FetchAuthTokenInterface
   * if $publicKey is null, the key is decoded without being verified.
   *
   * @param $publicKey the publicKey to use to authenticate the token
+  * @param Array $allowed_algs List of supported verification algorithms
   */
-  public function verifyIdToken($publicKey = null)
+  public function verifyIdToken($publicKey = null, $allowed_algs = array())
   {
     $idToken = $this->getIdToken();
     if (is_null($idToken)) {
       return null;
     }
 
-    $resp = JWT::decode($idToken, $publicKey, !is_null($publicKey));
+    $resp = JWT::decode($idToken, $publicKey, $allowed_algs);
     if (!property_exists($resp, 'aud')) {
       throw new \DomainException('No audience found the id token');
     }

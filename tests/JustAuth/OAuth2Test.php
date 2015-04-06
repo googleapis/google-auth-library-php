@@ -409,7 +409,7 @@ class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
     $testConfig = $this->signingMinimal;
     $o = new OAuth2($testConfig);
     $payload = $o->toJwt();
-    $roundTrip = JWT::decode($payload, $testConfig['signingKey']) ;
+    $roundTrip = JWT::decode($payload, $testConfig['signingKey'], array('HS256')) ;
     $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
     $this->assertEquals($roundTrip->aud, $testConfig['audience']);
     $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -424,7 +424,7 @@ class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
     $o->setSigningAlgorithm('RS256');
     $o->setSigningKey($privateKey);
     $payload = $o->toJwt();
-    $roundTrip = JWT::decode($payload, $publicKey) ;
+    $roundTrip = JWT::decode($payload, $publicKey, array('RS256')) ;
     $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
     $this->assertEquals($roundTrip->aud, $testConfig['audience']);
     $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -744,9 +744,10 @@ class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
         'iat' => $now,
     ];
     $o = new OAuth2($testConfig);
-    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+    $alg = 'RS256';
+    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, $alg);
     $o->setIdToken($jwtIdToken);
-    $roundTrip = $o->verifyIdToken($this->publicKey);
+    $roundTrip = $o->verifyIdToken($this->publicKey, array($alg));
     $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
   }
 }
