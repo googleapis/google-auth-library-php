@@ -293,14 +293,14 @@ class OAuth2 implements FetchAuthTokenInterface
   *
   * @param $publicKey the publicKey to use to authenticate the token
   */
-  public function verifyIdToken($publicKey = null)
+  public function verifyIdToken($publicKey = null, $alg = array())
   {
     $idToken = $this->getIdToken();
     if (is_null($idToken)) {
       return null;
     }
 
-    $resp = JWT::decode($idToken, $publicKey, !is_null($publicKey));
+    $resp = JWT::decode($idToken, $publicKey, $alg);
     if (!property_exists($resp, 'aud')) {
       throw new \DomainException('No audience found the id token');
     }
