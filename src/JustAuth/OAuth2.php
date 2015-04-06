@@ -292,6 +292,7 @@ class OAuth2 implements FetchAuthTokenInterface
   * if $publicKey is null, the key is decoded without being verified.
   *
   * @param $publicKey the publicKey to use to authenticate the token
+  * @param Array $allowed_algs List of supported verification algorithms
   */
   public function verifyIdToken($publicKey = null, $alg = array())
   {
