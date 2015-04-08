@@ -18,7 +18,7 @@
       "src/"
     ],
     "psr-4": {
-      "Google\\Auth\\": "src/JustAuth"
+      "Google\\Auth\\": "src"
     }
   }
 }

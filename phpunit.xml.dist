@@ -2,7 +2,7 @@
 <phpunit bootstrap="tests/bootstrap.php" colors="true">
   <testsuites>
     <testsuite name="google-auth-tests">
-      <directory suffix="Test.php">tests/JustAuth</directory>
+      <directory suffix="Test.php">tests</directory>
     </testsuite>
   </testsuites>
   <filter>
