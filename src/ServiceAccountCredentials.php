@@ -51,77 +51,10 @@ use GuzzleHttp\Exception\ServerException;
  *
  *   $res = $client->('myproject/taskqueues/myqueue');
  */
-class ServiceAccountCredentials implements FetchAuthTokenInterface
+class ServiceAccountCredentials extends CredentialsLoader
+  implements FetchAuthTokenInterface
 {
-  const DEFAULT_EXPIRY_MINUTES = 60;
-  const ENV_VAR = 'GOOGLE_APPLICATION_CREDENTIALS';
   const TOKEN_CREDENTIAL_URI = 'https://www.googleapis.com/oauth2/v3/token';
-  const WELL_KNOWN_PATH = 'gcloud/application_default_credentials.json';
-
-  private static function unableToReadEnv($cause)
-  {
-    $msg = 'Unable to read the credential file specified by ';
-    $msg .= ' GOOGLE_APPLICATION_CREDENTIALS: ';
-    $msg .= $cause;
-    return $msg;
-  }
-
-  private static function isOnWindows()
-  {
-    return strtoupper(substr(php_uname('s'), 0, 3)) === 'WIN';
-  }
-
-  /**
-   * Create a new ServiceAccountCredentials from the path specified in the environment.
-   *
-   * Creates a credentials instance from the path specified in the environment
-   * variable GOOGLE_APPLICATION_CREDENTIALS. Return null if
-   * GOOGLE_APPLICATION_CREDENTIALS is not specified.
-   *
-   * @param string|array scope the scope of the access request, expressed
-   *   either as an Array or as a space-delimited String.
-   *
-   * @return a ServiceAccountCredentials instance | null
-   */
-  public static function fromEnv($scope = null)
-  {
-    $path = getenv(self::ENV_VAR);
-    if (empty($path)) {
-      return null;
-    }
-    if (!file_exists($path)) {
-      $cause = "file " . $path . " does not exist";
-      throw new \DomainException(self::unableToReadEnv($cause));
-    }
-    $keyStream = Stream::factory(file_get_contents($path));
-    return new ServiceAccountCredentials($scope, $keyStream);
-  }
-
-  /**
-   * Create a new ServiceAccountCredentials from a well known path.
-   *
-   * The well known path is OS dependent:
-   * - windows: %APPDATA%/gcloud/application_default_credentials.json
-   * - others: $HOME/.config/gcloud/application_default_credentials.json
-   *
-   * If the file does not exists, this returns null.
-   *
-   * @param string|array scope the scope of the access request, expressed
-   *   either as an Array or as a space-delimited String.
-   *
-   * @return a ServiceAccountCredentials instance | null
-   */
-  public static function fromWellKnownFile($scope = null)
-  {
-    $rootEnv = self::isOnWindows() ? 'APPDATA' : 'HOME';
-    $root = getenv($rootEnv);
-    $path = join(DIRECTORY_SEPARATOR, [$root, self::WELL_KNOWN_PATH]);
-    if (!file_exists($path)) {
-      return null;
-    }
-    $keyStream = Stream::factory(file_get_contents($path));
-    return new ServiceAccountCredentials($scope, $keyStream);
-  }
 
   /**
    * The OAuth2 instance used to conduct authorization.
