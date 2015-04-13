@@ -67,8 +67,8 @@ class UserRefreshCredentials extends CredentialsLoader
           'json key is missing the refresh_token field');
     }
     $this->auth = new OAuth2([
-        'client_id' => $jsonKey['client_id'],
-        'client_secret' => $jsonKey['client_secret'],
+        'clientId' => $jsonKey['client_id'],
+        'clientSecret' => $jsonKey['client_secret'],
         'refresh_token' => $jsonKey['refresh_token'],
         'scope' => $scope,
         'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI
