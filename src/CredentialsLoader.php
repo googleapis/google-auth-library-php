@@ -17,14 +17,19 @@
 
 namespace Google\Auth;
 
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Client;
 use GuzzleHttp\Stream\Stream;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 
 /**
  * CredentialsLoader contains the behaviour used to locate and find default
  * credentials files on the file system.
  */
-class CredentialsLoader
+class CredentialsLoader implements FetchAuthTokenInterface
 {
+  const TOKEN_CREDENTIAL_URI = 'https://www.googleapis.com/oauth2/v3/token';
   const ENV_VAR = 'GOOGLE_APPLICATION_CREDENTIALS';
   const WELL_KNOWN_PATH = 'gcloud/application_default_credentials.json';
 
@@ -40,6 +45,11 @@ class CredentialsLoader
   {
     return strtoupper(substr(php_uname('s'), 0, 3)) === 'WIN';
   }
+
+  /**
+   * The OAuth2 instance used to conduct authorization.
+   */
+  protected $auth;
 
   /**
    * Create a credentials instance from the path specified in the environment.
@@ -93,4 +103,19 @@ class CredentialsLoader
     return new static($scope, $keyStream);
   }
 
+ /**
+  * Implements FetchAuthTokenInterface#fetchAuthToken.
+  */
+  public function fetchAuthToken(ClientInterface $client = null)
+  {
+    return $this->auth->fetchAuthToken($client);
+  }
+
+ /**
+  * Implements FetchAuthTokenInterface#getCacheKey.
+  */
+  public function getCacheKey()
+  {
+    return $this->auth->getCacheKey();
+  }
 }

@@ -1,0 +1,86 @@
+<?php
+/*
+ * Copyright 2015 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace Google\Auth;
+
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\Stream\Stream;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
+
+/**
+ * Authenticates requests using User Refresh credentials.
+ *
+ * This class allows authorizing requests from user refresh tokens.
+ *
+ * This the end of the result of a 3LO flow.  E.g, the end result of
+ * 'gcloud auth login' saves a file with these contents in well known
+ * location
+ *
+ * cf [Application Default Credentials](http://goo.gl/mkAHpZ)
+ */
+class UserRefreshCredentials extends CredentialsLoader
+{
+  /**
+   * Create a new UserRefreshCredentials.
+   *
+   * @param string|array scope the scope of the access request, expressed
+   *   either as an Array or as a space-delimited String.
+   *
+   * @param Stream jsonKeyStream read it to get the JSON credentials.
+   *
+   * @param string jsonKeyPath the path to a file containing JSON credentials.  If
+   *   jsonKeyStream is set, it is ignored.
+   */
+  public function __construct($scope, Stream $jsonKeyStream = null,
+                              $jsonKeyPath = null)
+  {
+    if (is_null($jsonKeyStream)) {
+      $jsonKeyStream = Stream::factory(file_get_contents($jsonKeyPath));
+    }
+    $jsonKey = json_decode($jsonKeyStream->getContents(), true);
+    if (!array_key_exists('client_id', $jsonKey)) {
+      throw new \InvalidArgumentException(
+          'json key is missing the client_id field');
+    }
+    if (!array_key_exists('client_secret', $jsonKey)) {
+      throw new \InvalidArgumentException(
+          'json key is missing the client_secret field');
+    }
+    if (!array_key_exists('refresh_token', $jsonKey)) {
+      throw new \InvalidArgumentException(
+          'json key is missing the refresh_token field');
+    }
+    $this->auth = new OAuth2([
+        'client_id' => $jsonKey['client_id'],
+        'client_secret' => $jsonKey['client_secret'],
+        'refresh_token' => $jsonKey['refresh_token'],
+        'scope' => $scope,
+        'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI
+    ]);
+  }
+
+ /**
+  * Implements FetchAuthTokenInterface#getCacheKey.
+  */
+  public function getCacheKey()
+  {
+    return $this->auth->getClientId() . ':' . $this->auth->getCacheKey();
+  }
+
+}

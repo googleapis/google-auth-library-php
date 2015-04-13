@@ -52,15 +52,7 @@ use GuzzleHttp\Exception\ServerException;
  *   $res = $client->('myproject/taskqueues/myqueue');
  */
 class ServiceAccountCredentials extends CredentialsLoader
-  implements FetchAuthTokenInterface
 {
-  const TOKEN_CREDENTIAL_URI = 'https://www.googleapis.com/oauth2/v3/token';
-
-  /**
-   * The OAuth2 instance used to conduct authorization.
-   */
-  private $auth;
-
   /**
    * Create a new ServiceAccountCredentials.
    *
@@ -99,14 +91,6 @@ class ServiceAccountCredentials extends CredentialsLoader
         'sub' => $sub,
         'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI
     ]);
-  }
-
- /**
-  * Implements FetchAuthTokenInterface#fetchAuthToken.
-  */
-  public function fetchAuthToken(ClientInterface $client = null)
-  {
-    return $this->auth->fetchAuthToken($client);
   }
 
  /**
