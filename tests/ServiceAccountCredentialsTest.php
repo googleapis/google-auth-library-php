@@ -18,6 +18,7 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\OAuth2;
+use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\ServiceAccountCredentials;
 use GuzzleHttp\Client;
 use GuzzleHttp\Message\Response;
@@ -44,7 +45,7 @@ class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
     $scope = ['scope/1', 'scope/2'];
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory(json_encode($testJson)));
+        $testJson);
     $o = new OAuth2(['scope' => $scope]);
     $this->assertSame(
         $testJson['client_email'] . ':' . $o->getCacheKey(),
@@ -64,7 +65,7 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
     $notAnArrayOrString = new \stdClass();
     $sa = new ServiceAccountCredentials(
         $notAnArrayOrString,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
   }
 
@@ -78,7 +79,7 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
     $scope = ['scope/1', 'scope/2'];
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
   }
 
@@ -92,7 +93,7 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
     $scope = ['scope/1', 'scope/2'];
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
   }
 
@@ -133,14 +134,14 @@ class SACFromEnvTest extends \PHPUnit_Framework_TestCase
   {
     $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
     putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-    ServiceAccountCredentials::fromEnv('a scope');
+    ApplicationDefaultCredentials::getCredentials('a scope');
   }
 
   public function testSucceedIfFileExists()
   {
     $keyFile = __DIR__ . '/fixtures' . '/private.json';
     putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-    $this->assertNotNull(ServiceAccountCredentials::fromEnv('a scope'));
+    $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
   }
 }
 
@@ -171,7 +172,7 @@ class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
   {
     putenv('HOME=' . __DIR__ . '/fixtures');
     $this->assertNotNull(
-        ServiceAccountCredentials::fromWellKnownFile('a scope')
+        ApplicationDefaultCredentials::getCredentials('a scope')
     );
   }
 }
@@ -204,7 +205,7 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $client->getEmitter()->attach(new Mock([new Response(400)]));
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
     $sa->fetchAuthToken($client);
   }
@@ -220,7 +221,7 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $client->getEmitter()->attach(new Mock([new Response(500)]));
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
     $sa->fetchAuthToken($client);
   }
@@ -235,7 +236,7 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $client->getEmitter()->attach(new Mock([$testResponse]));
     $sa = new ServiceAccountCredentials(
         $scope,
-        Stream::factory($testJsonText)
+        $testJson
     );
     $tokens = $sa->fetchAuthToken($client);
     $this->assertEquals($testJson, $tokens);

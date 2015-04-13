@@ -59,7 +59,7 @@ class ServiceAccountCredentials extends CredentialsLoader
    * @param string|array scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
    *
-   * @param Stream jsonKeyStream read it to get the JSON credentials.
+   * @param array jsonKey JSON credentials.
    *
    * @param string jsonKeyPath the path to a file containing JSON credentials.  If
    *   jsonKeyStream is set, it is ignored.
@@ -67,13 +67,13 @@ class ServiceAccountCredentials extends CredentialsLoader
    * @param string sub an email address account to impersonate, in situations when
    *   the service account has been delegated domain wide access.
    */
-  public function __construct($scope, Stream $jsonKeyStream = null,
+  public function __construct($scope, $jsonKey,
                               $jsonKeyPath = null, $sub = null)
   {
-    if (is_null($jsonKeyStream)) {
+    if (is_null($jsonKey)) {
       $jsonKeyStream = Stream::factory(file_get_contents($jsonKeyPath));
+      $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     }
-    $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     if (!array_key_exists('client_email', $jsonKey)) {
       throw new \InvalidArgumentException(
           'json key is missing the client_email field');

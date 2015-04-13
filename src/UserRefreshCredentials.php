@@ -42,18 +42,18 @@ class UserRefreshCredentials extends CredentialsLoader
    * @param string|array scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
    *
-   * @param Stream jsonKeyStream read it to get the JSON credentials.
+   * @param array jsonKey JSON credentials.
    *
    * @param string jsonKeyPath the path to a file containing JSON credentials.  If
    *   jsonKeyStream is set, it is ignored.
    */
-  public function __construct($scope, Stream $jsonKeyStream = null,
+  public function __construct($scope, $jsonKey,
                               $jsonKeyPath = null)
   {
-    if (is_null($jsonKeyStream)) {
+    if (is_null($jsonKey)) {
       $jsonKeyStream = Stream::factory(file_get_contents($jsonKeyPath));
+      $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     }
-    $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     if (!array_key_exists('client_id', $jsonKey)) {
       throw new \InvalidArgumentException(
           'json key is missing the client_id field');

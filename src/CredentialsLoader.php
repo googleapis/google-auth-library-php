@@ -74,7 +74,7 @@ class CredentialsLoader implements FetchAuthTokenInterface
       throw new \DomainException(self::unableToReadEnv($cause));
     }
     $keyStream = Stream::factory(file_get_contents($path));
-    return new static($scope, $keyStream);
+    return static::makeCredentials($scope, $keyStream);
   }
 
   /**
@@ -100,7 +100,7 @@ class CredentialsLoader implements FetchAuthTokenInterface
       return null;
     }
     $keyStream = Stream::factory(file_get_contents($path));
-    return new static($scope, $keyStream);
+    return static::makeCredentials($scope, $keyStream);
   }
 
  /**

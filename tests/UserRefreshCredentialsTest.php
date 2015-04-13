@@ -18,6 +18,7 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\OAuth2;
+use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\UserRefreshCredentials;
 use GuzzleHttp\Client;
 use GuzzleHttp\Message\Response;
@@ -43,7 +44,7 @@ class URCGetCacheKeyTest extends \PHPUnit_Framework_TestCase
     $scope = ['scope/1', 'scope/2'];
     $sa = new UserRefreshCredentials(
         $scope,
-        Stream::factory(json_encode($testJson)));
+        $testJson);
     $o = new OAuth2(['scope' => $scope]);
     $this->assertSame(
         $testJson['client_id'] . ':' . $o->getCacheKey(),
@@ -63,7 +64,7 @@ class URCConstructorTest extends \PHPUnit_Framework_TestCase
     $notAnArrayOrString = new \stdClass();
     $sa = new UserRefreshCredentials(
         $notAnArrayOrString,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
   }
 
@@ -77,7 +78,7 @@ class URCConstructorTest extends \PHPUnit_Framework_TestCase
     $scope = ['scope/1', 'scope/2'];
     $sa = new UserRefreshCredentials(
         $scope,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
   }
 
@@ -91,7 +92,7 @@ class URCConstructorTest extends \PHPUnit_Framework_TestCase
     $scope = ['scope/1', 'scope/2'];
     $sa = new UserRefreshCredentials(
         $scope,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
   }
 
@@ -139,7 +140,7 @@ class URCFromEnvTest extends \PHPUnit_Framework_TestCase
   {
     $keyFile = __DIR__ . '/fixtures2' . '/private.json';
     putenv(UserRefreshCredentials::ENV_VAR . '=' . $keyFile);
-    $this->assertNotNull(UserRefreshCredentials::fromEnv('a scope'));
+    $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
   }
 }
 
@@ -170,7 +171,7 @@ class URCFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
   {
     putenv('HOME=' . __DIR__ . '/fixtures2');
     $this->assertNotNull(
-        UserRefreshCredentials::fromWellKnownFile('a scope')
+        ApplicationDefaultCredentials::getCredentials('a scope')
     );
   }
 }
@@ -188,7 +189,7 @@ class URCFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $client->getEmitter()->attach(new Mock([new Response(400)]));
     $sa = new UserRefreshCredentials(
         $scope,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
     $sa->fetchAuthToken($client);
   }
@@ -204,7 +205,7 @@ class URCFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $client->getEmitter()->attach(new Mock([new Response(500)]));
     $sa = new UserRefreshCredentials(
         $scope,
-        Stream::factory(json_encode($testJson))
+        $testJson
     );
     $sa->fetchAuthToken($client);
   }
@@ -219,7 +220,7 @@ class URCFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $client->getEmitter()->attach(new Mock([$testResponse]));
     $sa = new UserRefreshCredentials(
         $scope,
-        Stream::factory($testJsonText)
+        $testJson
     );
     $tokens = $sa->fetchAuthToken($client);
     $this->assertEquals($testJson, $tokens);
