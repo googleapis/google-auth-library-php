@@ -102,5 +102,6 @@ class ServiceAccountCredentials extends CredentialsLoader
     if ($sub = $this->auth->getSub()) {
       $key .= ':' . $sub;
     }
+    return $key;
   }
 }
