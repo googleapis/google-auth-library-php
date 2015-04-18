@@ -19,51 +19,50 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\OAuth2;
 use Google\Auth\ApplicationDefaultCredentials;
-use Google\Auth\ServiceAccountCredentials;
+use Google\Auth\UserRefreshCredentials;
 use GuzzleHttp\Client;
 use GuzzleHttp\Message\Response;
 use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\Subscriber\Mock;
 
 // Creates a standard JSON auth object for testing.
-function createTestJson()
+function createURCTestJson()
 {
   return [
-      'private_key_id' => 'key123',
-      'private_key' => 'privatekey',
-      'client_email' => 'test@example.com',
       'client_id' => 'client123',
-      'type' => 'service_account'
+      'client_secret' => 'clientSecret123',
+      'refresh_token' => 'refreshToken123',
+      'type' => 'authorized_user'
   ];
 }
 
-class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
+class URCGetCacheKeyTest extends \PHPUnit_Framework_TestCase
 {
   public function testShouldBeTheSameAsOAuth2WithTheSameScope()
   {
-    $testJson = createTestJson();
+    $testJson = createURCTestJson();
     $scope = ['scope/1', 'scope/2'];
-    $sa = new ServiceAccountCredentials(
+    $sa = new UserRefreshCredentials(
         $scope,
         $testJson);
     $o = new OAuth2(['scope' => $scope]);
     $this->assertSame(
-        $testJson['client_email'] . ':' . $o->getCacheKey(),
+        $testJson['client_id'] . ':' . $o->getCacheKey(),
         $sa->getCacheKey()
     );
   }
 }
 
-class SACConstructorTest extends \PHPUnit_Framework_TestCase
+class URCConstructorTest extends \PHPUnit_Framework_TestCase
 {
   /**
    * @expectedException InvalidArgumentException
    */
   public function testShouldFailIfScopeIsNotAValidType()
   {
-    $testJson = createTestJson();
+    $testJson = createURCTestJson();
     $notAnArrayOrString = new \stdClass();
-    $sa = new ServiceAccountCredentials(
+    $sa = new UserRefreshCredentials(
         $notAnArrayOrString,
         $testJson
     );
@@ -72,12 +71,12 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
   /**
    * @expectedException InvalidArgumentException
    */
-  public function testShouldFailIfJsonDoesNotHaveClientEmail()
+  public function testShouldFailIfJsonDoesNotHaveClientSecret()
   {
-    $testJson = createTestJson();
-    unset($testJson['client_email']);
+    $testJson = createURCTestJson();
+    unset($testJson['client_secret']);
     $scope = ['scope/1', 'scope/2'];
-    $sa = new ServiceAccountCredentials(
+    $sa = new UserRefreshCredentials(
         $scope,
         $testJson
     );
@@ -86,12 +85,12 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
   /**
    * @expectedException InvalidArgumentException
    */
-  public function testShouldFailIfJsonDoesNotHavePrivateKey()
+  public function testShouldFailIfJsonDoesNotHaveRefreshToken()
   {
-    $testJson = createTestJson();
-    unset($testJson['private_key']);
+    $testJson = createURCTestJson();
+    unset($testJson['refresh_token']);
     $scope = ['scope/1', 'scope/2'];
-    $sa = new ServiceAccountCredentials(
+    $sa = new UserRefreshCredentials(
         $scope,
         $testJson
     );
@@ -103,28 +102,28 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
   public function testFailsToInitalizeFromANonExistentFile()
   {
     $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
-    new ServiceAccountCredentials('scope/1', null, $keyFile);
+    new UserRefreshCredentials('scope/1', null, $keyFile);
   }
 
   public function testInitalizeFromAFile()
   {
-    $keyFile = __DIR__ . '/fixtures' . '/private.json';
+    $keyFile = __DIR__ . '/fixtures2' . '/private.json';
     $this->assertNotNull(
-        new ServiceAccountCredentials('scope/1', null, $keyFile)
+        new UserRefreshCredentials('scope/1', null, $keyFile)
     );
   }
 }
 
-class SACFromEnvTest extends \PHPUnit_Framework_TestCase
+class URCFromEnvTest extends \PHPUnit_Framework_TestCase
 {
   protected function tearDown()
   {
-    putenv(ServiceAccountCredentials::ENV_VAR);  // removes it from
+    putenv(UserRefreshCredentials::ENV_VAR);  // removes it from
   }
 
   public function testIsNullIfEnvVarIsNotSet()
   {
-    $this->assertNull(ServiceAccountCredentials::fromEnv('a scope'));
+    $this->assertNull(UserRefreshCredentials::fromEnv('a scope'));
   }
 
   /**
@@ -133,19 +132,19 @@ class SACFromEnvTest extends \PHPUnit_Framework_TestCase
   public function testFailsIfEnvSpecifiesNonExistentFile()
   {
     $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
-    putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-    ApplicationDefaultCredentials::getCredentials('a scope');
+    putenv(UserRefreshCredentials::ENV_VAR . '=' . $keyFile);
+    UserRefreshCredentials::fromEnv('a scope');
   }
 
   public function testSucceedIfFileExists()
   {
-    $keyFile = __DIR__ . '/fixtures' . '/private.json';
-    putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+    $keyFile = __DIR__ . '/fixtures2' . '/private.json';
+    putenv(UserRefreshCredentials::ENV_VAR . '=' . $keyFile);
     $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
   }
 }
 
-class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
+class URCFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
 {
   private $originalHome;
 
@@ -164,46 +163,31 @@ class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
   public function testIsNullIfFileDoesNotExist()
   {
     $this->assertNull(
-        ServiceAccountCredentials::fromWellKnownFile('a scope')
+        UserRefreshCredentials::fromWellKnownFile('a scope')
     );
   }
 
   public function testSucceedIfFileIsPresent()
   {
-    putenv('HOME=' . __DIR__ . '/fixtures');
+    putenv('HOME=' . __DIR__ . '/fixtures2');
     $this->assertNotNull(
         ApplicationDefaultCredentials::getCredentials('a scope')
     );
   }
 }
 
-class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
+class URCFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
 {
-  private $privateKey;
-
-  public function setUp()
-  {
-    $this->privateKey =
-        file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
-  }
-
-  private function createTestJson()
-  {
-    $testJson = createTestJson();
-    $testJson['private_key'] = $this->privateKey;
-    return $testJson;
-  }
-
   /**
    * @expectedException GuzzleHttp\Exception\ClientException
    */
   public function testFailsOnClientErrors()
   {
-    $testJson = $this->createTestJson();
+    $testJson = createURCTestJson();
     $scope = ['scope/1', 'scope/2'];
     $client = new Client();
     $client->getEmitter()->attach(new Mock([new Response(400)]));
-    $sa = new ServiceAccountCredentials(
+    $sa = new UserRefreshCredentials(
         $scope,
         $testJson
     );
@@ -215,11 +199,11 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
    */
   public function testFailsOnServerErrors()
   {
-    $testJson = $this->createTestJson();
+    $testJson = createURCTestJson();
     $scope = ['scope/1', 'scope/2'];
     $client = new Client();
     $client->getEmitter()->attach(new Mock([new Response(500)]));
-    $sa = new ServiceAccountCredentials(
+    $sa = new UserRefreshCredentials(
         $scope,
         $testJson
     );
@@ -228,13 +212,13 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
 
   public function testCanFetchCredsOK()
   {
-    $testJson = $this->createTestJson();
+    $testJson = createURCTestJson();
     $testJsonText = json_encode($testJson);
     $scope = ['scope/1', 'scope/2'];
     $client = new Client();
     $testResponse = new Response(200, [], Stream::factory($testJsonText));
     $client->getEmitter()->attach(new Mock([$testResponse]));
-    $sa = new ServiceAccountCredentials(
+    $sa = new UserRefreshCredentials(
         $scope,
         $testJson
     );
