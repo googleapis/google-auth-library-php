@@ -32,6 +32,7 @@ class CredentialsLoader implements FetchAuthTokenInterface
   const TOKEN_CREDENTIAL_URI = 'https://www.googleapis.com/oauth2/v3/token';
   const ENV_VAR = 'GOOGLE_APPLICATION_CREDENTIALS';
   const WELL_KNOWN_PATH = 'gcloud/application_default_credentials.json';
+  const AUTH_METADATA_KEY = 'Authorization';
 
   private static function unableToReadEnv($cause)
   {
@@ -117,5 +118,37 @@ class CredentialsLoader implements FetchAuthTokenInterface
   public function getCacheKey()
   {
     return $this->auth->getCacheKey();
+  }
+
+
+  /**
+   * export a callback function which updates runtime metadata 
+   *
+   * @return an updateMetadata function 
+   */
+  public function getUpdateMetadataFunc()
+  {
+    return array($this, 'updateMetadata');
+  }
+
+  /**
+   * Updates a_hash with the authorization token
+   *
+   * @param $a_hash array metadata hashmap
+   * @param $opts array optional parameters
+   * @param $client optional client interface
+   *
+   * @return array updated metadata hashmap
+   */
+  public function updateMetadata($a_hash, $opts = array(),
+                                 ClientInterface $client = null)
+  {
+    $result = $this->fetchAuthToken($client);
+    if (!isset($result['access_token'])) {
+      return $a_hash;
+    }
+    $a_copy = $a_hash;
+    $a_copy[self::AUTH_METADATA_KEY] = 'Bearer ' . $result['access_token'];
+    return $a_copy;
   }
 }
