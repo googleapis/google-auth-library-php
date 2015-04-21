@@ -19,6 +19,7 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\OAuth2;
 use Google\Auth\ApplicationDefaultCredentials;
+use Google\Auth\CredentialsLoader;
 use Google\Auth\ServiceAccountCredentials;
 use GuzzleHttp\Client;
 use GuzzleHttp\Message\Response;
@@ -240,5 +241,31 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     );
     $tokens = $sa->fetchAuthToken($client);
     $this->assertEquals($testJson, $tokens);
+  }
+
+  public function testUpdateMetadataFunc()
+  {
+    $testJson = $this->createTestJson();
+    $scope = ['scope/1', 'scope/2'];
+    $client = new Client();
+    $access_token = 'accessToken123';
+    $responseText = json_encode(array('access_token' => $access_token));
+    $testResponse = new Response(200, [], Stream::factory($responseText));
+    $client->getEmitter()->attach(new Mock([$testResponse]));
+    $sa = new ServiceAccountCredentials(
+        $scope,
+        $testJson
+    );
+    $update_metadata = $sa->getUpdateMetadataFunc();
+    $this->assertTrue(is_callable($update_metadata));
+
+    $actual_metadata = call_user_func($update_metadata,
+                               $a_hash = array('foo' => 'bar'),
+                               $client);
+    $this->assertTrue(
+        isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
+    $this->assertEquals(
+        $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
+        'Bearer ' . $access_token);
   }
 }
