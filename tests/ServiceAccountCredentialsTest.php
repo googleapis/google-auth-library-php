@@ -261,7 +261,6 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
 
     $actual_metadata = call_user_func($update_metadata,
                                $a_hash = array('foo' => 'bar'),
-                               $opts = array(),
                                $client);
     $this->assertTrue(
         isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));

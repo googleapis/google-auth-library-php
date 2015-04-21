@@ -135,12 +135,11 @@ class CredentialsLoader implements FetchAuthTokenInterface
    * Updates a_hash with the authorization token
    *
    * @param $a_hash array metadata hashmap
-   * @param $opts array optional parameters
    * @param $client optional client interface
    *
    * @return array updated metadata hashmap
    */
-  public function updateMetadata($a_hash, $opts = array(),
+  public function updateMetadata($a_hash,
                                  ClientInterface $client = null)
   {
     $result = $this->fetchAuthToken($client);
