@@ -18,7 +18,6 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\IAMCredentials;
-use GuzzleHttp\Client;
 
 class IAMConstructorTest extends \PHPUnit_Framework_TestCase
 {
@@ -60,7 +59,6 @@ class IAMUpdateMetadataCallbackTest extends \PHPUnit_Framework_TestCase
   {
     $selector = 'iam-selector';
     $token = 'iam-token';
-    $client = new Client();
     $iam = new IAMCredentials(
         $selector,
         $token
@@ -70,8 +68,7 @@ class IAMUpdateMetadataCallbackTest extends \PHPUnit_Framework_TestCase
     $this->assertTrue(is_callable($update_metadata));
 
     $actual_metadata = call_user_func($update_metadata,
-                                      $a_hash = array('foo' => 'bar'),
-                                      $client);
+                                      $a_hash = array('foo' => 'bar'));
     $this->assertTrue(
         isset($actual_metadata[IAMCredentials::SELECTOR_KEY]));
     $this->assertEquals(

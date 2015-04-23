@@ -63,12 +63,14 @@ class IAMCredentials
    * Updates a_hash with the appropriate header metadata
    *
    * @param $a_hash array metadata hashmap
-   * @param $client optional client interface
+   * @param $unusedClient optional client interface
+   *        Note: this param is unused here, only included here for
+   *        consistency with other credentials class
    *
    * @return array updated metadata hashmap
    */
   public function updateMetadata($a_hash,
-                                 ClientInterface $client = null)
+                                 ClientInterface $unusedClient = null)
   {
     $a_copy = $a_hash;
     $a_copy[self::SELECTOR_KEY] = $this->selector;
