@@ -1,0 +1,78 @@
+<?php
+/*
+ * Copyright 2015 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace Google\Auth;
+
+use GuzzleHttp\ClientInterface;
+
+/**
+ * Authenticates requests using IAM credentials
+ */
+class IAMCredentials
+{
+  const SELECTOR_KEY = 'x-goog-iam-authority-selector';
+  const TOKEN_KEY = 'x-goog-iam-authorization-token';
+
+  private $selector;
+  private $token;
+
+  /**
+   * @param $selector string the IAM selector
+   * @param $token string the IAM token
+   */
+  public function __construct($selector, $token)
+  {
+    if (!is_string($selector)) {
+      throw new \InvalidArgumentException(
+          'selector must be a string');
+    }
+    if (!is_string($token)) {
+      throw new \InvalidArgumentException(
+          'token must be a string');
+    }
+
+    $this->selector = $selector;
+    $this->token = $token;
+  }
+
+  /**
+   * export a callback function which updates runtime metadata 
+   *
+   * @return an updateMetadata function 
+   */
+  public function getUpdateMetadataFunc()
+  {
+    return array($this, 'updateMetadata');
+  }
+
+  /**
+   * Updates a_hash with the appropriate header metadata
+   *
+   * @param $a_hash array metadata hashmap
+   * @param $client optional client interface
+   *
+   * @return array updated metadata hashmap
+   */
+  public function updateMetadata($a_hash,
+                                 ClientInterface $client = null)
+  {
+    $a_copy = $a_hash;
+    $a_copy[self::SELECTOR_KEY] = $this->selector;
+    $a_copy[self::TOKEN_KEY] = $this->token;
+    return $a_copy;
+  }
+}
