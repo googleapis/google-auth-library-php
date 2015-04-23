@@ -2,7 +2,9 @@
 
 <dl>
   <dt>Homepage</dt><dd><a href="http://www.github.com/google/google-auth-library-php">http://www.github.com/google/google-auth-library-php</a></dd>
-  <dt>Authors</dt><dd><a href="mailto:temiola@google.com">Tim Emiola</a></dd>
+  <dt>Authors</dt>
+    <dd><a href="mailto:temiola@google.com">Tim Emiola</a></dd>
+    <dd><a href="mailto:stanleycheung@google.com">Stanley Cheung</a></dd>
   <dt>Copyright</dt><dd>Copyright © 2015 Google, Inc.</dd>
   <dt>License</dt><dd>Apache 2.0</dd>
 </dl>
