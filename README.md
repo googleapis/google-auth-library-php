@@ -25,6 +25,19 @@ we reserve the right to make incompatible changes when necessary.
 $ composer install
 ```
 
+## Application Default Credentials
+
+This library provides an implementation of
+[application default credentials][application default credentials] for PHP.
+
+The Application Default Credentials provide a simple way to get authorization
+credentials for use in calling Google APIs.
+
+They are best suited for cases when the call needs to have the same identity
+and authorization level for the application independent of the user. This is
+the recommended approach to authorize calls to Cloud APIs, particularly when
+you're building an application that uses Google Compute Engine.
+
 ## License
 
 This library is licensed under Apache 2.0. Full license text is
