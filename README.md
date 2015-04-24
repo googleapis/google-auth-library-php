@@ -54,7 +54,7 @@ The goal is for auth done by
 [google-apis-php-client][google-apis-php-client] to be be performed
 by this library. 
 
-Eventually, google-apis-php-client should a dependency on this library.
+Eventually, google-apis-php-client should have a dependency on this library.
 At the moment, there is no ETA for this, a key prequisite being for google-apis-php-client 
 itself take a dependency on [Guzzle][Guzzle] so that it can use the Guzzle
 subscribers that this package provides. That's currently [being discussed](http://github.com/google/google-api-php-client#473).
