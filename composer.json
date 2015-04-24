@@ -6,7 +6,7 @@
   "homepage": "http://github.com/google/google-auth-library-php",
   "license": "Apache-2.0",
   "require": {
-    "firebase/php-jwt": "dev-master",
+    "firebase/php-jwt": "2.0.0",
     "guzzlehttp/guzzle": "5.2.*",
     "php": ">=5.3"
   },
