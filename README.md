@@ -21,7 +21,7 @@ we reserve the right to make incompatible changes when necessary.
 
 ### Installing via Composer
 
-The recommended way to install Guzzle is through
+The recommended way to install the google auth library is through
 [Composer](http://getcomposer.org).
 
 ```bash
@@ -32,7 +32,7 @@ curl -sS https://getcomposer.org/installer | php
 Next, run the Composer command to install the latest stable version:
 
 ```bash
-composer.phar require google/google-auth-library-php
+composer.phar require google/auth
 ```
 
 ## Application Default Credentials
