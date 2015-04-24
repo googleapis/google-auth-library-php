@@ -19,10 +19,20 @@ authorization and authentication with Google APIs.
 This library is in Alpha. We will make an effort to support the library, but
 we reserve the right to make incompatible changes when necessary.
 
-## Install
+### Installing via Composer
+
+The recommended way to install Guzzle is through
+[Composer](http://getcomposer.org).
 
 ```bash
-$ composer install
+# Install Composer
+curl -sS https://getcomposer.org/installer | php
+```
+
+Next, run the Composer command to install the latest stable version:
+
+```bash
+composer.phar require google/google-auth-library-php
 ```
 
 ## Application Default Credentials
@@ -37,6 +47,19 @@ They are best suited for cases when the call needs to have the same identity
 and authorization level for the application independent of the user. This is
 the recommended approach to authorize calls to Cloud APIs, particularly when
 you're building an application that uses Google Compute Engine.
+
+## What about auth in google-apis-php-client?
+
+The goal is for auth done by
+[google-apis-php-client][google-apis-php-client] to be be performed
+by this library. 
+
+Eventually, google-apis-php-client should a dependency on this library.
+At the moment, there is no ETA for this, a key prequisite being for google-apis-php-client 
+itself take a dependency on [Guzzle][Guzzle] so that it can use the Guzzle
+subscribers that this package provides. That's currently [being discussed](http://github.com/google/google-api-php-client#473).
+This package's availability should make that transition simpler as there is one
+less thing that need to be handled.
 
 ## License
 
@@ -59,4 +82,5 @@ about the client or APIs on [StackOverflow](http://stackoverflow.com).
 [application default credentials]: (https://developers.google.com/accounts/docs/application-default-credentials)
 [contributing]: https://github.com/google/google-auth-library-php/tree/master/CONTRIBUTING.md
 [copying]: https://github.com/google/google-auth-library-php/tree/master/COPYING
+[Guzzle]: https://github.com/guzzle/guzzle
 
