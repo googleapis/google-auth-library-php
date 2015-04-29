@@ -147,7 +147,7 @@ class CredentialsLoader implements FetchAuthTokenInterface
       return $a_hash;
     }
     $a_copy = $a_hash;
-    $a_copy[self::AUTH_METADATA_KEY] = 'Bearer ' . $result['access_token'];
+    $a_copy[self::AUTH_METADATA_KEY] = array('Bearer ' . $result['access_token']);
     return $a_copy;
   }
 }
