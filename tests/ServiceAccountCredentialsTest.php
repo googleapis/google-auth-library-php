@@ -283,6 +283,6 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
         isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
     $this->assertEquals(
         $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
-        'Bearer ' . $access_token);
+        array('Bearer ' . $access_token));
   }
 }
