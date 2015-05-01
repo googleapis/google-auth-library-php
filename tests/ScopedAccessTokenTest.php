@@ -17,7 +17,6 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\CacheInterface;
 use Google\Auth\ScopedAccessToken;
 use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;

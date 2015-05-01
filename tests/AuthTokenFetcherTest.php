@@ -18,8 +18,6 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\AuthTokenFetcher;
-use Google\Auth\CacheInterface;
-use Google\Auth\FetchAuthTokenInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
