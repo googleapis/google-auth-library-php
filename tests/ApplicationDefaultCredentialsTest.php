@@ -90,7 +90,6 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
         'token_type' => 'Bearer',
     ];
     $jsonTokens = json_encode($wantedTokens);
-    $client = new Client();
     $plugin = new Mock([
         new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         new Response(200, [], Stream::factory($jsonTokens)),
@@ -163,7 +162,6 @@ class ADCGetFetcherTest extends \PHPUnit_Framework_TestCase
         'token_type' => 'Bearer',
     ];
     $jsonTokens = json_encode($wantedTokens);
-    $client = new Client();
     $plugin = new Mock([
         new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         new Response(200, [], Stream::factory($jsonTokens)),
