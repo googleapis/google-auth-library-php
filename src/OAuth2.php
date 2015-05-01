@@ -90,6 +90,11 @@ class OAuth2 implements FetchAuthTokenInterface
   private $username;
 
   /**
+   * The resource owner's password.
+   */
+  private $password;
+
+  /**
    * The scope of the access request, expressed either as an Array or as a
    * space-delimited string.
    */
