@@ -71,7 +71,7 @@ class GCECredentials implements FetchAuthTokenInterface
   /**
    * Flag that stores the value of the onGCE check.
    */
-  private $isOnGCE = false;
+  private $isOnGce = false;
 
   /**
    * The full uri for accessing the default token.
