@@ -43,7 +43,7 @@ use GuzzleHttp\Exception\ServerException;
  *   $client->getEmitter()->attach($gce);
  *   $res = $client->('myproject/taskqueues/myqueue');
  */
-class GCECredentials implements FetchAuthTokenInterface
+class GCECredentials extends CredentialsLoader
 {
   /**
    * The metadata IP address on appengine instances.
