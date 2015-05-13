@@ -183,11 +183,22 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
     if (empty($authUri)) {
       return $metadata;
     }
+
     $this->auth->setAudience($authUri);
-    $token = $this->auth->toJwt();
-    $metadata_copy = $metadata;
-    $metadata_copy[self::AUTH_METADATA_KEY] = array('Bearer ' . $token);
-    return $metadata_copy;
+    return parent::updateMetadata($metadata, $authUri, $client);
   }
 
+ /**
+  * Implements FetchAuthTokenInterface#fetchAuthToken.
+  */
+  public function fetchAuthToken(ClientInterface $unusedClient = null)
+  {
+    $audience = $this->auth->getAudience();
+    if (empty($audience)) {
+      return null;
+    }
+
+    $access_token = $this->auth->toJwt();
+    return array('access_token' => $access_token);
+  }
 }
