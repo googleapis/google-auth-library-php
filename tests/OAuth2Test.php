@@ -372,9 +372,8 @@ class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
   }
 
   /**
-   * @expectedException DomainException
    */
-  public function testFailsWithMissingScope()
+  public function testCanHaveNoScope()
   {
     $testConfig = $this->signingMinimal;
     unset($testConfig['scope']);

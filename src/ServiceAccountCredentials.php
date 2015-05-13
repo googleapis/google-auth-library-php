@@ -104,4 +104,90 @@ class ServiceAccountCredentials extends CredentialsLoader
     }
     return $key;
   }
+
+  /**
+   * Updates metadata with the authorization token
+   *
+   * @param $metadata array metadata hashmap
+   * @param $authUri string optional auth uri
+   * @param $client optional client interface
+   *
+   * @return array updated metadata hashmap
+   */
+  public function updateMetadata($metadata,
+                                 $authUri = null,
+                                 ClientInterface $client = null)
+  {
+    // scope exists. use oauth implementation
+    if (!empty($this->auth->getScope())) {
+      return parent::updateMetadata($metadata, $authUri, $client);
+    }
+
+    // no scope found. create jwt with the auth uri
+    $credJson = array(
+      'private_key' => $this->auth->getSigningKey(),
+      'client_email' => $this->auth->getIssuer(),
+    );
+    $jwtCreds = new ServiceAccountJwtAccessCredentials($credJson);
+    return $jwtCreds->updateMetadata($metadata, $authUri, $client);
+  }
+}
+
+/**
+ * Authenticates requests using Google's Service Account credentials via
+ * JWT Access.
+ *
+ * This class allows authorizing requests for service accounts directly
+ * from credentials from a json key file downloaded from the developer
+ * console (via 'Generate new Json Key').  It is not part of any OAuth2
+ * flow, rather it creates a JWT and sends that as a credential.
+ */
+class ServiceAccountJwtAccessCredentials extends CredentialsLoader
+{
+  /**
+   * Create a new ServiceAccountJwtAccessCredentials.
+   *
+   * @param array jsonKey JSON credentials.
+   */
+  public function __construct($jsonKey)
+  {
+    if (!array_key_exists('client_email', $jsonKey)) {
+      throw new \InvalidArgumentException(
+          'json key is missing the client_email field');
+    }
+    if (!array_key_exists('private_key', $jsonKey)) {
+      throw new \InvalidArgumentException(
+          'json key is missing the private_key field');
+    }
+    $this->auth = new OAuth2([
+      'issuer' => $jsonKey['client_email'],
+      'sub' => $jsonKey['client_email'],
+      'signingAlgorithm' => 'RS256',
+      'signingKey' => $jsonKey['private_key'],
+    ]);
+  }
+
+  /**
+   * Updates metadata with the authorization token
+   *
+   * @param $metadata array metadata hashmap
+   * @param $authUri string optional auth uri
+   * @param $client optional client interface
+   *
+   * @return array updated metadata hashmap
+   */
+  public function updateMetadata($metadata,
+                                 $authUri = null,
+                                 ClientInterface $client = null)
+  {
+    if (empty($authUri)) {
+      return $metadata;
+    }
+    $this->auth->setAudience($authUri);
+    $token = $this->auth->toJwt();
+    $metadata_copy = $metadata;
+    $metadata_copy[self::AUTH_METADATA_KEY] = array('Bearer ' . $token);
+    return $metadata_copy;
+  }
+
 }
