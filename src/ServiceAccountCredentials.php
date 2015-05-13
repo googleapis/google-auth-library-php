@@ -120,7 +120,7 @@ class ServiceAccountCredentials extends CredentialsLoader
   {
     // scope exists. use oauth implementation
     $scope = $this->auth->getScope();
-    if (!empty($scope)) {
+    if (!is_null($scope)) {
       return parent::updateMetadata($metadata, $authUri, $client);
     }
 

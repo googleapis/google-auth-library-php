@@ -347,7 +347,7 @@ class OAuth2 implements FetchAuthTokenInterface
         throw new \DomainException($k . ' should not be null');
       }
     }
-    if (!empty($this->getScope())) {
+    if (!(is_null($this->getScope()))) {
       $assertion['scope'] = $this->getScope();
     }
     if (!(is_null($this->getPrincipal()))) {
