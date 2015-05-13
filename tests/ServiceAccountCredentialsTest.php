@@ -465,4 +465,30 @@ class SACJwtAccessComboTest extends \PHPUnit_Framework_TestCase
     $this->assertTrue(strlen($bearer_token) > 30);
   }
 
+  public function testNoScopeAndNoAuthUri()
+  {
+    $testJson = $this->createTestJson();
+    // no scope, jwt access should be used, no outbound
+    // call should be made
+    $scope = null;
+    $client = new Client();
+    $client->getEmitter()->attach(new Mock([new Response(500)]));
+    $sa = new ServiceAccountCredentials(
+        $scope,
+        $testJson
+    );
+    $this->assertNotNull($sa);
+
+    $update_metadata = $sa->getUpdateMetadataFunc();
+    $this->assertTrue(is_callable($update_metadata));
+
+    $actual_metadata = call_user_func($update_metadata,
+                                      $metadata = array('foo' => 'bar'),
+                                      $authUri = null);
+    // no access_token is added to the metadata hash
+    // but also, no error should be thrown
+    $this->assertTrue(is_array($actual_metadata));
+    $this->assertTrue(
+        !isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
+  }
 }
