@@ -21,6 +21,7 @@ use Google\Auth\OAuth2;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\ServiceAccountCredentials;
+use Google\Auth\ServiceAccountJwtAccessCredentials;
 use GuzzleHttp\Client;
 use GuzzleHttp\Message\Response;
 use GuzzleHttp\Stream\Stream;
@@ -277,12 +278,217 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $this->assertTrue(is_callable($update_metadata));
 
     $actual_metadata = call_user_func($update_metadata,
-                               $a_hash = array('foo' => 'bar'),
+                               $metadata = array('foo' => 'bar'),
+                               $authUri = null,
                                $client);
     $this->assertTrue(
         isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
     $this->assertEquals(
         $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
         array('Bearer ' . $access_token));
+  }
+}
+
+class SACJwtAccessTest extends \PHPUnit_Framework_TestCase
+{
+  private $privateKey;
+
+  public function setUp()
+  {
+    $this->privateKey =
+        file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+  }
+
+  private function createTestJson()
+  {
+    $testJson = createTestJson();
+    $testJson['private_key'] = $this->privateKey;
+    return $testJson;
+  }
+
+  /**
+   * @expectedException InvalidArgumentException
+   */
+  public function testFailsOnMissingClientEmail()
+  {
+    $testJson = $this->createTestJson();
+    unset($testJson['client_email']);
+    $sa = new ServiceAccountJwtAccessCredentials(
+        $testJson
+    );
+  }
+
+  /**
+   * @expectedException InvalidArgumentException
+   */
+  public function testFailsOnMissingPrivateKey()
+  {
+    $testJson = $this->createTestJson();
+    unset($testJson['private_key']);
+    $sa = new ServiceAccountJwtAccessCredentials(
+        $testJson
+    );
+  }
+
+  public function testCanInitializeFromJson()
+  {
+    $testJson = $this->createTestJson();
+    $sa = new ServiceAccountJwtAccessCredentials(
+        $testJson
+    );
+    $this->assertNotNull($sa);
+  }
+
+
+  public function testNoOpOnFetchAuthToken()
+  {
+    $testJson = $this->createTestJson();
+    $sa = new ServiceAccountJwtAccessCredentials(
+        $testJson
+    );
+    $this->assertNotNull($sa);
+
+    $client = new Client();
+    $client->getEmitter()->attach(new Mock([new Response(200)]));
+    $result = $sa->fetchAuthToken($client); // authUri has not been set
+    $this->assertNull($result);
+  }
+
+
+  public function testAuthUriIsNotSet()
+  {
+    $testJson = $this->createTestJson();
+    $sa = new ServiceAccountJwtAccessCredentials(
+        $testJson
+    );
+    $this->assertNotNull($sa);
+
+    $update_metadata = $sa->getUpdateMetadataFunc();
+    $this->assertTrue(is_callable($update_metadata));
+
+    $actual_metadata = call_user_func($update_metadata,
+                               $metadata = array('foo' => 'bar'),
+                               $authUri = null);
+    $this->assertTrue(
+        !isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
+  }
+
+  public function testUpdateMetadataFunc()
+  {
+    $testJson = $this->createTestJson();
+    $sa = new ServiceAccountJwtAccessCredentials(
+        $testJson
+    );
+    $this->assertNotNull($sa);
+
+    $update_metadata = $sa->getUpdateMetadataFunc();
+    $this->assertTrue(is_callable($update_metadata));
+
+    $actual_metadata = call_user_func($update_metadata,
+                               $metadata = array('foo' => 'bar'),
+                               $authUri = 'https://example.com/service');
+    $this->assertTrue(
+        isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
+
+    $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
+    $this->assertTrue(is_array($authorization));
+
+    $bearer_token = current($authorization);
+    $this->assertTrue(is_string($bearer_token));
+    $this->assertTrue(strpos($bearer_token, 'Bearer ') == 0);
+    $this->assertTrue(strlen($bearer_token) > 30);
+
+    $actual_metadata2 = call_user_func($update_metadata,
+                               $metadata = array('foo' => 'bar'),
+                               $authUri = 'https://example.com/anotherService');
+    $this->assertTrue(
+        isset($actual_metadata2[CredentialsLoader::AUTH_METADATA_KEY]));
+
+    $authorization2 = $actual_metadata2[CredentialsLoader::AUTH_METADATA_KEY];
+    $this->assertTrue(is_array($authorization2));
+
+    $bearer_token2 = current($authorization2);
+    $this->assertTrue(is_string($bearer_token2));
+    $this->assertTrue(strpos($bearer_token2, 'Bearer ') == 0);
+    $this->assertTrue(strlen($bearer_token2) > 30);
+    $this->assertTrue($bearer_token != $bearer_token2);
+  }
+
+}
+
+class SACJwtAccessComboTest extends \PHPUnit_Framework_TestCase
+{
+  private $privateKey;
+
+  public function setUp()
+  {
+    $this->privateKey =
+        file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+  }
+
+  private function createTestJson()
+  {
+    $testJson = createTestJson();
+    $testJson['private_key'] = $this->privateKey;
+    return $testJson;
+  }
+
+  public function testNoScopeUseJwtAccess()
+  {
+    $testJson = $this->createTestJson();
+    // no scope, jwt access should be used, no outbound
+    // call should be made
+    $scope = null;
+    $client = new Client();
+    $client->getEmitter()->attach(new Mock([new Response(500)]));
+    $sa = new ServiceAccountCredentials(
+        $scope,
+        $testJson
+    );
+    $this->assertNotNull($sa);
+
+    $update_metadata = $sa->getUpdateMetadataFunc();
+    $this->assertTrue(is_callable($update_metadata));
+
+    $actual_metadata = call_user_func($update_metadata,
+                               $metadata = array('foo' => 'bar'),
+                               $authUri = 'https://example.com/service');
+    $this->assertTrue(
+        isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
+
+    $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
+    $this->assertTrue(is_array($authorization));
+
+    $bearer_token = current($authorization);
+    $this->assertTrue(is_string($bearer_token));
+    $this->assertTrue(strpos($bearer_token, 'Bearer ') == 0);
+    $this->assertTrue(strlen($bearer_token) > 30);
+  }
+
+  public function testNoScopeAndNoAuthUri()
+  {
+    $testJson = $this->createTestJson();
+    // no scope, jwt access should be used, no outbound
+    // call should be made
+    $scope = null;
+    $client = new Client();
+    $client->getEmitter()->attach(new Mock([new Response(500)]));
+    $sa = new ServiceAccountCredentials(
+        $scope,
+        $testJson
+    );
+    $this->assertNotNull($sa);
+
+    $update_metadata = $sa->getUpdateMetadataFunc();
+    $this->assertTrue(is_callable($update_metadata));
+
+    $actual_metadata = call_user_func($update_metadata,
+                                      $metadata = array('foo' => 'bar'),
+                                      $authUri = null);
+    // no access_token is added to the metadata hash
+    // but also, no error should be thrown
+    $this->assertTrue(is_array($actual_metadata));
+    $this->assertTrue(
+        !isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
   }
 }

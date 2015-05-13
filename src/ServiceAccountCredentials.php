@@ -104,4 +104,32 @@ class ServiceAccountCredentials extends CredentialsLoader
     }
     return $key;
   }
+
+  /**
+   * Updates metadata with the authorization token
+   *
+   * @param $metadata array metadata hashmap
+   * @param $authUri string optional auth uri
+   * @param $client optional client interface
+   *
+   * @return array updated metadata hashmap
+   */
+  public function updateMetadata($metadata,
+                                 $authUri = null,
+                                 ClientInterface $client = null)
+  {
+    // scope exists. use oauth implementation
+    $scope = $this->auth->getScope();
+    if (!is_null($scope)) {
+      return parent::updateMetadata($metadata, $authUri, $client);
+    }
+
+    // no scope found. create jwt with the auth uri
+    $credJson = array(
+      'private_key' => $this->auth->getSigningKey(),
+      'client_email' => $this->auth->getIssuer(),
+    );
+    $jwtCreds = new ServiceAccountJwtAccessCredentials($credJson);
+    return $jwtCreds->updateMetadata($metadata, $authUri, $client);
+  }
 }

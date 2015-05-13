@@ -68,7 +68,7 @@ class IAMUpdateMetadataCallbackTest extends \PHPUnit_Framework_TestCase
     $this->assertTrue(is_callable($update_metadata));
 
     $actual_metadata = call_user_func($update_metadata,
-                                      $a_hash = array('foo' => 'bar'));
+                                      $metadata = array('foo' => 'bar'));
     $this->assertTrue(
         isset($actual_metadata[IAMCredentials::SELECTOR_KEY]));
     $this->assertEquals(

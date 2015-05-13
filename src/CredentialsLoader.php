@@ -132,22 +132,24 @@ class CredentialsLoader implements FetchAuthTokenInterface
   }
 
   /**
-   * Updates a_hash with the authorization token
+   * Updates metadata with the authorization token
    *
-   * @param $a_hash array metadata hashmap
+   * @param $metadata array metadata hashmap
+   * @param $authUri string optional auth uri
    * @param $client optional client interface
    *
    * @return array updated metadata hashmap
    */
-  public function updateMetadata($a_hash,
+  public function updateMetadata($metadata,
+                                 $authUri = null,
                                  ClientInterface $client = null)
   {
     $result = $this->fetchAuthToken($client);
     if (!isset($result['access_token'])) {
-      return $a_hash;
+      return $metadata;
     }
-    $a_copy = $a_hash;
-    $a_copy[self::AUTH_METADATA_KEY] = array('Bearer ' . $result['access_token']);
-    return $a_copy;
+    $metadata_copy = $metadata;
+    $metadata_copy[self::AUTH_METADATA_KEY] = array('Bearer ' . $result['access_token']);
+    return $metadata_copy;
   }
 }
