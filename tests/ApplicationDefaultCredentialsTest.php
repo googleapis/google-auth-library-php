@@ -74,6 +74,7 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
    */
   public function testFailsIfNotOnGceAndNoDefaultFileFound()
   {
+    putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
     $client = new Client();
     // simulate not being GCE by return 500
     $client->getEmitter()->attach(new Mock([new Response(500)]));
@@ -146,6 +147,7 @@ class ADCGetFetcherTest extends \PHPUnit_Framework_TestCase
    */
   public function testFailsIfNotOnGceAndNoDefaultFileFound()
   {
+    putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
     $client = new Client();
     // simulate not being GCE by return 500
     $client->getEmitter()->attach(new Mock([new Response(500)]));

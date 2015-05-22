@@ -182,6 +182,7 @@ class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
 
   public function testIsNullIfFileDoesNotExist()
   {
+    putenv('HOME=' . __DIR__ . '/not_exists_fixtures');
     $this->assertNull(
         ServiceAccountCredentials::fromWellKnownFile('a scope')
     );

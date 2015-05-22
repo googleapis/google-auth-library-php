@@ -95,8 +95,12 @@ class CredentialsLoader implements FetchAuthTokenInterface
   public static function fromWellKnownFile($scope = null)
   {
     $rootEnv = self::isOnWindows() ? 'APPDATA' : 'HOME';
-    $root = getenv($rootEnv);
-    $path = join(DIRECTORY_SEPARATOR, [$root, self::WELL_KNOWN_PATH]);
+    $path = [getenv($rootEnv)];
+    if (!self::isOnWindows()) {
+      $path[] = '.config';
+    }
+    $path[] = self::WELL_KNOWN_PATH;
+    $path = join(DIRECTORY_SEPARATOR, $path);
     if (!file_exists($path)) {
       return null;
     }
