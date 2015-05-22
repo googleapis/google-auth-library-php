@@ -32,6 +32,7 @@ class CredentialsLoader implements FetchAuthTokenInterface
   const TOKEN_CREDENTIAL_URI = 'https://www.googleapis.com/oauth2/v3/token';
   const ENV_VAR = 'GOOGLE_APPLICATION_CREDENTIALS';
   const WELL_KNOWN_PATH = 'gcloud/application_default_credentials.json';
+  const NON_WINDOWS_WELL_KNOWN_PATH_BASE = '.config';
   const AUTH_METADATA_KEY = 'Authorization';
 
   private static function unableToReadEnv($cause)
@@ -95,8 +96,12 @@ class CredentialsLoader implements FetchAuthTokenInterface
   public static function fromWellKnownFile($scope = null)
   {
     $rootEnv = self::isOnWindows() ? 'APPDATA' : 'HOME';
-    $root = getenv($rootEnv);
-    $path = join(DIRECTORY_SEPARATOR, [$root, self::WELL_KNOWN_PATH]);
+    $path = [getenv($rootEnv)];
+    if (!self::isOnWindows()) {
+      $path[] = self::NON_WINDOWS_WELL_KNOWN_PATH_BASE;
+    }
+    $path[] = self::WELL_KNOWN_PATH;
+    $path = join(DIRECTORY_SEPARATOR, $path);
     if (!file_exists($path)) {
       return null;
     }

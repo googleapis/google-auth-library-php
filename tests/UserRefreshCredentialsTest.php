@@ -162,6 +162,7 @@ class URCFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
 
   public function testIsNullIfFileDoesNotExist()
   {
+    putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
     $this->assertNull(
         UserRefreshCredentials::fromWellKnownFile('a scope')
     );
