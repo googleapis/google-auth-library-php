@@ -621,7 +621,7 @@ class OAuth2 implements FetchAuthTokenInterface
       return;
     }
     $u = $this->coerceUri($uri);
-    if (!($u->isAbsolute())) {
+    if (!$this->isAbsoluteUri($u)) {
       throw new \InvalidArgumentException(
           'Redirect URI must be absolute');
     }
@@ -1067,5 +1067,14 @@ class OAuth2 implements FetchAuthTokenInterface
       throw new \InvalidArgumentException(
           'unexpected type for a uri: ' . get_class($uri));
     }
+  }
+
+  /**
+   * Determines if the URI is absolute based on its scheme and host or path
+   * (RFC 3986)
+   */
+  private function isAbsoluteUri($u)
+  {
+    return $u->getScheme() && ($u->getHost() || $u->getPath());
   }
 }
