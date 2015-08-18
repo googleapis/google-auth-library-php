@@ -336,6 +336,23 @@ class OAuth2GeneralTest extends \PHPUnit_Framework_TestCase
       $this->assertEquals($a, $o->getSigningAlgorithm());
     }
   }
+
+  /**
+   * @expectedException InvalidArgumentException
+   */
+  public function testFailsOnRelativeRedirectUri()
+  {
+    $o = new OAuth2($this->minimal);
+    $o->setRedirectUri('/relative/url');
+  }
+
+  public function testAllowsUrnRedirectUri()
+  {
+    $urn = 'urn:ietf:wg:oauth:2.0:oob';
+    $o = new OAuth2($this->minimal);
+    $o->setRedirectUri($urn);
+    $this->assertEquals($urn, $o->getRedirectUri());
+  }
 }
 
 class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
