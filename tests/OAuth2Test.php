@@ -527,6 +527,38 @@ class OAuth2GenerateAccessTokenRequestTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals('a_refresh_token', $fields['refresh_token']);
   }
 
+  public function testClientSecretAddedIfSetForAuthorizationCodeRequests()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    $testConfig['clientSecret'] = 'a_client_secret';
+    $testConfig['redirectUri'] = 'https://has/redirect/uri';
+    $o = new OAuth2($testConfig);
+    $o->setCode('an_auth_code');
+    $request = $o->generateCredentialsRequest();
+    $this->assertEquals('a_client_secret', $request->getBody()->getField('client_secret'));
+  }
+
+  public function testClientSecretAddedIfSetForRefreshTokenRequests()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    $testConfig['clientSecret'] = 'a_client_secret';
+    $o = new OAuth2($testConfig);
+    $o->setRefreshToken('a_refresh_token');
+    $request = $o->generateCredentialsRequest();
+    $this->assertEquals('a_client_secret', $request->getBody()->getField('client_secret'));
+  }
+
+  public function testClientSecretAddedIfSetForPasswordRequests()
+  {
+    $testConfig = $this->tokenRequestMinimal;
+    $testConfig['clientSecret'] = 'a_client_secret';
+    $o = new OAuth2($testConfig);
+    $o->setUsername('a_username');
+    $o->setPassword('a_password');
+    $request = $o->generateCredentialsRequest();
+    $this->assertEquals('a_client_secret', $request->getBody()->getField('client_secret'));
+  }
+
   public function testGeneratesAssertionRequests()
   {
     $testConfig = $this->tokenRequestMinimal;

@@ -381,13 +381,16 @@ class OAuth2 implements FetchAuthTokenInterface
       case 'authorization_code':
         $params['code'] = $this->getCode();
         $params['redirect_uri'] = $this->getRedirectUri();
+        $this->addClientCredentials($params);
         break;
       case 'password':
         $params['username'] = $this->getUsername();
         $params['password'] = $this->getPassword();
+        $this->addClientCredentials($params);
         break;
       case 'refresh_token':
         $params['refresh_token'] = $this->getRefreshToken();
+        $this->addClientCredentials($params);
         break;
       case self::JWT_URN:
         $params['assertion'] = $this->toJwt();
@@ -1076,5 +1079,18 @@ class OAuth2 implements FetchAuthTokenInterface
   private function isAbsoluteUri($u)
   {
     return $u->getScheme() && ($u->getHost() || $u->getPath());
+  }
+
+  private function addClientCredentials(&$params)
+  {
+    $clientId = $this->getClientId();
+    $clientSecret = $this->getClientSecret();
+
+    if ($clientId && $clientSecret) {
+      $params['client_id'] = $clientId;
+      $params['client_secret'] = $clientSecret;
+    }
+
+    return $params;
   }
 }
