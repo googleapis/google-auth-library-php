@@ -96,8 +96,8 @@ class ScopedAccessToken implements SubscriberInterface
    *   $scope = 'https://www.googleapis.com/auth/taskqueue'
    *   $scoped = new ScopedAccessToken('AppIdentityService::getAccessToken',
    *                                   $scope,
-   *                                   $cache = new Memcache(),
-   *                                   [ 'prefix' => 'Google_Auth_AppIdentity::' ]);
+   *                                   [ 'prefix' => 'Google\Auth\ScopedAccessToken::' ],
+   *                                   $cache = new Memcache());
    *   $client = new Client([
    *      'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
    *      'defaults' => ['auth' => 'scoped']
