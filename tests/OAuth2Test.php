@@ -77,7 +77,7 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
         'clientId' => 'aClientID'
     ]);
     $o->buildFullAuthorizationUri([
-        'approvalPrompt' => 'an approval prompt',
+        'approval_prompt' => 'an approval prompt',
         'prompt' => 'a prompt',
     ]);
   }

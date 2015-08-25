@@ -552,9 +552,9 @@ class OAuth2 implements FetchAuthTokenInterface
     if (is_null($params->get('redirect_uri'))) {
       throw new \InvalidArgumentException('missing the required redirect URI');
     }
-    if ($params->hasKey('prompt') && $params->hasKey('approvalPrompt')) {
+    if ($params->hasKey('prompt') && $params->hasKey('approval_prompt')) {
       throw new \InvalidArgumentException(
-          'prompt and approvalPrompt are mutually exclusive');
+          'prompt and approval_prompt are mutually exclusive');
     }
 
     // Construct the uri object; return it if it is valid.
