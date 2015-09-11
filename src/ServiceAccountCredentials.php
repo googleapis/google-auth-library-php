@@ -49,7 +49,7 @@ use GuzzleHttp\Exception\ServerException;
  *   ]);
  *   $client->getEmitter()->attach(new AuthTokenFetcher($sa));
  *
- *   $res = $client->('myproject/taskqueues/myqueue');
+ *   $res = $client->get('myproject/taskqueues/myqueue');
  */
 class ServiceAccountCredentials extends CredentialsLoader
 {

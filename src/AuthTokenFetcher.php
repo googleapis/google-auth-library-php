@@ -90,7 +90,7 @@ class AuthTokenFetcher implements SubscriberInterface
    *      'defaults' => ['auth' => 'google_auth']
    *   ]);
    *
-   *   $res = $client->('myproject/taskqueues/myqueue');
+   *   $res = $client->get('myproject/taskqueues/myqueue');
    */
   public function onBefore(BeforeEvent $event)
   {
