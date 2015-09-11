@@ -64,7 +64,7 @@ class Simple implements SubscriberInterface
    *      'defaults' => ['auth' => 'simple']
    *   ]);
    *
-   *   $res = $client->('drive/v2/rest');
+   *   $res = $client->get('drive/v2/rest');
    */
   public function onBefore(BeforeEvent $event)
   {

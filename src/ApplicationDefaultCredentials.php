@@ -84,9 +84,9 @@ class DefaultCredentials extends CredentialsLoader
  *   ]);
  *   $fetcher = ApplicationDefaultCredentials::getFetcher(
  *       'https://www.googleapis.com/auth/taskqueue');
- *   $client->getEmitter()->attach();
+ *   $client->getEmitter()->attach($fetcher);
  *
- *   $res = $client->('myproject/taskqueues/myqueue');
+ *   $res = $client->get('myproject/taskqueues/myqueue');
  */
 class ApplicationDefaultCredentials
 {

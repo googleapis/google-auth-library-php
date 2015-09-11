@@ -41,7 +41,7 @@ use GuzzleHttp\Exception\ServerException;
  *      'defaults' => ['auth' => 'google_auth']
  *   ]);
  *   $client->getEmitter()->attach($gce);
- *   $res = $client->('myproject/taskqueues/myqueue');
+ *   $res = $client->get('myproject/taskqueues/myqueue');
  */
 class GCECredentials extends CredentialsLoader
 {

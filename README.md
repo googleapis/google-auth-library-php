@@ -52,10 +52,10 @@ you're building an application that uses Google Compute Engine.
 
 The goal is for auth done by
 [google-apis-php-client][google-apis-php-client] to be be performed
-by this library. 
+by this library.
 
 Eventually, google-apis-php-client should have a dependency on this library.
-At the moment, there is no ETA for this, a key prequisite being for google-apis-php-client 
+At the moment, there is no ETA for this, a key prequisite being for google-apis-php-client
 itself take a dependency on [Guzzle][Guzzle] so that it can use the Guzzle
 subscribers that this package provides. That's currently [being discussed](http://github.com/google/google-api-php-client#473).
 This package's availability should make that transition simpler as there is one
@@ -78,8 +78,8 @@ hesitate to
 [ask questions](http://stackoverflow.com/questions/tagged/google-auth-library-php)
 about the client or APIs on [StackOverflow](http://stackoverflow.com).
 
-[google-apis-php-client]: (https://github.com/google/google-api-php-client)
-[application default credentials]: (https://developers.google.com/accounts/docs/application-default-credentials)
+[google-apis-php-client]: https://github.com/google/google-api-php-client
+[application default credentials]: https://developers.google.com/accounts/docs/application-default-credentials
 [contributing]: https://github.com/google/google-auth-library-php/tree/master/CONTRIBUTING.md
 [copying]: https://github.com/google/google-auth-library-php/tree/master/COPYING
 [Guzzle]: https://github.com/guzzle/guzzle
