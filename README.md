@@ -48,6 +48,62 @@ and authorization level for the application independent of the user. This is
 the recommended approach to authorize calls to Cloud APIs, particularly when
 you're building an application that uses Google Compute Engine.
 
+#### Download your Service Account Credentials JSON file
+
+To use `Application Default Credentials`, You first need to download a set of
+JSON credentials for your project. Go to **APIs & Auth** > **Credentials** in
+the [Google Developers Console](developer console) and select
+**Service account** from the **Add credentials** dropdown.
+
+> This file is your *only copy* of these credentials. It should never be
+> committed with your source code, and should be stored securely.
+
+Once downloaded, store the path to this file in the
+`GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+```php
+putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+```
+
+#### Enable the API you want to use
+
+Before making your API call, you must be sure the API you're calling has been
+enabled. Go to **APIs & Auth** > **APIs** in the
+[Google Developers Console](developer console) and enable the APIs you'd like to
+call. For the example below, you must enable the `Drive API`.
+
+#### Call the APIs
+
+As long as you update the environment variable below to point to *your* JSON
+credentials file, the following code should output a list of your Drive files.
+
+```php
+use GuzzleHttp\Client;
+use Google\Auth\ApplicationDefaultCredentials;
+
+// specify the path to your application credentials
+putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+
+// define the scopes for your API call
+$scopes = ['https://www.googleapis.com/auth/drive.readonly'];
+
+// create the HTTP client
+$client = new Client([
+  'base_url' => 'https://www.googleapis.com',
+  'defaults' => ['auth' => 'google_auth']  // authorize all requests
+]);
+
+// attach this library's auth listener
+$fetcher = ApplicationDefaultCredentials::getFetcher($scopes);
+$client->getEmitter()->attach($fetcher);
+
+// make the request
+$response = $client->get('drive/v2/files');
+
+// show the result!
+print_r($response->json());
+```
+
 ## What about auth in google-apis-php-client?
 
 The goal is for auth done by
@@ -83,4 +139,4 @@ about the client or APIs on [StackOverflow](http://stackoverflow.com).
 [contributing]: https://github.com/google/google-auth-library-php/tree/master/CONTRIBUTING.md
 [copying]: https://github.com/google/google-auth-library-php/tree/master/COPYING
 [Guzzle]: https://github.com/guzzle/guzzle
-
+[developer console]: https://console.developers.google.com
