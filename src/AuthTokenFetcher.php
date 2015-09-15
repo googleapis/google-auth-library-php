@@ -21,6 +21,7 @@ use GuzzleHttp\Collection;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
 use GuzzleHttp\Event\BeforeEvent;
+use GuzzleHttp\ClientInterface;
 
 /**
  * AuthTokenFetcher is a Guzzle Subscriber that adds an Authorization header
@@ -40,6 +41,9 @@ class AuthTokenFetcher implements SubscriberInterface
   /** @var An implementation of CacheInterface */
   private $cache;
 
+  /** @var An implementation of ClientInterface */
+  private $client;
+
   /** @var An implementation of FetchAuthTokenInterface */
   private $fetcher;
 
@@ -55,9 +59,11 @@ class AuthTokenFetcher implements SubscriberInterface
    */
   public function __construct(FetchAuthTokenInterface $fetcher,
                               array $cacheConfig = null,
-                              CacheInterface $cache = null)
+                              CacheInterface $cache = null,
+                              ClientInterface $client = null)
   {
     $this->fetcher = $fetcher;
+    $this->client = $client;
     if (!is_null($cache)) {
       $this->cache = $cache;
       $this->cacheConfig = Collection::fromConfig($cacheConfig, [
@@ -113,7 +119,7 @@ class AuthTokenFetcher implements SubscriberInterface
     }
 
     // Fetch the auth token.
-    $auth_tokens = $this->fetcher->fetchAuthToken();
+    $auth_tokens = $this->fetcher->fetchAuthToken($this->client);
     if (array_key_exists('access_token', $auth_tokens)) {
       $request->setHeader('Authorization', 'Bearer ' . $auth_tokens['access_token']);
       $this->setCachedValue($auth_tokens['access_token']);
