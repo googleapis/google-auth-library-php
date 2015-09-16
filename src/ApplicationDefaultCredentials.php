@@ -112,7 +112,7 @@ class ApplicationDefaultCredentials
       CacheInterface $cache = null)
   {
     $creds = self::getCredentials($scope, $client);
-    return new AuthTokenFetcher($creds, $cacheConfig, $cache);
+    return new AuthTokenFetcher($creds, $cacheConfig, $cache, $client);
   }
 
   /**
