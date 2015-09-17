@@ -65,6 +65,9 @@ Once downloaded, store the path to this file in the
 putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 ```
 
+> PHP's `putenv` function is just one way to set an environment variable.
+> Consider using `.htaccess` or apache configuration files as well.
+
 #### Enable the API you want to use
 
 Before making your API call, you must be sure the API you're calling has been
