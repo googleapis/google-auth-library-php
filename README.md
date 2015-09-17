@@ -32,8 +32,11 @@ curl -sS https://getcomposer.org/installer | php
 Next, run the Composer command to install the latest stable version:
 
 ```bash
-composer.phar require google/auth
+composer.phar require google/auth:dev-master
 ```
+
+> As this project is in alpha, there is currently no "stable" composer version,
+> so specifying `dev-master` is required.
 
 ## Application Default Credentials
 
