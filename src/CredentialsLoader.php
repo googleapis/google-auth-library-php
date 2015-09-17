@@ -27,7 +27,7 @@ use GuzzleHttp\Exception\ServerException;
  * CredentialsLoader contains the behaviour used to locate and find default
  * credentials files on the file system.
  */
-class CredentialsLoader implements FetchAuthTokenInterface
+abstract class CredentialsLoader implements FetchAuthTokenInterface
 {
   const TOKEN_CREDENTIAL_URI = 'https://www.googleapis.com/oauth2/v3/token';
   const ENV_VAR = 'GOOGLE_APPLICATION_CREDENTIALS';
@@ -137,23 +137,6 @@ class CredentialsLoader implements FetchAuthTokenInterface
           'invalid value in the type field');
     }
   }
-
- /**
-  * Implements FetchAuthTokenInterface#fetchAuthToken.
-  */
-  public function fetchAuthToken(ClientInterface $client = null)
-  {
-    return $this->auth->fetchAuthToken($client);
-  }
-
- /**
-  * Implements FetchAuthTokenInterface#getCacheKey.
-  */
-  public function getCacheKey()
-  {
-    return $this->auth->getCacheKey();
-  }
-
 
   /**
    * export a callback function which updates runtime metadata

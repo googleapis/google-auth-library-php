@@ -91,4 +91,12 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
     $access_token = $this->auth->toJwt();
     return array('access_token' => $access_token);
   }
+
+  /**
+   * Implements FetchAuthTokenInterface#getCacheKey.
+   */
+  public function getCacheKey()
+  {
+    return $this->auth->getCacheKey();
+  }
 }
