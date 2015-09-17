@@ -75,6 +75,14 @@ class UserRefreshCredentials extends CredentialsLoader
     ]);
   }
 
+  /**
+   * Implements FetchAuthTokenInterface#fetchAuthToken.
+   */
+  public function fetchAuthToken(ClientInterface $client = null)
+  {
+    return $this->auth->fetchAuthToken($client);
+  }
+
  /**
   * Implements FetchAuthTokenInterface#getCacheKey.
   */
