@@ -21,45 +21,6 @@ use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\ClientInterface;
 
 /**
- * DefaultCredentials is used to preload the credentials file, to determine
- * which type of credentials should be loaded.
- */
-class DefaultCredentials extends CredentialsLoader
-{
-
-  /**
-   * Create a new Credentials instance.
-   *
-   * @param string|array scope the scope of the access request, expressed
-   *   either as an Array or as a space-delimited String.
-   *
-   * @param Stream jsonKeyStream read it to get the JSON credentials.
-   *
-   */
-  public static function makeCredentials($scope, Stream $jsonKeyStream)
-  {
-    $jsonKey = json_decode($jsonKeyStream->getContents(), true);
-    if (!array_key_exists('type', $jsonKey)) {
-      throw new \InvalidArgumentException(
-          'json key is missing the type field');
-    }
-
-    if ($jsonKey['type'] == 'service_account') {
-      return new ServiceAccountCredentials($scope, $jsonKey);
-
-    } else if ($jsonKey['type'] == 'authorized_user') {
-      return new UserRefreshCredentials($scope, $jsonKey);
-
-    } else {
-      throw new \InvalidArgumentException(
-          'invalid value in the type field');
-    }
-  }
-
-}
-
-
-/**
  * ApplicationDefaultCredentials obtains the default credentials for
  * authorizing a request to a Google service.
  *
@@ -130,11 +91,11 @@ class ApplicationDefaultCredentials
    */
   public static function getCredentials($scope = null, $client = null)
   {
-    $creds = DefaultCredentials::fromEnv($scope);
+    $creds = CredentialsLoader::fromEnv($scope);
     if (!is_null($creds)) {
       return $creds;
     }
-    $creds = DefaultCredentials::fromWellKnownFile($scope);
+    $creds = CredentialsLoader::fromWellKnownFile($scope);
     if (!is_null($creds)) {
       return $creds;
     }
