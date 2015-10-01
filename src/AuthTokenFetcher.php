@@ -56,6 +56,7 @@ class AuthTokenFetcher implements SubscriberInterface
    * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
    * @param array $cacheConfig configures the cache
    * @param CacheInterface $cache (optional) caches the token.
+   * @param ClientInterface $client (optional) http client to fetch the token.
    */
   public function __construct(FetchAuthTokenInterface $fetcher,
                               array $cacheConfig = null,
@@ -113,7 +114,7 @@ class AuthTokenFetcher implements SubscriberInterface
     //
     // TODO: correct caching; enable the cache to be cleared.
     $cached = $this->getCachedValue();
-    if (!is_null($cached)) {
+    if (!empty($cached)) {
       $request->setHeader('Authorization', 'Bearer ' . $cached);
       return;
     }

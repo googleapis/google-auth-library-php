@@ -558,7 +558,7 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     // Construct the uri object; return it if it is valid.
-    $result = $this->authorizationUri;
+    $result = clone $this->authorizationUri;
     if (is_string($result)) {
       $result = Url::fromString($this->getAuthorizationUri());
     }
