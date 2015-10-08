@@ -99,10 +99,13 @@ class ApplicationDefaultCredentials
     if (!is_null($creds)) {
       return $creds;
     }
-    if (!GCECredentials::onGce($client)) {
-      throw new \DomainException(self::notFound());
+    if (AppIdentityCredentials::onAppEngine()) {
+      return new AppIdentityCredentials($scope);
     }
-    return new GCECredentials();
+    if (GCECredentials::onGce($client)) {
+      return new GCECredentials();
+    }
+    throw new \DomainException(self::notFound());
   }
 
   private static function notFound()
