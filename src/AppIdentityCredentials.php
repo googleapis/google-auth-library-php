@@ -19,6 +19,12 @@ namespace Google\Auth;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Client;
+
+/**
+ * The AppIdentityService class is automatically defined on App Engine,
+ * so including this dependency is not necessary, and will result in a
+ * PHP fatal error in the App Engine environment.
+ */
 use google\appengine\api\app_identity\AppIdentityService;
 
 /**
@@ -70,7 +76,7 @@ class AppIdentityCredentials extends CredentialsLoader
   /**
    * Implements FetchAuthTokenInterface#fetchAuthToken.
    *
-   * Fetches the auth tokens using the AppIdentityService it is available.
+   * Fetches the auth tokens using the AppIdentityService if available.
    * As the AppIdentityService uses protobufs to fetch the access token,
    * the GuzzleHttp\ClientInterface instance passed in will not be used.
    *
@@ -83,10 +89,17 @@ class AppIdentityCredentials extends CredentialsLoader
    *   string(10) "1444339905"
    *  }
    */
-  public function fetchAuthToken(ClientInterface $client = null)
+  public function fetchAuthToken(ClientInterface $unusedClient = null)
   {
     if (!self::onAppEngine()) {
       return array();
+    }
+
+    if (!class_exists('google\appengine\api\app_identity\AppIdentityService')) {
+      throw new \Exception(
+        'This class must be run in App Engine, or you must include the AppIdentityService '
+        . 'mock class defined in tests/mocks/AppIdentityService.php'
+      );
     }
 
     $token = AppIdentityService::getAccessToken($this->scope);

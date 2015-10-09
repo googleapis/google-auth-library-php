@@ -23,6 +23,9 @@ use GuzzleHttp\Message\Response;
 use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\Subscriber\Mock;
 
+// included from tests\mocks\AppIdentityService.php
+use google\appengine\api\app_identity\AppIdentityService;
+
 class AppIdentityCredentialsOnAppEngineTest extends \PHPUnit_Framework_TestCase
 {
   public function testIsFalseByDefault()
@@ -52,5 +55,32 @@ class AppIdentityCredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCa
   {
     $g = new AppIdentityCredentials();
     $this->assertEquals(array(), $g->fetchAuthToken());
+  }
+
+  /* @expectedException */
+  public function testTHrowsExceptionIfClassDoesntExist()
+  {
+    $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
+    $g = new AppIdentityCredentials();
+  }
+
+  public function testReturnsExpectedToken()
+  {
+    // include the mock AppIdentityService class
+    require_once __DIR__ . '/mocks/AppIdentityService.php';
+
+    $wantedToken = [
+        'access_token' => '1/abdef1234567890',
+        'expires_in' => '57',
+        'token_type' => 'Bearer',
+    ];
+
+    AppIdentityService::$accessToken = $wantedToken;
+
+    // AppIdentityService::$accessToken = $wantedToken;
+    $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
+
+    $g = new AppIdentityCredentials();
+    $this->assertEquals($wantedToken, $g->fetchAuthToken());
   }
 }
