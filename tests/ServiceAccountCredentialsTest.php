@@ -71,6 +71,24 @@ class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
         $sa->getCacheKey()
     );
   }
+
+  public function testShouldBeTheSameAsOAuth2WithTheSameScopeWithSubAddedLater()
+  {
+    $testJson = createTestJson();
+    $scope = ['scope/1', 'scope/2'];
+    $sub = 'sub123';
+    $sa = new ServiceAccountCredentials(
+        $scope,
+        $testJson,
+        null);
+    $sa->setSub($sub);
+
+    $o = new OAuth2(['scope' => $scope]);
+    $this->assertSame(
+        $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
+        $sa->getCacheKey()
+    );
+  }
 }
 
 class SACConstructorTest extends \PHPUnit_Framework_TestCase
