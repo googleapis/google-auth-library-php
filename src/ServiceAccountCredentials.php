@@ -140,4 +140,13 @@ class ServiceAccountCredentials extends CredentialsLoader
     $jwtCreds = new ServiceAccountJwtAccessCredentials($credJson);
     return $jwtCreds->updateMetadata($metadata, $authUri, $client);
   }
+
+  /**
+   * @param string sub an email address account to impersonate, in situations when
+   *   the service account has been delegated domain wide access.
+   */
+  public function setSub($sub)
+  {
+    $this->auth->setSub($sub);
+  }
 }
