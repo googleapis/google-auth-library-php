@@ -58,7 +58,7 @@ class AppIdentityCredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCa
   }
 
   /* @expectedException */
-  public function testTHrowsExceptionIfClassDoesntExist()
+  public function testThrowsExceptionIfClassDoesntExist()
   {
     $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
     $g = new AppIdentityCredentials();
@@ -77,10 +77,33 @@ class AppIdentityCredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCa
 
     AppIdentityService::$accessToken = $wantedToken;
 
-    // AppIdentityService::$accessToken = $wantedToken;
     $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
 
     $g = new AppIdentityCredentials();
     $this->assertEquals($wantedToken, $g->fetchAuthToken());
+  }
+
+  public function testScopeIsAlwaysArray()
+  {
+    // include the mock AppIdentityService class
+    require_once __DIR__ . '/mocks/AppIdentityService.php';
+
+    $scope1 = ['scopeA', 'scopeB'];
+    $scope2 = 'scopeA scopeB';
+    $scope3 = 'scopeA';
+
+    $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
+
+    $g = new AppIdentityCredentials($scope1);
+    $g->fetchAuthToken();
+    $this->assertEquals($scope1, AppIdentityService::$scope);
+
+    $g = new AppIdentityCredentials($scope2);
+    $g->fetchAuthToken();
+    $this->assertEquals(explode(' ', $scope2), AppIdentityService::$scope);
+
+    $g = new AppIdentityCredentials($scope3);
+    $g->fetchAuthToken();
+    $this->assertEquals([$scope3], AppIdentityService::$scope);
   }
 }

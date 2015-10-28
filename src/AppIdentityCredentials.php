@@ -102,7 +102,10 @@ class AppIdentityCredentials extends CredentialsLoader
       );
     }
 
-    $token = AppIdentityService::getAccessToken($this->scope);
+    // AppIdentityService expects an array when multiple scopes are supplied
+    $scope = is_array($this->scope) ? $this->scope : explode(' ', $this->scope);
+
+    $token = AppIdentityService::getAccessToken($scope);
 
     return $token;
   }
