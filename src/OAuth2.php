@@ -23,7 +23,7 @@ use GuzzleHttp\Collection;
 use GuzzleHttp\Query;
 use GuzzleHttp\Message\ResponseInterface;
 use GuzzleHttp\Url;
-use JWT;
+use Firebase\JWT\JWT;
 
 /**
  * OAuth2 supports authentication by OAuth2 2-legged flows.

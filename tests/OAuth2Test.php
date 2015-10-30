@@ -23,7 +23,7 @@ use GuzzleHttp\Message\Response;
 use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\Subscriber\Mock;
 use GuzzleHttp\Url;
-use JWT;
+use Firebase\JWT\JWT;
 
 class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
 {
