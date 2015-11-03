@@ -8,8 +8,13 @@ php:
   - 5.6
   - hhvm
 
+env:
+  - FIREBASE_JWT_VERSION=2.0.0
+  - FIREBASE_JWT_VERSION=3.0.0
+
 before_script:
   - composer install
+  - composer require firebase/php-jwt:$FIREBASE_JWT_VERSION
 
 script:
   - vendor/bin/phpunit

@@ -23,7 +23,6 @@ use GuzzleHttp\Collection;
 use GuzzleHttp\Query;
 use GuzzleHttp\Message\ResponseInterface;
 use GuzzleHttp\Url;
-use Firebase\JWT\JWT;
 
 /**
  * OAuth2 supports authentication by OAuth2 2-legged flows.
@@ -306,7 +305,7 @@ class OAuth2 implements FetchAuthTokenInterface
       return null;
     }
 
-    $resp = JWT::decode($idToken, $publicKey, $allowed_algs);
+    $resp = $this->jwtDecode($idToken, $publicKey, $allowed_algs);
     if (!property_exists($resp, 'aud')) {
       throw new \DomainException('No audience found the id token');
     }
@@ -356,7 +355,7 @@ class OAuth2 implements FetchAuthTokenInterface
     if (!(is_null($this->getSub()))) {
       $assertion['sub'] = $this->getSub();
     }
-    return JWT::encode($assertion, $this->getSigningKey(),
+    return $this->jwtEncode($assertion, $this->getSigningKey(),
                        $this->getSigningAlgorithm());
   }
 
@@ -1070,6 +1069,25 @@ class OAuth2 implements FetchAuthTokenInterface
       throw new \InvalidArgumentException(
           'unexpected type for a uri: ' . get_class($uri));
     }
+  }
+
+  private function jwtDecode($idToken, $publicKey, $allowedAlgs)
+  {
+    if (class_exists('Firebase\JWT\JWT')) {
+      return \Firebase\JWT\JWT::decode($idToken, $publicKey, $allowedAlgs);
+    }
+
+    return \JWT::decode($idToken, $publicKey, $allowedAlgs);
+  }
+
+  private function jwtEncode($assertion, $signingKey, $signingAlgorithm)
+  {
+    if (class_exists('Firebase\JWT\JWT')) {
+      return \Firebase\JWT\JWT::encode($assertion, $signingKey,
+                       $signingAlgorithm);
+    }
+
+    return \JWT::encode($assertion, $signingKey, $signingAlgorithm);
   }
 
   /**

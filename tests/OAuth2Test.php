@@ -23,7 +23,6 @@ use GuzzleHttp\Message\Response;
 use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\Subscriber\Mock;
 use GuzzleHttp\Url;
-use Firebase\JWT\JWT;
 
 class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
 {
@@ -425,7 +424,7 @@ class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
     $testConfig = $this->signingMinimal;
     $o = new OAuth2($testConfig);
     $payload = $o->toJwt();
-    $roundTrip = JWT::decode($payload, $testConfig['signingKey'], array('HS256')) ;
+    $roundTrip = $this->jwtDecode($payload, $testConfig['signingKey'], array('HS256')) ;
     $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
     $this->assertEquals($roundTrip->aud, $testConfig['audience']);
     $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -440,10 +439,21 @@ class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
     $o->setSigningAlgorithm('RS256');
     $o->setSigningKey($privateKey);
     $payload = $o->toJwt();
-    $roundTrip = JWT::decode($payload, $publicKey, array('RS256')) ;
+    $roundTrip = $this->jwtDecode($payload, $publicKey, array('RS256')) ;
     $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
     $this->assertEquals($roundTrip->aud, $testConfig['audience']);
     $this->assertEquals($roundTrip->scope, $testConfig['scope']);
+  }
+
+  private function jwtDecode()
+  {
+    $args = func_get_args();
+    $class = 'JWT';
+    if (class_exists('Firebase\JWT\JWT')) {
+      $class = 'Firebase\JWT\JWT';
+    }
+
+    return call_user_func_array("$class::decode", $args);
   }
 }
 
@@ -757,7 +767,7 @@ class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
         'iat' => $now,
     ];
     $o = new OAuth2($testConfig);
-    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+    $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, 'RS256');
     $o->setIdToken($jwtIdToken);
     $o->verifyIdToken($this->publicKey);
   }
@@ -776,7 +786,7 @@ class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
         'iat' => $now,
     ];
     $o = new OAuth2($testConfig);
-    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+    $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, 'RS256');
     $o->setIdToken($jwtIdToken);
     $o->verifyIdToken($this->publicKey);
   }
@@ -793,9 +803,20 @@ class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
     ];
     $o = new OAuth2($testConfig);
     $alg = 'RS256';
-    $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, $alg);
+    $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, $alg);
     $o->setIdToken($jwtIdToken);
     $roundTrip = $o->verifyIdToken($this->publicKey, array($alg));
     $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
+  }
+
+  private function jwtEncode()
+  {
+    $args = func_get_args();
+    $class = 'JWT';
+    if (class_exists('Firebase\JWT\JWT')) {
+      $class = 'Firebase\JWT\JWT';
+    }
+
+    return call_user_func_array("$class::encode", $args);
   }
 }
