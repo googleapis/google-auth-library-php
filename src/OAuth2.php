@@ -17,12 +17,12 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Collection;
-use GuzzleHttp\Query;
-use GuzzleHttp\Message\ResponseInterface;
-use GuzzleHttp\Url;
+use Http\Client\HttpClient;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\UriFactoryDiscovery;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * OAuth2 supports authentication by OAuth2 2-legged flows.
@@ -262,27 +262,26 @@ class OAuth2 implements FetchAuthTokenInterface
    */
   public function __construct(array $config)
   {
-    $opts = Collection::fromConfig($config, [
+    $opts = array_merge([
         'expiry' => self::DEFAULT_EXPIRY_MINUTES,
-        'extensionParams' => []
-    ], []);
-    $this->setAuthorizationUri($opts->get('authorizationUri'));
-    $this->setRedirectUri($opts->get('redirectUri'));
-    $this->setTokenCredentialUri($opts->get('tokenCredentialUri'));
-    $this->setState($opts->get('state'));
-    $this->setUsername($opts->get('username'));
-    $this->setPassword($opts->get('password'));
-    $this->setClientId($opts->get('clientId'));
-    $this->setClientSecret($opts->get('clientSecret'));
-    $this->setIssuer($opts->get('issuer'));
-    $this->setPrincipal($opts->get('principal'));
-    $this->setSub($opts->get('sub'));
-    $this->setExpiry($opts->get('expiry'));
-    $this->setAudience($opts->get('audience'));
-    $this->setSigningKey($opts->get('signingKey'));
-    $this->setSigningAlgorithm($opts->get('signingAlgorithm'));
-    $this->setScope($opts->get('scope'));
-    $this->setExtensionParams($opts->get('extensionParams'));
+        'extensionParams' => [],
+        'authorizationUri' => null,
+        'redirectUri' => null,
+        'tokenCredentialUri' => null,
+        'state' => null,
+        'username' => null,
+        'password' => null,
+        'clientId' => null,
+        'clientSecret' => null,
+        'issuer' => null,
+        'principal' => null,
+        'sub' => null,
+        'audience' => null,
+        'signingKey' => null,
+        'signingAlgorithm' => null,
+        'scope' => null,
+    ], $config);
+
     $this->updateToken($config);
   }
 
@@ -320,7 +319,7 @@ class OAuth2 implements FetchAuthTokenInterface
   *
   * @param $config array optional configuration parameters
   */
-  public function toJwt(array $config = null)
+  public function toJwt(array $config = array())
   {
     if (is_null($this->getSigningKey())) {
       throw new \DomainException('No signing key available');
@@ -329,17 +328,16 @@ class OAuth2 implements FetchAuthTokenInterface
       throw new \DomainException('No signing algorithm specified');
     }
     $now = time();
-    if (is_null($config)) {
-      $config = [];
-    }
-    $opts = Collection::fromConfig($config, [
+
+    $config = array_merge([
         'skew' => self::DEFAULT_SKEW,
-    ], []);
+    ], $config);
+
     $assertion = [
         'iss' => $this->getIssuer(),
         'aud' => $this->getAudience(),
         'exp' => ($now + $this->getExpiry()),
-        'iat' => ($now - $opts->get('skew'))
+        'iat' => ($now - $config['skew'])
     ];
     foreach ($assertion as $k => $v) {
       if (is_null($v)) {
@@ -362,17 +360,17 @@ class OAuth2 implements FetchAuthTokenInterface
  /**
   * Generates a request for token credentials.
   *
-  * @param $client GuzzleHttp\ClientInterface the optional client.
-  * @return GuzzleHttp\RequestInterface the authorization Url.
+  * @param HttpClient $client the optional client.
+  * @return RequestInterface the authorization Url.
   */
-  public function generateCredentialsRequest(ClientInterface $client = null)
+  public function generateCredentialsRequest(HttpClient $client = null)
   {
     $uri = $this->getTokenCredentialUri();
     if (is_null($uri)) {
       throw new \DomainException('No token credential URI was set.');
     }
     if (is_null($client)) {
-      $client = new Client();
+      $client = HttpClientDiscovery::find();
     }
     $grantType = $this->getGrantType();
     $params = array('grant_type' => $grantType);
@@ -406,25 +404,27 @@ class OAuth2 implements FetchAuthTokenInterface
         }
         $params = array_merge($params, $this->getExtensionParams());
     }
-    $request = $client->createRequest('POST', $uri);
-    $request->addHeader('Cache-Control', 'no-store');
-    $request->addHeader('Content-Type', 'application/x-www-form-urlencoded');
-    $request->getBody()->replaceFields($params);
+    $request = RequestBuilder::getRequest('POST', $uri, [
+        'Cache-Control'=>'no-store',
+        'Content-Type'=>'application/x-www-form-urlencoded',
+    ], http_build_str($params));
+
+    //TODO make sure http_build_str is the correct function
     return $request;
   }
 
  /**
   * Fetchs the auth tokens based on the current state.
   *
-  * @param $client GuzzleHttp\ClientInterface the optional client.
+  * @param HttpClient $client the optional client.
   * @return array the response
   */
-  public function fetchAuthToken(ClientInterface $client = null)
+  public function fetchAuthToken(HttpClient $client = null)
   {
     if (is_null($client)) {
-      $client = new Client();
+      $client = HttpClientDiscovery::find();
     }
-    $resp = $client->send($this->generateCredentialsRequest($client));
+    $resp = $client->sendRequest($this->generateCredentialsRequest($client));
     $creds = $this->parseTokenResponse($resp);
     $this->updateToken($creds);
     return $creds;
@@ -451,7 +451,7 @@ class OAuth2 implements FetchAuthTokenInterface
  /**
   * Parses the fetched tokens.
   *
-  * @param $resp GuzzleHttp\Message\ReponseInterface the response.
+  * @param ResponseInterface $resp the response.
   * @return array the tokens parsed from the response body.
   */
   public function parseTokenResponse(ResponseInterface $resp)
@@ -465,7 +465,7 @@ class OAuth2 implements FetchAuthTokenInterface
     } else {
       // Assume it's JSON; if it's not there needs to be an exception, so
       // we use the json decode exception instead of adding a new one.
-      return $resp->json();
+      return json_decode($resp->getBody());
     }
   }
 
@@ -503,26 +503,33 @@ class OAuth2 implements FetchAuthTokenInterface
   */
   public function updateToken(array $config)
   {
-    $opts = Collection::fromConfig($config, [
+    $opts = array_merge([
+        'expires' => null,
+        'expires_at' => null,
+        'expires_in' => null,
+        'issued_at' => null,
+        'access_token' => null,
+        'id_token' => null,
+        'refresh_token' => null,
         'extensionParams' => []
-    ], []);
-    $this->setExpiresAt($opts->get('expires'));
-    $this->setExpiresAt($opts->get('expires_at'));
-    $this->setExpiresIn($opts->get('expires_in'));
+    ], $config);
+    $this->setExpiresAt($opts['expires']);
+    $this->setExpiresAt($opts['expires_at']);
+    $this->setExpiresIn($opts['expires_in']);
     // By default, the token is issued at `Time.now` when `expiresIn` is set,
     // but this can be used to supply a more precise time.
-    $this->setIssuedAt($opts->get('issued_at'));
+    $this->setIssuedAt($opts['issued_at']);
 
-    $this->setAccessToken($opts->get('access_token'));
-    $this->setIdToken($opts->get('id_token'));
-    $this->setRefreshToken($opts->get('refresh_token'));
+    $this->setAccessToken($opts['access_token']);
+    $this->setIdToken($opts['id_token']);
+    $this->setRefreshToken($opts['refresh_token']);
   }
 
   /**
    * Builds the authorization Uri that the user should be redirected to.
    *
-   * @param $config configuration options that customize the return url
-   * @return GuzzleHttp::Url the authorization Url.
+   * @param array $config configuration options that customize the return url
+   * @return UriInterface the authorization Url.
    */
   public function buildFullAuthorizationUri(array $config = null)
   {
@@ -538,20 +545,18 @@ class OAuth2 implements FetchAuthTokenInterface
         'state' => $this->state,
         'scope' => $this->getScope()
     ];
-    $params = new Collection($defaults);
-    if (!is_null($config)) {
-      $params = Collection::fromConfig($config, $defaults, []);
-    }
+
+    $params = array_merge($defaults, $config);
 
     // Validate the auth_params
-    if (is_null($params->get('client_id'))) {
+    if (is_null($params['client_id'])) {
       throw new \InvalidArgumentException(
           'missing the required client identifier');
     }
-    if (is_null($params->get('redirect_uri'))) {
+    if (is_null($params['redirect_uri'])) {
       throw new \InvalidArgumentException('missing the required redirect URI');
     }
-    if ($params->hasKey('prompt') && $params->hasKey('approval_prompt')) {
+    if ($params['prompt'] && $params['approval_prompt']) {
       throw new \InvalidArgumentException(
           'prompt and approval_prompt are mutually exclusive');
     }
@@ -559,9 +564,11 @@ class OAuth2 implements FetchAuthTokenInterface
     // Construct the uri object; return it if it is valid.
     $result = clone $this->authorizationUri;
     if (is_string($result)) {
-      $result = Url::fromString($this->getAuthorizationUri());
+      $result = $this->createUriObject($this->getAuthorizationUri());
     }
-    $result->getQuery()->merge($params);
+    //TODO get existing query params and merge
+    $result = $result->withQuery(http_build_query($params));
+
     if ($result->getScheme() != 'https') {
       throw new \InvalidArgumentException(
           'Authorization endpoint must be protected by TLS');
@@ -698,7 +705,7 @@ class OAuth2 implements FetchAuthTokenInterface
     if (in_array($gt, self::$knownGrantTypes)) {
       $this->grantType = $gt;
     } else {
-      $this->grantType = Url::fromString($gt);
+      $this->grantType = $this->createUriObject($gt);
     }
   }
 
@@ -1055,15 +1062,21 @@ class OAuth2 implements FetchAuthTokenInterface
     $this->refreshToken = $refreshToken;
   }
 
+  private function createUriObject($uri)
+  {
+    return UriFactoryDiscovery::find()->createUri($uri);
+  }
+
   private function coerceUri($uri)
   {
     if (is_null($uri)) {
       return null;
     } else if (is_string($uri)) {
-      return Url::fromString($uri);
+      return $this->createUriObject($uri);
     } else if (is_array($uri)) {
+      //TODO support this
       return Url::buildUrl($uri);
-    } else if (get_class($uri) == 'GuzzleHttp\Url') {
+    } else if ($uri instanceof UriInterface) {
       return $uri;
     } else {
       throw new \InvalidArgumentException(
@@ -1094,7 +1107,7 @@ class OAuth2 implements FetchAuthTokenInterface
    * Determines if the URI is absolute based on its scheme and host or path
    * (RFC 3986)
    */
-  private function isAbsoluteUri($u)
+  private function isAbsoluteUri(UriInterface $u)
   {
     return $u->getScheme() && ($u->getHost() || $u->getPath());
   }
