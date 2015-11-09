@@ -17,11 +17,9 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Stream;
+use Http\Client\HttpClient;
 
 /**
  * CredentialsLoader contains the behaviour used to locate and find default
@@ -75,7 +73,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
       $cause = "file " . $path . " does not exist";
       throw new \DomainException(self::unableToReadEnv($cause));
     }
-    $keyStream = Stream::factory(file_get_contents($path));
+    $keyStream = Psr7\stream_for(file_get_contents($path));
     return static::makeCredentials($scope, $keyStream);
   }
 
@@ -105,7 +103,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
     if (!file_exists($path)) {
       return null;
     }
-    $keyStream = Stream::factory(file_get_contents($path));
+    $keyStream = Psr7\stream_for(file_get_contents($path));
     return static::makeCredentials($scope, $keyStream);
   }
 
@@ -157,10 +155,11 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
    *
    * @return array updated metadata hashmap
    */
-  public function updateMetadata($metadata,
-                                 $authUri = null,
-                                 ClientInterface $client = null)
-  {
+  public function updateMetadata(
+      $metadata,
+      $authUri = null,
+      HttpClient $client = null
+  ) {
     $result = $this->fetchAuthToken($client);
     if (!isset($result['access_token'])) {
       return $metadata;

@@ -17,7 +17,6 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\Collection;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
 use GuzzleHttp\Event\BeforeEvent;
@@ -42,7 +41,10 @@ class Simple implements SubscriberInterface
    */
   public function __construct(array $config)
   {
-    $this->config = Collection::fromConfig($config, [], ['key']);
+    if (!isset($config['key'])) {
+      throw new \InvalidArgumentException('"key" is a required config value');
+    }
+    $this->config = $config;
   }
 
   /* Implements SubscriberInterface */

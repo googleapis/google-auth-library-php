@@ -17,8 +17,7 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\ClientInterface;
+use Http\Client\HttpClient;
 
 /**
  * ApplicationDefaultCredentials obtains the default credentials for
@@ -60,7 +59,7 @@ class ApplicationDefaultCredentials
    *
    * @param string|array scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
-   * @param $client GuzzleHttp\ClientInterface optional client.
+   * @param $client HttpClient optional client.
    * @param cacheConfig configuration for the cache when it's present
    * @param object $cache an implementation of CacheInterface
    *
@@ -68,7 +67,7 @@ class ApplicationDefaultCredentials
    */
   public static function getFetcher(
       $scope = null,
-      ClientInterface $client = null,
+      HttpClient $client = null,
       array $cacheConfig = null,
       CacheInterface $cache = null)
   {
@@ -86,10 +85,10 @@ class ApplicationDefaultCredentials
    * @param string|array scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
    *
-   * @param $client GuzzleHttp\ClientInterface optional client.
+   * @param $client HttpClient optional client.
    * @throws DomainException if no implementation can be obtained.
    */
-  public static function getCredentials($scope = null, $client = null)
+  public static function getCredentials($scope = null, HttpClient $client = null)
   {
     $creds = CredentialsLoader::fromEnv($scope);
     if (!is_null($creds)) {

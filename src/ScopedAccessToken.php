@@ -70,10 +70,10 @@ class ScopedAccessToken implements SubscriberInterface
 
     if (!is_null($cache)) {
       $this->cache = $cache;
-      $this->cacheConfig = Collection::fromConfig($cacheConfig, [
+      $this->cacheConfig = array_merge([
           'lifetime' => self::DEFAULT_CACHE_LIFETIME,
           'prefix'   => ''
-      ], []);
+      ], $cacheConfig);
     }
   }
 

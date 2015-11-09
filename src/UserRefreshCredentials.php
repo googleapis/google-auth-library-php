@@ -17,11 +17,8 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Psr7;
+use Http\Client\HttpClient;
 
 /**
  * Authenticates requests using User Refresh credentials.
@@ -51,7 +48,7 @@ class UserRefreshCredentials extends CredentialsLoader
                               $jsonKeyPath = null)
   {
     if (is_null($jsonKey)) {
-      $jsonKeyStream = Stream::factory(file_get_contents($jsonKeyPath));
+      $jsonKeyStream = Psr7\stream_for(file_get_contents($jsonKeyPath));
       $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     }
     if (!array_key_exists('client_id', $jsonKey)) {
@@ -78,7 +75,7 @@ class UserRefreshCredentials extends CredentialsLoader
   /**
    * Implements FetchAuthTokenInterface#fetchAuthToken.
    */
-  public function fetchAuthToken(ClientInterface $client = null)
+  public function fetchAuthToken(HttpClient $client = null)
   {
     return $this->auth->fetchAuthToken($client);
   }

@@ -21,7 +21,7 @@ use GuzzleHttp\Collection;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
 use GuzzleHttp\Event\BeforeEvent;
-use GuzzleHttp\ClientInterface;
+use Http\Client\HttpClient;
 
 /**
  * AuthTokenFetcher is a Guzzle Subscriber that adds an Authorization header
@@ -41,7 +41,7 @@ class AuthTokenFetcher implements SubscriberInterface
   /** @var An implementation of CacheInterface */
   private $cache;
 
-  /** @var An implementation of ClientInterface */
+  /** @var An implementation of HttpClient */
   private $client;
 
   /** @var An implementation of FetchAuthTokenInterface */
@@ -56,21 +56,22 @@ class AuthTokenFetcher implements SubscriberInterface
    * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
    * @param array $cacheConfig configures the cache
    * @param CacheInterface $cache (optional) caches the token.
-   * @param ClientInterface $client (optional) http client to fetch the token.
+   * @param HttpClient $client (optional) http client to fetch the token.
    */
-  public function __construct(FetchAuthTokenInterface $fetcher,
-                              array $cacheConfig = null,
-                              CacheInterface $cache = null,
-                              ClientInterface $client = null)
-  {
+  public function __construct(
+      FetchAuthTokenInterface $fetcher,
+      array $cacheConfig = null,
+      CacheInterface $cache = null,
+      HttpClient $client = null
+  ) {
     $this->fetcher = $fetcher;
     $this->client = $client;
     if (!is_null($cache)) {
       $this->cache = $cache;
-      $this->cacheConfig = Collection::fromConfig($cacheConfig, [
+      $this->cacheConfig = array_merge([
           'lifetime' => self::DEFAULT_CACHE_LIFETIME,
           'prefix'   => ''
-      ], []);
+      ], $cacheConfig);
     }
   }
 
