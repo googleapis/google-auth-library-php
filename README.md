@@ -99,11 +99,14 @@ $fetcher = ApplicationDefaultCredentials::getFetcher($scopes);
 // create the HTTP client with the auth listener
 $client = HttpFactory::getClient($fetcher);
 
-// make the request
-$response = $client->get('https://www.googleapis.com/drive/v2/files');
+// create a PSR7 request
+$request = HttpFactory::getRequest('GET', 'https://www.googleapis.com/drive/v2/files');
+
+// send the request and get a PSR7 response back
+$response = $client->sendRequest($request);
 
 // show the result!
-print_r($response->json());
+print_r(json_decode($resp->getBody(), true););
 ```
 
 ## What about auth in google-apis-php-client?
