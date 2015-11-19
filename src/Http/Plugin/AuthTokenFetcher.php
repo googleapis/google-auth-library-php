@@ -22,8 +22,6 @@ use Google\Auth\CacheInterface;
 use Google\Auth\FetchAuthTokenInterface;
 use Http\Client\HttpClient;
 use Http\Client\Plugin\Plugin;
-use Http\Client\Plugin\PluginClient;
-use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\RequestInterface;
 
 /**

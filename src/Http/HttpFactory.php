@@ -16,15 +16,15 @@
  * limitations under the License.
  */
 
-
 namespace Google\Auth\Http;
 
+use Http\Client\Plugin\Plugin;
 use Http\Client\Plugin\PluginClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
 
 /**
- * A factory to get clients or plugin clients.
+ * A factory to get clients and requests.
  *
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
@@ -35,25 +35,33 @@ class HttpFactory
      *
      * @return \Http\Client\HttpClient
      */
-    static function getClient(array $plugins = array())
+    public static function getClient($plugins = null)
     {
-        if (!empty($plugins)) {
-            return new PluginClient(HttpClientDiscovery::find(), [$plugins]);
+        if ($plugins === null) {
+            return HttpClientDiscovery::find();
         }
 
-        return HttpClientDiscovery::find();
+        if ($plugins instanceof Plugin) {
+            $plugins = [$plugins];
+        }
+
+        if (is_array($plugins)) {
+            return new PluginClient(HttpClientDiscovery::find(), $plugins);
+        }
+
+        throw new \LogicException(sprintf('First argument of HttpFactory::getClient must be null, Http\Client\Plugin\Plugin or an array of Http\Client\Plugin\Plugin. You gave a "%s"', gettype($plugins)));
     }
 
     /**
      * @param string $method
      * @param string $uri
-     * @param array $headers
-     * @param null $body
+     * @param array  $headers
+     * @param null   $body
      * @param string $protocolVersion
      *
      * @return \Psr\Http\Message\RequestInterface
      */
-    static function getRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
+    public static function getRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
     {
         return MessageFactoryDiscovery::find()->createRequest($method, $uri, $headers, $body, $protocolVersion);
     }

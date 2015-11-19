@@ -84,7 +84,7 @@ As long as you update the environment variable below to point to *your* JSON
 credentials file, the following code should output a list of your Drive files.
 
 ```php
-use GuzzleHttp\Client;
+use Google\Http\HttpFactory;
 use Google\Auth\ApplicationDefaultCredentials;
 
 // specify the path to your application credentials
@@ -93,18 +93,14 @@ putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 // define the scopes for your API call
 $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
 
-// create the HTTP client
-$client = new Client([
-  'base_url' => 'https://www.googleapis.com',
-  'defaults' => ['auth' => 'google_auth']  // authorize all requests
-]);
-
 // attach this library's auth listener
 $fetcher = ApplicationDefaultCredentials::getFetcher($scopes);
-$client->getEmitter()->attach($fetcher);
+
+// create the HTTP client with the auth listener
+$client = HttpFactory::getClient($fetcher);
 
 // make the request
-$response = $client->get('drive/v2/files');
+$response = $client->get('https://www.googleapis.com/drive/v2/files');
 
 // show the result!
 print_r($response->json());
