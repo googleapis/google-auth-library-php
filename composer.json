@@ -9,14 +9,15 @@
     "php": ">=5.4",
     "firebase/php-jwt": "~2.0|~3.0",
     "guzzlehttp/psr7": "~1.2",
-    "php-http/adapter-implementation": "@dev",
-    "php-http/discovery": "^0.2.0"
+    "php-http/client-implementation": "@dev",
+    "php-http/discovery": "^0.2",
+    "php-http/plugins":"dev-master",
+    "php-http/utils":"dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "3.7.*",
-    "php-http/guzzle6-adapter": "~0.1",
+    "php-http/guzzle6-adapter": "dev-master",
     "php-http/httplug": "dev-master",
-    "php-http/message-factory": "dev-master",
     "phplint/phplint": "0.0.1"
   },
   "autoload": {

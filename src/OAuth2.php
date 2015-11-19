@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Google\Auth\Http\HttpFactory;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\UriFactoryDiscovery;
@@ -370,7 +371,8 @@ class OAuth2 implements FetchAuthTokenInterface
       throw new \DomainException('No token credential URI was set.');
     }
     if (is_null($client)) {
-      $client = HttpClientDiscovery::find();
+      //TODO why do we need a client here?
+      $client = HttpFactory::getClient();
     }
     $grantType = $this->getGrantType();
     $params = array('grant_type' => $grantType);
@@ -404,7 +406,7 @@ class OAuth2 implements FetchAuthTokenInterface
         }
         $params = array_merge($params, $this->getExtensionParams());
     }
-    $request = RequestBuilder::getRequest('POST', $uri, [
+    $request = HttpFactory::getRequest('POST', $uri, [
         'Cache-Control'=>'no-store',
         'Content-Type'=>'application/x-www-form-urlencoded',
     ], http_build_str($params));
@@ -422,7 +424,7 @@ class OAuth2 implements FetchAuthTokenInterface
   public function fetchAuthToken(HttpClient $client = null)
   {
     if (is_null($client)) {
-      $client = HttpClientDiscovery::find();
+      $client = HttpFactory::getClient();
     }
     $resp = $client->sendRequest($this->generateCredentialsRequest($client));
     $creds = $this->parseTokenResponse($resp);

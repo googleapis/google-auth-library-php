@@ -1,0 +1,60 @@
+<?php
+
+/*
+ * Copyright 2015 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+namespace Google\Auth\Http;
+
+use Http\Client\Plugin\PluginClient;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
+
+/**
+ * A factory to get clients or plugin clients.
+ *
+ * @author Tobias Nyholm <tobias.nyholm@gmail.com>
+ */
+class HttpFactory
+{
+    /**
+     * @param array $plugins
+     *
+     * @return \Http\Client\HttpClient
+     */
+    static function getClient(array $plugins = array())
+    {
+        if (!empty($plugins)) {
+            return new PluginClient(HttpClientDiscovery::find(), [$plugins]);
+        }
+
+        return HttpClientDiscovery::find();
+    }
+
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array $headers
+     * @param null $body
+     * @param string $protocolVersion
+     *
+     * @return \Psr\Http\Message\RequestInterface
+     */
+    static function getRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
+    {
+        return MessageFactoryDiscovery::find()->createRequest($method, $uri, $headers, $body, $protocolVersion);
+    }
+}

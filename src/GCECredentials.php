@@ -17,9 +17,9 @@
 
 namespace Google\Auth;
 
+use Google\Auth\Http\HttpFactory;
 use Http\Client\Exception;
 use Http\Client\HttpClient;
-use Http\Discovery\HttpClientDiscovery;
 
 /**
  * GCECredentials supports authorization on Google Compute Engine.
@@ -90,7 +90,7 @@ class GCECredentials extends CredentialsLoader
   public static function onGce(HttpClient $client = null)
   {
     if (is_null($client)) {
-      $client = HttpClientDiscovery::find();
+      $client = HttpFactory::getClient();
     }
     $checkUri = 'http://' . self::METADATA_IP;
     try {
@@ -104,7 +104,7 @@ class GCECredentials extends CredentialsLoader
       // "unlikely".
 
       //TODO re-add timeout
-      $resp = $client->sendRequest(RequestBuilder::getRequest('GET', $checkUri));
+      $resp = $client->sendRequest(HttpFactory::getRequest('GET', $checkUri));
       return $resp->getHeaderLine(self::FLAVOR_HEADER) == 'Google';
     } catch (Exception $e) {
       return false;
@@ -123,7 +123,7 @@ class GCECredentials extends CredentialsLoader
   public function fetchAuthToken(HttpClient $client = null)
   {
     if (is_null($client)) {
-      $client = HttpClientDiscovery::find();
+      $client = HttpFactory::getClient();
     }
     if (!$this->hasCheckedOnGce) {
       $this->isOnGce = self::onGce($client);
@@ -131,7 +131,7 @@ class GCECredentials extends CredentialsLoader
     if (!$this->isOnGce) {
       return array();  // return an empty array with no access token
     }
-    $resp = $client->sendRequest(RequestBuilder::getRequest('GET', self::getTokenUri(), [self::FLAVOR_HEADER => 'Google']));
+    $resp = $client->sendRequest(HttpFactory::getRequest('GET', self::getTokenUri(), [self::FLAVOR_HEADER => 'Google']));
     return json_decode($resp->getBody(), true);
   }
 

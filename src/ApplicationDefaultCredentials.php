@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Google\Auth\Http\Plugin\AuthTokenFetcher;
 use Http\Client\HttpClient;
 
 /**
@@ -63,7 +64,7 @@ class ApplicationDefaultCredentials
    * @param cacheConfig configuration for the cache when it's present
    * @param object $cache an implementation of CacheInterface
    *
-   * @throws DomainException if no implementation can be obtained.
+   * @throws \DomainException if no implementation can be obtained.
    */
   public static function getFetcher(
       $scope = null,
@@ -86,7 +87,7 @@ class ApplicationDefaultCredentials
    *   either as an Array or as a space-delimited String.
    *
    * @param $client HttpClient optional client.
-   * @throws DomainException if no implementation can be obtained.
+   * @throws \DomainException if no implementation can be obtained.
    */
   public static function getCredentials($scope = null, HttpClient $client = null)
   {
