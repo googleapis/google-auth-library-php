@@ -361,19 +361,15 @@ class OAuth2 implements FetchAuthTokenInterface
  /**
   * Generates a request for token credentials.
   *
-  * @param HttpClient $client the optional client.
   * @return RequestInterface the authorization Url.
   */
-  public function generateCredentialsRequest(HttpClient $client = null)
+  public function generateCredentialsRequest()
   {
     $uri = $this->getTokenCredentialUri();
     if (is_null($uri)) {
       throw new \DomainException('No token credential URI was set.');
     }
-    if (is_null($client)) {
-      //TODO why do we need a client here?
-      $client = HttpFactory::getClient();
-    }
+
     $grantType = $this->getGrantType();
     $params = array('grant_type' => $grantType);
     switch($grantType) {
@@ -411,7 +407,7 @@ class OAuth2 implements FetchAuthTokenInterface
         'Content-Type'=>'application/x-www-form-urlencoded',
     ], http_build_str($params));
 
-    //TODO make sure http_build_str is the correct function
+    //FIXME make sure http_build_str is the correct function
     return $request;
   }
 
@@ -426,9 +422,10 @@ class OAuth2 implements FetchAuthTokenInterface
     if (is_null($client)) {
       $client = HttpFactory::getClient();
     }
-    $resp = $client->sendRequest($this->generateCredentialsRequest($client));
+    $resp = $client->sendRequest($this->generateCredentialsRequest());
     $creds = $this->parseTokenResponse($resp);
     $this->updateToken($creds);
+
     return $creds;
   }
 
@@ -568,7 +565,7 @@ class OAuth2 implements FetchAuthTokenInterface
     if (is_string($result)) {
       $result = $this->createUriObject($this->getAuthorizationUri());
     }
-    //TODO get existing query params and merge
+    //FIXME get existing query params and merge
     $result = $result->withQuery(http_build_query($params));
 
     if ($result->getScheme() != 'https') {
@@ -1076,7 +1073,7 @@ class OAuth2 implements FetchAuthTokenInterface
     } else if (is_string($uri)) {
       return $this->createUriObject($uri);
     } else if (is_array($uri)) {
-      //TODO support this
+      //FIXME support this
       return Url::buildUrl($uri);
     } else if ($uri instanceof UriInterface) {
       return $uri;

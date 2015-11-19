@@ -103,7 +103,7 @@ class GCECredentials extends CredentialsLoader
       // the metadata resolution was particularly slow. The latter case is
       // "unlikely".
 
-      //TODO re-add timeout
+      //FIXME re-add timeout
       $resp = $client->sendRequest(HttpFactory::getRequest('GET', $checkUri));
       return $resp->getHeaderLine(self::FLAVOR_HEADER) == 'Google';
     } catch (Exception $e) {
