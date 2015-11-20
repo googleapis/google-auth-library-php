@@ -17,7 +17,7 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\Psr7;
+use Google\Auth\Http\HttpFactory;
 use Http\Client\HttpClient;
 
 /**
@@ -48,7 +48,7 @@ class UserRefreshCredentials extends CredentialsLoader
                               $jsonKeyPath = null)
   {
     if (is_null($jsonKey)) {
-      $jsonKeyStream = Psr7\stream_for(file_get_contents($jsonKeyPath));
+      $jsonKeyStream = HttpFactory::getStream(file_get_contents($jsonKeyPath));
       $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     }
     if (!array_key_exists('client_id', $jsonKey)) {

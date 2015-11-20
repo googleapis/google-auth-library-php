@@ -22,6 +22,8 @@ use Http\Client\Plugin\Plugin;
 use Http\Client\Plugin\PluginClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
+use Http\Discovery\StreamFactoryDiscovery;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * A factory to get clients and requests.
@@ -49,14 +51,19 @@ class HttpFactory
             return new PluginClient(HttpClientDiscovery::find(), $plugins);
         }
 
-        throw new \LogicException(sprintf('First argument of HttpFactory::getClient must be null, Http\Client\Plugin\Plugin or an array of Http\Client\Plugin\Plugin. You gave a "%s"', gettype($plugins)));
+        throw new \LogicException(
+            sprintf(
+                'First argument of HttpFactory::getClient must be null, Http\Client\Plugin\Plugin or an array of Http\Client\Plugin\Plugin. You gave a "%s"',
+                gettype($plugins)
+            )
+        );
     }
 
     /**
      * @param string $method
      * @param string $uri
-     * @param array  $headers
-     * @param null   $body
+     * @param array $headers
+     * @param null $body
      * @param string $protocolVersion
      *
      * @return \Psr\Http\Message\RequestInterface
@@ -64,5 +71,20 @@ class HttpFactory
     public static function getRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
     {
         return MessageFactoryDiscovery::find()->createRequest($method, $uri, $headers, $body, $protocolVersion);
+    }
+
+
+    /**
+     * Creates a new PSR-7 stream.
+     *
+     * @param string|resource|StreamInterface|null $body
+     *
+     * @return StreamInterface
+     *
+     * @throws \InvalidArgumentException If the stream body is invalid.
+     */
+    public static function getStream($body)
+    {
+        return StreamFactoryDiscovery::find()->createStream($body);
     }
 }

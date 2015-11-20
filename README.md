@@ -106,7 +106,7 @@ $request = HttpFactory::getRequest('GET', 'https://www.googleapis.com/drive/v2/f
 $response = $client->sendRequest($request);
 
 // show the result!
-print_r(json_decode($resp->getBody(), true););
+print_r(json_decode($resp->getBody(), true));
 ```
 
 ## What about auth in google-apis-php-client?
