@@ -23,6 +23,7 @@ use Http\Client\Plugin\PluginClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Discovery\StreamFactoryDiscovery;
+use Http\Discovery\UriFactoryDiscovery;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -86,5 +87,10 @@ class HttpFactory
     public static function getStream($body)
     {
         return StreamFactoryDiscovery::find()->createStream($body);
+    }
+
+    public static function getUri($uri)
+    {
+        return UriFactoryDiscovery::find()->createUri($uri);
     }
 }

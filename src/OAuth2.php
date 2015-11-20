@@ -405,9 +405,8 @@ class OAuth2 implements FetchAuthTokenInterface
     $request = HttpFactory::getRequest('POST', $uri, [
         'Cache-Control'=>'no-store',
         'Content-Type'=>'application/x-www-form-urlencoded',
-    ], http_build_str($params));
+    ], http_build_query($params));
 
-    //FIXME make sure http_build_str is the correct function
     return $request;
   }
 
@@ -563,7 +562,7 @@ class OAuth2 implements FetchAuthTokenInterface
     // Construct the uri object; return it if it is valid.
     $result = clone $this->authorizationUri;
     if (is_string($result)) {
-      $result = $this->createUriObject($this->getAuthorizationUri());
+      $result = HttpFactory::getUri($this->getAuthorizationUri());
     }
     //FIXME get existing query params and merge
     $result = $result->withQuery(http_build_query($params));
@@ -704,7 +703,7 @@ class OAuth2 implements FetchAuthTokenInterface
     if (in_array($gt, self::$knownGrantTypes)) {
       $this->grantType = $gt;
     } else {
-      $this->grantType = $this->createUriObject($gt);
+      $this->grantType = HttpFactory::getUri($gt);
     }
   }
 
@@ -1071,10 +1070,9 @@ class OAuth2 implements FetchAuthTokenInterface
     if (is_null($uri)) {
       return null;
     } else if (is_string($uri)) {
-      return $this->createUriObject($uri);
+      return HttpFactory::getUri($uri);
     } else if (is_array($uri)) {
-      //FIXME support this
-      return Url::buildUrl($uri);
+      return HttpFactory::getUri($uri);
     } else if ($uri instanceof UriInterface) {
       return $uri;
     } else {
