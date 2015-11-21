@@ -54,6 +54,7 @@ class OAuth2 implements FetchAuthTokenInterface
                                          'client_credentials');
 
   /**
+   * @var UriInterface
    * - authorizationUri
    *   The authorization server's HTTP endpoint capable of
    *   authenticating the end-user and obtaining authorization.
@@ -560,14 +561,18 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     // Construct the uri object; return it if it is valid.
+    $existingQueryParams = [];
     $result = clone $this->authorizationUri;
-    if (is_string($result)) {
-      $result = HttpFactory::getUri($this->getAuthorizationUri());
+    if ($result instanceof UriInterface) {
+      // Get existing query string to an array
+      parse_str($result->getQuery(), $existingQueryParams);
     }
-    //FIXME get existing query params and merge
+
+    // Merge existing query parameters with the new ones
+    $params = array_merge($existingQueryParams, $params);
     $result = $result->withQuery(http_build_query($params));
 
-    if ($result->getScheme() != 'https') {
+    if ($result->getScheme() !== 'https') {
       throw new \InvalidArgumentException(
           'Authorization endpoint must be protected by TLS');
     }
@@ -1065,6 +1070,11 @@ class OAuth2 implements FetchAuthTokenInterface
     return UriFactoryDiscovery::find()->createUri($uri);
   }
 
+  /**
+   * @param mixed $uri
+   *
+   * @return null|UriInterface
+   */
   private function coerceUri($uri)
   {
     if (is_null($uri)) {
