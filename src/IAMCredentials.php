@@ -17,7 +17,7 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\ClientInterface;
+use Http\Client\HttpClient;
 
 /**
  * Authenticates requests using IAM credentials
@@ -72,7 +72,7 @@ class IAMCredentials
    */
   public function updateMetadata($metadata,
                                  $unusedAuthUri = null,
-                                 ClientInterface $unusedClient = null)
+                                 HttpClient $unusedClient = null)
   {
     $metadata_copy = $metadata;
     $metadata_copy[self::SELECTOR_KEY] = $this->selector;

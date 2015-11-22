@@ -17,11 +17,7 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
+use Http\Client\HttpClient;
 
 /**
  * Authenticates requests using Google's Service Account credentials via
@@ -66,10 +62,11 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
    *
    * @return array updated metadata hashmap
    */
-  public function updateMetadata($metadata,
-                                 $authUri = null,
-                                 ClientInterface $client = null)
-  {
+  public function updateMetadata(
+      $metadata,
+      $authUri = null,
+      HttpClient $client = null
+  ) {
     if (empty($authUri)) {
       return $metadata;
     }
@@ -81,7 +78,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
  /**
   * Implements FetchAuthTokenInterface#fetchAuthToken.
   */
-  public function fetchAuthToken(ClientInterface $unusedClient = null)
+  public function fetchAuthToken(HttpClient $unusedClient = null)
   {
     $audience = $this->auth->getAudience();
     if (empty($audience)) {

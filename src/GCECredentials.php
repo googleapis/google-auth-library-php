@@ -17,12 +17,10 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Exception\ServerException;
+use Http\Client\Exception;
+use Http\Client\HttpClient;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
 
 /**
  * GCECredentials supports authorization on Google Compute Engine.
@@ -87,13 +85,13 @@ class GCECredentials extends CredentialsLoader
    * host.
    * If $client is not specified a new GuzzleHttp\Client instance is used.
    *
-   * @param $client GuzzleHttp\ClientInterface optional client.
+   * @param $client HttpClient optional client.
    * @return true if this a GCEInstance false otherwise
    */
-  public static function onGce(ClientInterface $client = null)
+  public static function onGce(HttpClient $client = null)
   {
     if (is_null($client)) {
-      $client = new Client();
+      $client = HttpClientDiscovery::find();
     }
     $checkUri = 'http://' . self::METADATA_IP;
     try {
@@ -105,13 +103,11 @@ class GCECredentials extends CredentialsLoader
       // could lead to false negatives in the event that we are on GCE, but
       // the metadata resolution was particularly slow. The latter case is
       // "unlikely".
-      $resp = $client->get($checkUri, ['timeout' => 0.3]);
-      return $resp->getHeader(self::FLAVOR_HEADER) == 'Google';
-    } catch (ClientException $e) {
-      return false;
-    } catch (ServerException $e) {
-      return false;
-    } catch (RequestException $e) {
+
+      //FIXME re-add timeout
+      $resp = $client->sendRequest(MessageFactoryDiscovery::find()->createRequest('GET', $checkUri));
+      return $resp->getHeaderLine(self::FLAVOR_HEADER) == 'Google';
+    } catch (Exception $e) {
       return false;
     }
   }
@@ -122,13 +118,13 @@ class GCECredentials extends CredentialsLoader
    * Fetches the auth tokens from the GCE metadata host if it is available.
    * If $client is not specified a new GuzzleHttp\Client instance is used.
    *
-   * @param $client GuzzleHttp\ClientInterface optional client.
+   * @param $client HttpClient optional client.
    * @return array the response
    */
-  public function fetchAuthToken(ClientInterface $client = null)
+  public function fetchAuthToken(HttpClient $client = null)
   {
     if (is_null($client)) {
-      $client = new Client();
+      $client = HttpClientDiscovery::find();
     }
     if (!$this->hasCheckedOnGce) {
       $this->isOnGce = self::onGce($client);
@@ -136,9 +132,8 @@ class GCECredentials extends CredentialsLoader
     if (!$this->isOnGce) {
       return array();  // return an empty array with no access token
     }
-    $resp = $client->get(self::getTokenUri(),
-                         [ 'headers' => [self::FLAVOR_HEADER => 'Google']]);
-    return $resp->json();
+    $resp = $client->sendRequest(MessageFactoryDiscovery::find()->createRequest('GET', self::getTokenUri(), [self::FLAVOR_HEADER => 'Google']));
+    return json_decode($resp->getBody(), true);
   }
 
   /**

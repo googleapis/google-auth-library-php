@@ -17,11 +17,8 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
+use Http\Client\HttpClient;
+use Http\Discovery\StreamFactoryDiscovery;
 
 /**
  * ServiceAccountCredentials supports authorization using a Google service
@@ -39,7 +36,7 @@ use GuzzleHttp\Exception\ServerException;
  *   use Google\Auth\ServiceAccountCredentials;
  *   use Google\Auth\AuthTokenFetcher;
  *
- *   $stream = Stream::factory(get_file_contents(<my_key_file>));
+ *   $stream = Psr7\stream_for(get_file_contents(<my_key_file>));
  *   $sa = new ServiceAccountCredentials(
  *       'https://www.googleapis.com/auth/taskqueue',
  *        $stream);
@@ -71,7 +68,7 @@ class ServiceAccountCredentials extends CredentialsLoader
                               $jsonKeyPath = null, $sub = null)
   {
     if (is_null($jsonKey)) {
-      $jsonKeyStream = Stream::factory(file_get_contents($jsonKeyPath));
+      $jsonKeyStream = StreamFactoryDiscovery::find()->createStream(file_get_contents($jsonKeyPath));
       $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     }
     if (!array_key_exists('client_email', $jsonKey)) {
@@ -96,7 +93,7 @@ class ServiceAccountCredentials extends CredentialsLoader
   /**
    * Implements FetchAuthTokenInterface#fetchAuthToken.
    */
-  public function fetchAuthToken(ClientInterface $client = null)
+  public function fetchAuthToken(HttpClient $client = null)
   {
     return $this->auth->fetchAuthToken($client);
   }
@@ -122,10 +119,11 @@ class ServiceAccountCredentials extends CredentialsLoader
    *
    * @return array updated metadata hashmap
    */
-  public function updateMetadata($metadata,
-                                 $authUri = null,
-                                 ClientInterface $client = null)
-  {
+  public function updateMetadata(
+      $metadata,
+      $authUri = null,
+      HttpClient $client = null
+  ) {
     // scope exists. use oauth implementation
     $scope = $this->auth->getScope();
     if (!is_null($scope)) {

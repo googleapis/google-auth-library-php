@@ -17,15 +17,13 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-
 /**
  * The AppIdentityService class is automatically defined on App Engine,
  * so including this dependency is not necessary, and will result in a
  * PHP fatal error in the App Engine environment.
  */
 use google\appengine\api\app_identity\AppIdentityService;
+use Http\Client\HttpClient;
 
 /**
  * AppIdentityCredentials supports authorization on Google App Engine.
@@ -80,7 +78,7 @@ class AppIdentityCredentials extends CredentialsLoader
    * As the AppIdentityService uses protobufs to fetch the access token,
    * the GuzzleHttp\ClientInterface instance passed in will not be used.
    *
-   * @param $client GuzzleHttp\ClientInterface optional client.
+   * @param $client HttpClient optional client.
    * @return array the auth metadata:
    *  array(2) {
    *   ["access_token"]=>
@@ -89,7 +87,7 @@ class AppIdentityCredentials extends CredentialsLoader
    *   string(10) "1444339905"
    *  }
    */
-  public function fetchAuthToken(ClientInterface $unusedClient = null)
+  public function fetchAuthToken(HttpClient $httpClient = null)
   {
     if (!self::onAppEngine()) {
       return array();
