@@ -17,8 +17,10 @@
 
 namespace Google\Auth;
 
-use Google\Auth\Http\HttpFactory;
 use Http\Client\HttpClient;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
+use Http\Discovery\UriFactoryDiscovery;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -401,7 +403,7 @@ class OAuth2 implements FetchAuthTokenInterface
         }
         $params = array_merge($params, $this->getExtensionParams());
     }
-    $request = HttpFactory::getRequest('POST', $uri, [
+    $request = MessageFactoryDiscovery::find()->createRequest('POST', $uri, [
         'Cache-Control'=>'no-store',
         'Content-Type'=>'application/x-www-form-urlencoded',
     ], http_build_query($params));
@@ -418,7 +420,7 @@ class OAuth2 implements FetchAuthTokenInterface
   public function fetchAuthToken(HttpClient $client = null)
   {
     if (is_null($client)) {
-      $client = HttpFactory::getClient();
+      $client = HttpClientDiscovery::find();
     }
     $resp = $client->sendRequest($this->generateCredentialsRequest());
     $creds = $this->parseTokenResponse($resp);
@@ -706,7 +708,7 @@ class OAuth2 implements FetchAuthTokenInterface
     if (in_array($gt, self::$knownGrantTypes)) {
       $this->grantType = $gt;
     } else {
-      $this->grantType = HttpFactory::getUri($gt);
+      $this->grantType = UriFactoryDiscovery::find($gt);
     }
   }
 
@@ -1073,9 +1075,9 @@ class OAuth2 implements FetchAuthTokenInterface
     if (is_null($uri)) {
       return null;
     } else if (is_string($uri)) {
-      return HttpFactory::getUri($uri);
+      return UriFactoryDiscovery::find($uri);
     } else if (is_array($uri)) {
-      return HttpFactory::getUri($uri);
+      return UriFactoryDiscovery::find($uri);
     } else if ($uri instanceof UriInterface) {
       return $uri;
     } else {

@@ -17,8 +17,8 @@
 
 namespace Google\Auth;
 
-use Google\Auth\Http\HttpFactory;
 use Http\Client\HttpClient;
+use Http\Discovery\StreamFactoryDiscovery;
 
 /**
  * CredentialsLoader contains the behaviour used to locate and find default
@@ -72,7 +72,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
       $cause = "file " . $path . " does not exist";
       throw new \DomainException(self::unableToReadEnv($cause));
     }
-    $keyStream = HttpFactory::getStream(file_get_contents($path));
+    $keyStream = StreamFactoryDiscovery::find()->createStream(file_get_contents($path));
     return static::makeCredentials($scope, $keyStream);
   }
 
@@ -102,7 +102,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
     if (!file_exists($path)) {
       return null;
     }
-    $keyStream = HttpFactory::getStream(file_get_contents($path));
+    $keyStream = StreamFactoryDiscovery::find()->createStream(file_get_contents($path));
     return static::makeCredentials($scope, $keyStream);
   }
 

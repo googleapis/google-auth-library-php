@@ -17,9 +17,8 @@
 
 namespace Google\Auth;
 
-
-use Google\Auth\Http\HttpFactory;
 use Http\Client\HttpClient;
+use Http\Discovery\StreamFactoryDiscovery;
 
 /**
  * ServiceAccountCredentials supports authorization using a Google service
@@ -69,7 +68,7 @@ class ServiceAccountCredentials extends CredentialsLoader
                               $jsonKeyPath = null, $sub = null)
   {
     if (is_null($jsonKey)) {
-      $jsonKeyStream = HttpFactory::getStream(file_get_contents($jsonKeyPath));
+      $jsonKeyStream = StreamFactoryDiscovery::find()->createStream(file_get_contents($jsonKeyPath));
       $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     }
     if (!array_key_exists('client_email', $jsonKey)) {

@@ -17,8 +17,8 @@
 
 namespace Google\Auth;
 
-use Google\Auth\Http\HttpFactory;
 use Http\Client\HttpClient;
+use Http\Discovery\StreamFactoryDiscovery;
 
 /**
  * Authenticates requests using User Refresh credentials.
@@ -48,7 +48,7 @@ class UserRefreshCredentials extends CredentialsLoader
                               $jsonKeyPath = null)
   {
     if (is_null($jsonKey)) {
-      $jsonKeyStream = HttpFactory::getStream(file_get_contents($jsonKeyPath));
+      $jsonKeyStream = StreamFactoryDiscovery::find()->createStream(file_get_contents($jsonKeyPath));
       $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     }
     if (!array_key_exists('client_id', $jsonKey)) {
