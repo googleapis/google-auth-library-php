@@ -89,6 +89,11 @@ class HttpFactory
         return StreamFactoryDiscovery::find()->createStream($body);
     }
 
+    /**
+     * @param mixed $uri
+     *
+     * @return \Psr\Http\Message\UriInterface
+     */
     public static function getUri($uri)
     {
         return UriFactoryDiscovery::find()->createUri($uri);

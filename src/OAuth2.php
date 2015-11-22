@@ -19,8 +19,6 @@ namespace Google\Auth;
 
 use Google\Auth\Http\HttpFactory;
 use Http\Client\HttpClient;
-use Http\Discovery\HttpClientDiscovery;
-use Http\Discovery\UriFactoryDiscovery;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -1063,11 +1061,6 @@ class OAuth2 implements FetchAuthTokenInterface
   public function setRefreshToken($refreshToken)
   {
     $this->refreshToken = $refreshToken;
-  }
-
-  private function createUriObject($uri)
-  {
-    return UriFactoryDiscovery::find()->createUri($uri);
   }
 
   /**
