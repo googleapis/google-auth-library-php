@@ -22,7 +22,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
-class ScopedAccessTokenMiddlewareTest extends \PHPUnit_Framework_TestCase
+class ScopedAccessTokenMiddlewareTest extends BaseTest
 {
   const TEST_SCOPE = 'https://www.googleapis.com/auth/cloud-taskqueue';
 
@@ -31,9 +31,7 @@ class ScopedAccessTokenMiddlewareTest extends \PHPUnit_Framework_TestCase
 
   protected function setUp()
   {
-    if (!class_exists('GuzzleHttp\HandlerStack')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle6();
 
     $this->mockCache =
       $this

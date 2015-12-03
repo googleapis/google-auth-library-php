@@ -22,13 +22,11 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
 
-class SimpleSubscriberTest extends \PHPUnit_Framework_TestCase
+class SimpleSubscriberTest extends BaseTest
 {
   protected function setUp()
   {
-    if (!interface_exists('GuzzleHttp\Event\SubscriberInterface')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle5();
   }
 
   /**

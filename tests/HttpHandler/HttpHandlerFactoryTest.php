@@ -19,13 +19,11 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 
-class HttpHandlerFactoryTest extends \PHPUnit_Framework_TestCase
+class HttpHandlerFactoryTest extends BaseTest
 {
   public function testBuildsGuzzle5Handler()
   {
-    if (!interface_exists('GuzzleHttp\Event\SubscriberInterface')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle5();
 
     $handler = HttpHandlerFactory::build();
     $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle5HttpHandler', $handler);
@@ -33,9 +31,7 @@ class HttpHandlerFactoryTest extends \PHPUnit_Framework_TestCase
 
   public function testBuildsGuzzle6Handler()
   {
-    if (!class_exists('GuzzleHttp\HandlerStack')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle6();
 
     $handler = HttpHandlerFactory::build();
     $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle6HttpHandler', $handler);

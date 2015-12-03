@@ -59,7 +59,7 @@ class Guzzle5HttpHandler
 
     return new Response(
       $response->getStatusCode(),
-      $response->getHeaders(),
+      $response->getHeaders() ?: [],
       $response->getBody(),
       $response->getProtocolVersion(),
       $response->getReasonPhrase()
