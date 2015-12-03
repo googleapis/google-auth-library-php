@@ -21,13 +21,11 @@ use Google\Auth\HttpHandler\Guzzle5HttpHandler;
 use GuzzleHttp\Client;
 use GuzzleHttp\Message\Response;
 
-class Guzzle5HttpHandlerTest extends \PHPUnit_Framework_TestCase
+class Guzzle5HttpHandlerTest extends BaseTest
 {
   public function setUp()
   {
-    if (!interface_exists('GuzzleHttp\Event\SubscriberInterface')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle5();
 
     $this->mockPsr7Request =
       $this

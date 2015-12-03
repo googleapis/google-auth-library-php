@@ -20,10 +20,7 @@ namespace Google\Auth\Tests;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
-use Google\Auth\HttpHandler\Guzzle6HttpHandler;
-use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
-use GuzzleHttp\Psr7\Response;
 
 class ADCGetTest extends \PHPUnit_Framework_TestCase
 {
@@ -180,15 +177,13 @@ class ADCGetMiddlewareTest extends \PHPUnit_Framework_TestCase
 }
 
 // @todo consider a way to DRY this and above class up
-class ADCGetSubscriberTest extends \PHPUnit_Framework_TestCase
+class ADCGetSubscriberTest extends BaseTest
 {
   private $originalHome;
 
   protected function setUp()
   {
-    if (!interface_exists('GuzzleHttp\Event\SubscriberInterface')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle5();
 
     $this->originalHome = getenv('HOME');
   }
