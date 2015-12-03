@@ -17,44 +17,52 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\AuthTokenFetcher;
-use GuzzleHttp\Client;
-use GuzzleHttp\Event\BeforeEvent;
-use GuzzleHttp\Transaction;
+use Google\Auth\Middleware\AuthTokenMiddleware;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
-class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
+class AuthTokenMiddlewareTest extends \PHPUnit_Framework_TestCase
 {
   private $mockFetcher;
   private $mockCache;
+  private $mockRequest;
 
   protected function setUp()
   {
+    if (!class_exists('GuzzleHttp\HandlerStack')) {
+      $this->markTestSkipped();
+    }
+
     $this->mockFetcher =
-        $this
-        ->getMockBuilder('Google\Auth\FetchAuthTokenInterface')
-        ->getMock();
+      $this
+      ->getMockBuilder('Google\Auth\FetchAuthTokenInterface')
+      ->getMock();
     $this->mockCache =
-        $this
-        ->getMockBuilder('Google\Auth\CacheInterface')
-        ->getMock();
+      $this
+      ->getMockBuilder('Google\Auth\CacheInterface')
+      ->getMock();
+    $this->mockRequest =
+      $this
+      ->getMockBuilder('GuzzleHttp\Psr7\Request')
+      ->disableOriginalConstructor()
+      ->getMock();
   }
-
-  public function testSubscribesToEvents()
-  {
-    $a = new AuthTokenFetcher($this->mockFetcher, array());
-    $this->assertArrayHasKey('before', $a->getEvents());
-  }
-
 
   public function testOnlyTouchesWhenAuthConfigScoped()
   {
-    $s = new AuthTokenFetcher($this->mockFetcher, array());
-    $client = new Client();
-    $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'not_google_auth']);
-    $before = new BeforeEvent(new Transaction($client, $request));
-    $s->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'), '');
+    $this->mockFetcher
+      ->expects($this->any())
+      ->method('fetchAuthToken')
+      ->will($this->returnValue([]));
+    $this->mockRequest
+      ->expects($this->never())
+      ->method('withHeader');
+
+    $middleware = new AuthTokenMiddleware($this->mockFetcher);
+    $mock = new MockHandler([new Response(200)]);
+    $callable = $middleware($mock);
+    $callable($this->mockRequest, ['auth' => 'not_google_auth']);
   }
 
   public function testAddsTheTokenAsAnAuthorizationHeader()
@@ -64,16 +72,17 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->expects($this->once())
         ->method('fetchAuthToken')
         ->will($this->returnValue($authResult));
+    $this->mockRequest
+      ->expects($this->once())
+      ->method('withHeader')
+      ->with('Authorization', 'Bearer ' . $authResult['access_token'])
+      ->will($this->returnValue($this->mockRequest));
 
     // Run the test.
-    $a = new AuthTokenFetcher($this->mockFetcher, array());
-    $client = new Client();
-    $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'google_auth']);
-    $before = new BeforeEvent(new Transaction($client, $request));
-    $a->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'),
-                      'Bearer 1/abcdef1234567890');
+    $middleware = new AuthTokenMiddleware($this->mockFetcher);
+    $mock = new MockHandler([new Response(200)]);
+    $callable = $middleware($mock);
+    $callable($this->mockRequest, ['auth' => 'google_auth']);
   }
 
   public function testDoesNotAddAnAuthorizationHeaderOnNoAccessToken()
@@ -83,15 +92,17 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->expects($this->once())
         ->method('fetchAuthToken')
         ->will($this->returnValue($authResult));
+    $this->mockRequest
+      ->expects($this->once())
+      ->method('withHeader')
+      ->with('Authorization', 'Bearer ')
+      ->will($this->returnValue($this->mockRequest));
 
     // Run the test.
-    $a = new AuthTokenFetcher($this->mockFetcher, array());
-    $client = new Client();
-    $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'google_auth']);
-    $before = new BeforeEvent(new Transaction($client, $request));
-    $a->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'), '');
+    $middleware = new AuthTokenMiddleware($this->mockFetcher);
+    $mock = new MockHandler([new Response(200)]);
+    $callable = $middleware($mock);
+    $callable($this->mockRequest, ['auth' => 'google_auth']);
   }
 
   public function testUsesCachedAuthToken()
@@ -102,7 +113,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->expects($this->once())
         ->method('get')
         ->with($this->equalTo($cacheKey),
-               $this->equalTo(AuthTokenFetcher::DEFAULT_CACHE_LIFETIME))
+               $this->equalTo(AuthTokenMiddleware::DEFAULT_CACHE_LIFETIME))
         ->will($this->returnValue($cachedValue));
     $this->mockFetcher
         ->expects($this->never())
@@ -111,16 +122,17 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->expects($this->any())
         ->method('getCacheKey')
         ->will($this->returnValue($cacheKey));
+    $this->mockRequest
+      ->expects($this->once())
+      ->method('withHeader')
+      ->with('Authorization', 'Bearer ' . $cachedValue)
+      ->will($this->returnValue($this->mockRequest));
 
     // Run the test.
-    $a = new AuthTokenFetcher($this->mockFetcher, array(), $this->mockCache);
-    $client = new Client();
-    $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'google_auth']);
-    $before = new BeforeEvent(new Transaction($client, $request));
-    $a->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'),
-                      'Bearer 2/abcdef1234567890');
+    $middleware = new AuthTokenMiddleware($this->mockFetcher, [], $this->mockCache);
+    $mock = new MockHandler([new Response(200)]);
+    $callable = $middleware($mock);
+    $callable($this->mockRequest, ['auth' => 'google_auth']);
   }
 
   public function testGetsCachedAuthTokenUsingCacheOptions()
@@ -142,19 +154,21 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->expects($this->any())
         ->method('getCacheKey')
         ->will($this->returnValue($cacheKey));
+    $this->mockRequest
+      ->expects($this->once())
+      ->method('withHeader')
+      ->with('Authorization', 'Bearer ' . $cachedValue)
+      ->will($this->returnValue($this->mockRequest));
 
-    // Run the test
-    $a = new AuthTokenFetcher($this->mockFetcher,
-                              array('prefix' => $prefix,
-                                    'lifetime' => $lifetime),
-                              $this->mockCache);
-    $client = new Client();
-    $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'google_auth']);
-    $before = new BeforeEvent(new Transaction($client, $request));
-    $a->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'),
-                      'Bearer 2/abcdef1234567890');
+    // Run the test.
+    $middleware = new AuthTokenMiddleware(
+      $this->mockFetcher,
+      ['prefix' => $prefix, 'lifetime' => $lifetime],
+      $this->mockCache
+    );
+    $mock = new MockHandler([new Response(200)]);
+    $callable = $middleware($mock);
+    $callable($this->mockRequest, ['auth' => 'google_auth']);
   }
 
   public function testShouldSaveValueInCacheWithSpecifiedPrefix()
@@ -181,18 +195,20 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->expects($this->once())
         ->method('fetchAuthToken')
         ->will($this->returnValue($authResult));
+    $this->mockRequest
+      ->expects($this->once())
+      ->method('withHeader')
+      ->with('Authorization', 'Bearer ' . $token)
+      ->will($this->returnValue($this->mockRequest));
 
-    // Run the test
-    $a = new AuthTokenFetcher($this->mockFetcher,
-                              array('prefix' => $prefix),
-                              $this->mockCache);
-
-    $client = new Client();
-    $request = $client->createRequest('GET', 'http://testing.org',
-                                      ['auth' => 'google_auth']);
-    $before = new BeforeEvent(new Transaction($client, $request));
-    $a->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'),
-                      'Bearer 1/abcdef1234567890');
+    // Run the test.
+    $middleware = new AuthTokenMiddleware(
+      $this->mockFetcher,
+      ['prefix' => $prefix],
+      $this->mockCache
+    );
+    $mock = new MockHandler([new Response(200)]);
+    $callable = $middleware($mock);
+    $callable($this->mockRequest, ['auth' => 'google_auth']);
   }
 }

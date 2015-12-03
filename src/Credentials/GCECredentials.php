@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
+namespace Google\Auth\Credentials;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
+use Google\Auth\CredentialsLoader;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Psr7\Request;
 
 /**
  * GCECredentials supports authorization on Google Compute Engine.
@@ -30,17 +30,22 @@ use GuzzleHttp\Exception\ServerException;
  * It can be used to authorize requests using the AuthTokenFetcher, but will
  * only succeed if being run on GCE:
  *
+ *   use Google\Auth\Credentials\GCECredentials;
+ *   use Google\Auth\Middleware\AuthTokenMiddleware;
  *   use GuzzleHttp\Client;
- *   use Google\Auth\GCECredentials;
- *   use Google\Auth\AuthTokenFetcher;
+ *   use GuzzleHttp\HandlerStack;
  *
  *   $gce = new GCECredentials();
- *   $scoped = new AuthTokenFetcher($gce);
+ *   $middleware = new AuthTokenMiddleware($gce);
+ *   $stack = HandlerStack::create();
+ *   $stack->push($middleware);
+ *
  *   $client = new Client([
- *      'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
- *      'defaults' => ['auth' => 'google_auth']
+ *      'handler' => $stack,
+ *      'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
+ *      'auth' => 'google_auth'
  *   ]);
- *   $client->getEmitter()->attach($gce);
+ *
  *   $res = $client->get('myproject/taskqueues/myqueue');
  */
 class GCECredentials extends CredentialsLoader
@@ -85,15 +90,15 @@ class GCECredentials extends CredentialsLoader
   /**
    * Determines if this a GCE instance, by accessing the expected metadata
    * host.
-   * If $client is not specified a new GuzzleHttp\Client instance is used.
+   * If $httpHandler is not specified a the default HttpHandler is used.
    *
-   * @param $client GuzzleHttp\ClientInterface optional client.
+   * @param callable $httpHandler callback which delivers psr7 request
    * @return true if this a GCEInstance false otherwise
    */
-  public static function onGce(ClientInterface $client = null)
+  public static function onGce(callable $httpHandler = null)
   {
-    if (is_null($client)) {
-      $client = new Client();
+    if (is_null($httpHandler)) {
+      $httpHandler = HttpHandlerFactory::build();
     }
     $checkUri = 'http://' . self::METADATA_IP;
     try {
@@ -105,8 +110,11 @@ class GCECredentials extends CredentialsLoader
       // could lead to false negatives in the event that we are on GCE, but
       // the metadata resolution was particularly slow. The latter case is
       // "unlikely".
-      $resp = $client->get($checkUri, ['timeout' => 0.3]);
-      return $resp->getHeader(self::FLAVOR_HEADER) == 'Google';
+      $resp = $httpHandler(
+        new Request('GET', $checkUri),
+        ['timeout' => 0.3]
+      );
+      return $resp->getHeaderLine(self::FLAVOR_HEADER) == 'Google';
     } catch (ClientException $e) {
       return false;
     } catch (ServerException $e) {
@@ -120,25 +128,31 @@ class GCECredentials extends CredentialsLoader
    * Implements FetchAuthTokenInterface#fetchAuthToken.
    *
    * Fetches the auth tokens from the GCE metadata host if it is available.
-   * If $client is not specified a new GuzzleHttp\Client instance is used.
+   * If $httpHandler is not specified a the default HttpHandler is used.
    *
-   * @param $client GuzzleHttp\ClientInterface optional client.
+   * @param callable $httpHandler callback which delivers psr7 request
    * @return array the response
    */
-  public function fetchAuthToken(ClientInterface $client = null)
+  public function fetchAuthToken(callable $httpHandler = null)
   {
-    if (is_null($client)) {
-      $client = new Client();
+    if (is_null($httpHandler)) {
+      $httpHandler = HttpHandlerFactory::build();
     }
     if (!$this->hasCheckedOnGce) {
-      $this->isOnGce = self::onGce($client);
+      $this->isOnGce = self::onGce($httpHandler);
     }
     if (!$this->isOnGce) {
       return array();  // return an empty array with no access token
     }
-    $resp = $client->get(self::getTokenUri(),
-                         [ 'headers' => [self::FLAVOR_HEADER => 'Google']]);
-    return $resp->json();
+    $resp = $httpHandler(
+      new Request(
+        'GET',
+        self::getTokenUri(),
+        [self::FLAVOR_HEADER => 'Google']
+      )
+    );
+    $body = (string) $resp->getBody();
+    return json_decode($body, true);
   }
 
   /**

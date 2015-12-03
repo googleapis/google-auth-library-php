@@ -17,15 +17,15 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\OAuth2;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\CredentialsLoader;
-use Google\Auth\ServiceAccountCredentials;
-use Google\Auth\ServiceAccountJwtAccessCredentials;
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
+use Google\Auth\HttpHandler\Guzzle6HttpHandler;
+use Google\Auth\OAuth2;
 use GuzzleHttp\Client;
-use GuzzleHttp\Message\Response;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Subscriber\Mock;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Response;
 
 // Creates a standard JSON auth object for testing.
 function createTestJson()
@@ -139,13 +139,13 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
    */
   public function testFailsToInitalizeFromANonExistentFile()
   {
-    $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+    $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
     new ServiceAccountCredentials('scope/1', null, $keyFile);
   }
 
   public function testInitalizeFromAFile()
   {
-    $keyFile = __DIR__ . '/fixtures' . '/private.json';
+    $keyFile = __DIR__ . '/../fixtures' . '/private.json';
     $this->assertNotNull(
         new ServiceAccountCredentials('scope/1', null, $keyFile)
     );
@@ -169,14 +169,14 @@ class SACFromEnvTest extends \PHPUnit_Framework_TestCase
    */
   public function testFailsIfEnvSpecifiesNonExistentFile()
   {
-    $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+    $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
     putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
     ApplicationDefaultCredentials::getCredentials('a scope');
   }
 
   public function testSucceedIfFileExists()
   {
-    $keyFile = __DIR__ . '/fixtures' . '/private.json';
+    $keyFile = __DIR__ . '/../fixtures' . '/private.json';
     putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
     $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
   }
@@ -200,7 +200,7 @@ class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
 
   public function testIsNullIfFileDoesNotExist()
   {
-    putenv('HOME=' . __DIR__ . '/not_exists_fixtures');
+    putenv('HOME=' . __DIR__ . '/../not_exists_fixtures');
     $this->assertNull(
         ServiceAccountCredentials::fromWellKnownFile('a scope')
     );
@@ -208,7 +208,7 @@ class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
 
   public function testSucceedIfFileIsPresent()
   {
-    putenv('HOME=' . __DIR__ . '/fixtures');
+    putenv('HOME=' . __DIR__ . '/../fixtures');
     $this->assertNotNull(
         ApplicationDefaultCredentials::getCredentials('a scope')
     );
@@ -222,7 +222,7 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
   public function setUp()
   {
     $this->privateKey =
-        file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+        file_get_contents(__DIR__ . '/../fixtures' . '/private.pem');
   }
 
   private function createTestJson()
@@ -239,13 +239,14 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
   {
     $testJson = $this->createTestJson();
     $scope = ['scope/1', 'scope/2'];
-    $client = new Client();
-    $client->getEmitter()->attach(new Mock([new Response(400)]));
+    $httpHandler = getHandler([
+      buildResponse(400)
+    ]);
     $sa = new ServiceAccountCredentials(
         $scope,
         $testJson
     );
-    $sa->fetchAuthToken($client);
+    $sa->fetchAuthToken($httpHandler);
   }
 
   /**
@@ -255,13 +256,14 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
   {
     $testJson = $this->createTestJson();
     $scope = ['scope/1', 'scope/2'];
-    $client = new Client();
-    $client->getEmitter()->attach(new Mock([new Response(500)]));
+    $httpHandler = getHandler([
+      buildResponse(500)
+    ]);
     $sa = new ServiceAccountCredentials(
         $scope,
         $testJson
     );
-    $sa->fetchAuthToken($client);
+    $sa->fetchAuthToken($httpHandler);
   }
 
   public function testCanFetchCredsOK()
@@ -269,14 +271,14 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $testJson = $this->createTestJson();
     $testJsonText = json_encode($testJson);
     $scope = ['scope/1', 'scope/2'];
-    $client = new Client();
-    $testResponse = new Response(200, [], Stream::factory($testJsonText));
-    $client->getEmitter()->attach(new Mock([$testResponse]));
+    $httpHandler = getHandler([
+      buildResponse(200, [], Psr7\stream_for($testJsonText))
+    ]);
     $sa = new ServiceAccountCredentials(
         $scope,
         $testJson
     );
-    $tokens = $sa->fetchAuthToken($client);
+    $tokens = $sa->fetchAuthToken($httpHandler);
     $this->assertEquals($testJson, $tokens);
   }
 
@@ -284,11 +286,11 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
   {
     $testJson = $this->createTestJson();
     $scope = ['scope/1', 'scope/2'];
-    $client = new Client();
     $access_token = 'accessToken123';
     $responseText = json_encode(array('access_token' => $access_token));
-    $testResponse = new Response(200, [], Stream::factory($responseText));
-    $client->getEmitter()->attach(new Mock([$testResponse]));
+    $httpHandler = getHandler([
+      buildResponse(200, [], Psr7\stream_for($responseText))
+    ]);
     $sa = new ServiceAccountCredentials(
         $scope,
         $testJson
@@ -299,7 +301,7 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $actual_metadata = call_user_func($update_metadata,
                                $metadata = array('foo' => 'bar'),
                                $authUri = null,
-                               $client);
+                               $httpHandler);
     $this->assertTrue(
         isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
     $this->assertEquals(
@@ -315,7 +317,7 @@ class SACJwtAccessTest extends \PHPUnit_Framework_TestCase
   public function setUp()
   {
     $this->privateKey =
-        file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+        file_get_contents(__DIR__ . '/../fixtures' . '/private.pem');
   }
 
   private function createTestJson()
@@ -367,9 +369,10 @@ class SACJwtAccessTest extends \PHPUnit_Framework_TestCase
     );
     $this->assertNotNull($sa);
 
-    $client = new Client();
-    $client->getEmitter()->attach(new Mock([new Response(200)]));
-    $result = $sa->fetchAuthToken($client); // authUri has not been set
+    $httpHandler = getHandler([
+      buildResponse(200)
+    ]);
+    $result = $sa->fetchAuthToken($httpHandler); // authUri has not been set
     $this->assertNull($result);
   }
 
@@ -442,7 +445,7 @@ class SACJwtAccessComboTest extends \PHPUnit_Framework_TestCase
   public function setUp()
   {
     $this->privateKey =
-        file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+        file_get_contents(__DIR__ . '/../fixtures' . '/private.pem');
   }
 
   private function createTestJson()
@@ -458,8 +461,6 @@ class SACJwtAccessComboTest extends \PHPUnit_Framework_TestCase
     // no scope, jwt access should be used, no outbound
     // call should be made
     $scope = null;
-    $client = new Client();
-    $client->getEmitter()->attach(new Mock([new Response(500)]));
     $sa = new ServiceAccountCredentials(
         $scope,
         $testJson
@@ -490,8 +491,6 @@ class SACJwtAccessComboTest extends \PHPUnit_Framework_TestCase
     // no scope, jwt access should be used, no outbound
     // call should be made
     $scope = null;
-    $client = new Client();
-    $client->getEmitter()->attach(new Mock([new Response(500)]));
     $sa = new ServiceAccountCredentials(
         $scope,
         $testJson
