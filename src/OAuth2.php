@@ -415,7 +415,7 @@ class OAuth2 implements FetchAuthTokenInterface
         }
         unset($params['grant_type']);
         if (!is_null($grantType)) {
-          $params['grant_type'] = strval($grantType);
+          $params['grant_type'] = $grantType;
         }
         $params = array_merge($params, $this->getExtensionParams());
     }
@@ -484,9 +484,12 @@ class OAuth2 implements FetchAuthTokenInterface
       parse_str($body, $res);
       return $res;
     } else {
-      // Assume it's JSON; if it's not there needs to be an exception, so
-      // we use the json decode exception instead of adding a new one.
-      return json_decode($body, true);
+      // Assume it's JSON; if it's not throw an exception
+      if (null === $res = json_decode($body, true)) {
+        throw new \Exception('Invalid JSON response');
+      }
+
+      return $res;
     }
   }
 
@@ -568,8 +571,6 @@ class OAuth2 implements FetchAuthTokenInterface
         'redirect_uri' => $this->redirectUri,
         'state' => $this->state,
         'scope' => $this->getScope(),
-        'prompt' => null,
-        'approval_prompt' => null
     ], $config);
 
     // Validate the auth_params
@@ -580,7 +581,7 @@ class OAuth2 implements FetchAuthTokenInterface
     if (is_null($params['redirect_uri'])) {
       throw new \InvalidArgumentException('missing the required redirect URI');
     }
-    if ($params['prompt'] && $params['approval_prompt']) {
+    if (!empty($params['prompt']) && !empty($params['approval_prompt'])) {
       throw new \InvalidArgumentException(
           'prompt and approval_prompt are mutually exclusive');
     }
@@ -653,12 +654,11 @@ class OAuth2 implements FetchAuthTokenInterface
       $this->redirectUri = null;
       return;
     }
-    $u = $this->coerceUri($uri);
-    if (!$this->isAbsoluteUri($u)) {
+    if (!$this->isAbsoluteUri($uri)) {
       throw new \InvalidArgumentException(
           'Redirect URI must be absolute');
     }
-    $this->redirectUri = $u;
+    $this->redirectUri = (string) $uri;
   }
 
   /**
@@ -729,7 +729,12 @@ class OAuth2 implements FetchAuthTokenInterface
     if (in_array($gt, self::$knownGrantTypes)) {
       $this->grantType = $gt;
     } else {
-      $this->grantType = Psr7\uri_for($gt);
+      // validate URI
+      if (!$this->isAbsoluteUri($gt)) {
+        throw new \InvalidArgumentException(
+          'invalid grant type');
+      }
+      $this->grantType = (string) $gt;
     }
   }
 
@@ -1123,11 +1128,13 @@ class OAuth2 implements FetchAuthTokenInterface
    * Determines if the URI is absolute based on its scheme and host or path
    * (RFC 3986)
    *
-   * @param UriInterface $u
+   * @param string $uri
    * @return bool
    */
-  private function isAbsoluteUri(UriInterface $u)
+  private function isAbsoluteUri($uri)
   {
+    $u = $this->coerceUri($uri);
+
     return $u->getScheme() && ($u->getHost() || $u->getPath());
   }
 

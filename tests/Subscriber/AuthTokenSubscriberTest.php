@@ -23,16 +23,14 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
 
-class AuthTokenSubscriberTest extends \PHPUnit_Framework_TestCase
+class AuthTokenSubscriberTest extends BaseTest
 {
   private $mockFetcher;
   private $mockCache;
 
   protected function setUp()
   {
-    if (!interface_exists('GuzzleHttp\Event\SubscriberInterface')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle5();
 
     $this->mockFetcher =
         $this

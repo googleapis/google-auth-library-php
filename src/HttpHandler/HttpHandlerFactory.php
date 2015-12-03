@@ -30,10 +30,10 @@ class HttpHandlerFactory
    * @return Guzzle5HttpHandler|Guzzle6HttpHandler
    * @throws \Exception
    */
-  public static function build()
+  public static function build(ClientInterface $client = null)
   {
     $version = ClientInterface::VERSION;
-    $client = new Client();
+    $client = $client ?: new Client();
 
     switch ($version[0]) {
       case '5':
