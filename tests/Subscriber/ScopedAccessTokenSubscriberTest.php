@@ -17,14 +17,21 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\ScopedAccessToken;
+use Google\Auth\Subscriber\ScopedAccessTokenSubscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
 
-class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
+class ScopedAccessTokenSubscriberTest extends \PHPUnit_Framework_TestCase
 {
   const TEST_SCOPE = 'https://www.googleapis.com/auth/cloud-taskqueue';
+
+  protected function setUp()
+  {
+    if (!interface_exists('GuzzleHttp\Event\SubscriberInterface')) {
+      $this->markTestSkipped();
+    }
+  }
 
   /**
    * @expectedException InvalidArgumentException
@@ -34,7 +41,7 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
     $fakeAuthFunc = function ($unused_scopes) {
        return '1/abcdef1234567890';
     };
-    new ScopedAccessToken($fakeAuthFunc, new \stdClass(), array());
+    new ScopedAccessTokenSubscriber($fakeAuthFunc, new \stdClass(), array());
   }
 
   public function testSubscribesToEvents()
@@ -42,7 +49,7 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
     $fakeAuthFunc = function ($unused_scopes) {
        return '1/abcdef1234567890';
     };
-    $s = new ScopedAccessToken($fakeAuthFunc, self::TEST_SCOPE, array());
+    $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array());
     $this->assertArrayHasKey('before', $s->getEvents());
   }
 
@@ -51,14 +58,16 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
     $fakeAuthFunc = function ($unused_scopes) {
        return '1/abcdef1234567890';
     };
-    $s = new ScopedAccessToken($fakeAuthFunc, self::TEST_SCOPE, array());
+    $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array());
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'scoped']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $s->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'),
-                      'Bearer 1/abcdef1234567890');
+    $this->assertSame(
+      'Bearer 1/abcdef1234567890',
+      $request->getHeader('Authorization')
+    );
   }
 
   public function testUsesCachedAuthToken()
@@ -76,15 +85,17 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue($cachedValue));
 
     // Run the test
-    $s = new ScopedAccessToken($fakeAuthFunc, self::TEST_SCOPE, array(),
+    $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array(),
                                $mockCache);
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'scoped']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $s->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'),
-                      'Bearer 2/abcdef1234567890');
+    $this->assertSame(
+      'Bearer 2/abcdef1234567890',
+      $request->getHeader('Authorization')
+    );
   }
 
   public function testGetsCachedAuthTokenUsingCacheOptions()
@@ -106,7 +117,7 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue($cachedValue));
 
     // Run the test
-    $s = new ScopedAccessToken($fakeAuthFunc, self::TEST_SCOPE,
+    $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE,
                                array('prefix' => $prefix,
                                      'lifetime' => $lifetime),
                                $mockCache);
@@ -115,8 +126,10 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
                                       ['auth' => 'scoped']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $s->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'),
-                      'Bearer 2/abcdef1234567890');
+    $this->assertSame(
+      'Bearer 2/abcdef1234567890',
+      $request->getHeader('Authorization')
+    );
   }
 
   public function testShouldSaveValueInCache()
@@ -137,15 +150,17 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
         ->method('set')
         ->with($this->equalTo(self::TEST_SCOPE), $this->equalTo($token))
         ->will($this->returnValue(false));
-    $s = new ScopedAccessToken($fakeAuthFunc, self::TEST_SCOPE, array(),
+    $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array(),
                                $mockCache);
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'scoped']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $s->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'),
-                      'Bearer 2/abcdef1234567890');
+    $this->assertSame(
+      'Bearer 2/abcdef1234567890',
+      $request->getHeader('Authorization')
+    );
   }
 
   public function testShouldSaveValueInCacheWithSpecifiedPrefix()
@@ -170,7 +185,7 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue(false));
 
     // Run the test
-    $s = new ScopedAccessToken($fakeAuthFunc, self::TEST_SCOPE,
+    $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE,
                                array('prefix' => $prefix),
                                $mockCache);
     $client = new Client();
@@ -178,8 +193,10 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
                                       ['auth' => 'scoped']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $s->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'),
-                      'Bearer 2/abcdef1234567890');
+    $this->assertSame(
+      'Bearer 2/abcdef1234567890',
+      $request->getHeader('Authorization')
+    );
   }
 
   public function testOnlyTouchesWhenAuthConfigScoped()
@@ -187,12 +204,12 @@ class ScopedAccessTokenTest extends \PHPUnit_Framework_TestCase
     $fakeAuthFunc = function ($unused_scopes) {
        return '1/abcdef1234567890';
     };
-    $s = new ScopedAccessToken($fakeAuthFunc, self::TEST_SCOPE, array());
+    $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array());
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'notscoped']);
     $before = new BeforeEvent(new Transaction($client, $request));
     $s->onBefore($before);
-    $this->assertSame($request->getHeader('Authorization'), '');
+    $this->assertSame('', $request->getHeader('Authorization'));
   }
 }
