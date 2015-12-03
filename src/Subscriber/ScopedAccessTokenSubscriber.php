@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
+namespace Google\Auth\Subscriber;
 
-use GuzzleHttp\Collection;
+use Google\Auth\CacheInterface;
+use Google\Auth\CacheTrait;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
 use GuzzleHttp\Event\BeforeEvent;
 
 /**
- * ScopedAccessToken is a Guzzle Subscriber that adds an Authorization header
- * provided by a closure.
+ * ScopedAccessTokenSubscriber is a Guzzle Subscriber that adds an Authorization
+ * header provided by a closure.
  *
  * The closure returns an access token, taking the scope, either a single
  * string or an array of strings, as its value.  If provided, a cache will be
@@ -34,8 +35,10 @@ use GuzzleHttp\Event\BeforeEvent;
  *
  * 'Authorization' 'Bearer <access token obtained from the closure>'
  */
-class ScopedAccessToken implements SubscriberInterface
+class ScopedAccessTokenSubscriber implements SubscriberInterface
 {
+  use CacheTrait;
+
   const DEFAULT_CACHE_LIFETIME = 1500;
 
   /** @var An implementation of CacheInterface */
@@ -51,16 +54,19 @@ class ScopedAccessToken implements SubscriberInterface
   private $cacheConfig;
 
   /**
-   * Creates a new ScopedAccessToken plugin.
+   * Creates a new ScopedAccessTokenSubscriber.
    *
-   * @param object $tokenFunc a token generator function
-   * @param array|string scopes the token authentication scopes
-   * @param cacheConfig configuration for the cache when it's present
-   * @param object $cache an implementation of CacheInterface
+   * @param callable $tokenFunc a token generator function
+   * @param array|string $scopes the token authentication scopes
+   * @param array $cacheConfig configuration for the cache when it's present
+   * @param CacheInterface $cache an implementation of CacheInterface
    */
-  public function __construct(callable $tokenFunc, $scopes, array $cacheConfig,
-                              CacheInterface $cache=NULL)
-  {
+  public function __construct(
+    callable $tokenFunc,
+    $scopes,
+    array $cacheConfig = null,
+    CacheInterface $cache = null
+  ) {
     $this->tokenFunc = $tokenFunc;
     if (!(is_string($scopes) || is_array($scopes))) {
       throw new \InvalidArgumentException(
@@ -70,10 +76,10 @@ class ScopedAccessToken implements SubscriberInterface
 
     if (!is_null($cache)) {
       $this->cache = $cache;
-      $this->cacheConfig = Collection::fromConfig($cacheConfig, [
-          'lifetime' => self::DEFAULT_CACHE_LIFETIME,
-          'prefix'   => ''
-      ], []);
+      $this->cacheConfig = array_merge([
+        'lifetime' => self::DEFAULT_CACHE_LIFETIME,
+        'prefix'   => ''
+      ], $cacheConfig);
     }
   }
 
@@ -90,18 +96,22 @@ class ScopedAccessToken implements SubscriberInterface
    *   AppIdentityService.
    *
    *   use google\appengine\api\app_identity\AppIdentityService;
+   *   use Google\Auth\Subscriber\ScopedAccessTokenSubscriber;
    *   use GuzzleHttp\Client;
-   *   use Google\Auth\ScopedAccessToken;
    *
    *   $scope = 'https://www.googleapis.com/auth/taskqueue'
-   *   $scoped = new ScopedAccessToken('AppIdentityService::getAccessToken',
-   *                                   $scope,
-   *                                   [ 'prefix' => 'Google\Auth\ScopedAccessToken::' ],
-   *                                   $cache = new Memcache());
+   *   $subscriber = new ScopedAccessToken(
+   *       'AppIdentityService::getAccessToken',
+   *       $scope,
+   *       ['prefix' => 'Google\Auth\ScopedAccessToken::'],
+   *       $cache = new Memcache()
+   *   );
+   *
    *   $client = new Client([
-   *      'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
-   *      'defaults' => ['auth' => 'scoped']
+   *       'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
+   *       'defaults' => ['auth' => 'scoped']
    *   ]);
+   *   $client->getEmitter()->attach($subscriber);
    *
    *   $res = $client->get('myproject/taskqueues/myqueue');
    */
@@ -116,32 +126,37 @@ class ScopedAccessToken implements SubscriberInterface
     $request->setHeader('Authorization', $auth_header);
   }
 
+  /**
+   * @return string
+   */
+  private function getCacheKey()
+  {
+    $key = null;
+
+    if (is_string($this->scopes)) {
+      $key .= $this->scopes;
+    } else if (is_array($this->scopes)) {
+      $key .= implode(":", $this->scopes);
+    }
+    return $key;
+  }
+
+  /**
+   * Determine if token is available in the cache, if not call tokenFunc to
+   * fetch it.
+   *
+   * @return string
+   */
   private function fetchToken()
   {
-    // Determine if token is available in the cache, if not call tokenFunc to
-    // fetch it.
-    $token = false;
-    $hasCache = !is_null($this->cache);
-    if ($hasCache) {
-      $token = $this->cache->get($this->buildCacheKey(), $this->cacheConfig['lifetime']);
+    $cached = $this->getCachedValue();
+
+    if (!empty($cached)) {
+      return $cached;
     }
-    if (!$token) {
-      $token = call_user_func($this->tokenFunc, $this->scopes);
-      if ($hasCache) {
-        $this->cache->set($this->buildCacheKey(), $token);
-      }
-    }
+
+    $token = call_user_func($this->tokenFunc, $this->scopes);
+    $this->setCachedValue($token);
     return $token;
   }
-
-  private function buildCacheKey() {
-    $cacheKey = $this->cacheConfig['prefix'];
-    if (is_string($this->scopes)) {
-      $cacheKey .= $this->scopes;
-    } else if (is_array($this->scopes)) {
-      $cacheKey .= implode(":", $this->scopes);
-    }
-    return $cacheKey;
-  }
-
 }

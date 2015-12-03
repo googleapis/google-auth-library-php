@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
+namespace Google\Auth\Subscriber;
 
-use GuzzleHttp\Collection;
+use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
-use GuzzleHttp\Event\BeforeEvent;
 
 /**
- * Simple is a Guzzle Subscriber that implements Google's Simple API access.
+ * SimpleSubscriber is a Guzzle Subscriber that implements Google's Simple API
+ * access.
  *
  * Requests are accessed using the Simple API access developer key.
  */
-class Simple implements SubscriberInterface
+class SimpleSubscriber implements SubscriberInterface
 {
   /** @var configuration */
   private $config;
@@ -42,7 +42,11 @@ class Simple implements SubscriberInterface
    */
   public function __construct(array $config)
   {
-    $this->config = Collection::fromConfig($config, [], ['key']);
+    if (!isset($config['key'])) {
+      throw new \InvalidArgumentException('requires a key to have been set');
+    }
+
+    $this->config = array_merge([], $config);
   }
 
   /* Implements SubscriberInterface */
@@ -54,15 +58,17 @@ class Simple implements SubscriberInterface
   /**
    * Updates the request query with the developer key if auth is set to simple
    *
+   *   use Google\Auth\Subscriber\SimpleSubscriber;
    *   use GuzzleHttp\Client;
-   *   use Google\Auth\Simple;
    *
    *   $my_key = 'is not the same as yours';
-   *   $simple = new Simple(['key' => $my_key]);
+   *   $subscriber = new SimpleSubscriber(['key' => $my_key]);
+   *
    *   $client = new Client([
    *      'base_url' => 'https://www.googleapis.com/discovery/v1/',
    *      'defaults' => ['auth' => 'simple']
    *   ]);
+   *   $client->getEmitter()->attach($subscriber);
    *
    *   $res = $client->get('drive/v2/rest');
    */
