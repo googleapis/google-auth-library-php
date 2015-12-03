@@ -79,19 +79,18 @@ class GCECredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
   }
 
   /**
-   * @ExpectedException \GuzzleHttp\Exception\ParseException
-   * @todo psr7 responses are not throwing a parseexception. do we need this?
+   * @expectedException Exception
+   * @expectedExceptionMessage Invalid JSON response
    */
   public function testShouldFailIfResponseIsNotJson()
   {
-    $this->markTestSkipped();
     $notJson = '{"foo": , this is cannot be passed as json" "bar"}';
     $httpHandler = getHandler([
       buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-      buildResponse(200, [], Psr7\stream_for($notJson)),
+      buildResponse(200, [], $notJson),
     ]);
     $g = new GCECredentials();
-    $this->assertEquals(array(), $g->fetchAuthToken($httpHandler));
+    $g->fetchAuthToken($httpHandler);
   }
 
   public function testShouldReturnTokenInfo()

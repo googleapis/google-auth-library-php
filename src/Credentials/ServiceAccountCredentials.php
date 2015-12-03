@@ -31,7 +31,7 @@ use GuzzleHttp\Psr7;
  * console, which should contain a private_key and client_email fields that it
  * uses.
  *
- * Use it with AuthTokenFetcher to authorize http requests:
+ * Use it with AuthTokenMiddleware to authorize http requests:
  *
  *   use Google\Auth\Credentials\ServiceAccountCredentials;
  *   use Google\Auth\Middleware\AuthTokenMiddleware;

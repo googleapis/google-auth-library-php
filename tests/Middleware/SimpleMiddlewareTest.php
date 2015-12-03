@@ -23,7 +23,7 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Uri;
 
-class SimpleMiddlewareTest extends \PHPUnit_Framework_TestCase
+class SimpleMiddlewareTest extends BaseTest
 {
   private $mockRequest;
 
@@ -32,9 +32,7 @@ class SimpleMiddlewareTest extends \PHPUnit_Framework_TestCase
    */
   protected function setUp()
   {
-    if (!class_exists('GuzzleHttp\HandlerStack')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle6();
 
     $this->mockRequest =
       $this

@@ -22,15 +22,13 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
 
-class ScopedAccessTokenSubscriberTest extends \PHPUnit_Framework_TestCase
+class ScopedAccessTokenSubscriberTest extends BaseTest
 {
   const TEST_SCOPE = 'https://www.googleapis.com/auth/cloud-taskqueue';
 
   protected function setUp()
   {
-    if (!interface_exists('GuzzleHttp\Event\SubscriberInterface')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle5();
   }
 
   /**
