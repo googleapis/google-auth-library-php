@@ -15,13 +15,11 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
+namespace Google\Auth\Credentials;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
+use Google\Auth\CredentialsLoader;
+use Google\Auth\OAuth2;
+use GuzzleHttp\Psr7;
 
 /**
  * Authenticates requests using User Refresh credentials.
@@ -39,19 +37,21 @@ class UserRefreshCredentials extends CredentialsLoader
   /**
    * Create a new UserRefreshCredentials.
    *
-   * @param string|array scope the scope of the access request, expressed
+   * @param string|array $scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
    *
-   * @param array jsonKey JSON credentials.
+   * @param array $jsonKey JSON credentials.
    *
-   * @param string jsonKeyPath the path to a file containing JSON credentials.  If
+   * @param string $jsonKeyPath the path to a file containing JSON credentials.  If
    *   jsonKeyStream is set, it is ignored.
    */
-  public function __construct($scope, $jsonKey,
-                              $jsonKeyPath = null)
-  {
+  public function __construct(
+    $scope,
+    $jsonKey,
+    $jsonKeyPath = null
+  ) {
     if (is_null($jsonKey)) {
-      $jsonKeyStream = Stream::factory(file_get_contents($jsonKeyPath));
+      $jsonKeyStream = Psr7\stream_for(file_get_contents($jsonKeyPath));
       $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     }
     if (!array_key_exists('client_id', $jsonKey)) {
@@ -78,9 +78,9 @@ class UserRefreshCredentials extends CredentialsLoader
   /**
    * Implements FetchAuthTokenInterface#fetchAuthToken.
    */
-  public function fetchAuthToken(ClientInterface $client = null)
+  public function fetchAuthToken(callable $httpHandler = null)
   {
-    return $this->auth->fetchAuthToken($client);
+    return $this->auth->fetchAuthToken($httpHandler);
   }
 
  /**
@@ -90,5 +90,4 @@ class UserRefreshCredentials extends CredentialsLoader
   {
     return $this->auth->getClientId() . ':' . $this->auth->getCacheKey();
   }
-
 }

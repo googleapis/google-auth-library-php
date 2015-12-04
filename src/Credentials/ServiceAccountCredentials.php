@@ -15,13 +15,11 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
+namespace Google\Auth\Credentials;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
+use Google\Auth\CredentialsLoader;
+use Google\Auth\OAuth2;
+use GuzzleHttp\Psr7;
 
 /**
  * ServiceAccountCredentials supports authorization using a Google service
@@ -33,21 +31,28 @@ use GuzzleHttp\Exception\ServerException;
  * console, which should contain a private_key and client_email fields that it
  * uses.
  *
- * Use it with AuthTokenFetcher to authorize http requests:
+ * Use it with AuthTokenMiddleware to authorize http requests:
  *
+ *   use Google\Auth\Credentials\ServiceAccountCredentials;
+ *   use Google\Auth\Middleware\AuthTokenMiddleware;
  *   use GuzzleHttp\Client;
- *   use Google\Auth\ServiceAccountCredentials;
- *   use Google\Auth\AuthTokenFetcher;
+ *   use GuzzleHttp\HandlerStack;
+ *   use GuzzleHttp\Psr7;
  *
- *   $stream = Stream::factory(get_file_contents(<my_key_file>));
+ *   $stream = Psr7\stream_for(file_get_contents(<my_key_file>));
  *   $sa = new ServiceAccountCredentials(
  *       'https://www.googleapis.com/auth/taskqueue',
- *        $stream);
+ *       $stream
+ *   );
+ *   $middleware = new AuthTokenMiddleware($sa);
+ *   $stack = HandlerStack::create();
+ *   $stack->push($middleware);
+ *
  *   $client = new Client([
- *      'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
- *      'defaults' => ['auth' => 'google_auth']  // authorize all requests
+ *       'handler' => $stack,
+ *       'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
+ *       'auth' => 'google_auth' // authorize all requests
  *   ]);
- *   $client->getEmitter()->attach(new AuthTokenFetcher($sa));
  *
  *   $res = $client->get('myproject/taskqueues/myqueue');
  */
@@ -56,22 +61,25 @@ class ServiceAccountCredentials extends CredentialsLoader
   /**
    * Create a new ServiceAccountCredentials.
    *
-   * @param string|array scope the scope of the access request, expressed
+   * @param string|array $scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
    *
-   * @param array jsonKey JSON credentials.
+   * @param array $jsonKey JSON credentials.
    *
-   * @param string jsonKeyPath the path to a file containing JSON credentials.  If
+   * @param string $jsonKeyPath the path to a file containing JSON credentials.  If
    *   jsonKeyStream is set, it is ignored.
    *
-   * @param string sub an email address account to impersonate, in situations when
+   * @param string $sub an email address account to impersonate, in situations when
    *   the service account has been delegated domain wide access.
    */
-  public function __construct($scope, $jsonKey,
-                              $jsonKeyPath = null, $sub = null)
-  {
+  public function __construct(
+    $scope,
+    $jsonKey,
+    $jsonKeyPath = null,
+    $sub = null
+  ) {
     if (is_null($jsonKey)) {
-      $jsonKeyStream = Stream::factory(file_get_contents($jsonKeyPath));
+      $jsonKeyStream = Psr7\stream_for(file_get_contents($jsonKeyPath));
       $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     }
     if (!array_key_exists('client_email', $jsonKey)) {
@@ -96,9 +104,9 @@ class ServiceAccountCredentials extends CredentialsLoader
   /**
    * Implements FetchAuthTokenInterface#fetchAuthToken.
    */
-  public function fetchAuthToken(ClientInterface $client = null)
+  public function fetchAuthToken(callable $httpHandler = null)
   {
-    return $this->auth->fetchAuthToken($client);
+    return $this->auth->fetchAuthToken($httpHandler);
   }
 
  /**
@@ -116,20 +124,21 @@ class ServiceAccountCredentials extends CredentialsLoader
   /**
    * Updates metadata with the authorization token
    *
-   * @param $metadata array metadata hashmap
-   * @param $authUri string optional auth uri
-   * @param $client optional client interface
+   * @param array $metadata metadata hashmap
+   * @param string $authUri optional auth uri
+   * @param callable $httpHandler callback which delivers psr7 request
    *
    * @return array updated metadata hashmap
    */
-  public function updateMetadata($metadata,
-                                 $authUri = null,
-                                 ClientInterface $client = null)
-  {
+  public function updateMetadata(
+    $metadata,
+    $authUri = null,
+    callable $httpHandler = null
+  ) {
     // scope exists. use oauth implementation
     $scope = $this->auth->getScope();
     if (!is_null($scope)) {
-      return parent::updateMetadata($metadata, $authUri, $client);
+      return parent::updateMetadata($metadata, $authUri, $httpHandler);
     }
 
     // no scope found. create jwt with the auth uri
@@ -138,11 +147,11 @@ class ServiceAccountCredentials extends CredentialsLoader
       'client_email' => $this->auth->getIssuer(),
     );
     $jwtCreds = new ServiceAccountJwtAccessCredentials($credJson);
-    return $jwtCreds->updateMetadata($metadata, $authUri, $client);
+    return $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
   }
 
   /**
-   * @param string sub an email address account to impersonate, in situations when
+   * @param string $sub an email address account to impersonate, in situations when
    *   the service account has been delegated domain wide access.
    */
   public function setSub($sub)

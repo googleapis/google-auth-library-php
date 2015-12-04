@@ -17,8 +17,6 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\ClientInterface;
-
 /**
  * An interface implemented by objects that can fetch auth tokens.
  */
@@ -28,10 +26,10 @@ interface FetchAuthTokenInterface
  /**
   * Fetchs the auth tokens based on the current state.
   *
-  * @param $client GuzzleHttp\ClientInterface the optional client.
+  * @param callable $httpHandler callback which delivers psr7 request
   * @return array a hash of auth tokens
   */
-  public function fetchAuthToken(ClientInterface $client = null);
+  public function fetchAuthToken(callable $httpHandler = null);
 
 
  /**

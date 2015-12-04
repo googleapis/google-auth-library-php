@@ -18,12 +18,9 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\ApplicationDefaultCredentials;
-use Google\Auth\GCECredentials;
-use Google\Auth\ServiceAccountCredentials;
-use GuzzleHttp\Client;
-use GuzzleHttp\Message\Response;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Subscriber\Mock;
+use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use GuzzleHttp\Psr7;
 
 class ADCGetTest extends \PHPUnit_Framework_TestCase
 {
@@ -75,34 +72,36 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
   public function testFailsIfNotOnGceAndNoDefaultFileFound()
   {
     putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
-    $client = new Client();
     // simulate not being GCE by return 500
-    $client->getEmitter()->attach(new Mock([new Response(500)]));
-    ApplicationDefaultCredentials::getCredentials('a scope', $client);
+    $httpHandler = getHandler([
+      buildResponse(500)
+    ]);
+
+    ApplicationDefaultCredentials::getCredentials('a scope', $httpHandler);
   }
 
   public function testSuccedsIfNoDefaultFilesButIsOnGCE()
   {
-    $client = new Client();
-    // simulate the response from GCE.
     $wantedTokens = [
         'access_token' => '1/abdef1234567890',
         'expires_in' => '57',
         'token_type' => 'Bearer',
     ];
     $jsonTokens = json_encode($wantedTokens);
-    $plugin = new Mock([
-        new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-        new Response(200, [], Stream::factory($jsonTokens)),
+
+    // simulate the response from GCE.
+    $httpHandler = getHandler([
+      buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+      buildResponse(200, [], Psr7\stream_for($jsonTokens))
     ]);
-    $client->getEmitter()->attach($plugin);
+
     $this->assertNotNull(
-        ApplicationDefaultCredentials::getCredentials('a scope', $client)
+        ApplicationDefaultCredentials::getCredentials('a scope', $httpHandler)
     );
   }
 }
 
-class ADCGetFetcherTest extends \PHPUnit_Framework_TestCase
+class ADCGetMiddlewareTest extends \PHPUnit_Framework_TestCase
 {
   private $originalHome;
 
@@ -126,20 +125,21 @@ class ADCGetFetcherTest extends \PHPUnit_Framework_TestCase
   {
     $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
     putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-    ApplicationDefaultCredentials::getFetcher('a scope');
+    ApplicationDefaultCredentials::getMiddleware('a scope');
   }
 
   public function testLoadsOKIfEnvSpecifiedIsValid()
   {
     $keyFile = __DIR__ . '/fixtures' . '/private.json';
     putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-    $this->assertNotNull(ApplicationDefaultCredentials::getFetcher('a scope'));
+    $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope'));
   }
 
   public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
   {
     putenv('HOME=' . __DIR__ . '/fixtures');
-    $this->assertNotNull(ApplicationDefaultCredentials::getFetcher('a scope'));
+    $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope'));
+
   }
 
   /**
@@ -148,28 +148,108 @@ class ADCGetFetcherTest extends \PHPUnit_Framework_TestCase
   public function testFailsIfNotOnGceAndNoDefaultFileFound()
   {
     putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
-    $client = new Client();
+
     // simulate not being GCE by return 500
-    $client->getEmitter()->attach(new Mock([new Response(500)]));
-    ApplicationDefaultCredentials::getFetcher('a scope', $client);
+    $httpHandler = getHandler([
+      buildResponse(500)
+    ]);
+
+    ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler);
   }
 
   public function testSuccedsIfNoDefaultFilesButIsOnGCE()
   {
-    $client = new Client();
-    // simulate the response from GCE.
     $wantedTokens = [
         'access_token' => '1/abdef1234567890',
         'expires_in' => '57',
         'token_type' => 'Bearer',
     ];
     $jsonTokens = json_encode($wantedTokens);
-    $plugin = new Mock([
-        new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-        new Response(200, [], Stream::factory($jsonTokens)),
+
+    // simulate the response from GCE.
+    $httpHandler = getHandler([
+      buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+      buildResponse(200, [], Psr7\stream_for($jsonTokens))
     ]);
-    $client->getEmitter()->attach($plugin);
-    $this->assertNotNull(
-        ApplicationDefaultCredentials::getFetcher('a scope', $client));
+
+    $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler));
+  }
+}
+
+// @todo consider a way to DRY this and above class up
+class ADCGetSubscriberTest extends BaseTest
+{
+  private $originalHome;
+
+  protected function setUp()
+  {
+    $this->onlyGuzzle5();
+
+    $this->originalHome = getenv('HOME');
+  }
+
+  protected function tearDown()
+  {
+    if ($this->originalHome != getenv('HOME')) {
+      putenv('HOME=' . $this->originalHome);
+    }
+    putenv(ServiceAccountCredentials::ENV_VAR);  // removes it if assigned
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testIsFailsEnvSpecifiesNonExistentFile()
+  {
+    $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+    putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+    ApplicationDefaultCredentials::getSubscriber('a scope');
+  }
+
+  public function testLoadsOKIfEnvSpecifiedIsValid()
+  {
+    $keyFile = __DIR__ . '/fixtures' . '/private.json';
+    putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+    $this->assertNotNull(ApplicationDefaultCredentials::getSubscriber('a scope'));
+  }
+
+  public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
+  {
+    putenv('HOME=' . __DIR__ . '/fixtures');
+    $this->assertNotNull(ApplicationDefaultCredentials::getSubscriber('a scope'));
+
+  }
+
+  /**
+   * @expectedException DomainException
+   */
+  public function testFailsIfNotOnGceAndNoDefaultFileFound()
+  {
+    putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+
+    // simulate not being GCE by return 500
+    $httpHandler = getHandler([
+      buildResponse(500)
+    ]);
+
+    ApplicationDefaultCredentials::getSubscriber('a scope', $httpHandler);
+  }
+
+  public function testSuccedsIfNoDefaultFilesButIsOnGCE()
+  {
+    $wantedTokens = [
+        'access_token' => '1/abdef1234567890',
+        'expires_in' => '57',
+        'token_type' => 'Bearer',
+    ];
+    $jsonTokens = json_encode($wantedTokens);
+
+    // simulate the response from GCE.
+    $httpHandler = getHandler([
+      buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+      buildResponse(200, [], Psr7\stream_for($jsonTokens))
+    ]);
+
+    $this->assertNotNull(ApplicationDefaultCredentials::getSubscriber('a scope', $httpHandler));
   }
 }
