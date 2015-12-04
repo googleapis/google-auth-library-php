@@ -22,13 +22,11 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 
 
-class Guzzle6HttpHandlerTest extends \PHPUnit_Framework_TestCase
+class Guzzle6HttpHandlerTest extends BaseTest
 {
   public function setUp()
   {
-    if (!class_exists('GuzzleHttp\HandlerStack')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle6();
 
     $this->mockRequest =
       $this

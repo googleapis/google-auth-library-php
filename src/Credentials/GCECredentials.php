@@ -27,7 +27,7 @@ use GuzzleHttp\Psr7\Request;
 /**
  * GCECredentials supports authorization on Google Compute Engine.
  *
- * It can be used to authorize requests using the AuthTokenFetcher, but will
+ * It can be used to authorize requests using the AuthTokenMiddleware, but will
  * only succeed if being run on GCE:
  *
  *   use Google\Auth\Credentials\GCECredentials;
@@ -152,7 +152,13 @@ class GCECredentials extends CredentialsLoader
       )
     );
     $body = (string) $resp->getBody();
-    return json_decode($body, true);
+
+    // Assume it's JSON; if it's not throw an exception
+    if (null === $json = json_decode($body, true)) {
+      throw new \Exception('Invalid JSON response');
+    }
+
+    return $json;
   }
 
   /**

@@ -217,8 +217,7 @@ class OAuth2GrantTypeTest extends \PHPUnit_Framework_TestCase
   {
     $o = new OAuth2($this->minimal);
     $o->setGrantType('http://a/grant/url');
-    $this->assertInstanceOf('GuzzleHttp\Psr7\Uri', $o->getGrantType());
-    $this->assertEquals('http://a/grant/url', strval($o->getGrantType()));
+    $this->assertEquals('http://a/grant/url', $o->getGrantType());
   }
 }
 
@@ -345,14 +344,12 @@ class OAuth2GeneralTest extends \PHPUnit_Framework_TestCase
   }
 
 
-  //@todo was having trouble with urn uri's in the psr7 uri implementation. dig in deeper
   public function testAllowsUrnRedirectUri()
   {
-    $this->markTestSkipped();
     $urn = 'urn:ietf:wg:oauth:2.0:oob';
     $o = new OAuth2($this->minimal);
     $o->setRedirectUri($urn);
-    $this->assertEquals($urn, (string) $o->getRedirectUri());
+    $this->assertEquals($urn, $o->getRedirectUri());
   }
 }
 
@@ -590,10 +587,8 @@ class OAuth2GenerateAccessTokenRequestTest extends \PHPUnit_Framework_TestCase
     $this->assertTrue(array_key_exists('assertion', $fields));
   }
 
-  //@todo was having trouble with urn uri's in the psr7 uri implementation. dig in deeper
   public function testGeneratesExtendedRequests()
   {
-    $this->markTestSkipped();
     $testConfig = $this->tokenRequestMinimal;
     $o = new OAuth2($testConfig);
     $o->setGrantType('urn:my_test_grant_type');
@@ -648,12 +643,11 @@ class OAuth2FetchAuthTokenTest extends \PHPUnit_Framework_TestCase
   }
 
   /**
-   * @ExpectedException GuzzleHttp\Exception\ParseException
-   * @todo psr7 responses do not appear to throw exceptions on invalid json. follow up
+   * @expectedException Exception
+   * @expectedExceptionMessage Invalid JSON response
    */
   public function testFailsOnNoContentTypeIfResponseIsNotJSON()
   {
-    $this->markTestSkipped();
     $testConfig = $this->fetchAuthTokenMinimal;
     $notJson = '{"foo": , this is cannot be passed as json" "bar"}';
     $httpHandler = getHandler([

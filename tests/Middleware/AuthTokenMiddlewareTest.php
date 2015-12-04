@@ -22,7 +22,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
-class AuthTokenMiddlewareTest extends \PHPUnit_Framework_TestCase
+class AuthTokenMiddlewareTest extends BaseTest
 {
   private $mockFetcher;
   private $mockCache;
@@ -30,9 +30,7 @@ class AuthTokenMiddlewareTest extends \PHPUnit_Framework_TestCase
 
   protected function setUp()
   {
-    if (!class_exists('GuzzleHttp\HandlerStack')) {
-      $this->markTestSkipped();
-    }
+    $this->onlyGuzzle6();
 
     $this->mockFetcher =
       $this
