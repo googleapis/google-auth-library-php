@@ -76,7 +76,9 @@ class SimpleMiddleware
         return $handler($request, $options);
       }
 
-      $uri = $request->getUri()->withQuery(Psr7\build_query($this->config));
+      $query = Psr7\parse_query($request->getUri()->getQuery());
+      $params = array_merge($query, $this->config);
+      $uri = $request->getUri()->withQuery(Psr7\build_query($params));
       $request = $request->withUri($uri);
       return $handler($request, $options);
     };
