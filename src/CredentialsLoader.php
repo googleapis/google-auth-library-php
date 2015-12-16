@@ -45,7 +45,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
 
   private static function isOnWindows()
   {
-    return strtoupper(substr(php_uname('s'), 0, 3)) === 'WIN';
+    return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
   }
 
   /**
