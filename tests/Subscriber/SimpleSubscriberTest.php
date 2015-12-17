@@ -17,31 +17,35 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\Simple;
+use Google\Auth\Subscriber\SimpleSubscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
 
-class SimpleTest extends \PHPUnit_Framework_TestCase
+class SimpleSubscriberTest extends BaseTest
 {
+  protected function setUp()
+  {
+    $this->onlyGuzzle5();
+  }
 
   /**
    * @expectedException InvalidArgumentException
    */
   public function testRequiresADeveloperKey()
   {
-    new Simple(['not_key' => 'a test key']);
+    new SimpleSubscriber(['not_key' => 'a test key']);
   }
 
   public function testSubscribesToEvents()
   {
-    $events = (new Simple(['key' => 'a test key']))->getEvents();
+    $events = (new SimpleSubscriber(['key' => 'a test key']))->getEvents();
     $this->assertArrayHasKey('before', $events);
   }
 
   public function testAddsTheKeyToTheQuery()
   {
-    $s = new Simple(['key' => 'test_key']);
+    $s = new SimpleSubscriber(['key' => 'test_key']);
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'simple']);
@@ -54,7 +58,7 @@ class SimpleTest extends \PHPUnit_Framework_TestCase
 
   public function testOnlyTouchesWhenAuthConfigIsSimple()
   {
-    $s = new Simple(['key' => 'test_key']);
+    $s = new SimpleSubscriber(['key' => 'test_key']);
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'notsimple']);

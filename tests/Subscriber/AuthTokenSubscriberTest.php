@@ -17,18 +17,21 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\AuthTokenFetcher;
+use Google\Auth\Subscriber\AuthTokenSubscriber;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
 
-class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
+class AuthTokenSubscriberTest extends BaseTest
 {
   private $mockFetcher;
   private $mockCache;
 
   protected function setUp()
   {
+    $this->onlyGuzzle5();
+
     $this->mockFetcher =
         $this
         ->getMockBuilder('Google\Auth\FetchAuthTokenInterface')
@@ -41,14 +44,14 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
 
   public function testSubscribesToEvents()
   {
-    $a = new AuthTokenFetcher($this->mockFetcher, array());
+    $a = new AuthTokenSubscriber($this->mockFetcher, array());
     $this->assertArrayHasKey('before', $a->getEvents());
   }
 
 
   public function testOnlyTouchesWhenAuthConfigScoped()
   {
-    $s = new AuthTokenFetcher($this->mockFetcher, array());
+    $s = new AuthTokenSubscriber($this->mockFetcher, array());
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'not_google_auth']);
@@ -66,7 +69,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue($authResult));
 
     // Run the test.
-    $a = new AuthTokenFetcher($this->mockFetcher, array());
+    $a = new AuthTokenSubscriber($this->mockFetcher, array());
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'google_auth']);
@@ -85,7 +88,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue($authResult));
 
     // Run the test.
-    $a = new AuthTokenFetcher($this->mockFetcher, array());
+    $a = new AuthTokenSubscriber($this->mockFetcher, array());
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'google_auth']);
@@ -102,7 +105,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->expects($this->once())
         ->method('get')
         ->with($this->equalTo($cacheKey),
-               $this->equalTo(AuthTokenFetcher::DEFAULT_CACHE_LIFETIME))
+               $this->equalTo(AuthTokenSubscriber::DEFAULT_CACHE_LIFETIME))
         ->will($this->returnValue($cachedValue));
     $this->mockFetcher
         ->expects($this->never())
@@ -113,7 +116,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue($cacheKey));
 
     // Run the test.
-    $a = new AuthTokenFetcher($this->mockFetcher, array(), $this->mockCache);
+    $a = new AuthTokenSubscriber($this->mockFetcher, array(), $this->mockCache);
     $client = new Client();
     $request = $client->createRequest('GET', 'http://testing.org',
                                       ['auth' => 'google_auth']);
@@ -144,7 +147,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue($cacheKey));
 
     // Run the test
-    $a = new AuthTokenFetcher($this->mockFetcher,
+    $a = new AuthTokenSubscriber($this->mockFetcher,
                               array('prefix' => $prefix,
                                     'lifetime' => $lifetime),
                               $this->mockCache);
@@ -183,7 +186,7 @@ class AuthTokenFetcherTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue($authResult));
 
     // Run the test
-    $a = new AuthTokenFetcher($this->mockFetcher,
+    $a = new AuthTokenSubscriber($this->mockFetcher,
                               array('prefix' => $prefix),
                               $this->mockCache);
 

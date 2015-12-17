@@ -17,11 +17,8 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\AppIdentityCredentials;
-use GuzzleHttp\Client;
-use GuzzleHttp\Message\Response;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Subscriber\Mock;
+use Google\Auth\Credentials\AppIdentityCredentials;
+use GuzzleHttp\Psr7\Response;
 
 // included from tests\mocks\AppIdentityService.php
 use google\appengine\api\app_identity\AppIdentityService;
@@ -67,7 +64,7 @@ class AppIdentityCredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCa
   public function testReturnsExpectedToken()
   {
     // include the mock AppIdentityService class
-    require_once __DIR__ . '/mocks/AppIdentityService.php';
+    require_once __DIR__ . '/../mocks/AppIdentityService.php';
 
     $wantedToken = [
         'access_token' => '1/abdef1234567890',
@@ -86,7 +83,7 @@ class AppIdentityCredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCa
   public function testScopeIsAlwaysArray()
   {
     // include the mock AppIdentityService class
-    require_once __DIR__ . '/mocks/AppIdentityService.php';
+    require_once __DIR__ . '/../mocks/AppIdentityService.php';
 
     $scope1 = ['scopeA', 'scopeB'];
     $scope2 = 'scopeA scopeB';

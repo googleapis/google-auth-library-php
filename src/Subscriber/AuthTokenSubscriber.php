@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
+namespace Google\Auth\Subscriber;
 
-use GuzzleHttp\Collection;
+use Google\Auth\CacheInterface;
+use Google\Auth\CacheTrait;
+use Google\Auth\FetchAuthTokenInterface;
+use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
-use GuzzleHttp\Event\BeforeEvent;
-use GuzzleHttp\ClientInterface;
 
 /**
- * AuthTokenFetcher is a Guzzle Subscriber that adds an Authorization header
+ * AuthTokenSubscriber is a Guzzle Subscriber that adds an Authorization header
  * provided by an object implementing FetchAuthTokenInterface.
  *
  * The FetchAuthTokenInterface#fetchAuthToken is used to obtain a hash; one of
@@ -34,15 +35,17 @@ use GuzzleHttp\ClientInterface;
  *
  * 'Authorization' 'Bearer <value of auth_token>'
  */
-class AuthTokenFetcher implements SubscriberInterface
+class AuthTokenSubscriber implements SubscriberInterface
 {
+  use CacheTrait;
+
   const DEFAULT_CACHE_LIFETIME = 1500;
 
   /** @var An implementation of CacheInterface */
   private $cache;
 
-  /** @var An implementation of ClientInterface */
-  private $client;
+  /** @var callable */
+  private $httpHandler;
 
   /** @var An implementation of FetchAuthTokenInterface */
   private $fetcher;
@@ -51,26 +54,27 @@ class AuthTokenFetcher implements SubscriberInterface
   private $cacheConfig;
 
   /**
-   * Creates a new AuthTokenFetcher plugin.
+   * Creates a new AuthTokenSubscriber.
    *
    * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
    * @param array $cacheConfig configures the cache
    * @param CacheInterface $cache (optional) caches the token.
-   * @param ClientInterface $client (optional) http client to fetch the token.
+   * @param callable $httpHandler (optional) http client to fetch the token.
    */
-  public function __construct(FetchAuthTokenInterface $fetcher,
-                              array $cacheConfig = null,
-                              CacheInterface $cache = null,
-                              ClientInterface $client = null)
-  {
+  public function __construct(
+    FetchAuthTokenInterface $fetcher,
+    array $cacheConfig = null,
+    CacheInterface $cache = null,
+    callable $httpHandler = null
+  ) {
     $this->fetcher = $fetcher;
-    $this->client = $client;
+    $this->httpHandler = $httpHandler;
     if (!is_null($cache)) {
       $this->cache = $cache;
-      $this->cacheConfig = Collection::fromConfig($cacheConfig, [
-          'lifetime' => self::DEFAULT_CACHE_LIFETIME,
-          'prefix'   => ''
-      ], []);
+      $this->cacheConfig = array_merge([
+        'lifetime' => self::DEFAULT_CACHE_LIFETIME,
+        'prefix'   => ''
+      ], $cacheConfig);
     }
   }
 
@@ -85,17 +89,21 @@ class AuthTokenFetcher implements SubscriberInterface
    *
    *   use GuzzleHttp\Client;
    *   use Google\Auth\OAuth2;
-   *   use Google\Auth\AuthTokenFetcher;
+   *   use Google\Auth\Subscriber\AuthTokenSubscriber;
    *
    *   $config = [..<oauth config param>.];
    *   $oauth2 = new OAuth2($config)
-   *   $scoped = new AuthTokenFetcher($oauth2,
-   *                                  $cache = new Memcache(),
-   *                                  [ 'prefix' => 'OAuth2::' ]);
+   *   $subscriber = new AuthTokenSubscriber(
+   *       $oauth2,
+   *       ['prefix' => 'OAuth2::'],
+   *       $cache = new Memcache()
+   *   );
+   *
    *   $client = new Client([
    *      'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
    *      'defaults' => ['auth' => 'google_auth']
    *   ]);
+   *   $client->getEmitter()->attach($subscriber);
    *
    *   $res = $client->get('myproject/taskqueues/myqueue');
    */
@@ -120,43 +128,10 @@ class AuthTokenFetcher implements SubscriberInterface
     }
 
     // Fetch the auth token.
-    $auth_tokens = $this->fetcher->fetchAuthToken($this->client);
+    $auth_tokens = $this->fetcher->fetchAuthToken($this->httpHandler);
     if (array_key_exists('access_token', $auth_tokens)) {
       $request->setHeader('Authorization', 'Bearer ' . $auth_tokens['access_token']);
       $this->setCachedValue($auth_tokens['access_token']);
     }
-  }
-
-  /**
-   * Gets the cached value if it is present in the cache when that is
-   * available.
-   */
-  protected function getCachedValue()
-  {
-    if (is_null($this->cache)) {
-      return null;
-    }
-    $fetcherKey = $this->fetcher->getCacheKey();
-    if (is_null($fetcherKey)) {
-      return null;
-    }
-    $key = $this->cacheConfig['prefix'] . $fetcherKey;
-    return $this->cache->get($key, $this->cacheConfig['lifetime']);
-  }
-
-  /**
-   * Saves the value in the cache when that is available.
-   */
-  protected function setCachedValue($v)
-  {
-    if (is_null($this->cache)) {
-      return;
-    }
-    $fetcherKey = $this->fetcher->getCacheKey();
-    if (is_null($fetcherKey)) {
-      return;
-    }
-    $key = $this->cacheConfig['prefix'] . $fetcherKey;
-    $this->cache->set($key, $v);
   }
 }

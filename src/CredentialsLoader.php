@@ -17,11 +17,10 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\Credentials\UserRefreshCredentials;
+use GuzzleHttp\Psr7;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * CredentialsLoader contains the behaviour used to locate and find default
@@ -75,7 +74,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
       $cause = "file " . $path . " does not exist";
       throw new \DomainException(self::unableToReadEnv($cause));
     }
-    $keyStream = Stream::factory(file_get_contents($path));
+    $keyStream = Psr7\stream_for(file_get_contents($path));
     return static::makeCredentials($scope, $keyStream);
   }
 
@@ -105,7 +104,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
     if (!file_exists($path)) {
       return null;
     }
-    $keyStream = Stream::factory(file_get_contents($path));
+    $keyStream = Psr7\stream_for(file_get_contents($path));
     return static::makeCredentials($scope, $keyStream);
   }
 
@@ -115,10 +114,10 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
    * @param string|array scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
    *
-   * @param Stream jsonKeyStream read it to get the JSON credentials.
+   * @param StreamInterface jsonKeyStream read it to get the JSON credentials.
    *
    */
-  public static function makeCredentials($scope, Stream $jsonKeyStream)
+  public static function makeCredentials($scope, StreamInterface $jsonKeyStream)
   {
     $jsonKey = json_decode($jsonKeyStream->getContents(), true);
     if (!array_key_exists('type', $jsonKey)) {
@@ -151,17 +150,18 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
   /**
    * Updates metadata with the authorization token
    *
-   * @param $metadata array metadata hashmap
-   * @param $authUri string optional auth uri
-   * @param $client optional client interface
+   * @param array $metadata metadata hashmap
+   * @param string $authUri optional auth uri
+   * @param callable $httpHandler callback which delivers psr7 request
    *
    * @return array updated metadata hashmap
    */
-  public function updateMetadata($metadata,
-                                 $authUri = null,
-                                 ClientInterface $client = null)
-  {
-    $result = $this->fetchAuthToken($client);
+  public function updateMetadata(
+    $metadata,
+    $authUri = null,
+    callable $httpHandler = null
+  ) {
+    $result = $this->fetchAuthToken($httpHandler);
     if (!isset($result['access_token'])) {
       return $metadata;
     }

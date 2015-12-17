@@ -48,5 +48,4 @@ interface CacheInterface
    * @param String $key
    */
   public function delete($key);
-
 }

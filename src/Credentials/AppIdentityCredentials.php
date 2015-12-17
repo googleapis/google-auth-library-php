@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
+namespace Google\Auth\Credentials;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
+use Google\Auth\CredentialsLoader;
 
 /**
  * The AppIdentityService class is automatically defined on App Engine,
@@ -30,27 +29,26 @@ use google\appengine\api\app_identity\AppIdentityService;
 /**
  * AppIdentityCredentials supports authorization on Google App Engine.
  *
- * It can be used to authorize requests using the AuthTokenFetcher, but will
- * only succeed if being run on App Engine:
+ * It can be used to authorize requests using the AuthTokenMiddleware or
+ * AuthTokenSubscriber, but will only succeed if being run on App Engine:
  *
+ *   use Google\Auth\Credentials\AppIdentityCredentials;
+ *   use Google\Auth\Middleware\AuthTokenMiddleware;
  *   use GuzzleHttp\Client;
- *   use Google\Auth\AppIdentityCredentials;
- *   use Google\Auth\AuthTokenFetcher;
+ *   use GuzzleHttp\HandlerStack;
  *
  *   $gae = new AppIdentityCredentials('https://www.googleapis.com/auth/books');
- *   $subscriber = new AuthTokenFetcher($gae);
+ *   $middleware = new AuthTokenMiddleware($gae);
+ *   $stack = HandlerStack::create();
+ *   $stack->push($middleware);
+ *
  *   $client = new Client([
- *      'base_url' => 'https://www.googleapis.com/books/v1',
- *      'defaults' => ['auth' => 'google_auth']
+ *       'handler' => $stack,
+ *       'base_uri' => 'https://www.googleapis.com/books/v1',
+ *       'auth' => 'google_auth'
  *   ]);
- *   $client->setDefaultOption('verify', '/etc/ca-certificates.crt');
- *   $client->getEmitter()->attach($subscriber);
+ *
  *   $res = $client->get('volumes?q=Henry+David+Thoreau&country=US');
- *
- * In Guzzle 5 and below, the App Engine certificates need to be set on the
- * guzzle client in order for SSL requests to succeed.
- *
- *   $client->setDefaultOption('verify', '/etc/ca-certificates.crt');
  */
 class AppIdentityCredentials extends CredentialsLoader
 {
@@ -80,7 +78,7 @@ class AppIdentityCredentials extends CredentialsLoader
    * As the AppIdentityService uses protobufs to fetch the access token,
    * the GuzzleHttp\ClientInterface instance passed in will not be used.
    *
-   * @param $client GuzzleHttp\ClientInterface optional client.
+   * @param callable $httpHandler callback which delivers psr7 request
    * @return array the auth metadata:
    *  array(2) {
    *   ["access_token"]=>
@@ -89,7 +87,7 @@ class AppIdentityCredentials extends CredentialsLoader
    *   string(10) "1444339905"
    *  }
    */
-  public function fetchAuthToken(ClientInterface $unusedClient = null)
+  public function fetchAuthToken(callable $httpHandler = null)
   {
     if (!self::onAppEngine()) {
       return array();

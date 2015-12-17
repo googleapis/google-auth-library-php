@@ -17,13 +17,13 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\OAuth2;
 use Google\Auth\ApplicationDefaultCredentials;
-use Google\Auth\UserRefreshCredentials;
+use Google\Auth\Credentials\UserRefreshCredentials;
+use Google\Auth\HttpHandler\Guzzle6HttpHandler;
+use Google\Auth\OAuth2;
 use GuzzleHttp\Client;
-use GuzzleHttp\Message\Response;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Subscriber\Mock;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Response;
 
 // Creates a standard JSON auth object for testing.
 function createURCTestJson()
@@ -101,13 +101,13 @@ class URCConstructorTest extends \PHPUnit_Framework_TestCase
    */
   public function testFailsToInitalizeFromANonExistentFile()
   {
-    $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+    $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
     new UserRefreshCredentials('scope/1', null, $keyFile);
   }
 
   public function testInitalizeFromAFile()
   {
-    $keyFile = __DIR__ . '/fixtures2' . '/private.json';
+    $keyFile = __DIR__ . '/../fixtures2' . '/private.json';
     $this->assertNotNull(
         new UserRefreshCredentials('scope/1', null, $keyFile)
     );
@@ -131,14 +131,14 @@ class URCFromEnvTest extends \PHPUnit_Framework_TestCase
    */
   public function testFailsIfEnvSpecifiesNonExistentFile()
   {
-    $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+    $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
     putenv(UserRefreshCredentials::ENV_VAR . '=' . $keyFile);
     UserRefreshCredentials::fromEnv('a scope');
   }
 
   public function testSucceedIfFileExists()
   {
-    $keyFile = __DIR__ . '/fixtures2' . '/private.json';
+    $keyFile = __DIR__ . '/../fixtures2' . '/private.json';
     putenv(UserRefreshCredentials::ENV_VAR . '=' . $keyFile);
     $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
   }
@@ -162,7 +162,7 @@ class URCFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
 
   public function testIsNullIfFileDoesNotExist()
   {
-    putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+    putenv('HOME=' . __DIR__ . '/../not_exist_fixtures');
     $this->assertNull(
         UserRefreshCredentials::fromWellKnownFile('a scope')
     );
@@ -170,7 +170,7 @@ class URCFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
 
   public function testSucceedIfFileIsPresent()
   {
-    putenv('HOME=' . __DIR__ . '/fixtures2');
+    putenv('HOME=' . __DIR__ . '/../fixtures2');
     $this->assertNotNull(
         ApplicationDefaultCredentials::getCredentials('a scope')
     );
@@ -186,13 +186,14 @@ class URCFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
   {
     $testJson = createURCTestJson();
     $scope = ['scope/1', 'scope/2'];
-    $client = new Client();
-    $client->getEmitter()->attach(new Mock([new Response(400)]));
+    $httpHandler = getHandler([
+      buildResponse(400)
+    ]);
     $sa = new UserRefreshCredentials(
         $scope,
         $testJson
     );
-    $sa->fetchAuthToken($client);
+    $sa->fetchAuthToken($httpHandler);
   }
 
   /**
@@ -202,13 +203,14 @@ class URCFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
   {
     $testJson = createURCTestJson();
     $scope = ['scope/1', 'scope/2'];
-    $client = new Client();
-    $client->getEmitter()->attach(new Mock([new Response(500)]));
+    $httpHandler = getHandler([
+      buildResponse(500)
+    ]);
     $sa = new UserRefreshCredentials(
         $scope,
         $testJson
     );
-    $sa->fetchAuthToken($client);
+    $sa->fetchAuthToken($httpHandler);
   }
 
   public function testCanFetchCredsOK()
@@ -216,14 +218,14 @@ class URCFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     $testJson = createURCTestJson();
     $testJsonText = json_encode($testJson);
     $scope = ['scope/1', 'scope/2'];
-    $client = new Client();
-    $testResponse = new Response(200, [], Stream::factory($testJsonText));
-    $client->getEmitter()->attach(new Mock([$testResponse]));
+    $httpHandler = getHandler([
+      buildResponse(200, [], Psr7\stream_for($testJsonText))
+    ]);
     $sa = new UserRefreshCredentials(
         $scope,
         $testJson
     );
-    $tokens = $sa->fetchAuthToken($client);
+    $tokens = $sa->fetchAuthToken($httpHandler);
     $this->assertEquals($testJson, $tokens);
   }
 }

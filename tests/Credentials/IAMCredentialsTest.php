@@ -17,7 +17,7 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\IAMCredentials;
+use Google\Auth\Credentials\IAMCredentials;
 
 class IAMConstructorTest extends \PHPUnit_Framework_TestCase
 {

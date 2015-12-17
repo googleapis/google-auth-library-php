@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
-
-use GuzzleHttp\ClientInterface;
+namespace Google\Auth\Credentials;
 
 /**
  * Authenticates requests using IAM credentials
@@ -50,9 +48,9 @@ class IAMCredentials
   }
 
   /**
-   * export a callback function which updates runtime metadata 
+   * export a callback function which updates runtime metadata
    *
-   * @return an updateMetadata function 
+   * @return an updateMetadata function
    */
   public function getUpdateMetadataFunc()
   {
@@ -62,18 +60,19 @@ class IAMCredentials
   /**
    * Updates metadata with the appropriate header metadata
    *
-   * @param $metadata array metadata hashmap
-   * @param $unusedAuthUri optional auth uri
-   * @param $unusedClient optional client interface
+   * @param array $metadata metadata hashmap
+   * @param string $unusedAuthUri optional auth uri
+   * @param callable $httpHandler callback which delivers psr7 request
    *        Note: this param is unused here, only included here for
    *        consistency with other credentials class
    *
    * @return array updated metadata hashmap
    */
-  public function updateMetadata($metadata,
-                                 $unusedAuthUri = null,
-                                 ClientInterface $unusedClient = null)
-  {
+  public function updateMetadata(
+    $metadata,
+    $unusedAuthUri = null,
+    callable $httpHandler = null
+  ) {
     $metadata_copy = $metadata;
     $metadata_copy[self::SELECTOR_KEY] = $this->selector;
     $metadata_copy[self::TOKEN_KEY] = $this->token;

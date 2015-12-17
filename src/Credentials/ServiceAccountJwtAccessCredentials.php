@@ -15,13 +15,10 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
+namespace Google\Auth\Credentials;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
+use Google\Auth\CredentialsLoader;
+use Google\Auth\OAuth2;
 
 /**
  * Authenticates requests using Google's Service Account credentials via
@@ -37,10 +34,9 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
   /**
    * Create a new ServiceAccountJwtAccessCredentials.
    *
-   * @param array jsonKey JSON credentials.
+   * @param array $jsonKey JSON credentials.
    */
-  public function __construct($jsonKey)
-  {
+  public function __construct(array $jsonKey) {
     if (!array_key_exists('client_email', $jsonKey)) {
       throw new \InvalidArgumentException(
           'json key is missing the client_email field');
@@ -60,28 +56,29 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
   /**
    * Updates metadata with the authorization token
    *
-   * @param $metadata array metadata hashmap
-   * @param $authUri string optional auth uri
-   * @param $client optional client interface
+   * @param array $metadata metadata hashmap
+   * @param string $authUri optional auth uri
+   * @param callable $httpHandler callback which delivers psr7 request
    *
    * @return array updated metadata hashmap
    */
-  public function updateMetadata($metadata,
-                                 $authUri = null,
-                                 ClientInterface $client = null)
-  {
+  public function updateMetadata(
+    $metadata,
+    $authUri = null,
+    callable $httpHandler = null
+  ) {
     if (empty($authUri)) {
       return $metadata;
     }
 
     $this->auth->setAudience($authUri);
-    return parent::updateMetadata($metadata, $authUri, $client);
+    return parent::updateMetadata($metadata, $authUri, $httpHandler);
   }
 
  /**
   * Implements FetchAuthTokenInterface#fetchAuthToken.
   */
-  public function fetchAuthToken(ClientInterface $unusedClient = null)
+  public function fetchAuthToken(callable $httpHandler = null)
   {
     $audience = $this->auth->getAudience();
     if (empty($audience)) {

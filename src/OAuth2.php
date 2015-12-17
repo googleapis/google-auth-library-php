@@ -17,12 +17,13 @@
 
 namespace Google\Auth;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Collection;
-use GuzzleHttp\Query;
-use GuzzleHttp\Message\ResponseInterface;
-use GuzzleHttp\Url;
+use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * OAuth2 supports authentication by OAuth2 2-legged flows.
@@ -262,28 +263,44 @@ class OAuth2 implements FetchAuthTokenInterface
    */
   public function __construct(array $config)
   {
-    $opts = Collection::fromConfig($config, [
-        'expiry' => self::DEFAULT_EXPIRY_MINUTES,
-        'extensionParams' => []
-    ], []);
-    $this->setAuthorizationUri($opts->get('authorizationUri'));
-    $this->setRedirectUri($opts->get('redirectUri'));
-    $this->setTokenCredentialUri($opts->get('tokenCredentialUri'));
-    $this->setState($opts->get('state'));
-    $this->setUsername($opts->get('username'));
-    $this->setPassword($opts->get('password'));
-    $this->setClientId($opts->get('clientId'));
-    $this->setClientSecret($opts->get('clientSecret'));
-    $this->setIssuer($opts->get('issuer'));
-    $this->setPrincipal($opts->get('principal'));
-    $this->setSub($opts->get('sub'));
-    $this->setExpiry($opts->get('expiry'));
-    $this->setAudience($opts->get('audience'));
-    $this->setSigningKey($opts->get('signingKey'));
-    $this->setSigningAlgorithm($opts->get('signingAlgorithm'));
-    $this->setScope($opts->get('scope'));
-    $this->setExtensionParams($opts->get('extensionParams'));
-    $this->updateToken($config);
+    $opts = array_merge([
+      'expiry' => self::DEFAULT_EXPIRY_MINUTES,
+      'extensionParams' => [],
+      'authorizationUri' => null,
+      'redirectUri' => null,
+      'tokenCredentialUri' => null,
+      'state' => null,
+      'username' => null,
+      'password' => null,
+      'clientId' => null,
+      'clientSecret' => null,
+      'issuer' => null,
+      'principal' => null,
+      'sub' => null,
+      'audience' => null,
+      'signingKey' => null,
+      'signingAlgorithm' => null,
+      'scope' => null
+    ], $config);
+
+    $this->setAuthorizationUri($opts['authorizationUri']);
+    $this->setRedirectUri($opts['redirectUri']);
+    $this->setTokenCredentialUri($opts['tokenCredentialUri']);
+    $this->setState($opts['state']);
+    $this->setUsername($opts['username']);
+    $this->setPassword($opts['password']);
+    $this->setClientId($opts['clientId']);
+    $this->setClientSecret($opts['clientSecret']);
+    $this->setIssuer($opts['issuer']);
+    $this->setPrincipal($opts['principal']);
+    $this->setSub($opts['sub']);
+    $this->setExpiry($opts['expiry']);
+    $this->setAudience($opts['audience']);
+    $this->setSigningKey($opts['signingKey']);
+    $this->setSigningAlgorithm($opts['signingAlgorithm']);
+    $this->setScope($opts['scope']);
+    $this->setExtensionParams($opts['extensionParams']);
+    $this->updateToken($opts);
   }
 
  /**
@@ -320,7 +337,7 @@ class OAuth2 implements FetchAuthTokenInterface
   *
   * @param $config array optional configuration parameters
   */
-  public function toJwt(array $config = null)
+  public function toJwt(array $config = [])
   {
     if (is_null($this->getSigningKey())) {
       throw new \DomainException('No signing key available');
@@ -329,17 +346,16 @@ class OAuth2 implements FetchAuthTokenInterface
       throw new \DomainException('No signing algorithm specified');
     }
     $now = time();
-    if (is_null($config)) {
-      $config = [];
-    }
-    $opts = Collection::fromConfig($config, [
-        'skew' => self::DEFAULT_SKEW,
-    ], []);
+
+    $opts = array_merge([
+      'skew' => self::DEFAULT_SKEW
+    ], $config);
+
     $assertion = [
         'iss' => $this->getIssuer(),
         'aud' => $this->getAudience(),
         'exp' => ($now + $this->getExpiry()),
-        'iat' => ($now - $opts->get('skew'))
+        'iat' => ($now - $opts['skew'])
     ];
     foreach ($assertion as $k => $v) {
       if (is_null($v)) {
@@ -362,18 +378,15 @@ class OAuth2 implements FetchAuthTokenInterface
  /**
   * Generates a request for token credentials.
   *
-  * @param $client GuzzleHttp\ClientInterface the optional client.
-  * @return GuzzleHttp\RequestInterface the authorization Url.
+  * @return RequestInterface the authorization Url.
   */
-  public function generateCredentialsRequest(ClientInterface $client = null)
+  public function generateCredentialsRequest()
   {
     $uri = $this->getTokenCredentialUri();
     if (is_null($uri)) {
       throw new \DomainException('No token credential URI was set.');
     }
-    if (is_null($client)) {
-      $client = new Client();
-    }
+
     $grantType = $this->getGrantType();
     $params = array('grant_type' => $grantType);
     switch($grantType) {
@@ -402,30 +415,38 @@ class OAuth2 implements FetchAuthTokenInterface
         }
         unset($params['grant_type']);
         if (!is_null($grantType)) {
-          $params['grant_type'] = strval($grantType);
+          $params['grant_type'] = $grantType;
         }
         $params = array_merge($params, $this->getExtensionParams());
     }
-    $request = $client->createRequest('POST', $uri);
-    $request->addHeader('Cache-Control', 'no-store');
-    $request->addHeader('Content-Type', 'application/x-www-form-urlencoded');
-    $request->getBody()->replaceFields($params);
-    return $request;
+
+    $headers = [
+      'Cache-Control' => 'no-store',
+      'Content-Type' => 'application/x-www-form-urlencoded'
+    ];
+
+    return new Request(
+      'POST',
+      $uri,
+      $headers,
+      Psr7\build_query($params)
+    );
   }
 
  /**
   * Fetchs the auth tokens based on the current state.
   *
-  * @param $client GuzzleHttp\ClientInterface the optional client.
+  * @param callable $httpHandler callback which delivers psr7 request
   * @return array the response
   */
-  public function fetchAuthToken(ClientInterface $client = null)
+  public function fetchAuthToken(callable $httpHandler = null)
   {
-    if (is_null($client)) {
-      $client = new Client();
+    if (is_null($httpHandler)) {
+      $httpHandler = HttpHandlerFactory::build();
     }
-    $resp = $client->send($this->generateCredentialsRequest($client));
-    $creds = $this->parseTokenResponse($resp);
+
+    $response = $httpHandler($this->generateCredentialsRequest());
+    $creds = $this->parseTokenResponse($response);
     $this->updateToken($creds);
     return $creds;
   }
@@ -451,21 +472,24 @@ class OAuth2 implements FetchAuthTokenInterface
  /**
   * Parses the fetched tokens.
   *
-  * @param $resp GuzzleHttp\Message\ReponseInterface the response.
+  * @param $resp ReponseInterface the response.
   * @return array the tokens parsed from the response body.
   */
   public function parseTokenResponse(ResponseInterface $resp)
   {
-    $body = $resp->getBody()->getContents();
+    $body = (string) $resp->getBody();
     if ($resp->hasHeader('Content-Type') &&
-        $resp->getHeader('Content-Type') == 'application/x-www-form-urlencoded') {
+        $resp->getHeaderLine('Content-Type') == 'application/x-www-form-urlencoded') {
       $res = array();
       parse_str($body, $res);
       return $res;
     } else {
-      // Assume it's JSON; if it's not there needs to be an exception, so
-      // we use the json decode exception instead of adding a new one.
-      return $resp->json();
+      // Assume it's JSON; if it's not throw an exception
+      if (null === $res = json_decode($body, true)) {
+        throw new \Exception('Invalid JSON response');
+      }
+
+      return $res;
     }
   }
 
@@ -503,65 +527,73 @@ class OAuth2 implements FetchAuthTokenInterface
   */
   public function updateToken(array $config)
   {
-    $opts = Collection::fromConfig($config, [
-        'extensionParams' => []
-    ], []);
-    $this->setExpiresAt($opts->get('expires'));
-    $this->setExpiresAt($opts->get('expires_at'));
-    $this->setExpiresIn($opts->get('expires_in'));
+    $opts = array_merge([
+      'extensionParams' => [],
+      'refresh_token' => null,
+      'access_token' => null,
+      'id_token' => null,
+      'expires' => null,
+      'expires_in' => null,
+      'expires_at' => null,
+      'issued_at' => null
+    ], $config);
+
+    $this->setExpiresAt($opts['expires']);
+    $this->setExpiresAt($opts['expires_at']);
+    $this->setExpiresIn($opts['expires_in']);
     // By default, the token is issued at `Time.now` when `expiresIn` is set,
     // but this can be used to supply a more precise time.
-    $this->setIssuedAt($opts->get('issued_at'));
+    $this->setIssuedAt($opts['issued_at']);
 
-    $this->setAccessToken($opts->get('access_token'));
-    $this->setIdToken($opts->get('id_token'));
-    $this->setRefreshToken($opts->get('refresh_token'));
+    $this->setAccessToken($opts['access_token']);
+    $this->setIdToken($opts['id_token']);
+    $this->setRefreshToken($opts['refresh_token']);
   }
 
   /**
    * Builds the authorization Uri that the user should be redirected to.
    *
    * @param $config configuration options that customize the return url
-   * @return GuzzleHttp::Url the authorization Url.
+   * @return UriInterface the authorization Url.
+   * @throws InvalidArgumentException
    */
-  public function buildFullAuthorizationUri(array $config = null)
+  public function buildFullAuthorizationUri(array $config = [])
   {
     if (is_null($this->getAuthorizationUri())) {
       throw new \InvalidArgumentException(
           'requires an authorizationUri to have been set');
     }
-    $defaults = [
+
+    $params = array_merge([
         'response_type' => 'code',
         'access_type' => 'offline',
         'client_id' => $this->clientId,
         'redirect_uri' => $this->redirectUri,
         'state' => $this->state,
-        'scope' => $this->getScope()
-    ];
-    $params = new Collection($defaults);
-    if (!is_null($config)) {
-      $params = Collection::fromConfig($config, $defaults, []);
-    }
+        'scope' => $this->getScope(),
+    ], $config);
 
     // Validate the auth_params
-    if (is_null($params->get('client_id'))) {
+    if (is_null($params['client_id'])) {
       throw new \InvalidArgumentException(
           'missing the required client identifier');
     }
-    if (is_null($params->get('redirect_uri'))) {
+    if (is_null($params['redirect_uri'])) {
       throw new \InvalidArgumentException('missing the required redirect URI');
     }
-    if ($params->hasKey('prompt') && $params->hasKey('approval_prompt')) {
+    if (!empty($params['prompt']) && !empty($params['approval_prompt'])) {
       throw new \InvalidArgumentException(
           'prompt and approval_prompt are mutually exclusive');
     }
 
     // Construct the uri object; return it if it is valid.
     $result = clone $this->authorizationUri;
-    if (is_string($result)) {
-      $result = Url::fromString($this->getAuthorizationUri());
-    }
-    $result->getQuery()->merge($params);
+    $existingParams = Psr7\parse_query($result->getQuery());
+
+    $result = $result->withQuery(
+      Psr7\build_query(array_merge($existingParams, $params))
+    );
+
     if ($result->getScheme() != 'https') {
       throw new \InvalidArgumentException(
           'Authorization endpoint must be protected by TLS');
@@ -622,12 +654,11 @@ class OAuth2 implements FetchAuthTokenInterface
       $this->redirectUri = null;
       return;
     }
-    $u = $this->coerceUri($uri);
-    if (!$this->isAbsoluteUri($u)) {
+    if (!$this->isAbsoluteUri($uri)) {
       throw new \InvalidArgumentException(
           'Redirect URI must be absolute');
     }
-    $this->redirectUri = $u;
+    $this->redirectUri = (string) $uri;
   }
 
   /**
@@ -698,7 +729,12 @@ class OAuth2 implements FetchAuthTokenInterface
     if (in_array($gt, self::$knownGrantTypes)) {
       $this->grantType = $gt;
     } else {
-      $this->grantType = Url::fromString($gt);
+      // validate URI
+      if (!$this->isAbsoluteUri($gt)) {
+        throw new \InvalidArgumentException(
+          'invalid grant type');
+      }
+      $this->grantType = (string) $gt;
     }
   }
 
@@ -1055,20 +1091,18 @@ class OAuth2 implements FetchAuthTokenInterface
     $this->refreshToken = $refreshToken;
   }
 
+  /**
+   * @todo handle uri as array
+   * @param string $uri
+   * @return null|UriInterface
+   */
   private function coerceUri($uri)
   {
     if (is_null($uri)) {
       return null;
-    } else if (is_string($uri)) {
-      return Url::fromString($uri);
-    } else if (is_array($uri)) {
-      return Url::buildUrl($uri);
-    } else if (get_class($uri) == 'GuzzleHttp\Url') {
-      return $uri;
-    } else {
-      throw new \InvalidArgumentException(
-          'unexpected type for a uri: ' . get_class($uri));
     }
+
+    return Psr7\uri_for($uri);
   }
 
   private function jwtDecode($idToken, $publicKey, $allowedAlgs)
@@ -1093,9 +1127,14 @@ class OAuth2 implements FetchAuthTokenInterface
   /**
    * Determines if the URI is absolute based on its scheme and host or path
    * (RFC 3986)
+   *
+   * @param string $uri
+   * @return bool
    */
-  private function isAbsoluteUri($u)
+  private function isAbsoluteUri($uri)
   {
+    $u = $this->coerceUri($uri);
+
     return $u->getScheme() && ($u->getHost() || $u->getPath());
   }
 
