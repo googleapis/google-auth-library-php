@@ -654,9 +654,14 @@ class OAuth2 implements FetchAuthTokenInterface
       $this->redirectUri = null;
       return;
     }
+    // redirect URI must be absolute
     if (!$this->isAbsoluteUri($uri)) {
-      throw new \InvalidArgumentException(
+      // "postmessage" is a reserved URI string in Google-land
+      // @see https://developers.google.com/identity/sign-in/web/server-side-flow
+      if ('postmessage' !== (string) $uri) {
+        throw new \InvalidArgumentException(
           'Redirect URI must be absolute');
+      }
     }
     $this->redirectUri = (string) $uri;
   }

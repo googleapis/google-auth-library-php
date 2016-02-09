@@ -157,6 +157,20 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals('scope1 scope2', $q['scope']);
   }
 
+  public function testRedirectUriPostmessageIsAllowed()
+  {
+    $o = new OAuth2([
+        'authorizationUri' => 'https://accounts.test.org/insecure/url',
+        'redirectUri' => 'postmessage',
+        'clientId' => 'aClientID'
+    ]);
+    $this->assertEquals('postmessage', $o->getRedirectUri());
+    $url = $o->buildFullAuthorizationUri();
+    $parts = parse_url((string) $url);
+    parse_str($parts['query'], $query);
+    $this->assertArrayHasKey('redirect_uri', $query);
+    $this->assertEquals('postmessage', $query['redirect_uri']);
+  }
 }
 
 class OAuth2GrantTypeTest extends \PHPUnit_Framework_TestCase
