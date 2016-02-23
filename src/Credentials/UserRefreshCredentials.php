@@ -43,7 +43,7 @@ class UserRefreshCredentials extends CredentialsLoader
    * @param array $jsonKey JSON credentials.
    *
    * @param string $jsonKeyPath the path to a file containing JSON credentials.  If
-   *   jsonKeyStream is set, it is ignored.
+   *   jsonKey is set, it is ignored.
    */
   public function __construct(
     $scope,
