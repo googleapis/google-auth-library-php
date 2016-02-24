@@ -5,6 +5,7 @@
   <dt>Authors</dt>
     <dd><a href="mailto:temiola@google.com">Tim Emiola</a></dd>
     <dd><a href="mailto:stanleycheung@google.com">Stanley Cheung</a></dd>
+    <dd><a href="mailto:betterbrent@google.com">Brent Shaffer</a></dd>
   <dt>Copyright</dt><dd>Copyright © 2015 Google, Inc.</dd>
   <dt>License</dt><dd>Apache 2.0</dd>
 </dl>
@@ -13,11 +14,6 @@
 
 This is Google's officially supported PHP client library for using OAuth 2.0
 authorization and authentication with Google APIs.
-
-## Alpha
-
-This library is in Alpha. We will make an effort to support the library, but
-we reserve the right to make incompatible changes when necessary.
 
 ### Installing via Composer
 

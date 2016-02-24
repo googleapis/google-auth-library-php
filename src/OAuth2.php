@@ -713,7 +713,7 @@ class OAuth2 implements FetchAuthTokenInterface
 
     // Returns the inferred grant type, based on the current object instance
     // state.
-    if (!is_null($this->code) && !is_null($this->redirectUri)) {
+    if (!is_null($this->code)) {
       return 'authorization_code';
     } else if (!is_null($this->refreshToken)) {
       return 'refresh_token';
