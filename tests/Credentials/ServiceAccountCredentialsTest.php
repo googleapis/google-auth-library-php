@@ -63,7 +63,6 @@ class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
     $sa = new ServiceAccountCredentials(
         $scope,
         $testJson,
-        null,
         $sub);
     $o = new OAuth2(['scope' => $scope]);
     $this->assertSame(
@@ -135,19 +134,19 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
   }
 
   /**
-   * @expectedException PHPUnit_Framework_Error_Warning
+   * @expectedException InvalidArgumentException
    */
   public function testFailsToInitalizeFromANonExistentFile()
   {
     $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
-    new ServiceAccountCredentials('scope/1', null, $keyFile);
+    new ServiceAccountCredentials('scope/1', $keyFile);
   }
 
   public function testInitalizeFromAFile()
   {
     $keyFile = __DIR__ . '/../fixtures' . '/private.json';
     $this->assertNotNull(
-        new ServiceAccountCredentials('scope/1', null, $keyFile)
+        new ServiceAccountCredentials('scope/1', $keyFile)
     );
   }
 }
