@@ -19,7 +19,6 @@ namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
-use GuzzleHttp\Psr7;
 
 /**
  * ServiceAccountCredentials supports authorization using a Google service
@@ -57,6 +56,11 @@ use GuzzleHttp\Psr7;
 class ServiceAccountCredentials extends CredentialsLoader
 {
   /**
+   * The OAuth2 instance used to conduct authorization.
+   */
+  protected $auth;
+
+  /**
    * Create a new ServiceAccountCredentials.
    *
    * @param string|array $scope the scope of the access request, expressed
@@ -77,7 +81,7 @@ class ServiceAccountCredentials extends CredentialsLoader
       if (!file_exists($jsonKey)) {
         throw new \InvalidArgumentException('file does not exist');
       }
-      $jsonKeyStream = Psr7\stream_for(file_get_contents($jsonKey));
+      $jsonKeyStream = file_get_contents($jsonKey);
       if (!$jsonKey = json_decode($jsonKeyStream, true)) {
         throw new \LogicException('invalid json for auth config');
       }
@@ -119,6 +123,14 @@ class ServiceAccountCredentials extends CredentialsLoader
       $key .= ':' . $sub;
     }
     return $key;
+  }
+
+  /**
+   * Implements FetchAuthTokenInterface#getLastReceivedToken.
+   */
+  public function getLastReceivedToken()
+  {
+    return $this->auth->getLastReceivedToken();
   }
 
   /**

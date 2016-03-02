@@ -79,6 +79,11 @@ class GCECredentials extends CredentialsLoader
   private $isOnGce = false;
 
   /**
+   * Result of fetchAuthToken
+   */
+  protected $lastReceivedToken;
+
+  /**
    * The full uri for accessing the default token.
    */
   public static function getTokenUri()
@@ -158,6 +163,9 @@ class GCECredentials extends CredentialsLoader
       throw new \Exception('Invalid JSON response');
     }
 
+    // store this so we can retrieve it later
+    $this->lastReceivedToken = $json;
+
     return $json;
   }
 
@@ -166,7 +174,23 @@ class GCECredentials extends CredentialsLoader
    *
    * @return 'GOOGLE_AUTH_PHP_GCE'
    */
-  public function getCacheKey() {
+  public function getCacheKey()
+  {
     return 'GOOGLE_AUTH_PHP_GCE';
+  }
+
+  /**
+   * Implements FetchAuthTokenInterface#getLastReceivedToken.
+   */
+  public function getLastReceivedToken()
+  {
+    if ($this->lastReceivedToken) {
+      return [
+        'access_token' => $this->lastReceivedToken['access_token'],
+        'expires_at' => $this->lastReceivedToken['expiration_time'],
+      ];
+    }
+
+    return null;
   }
 }

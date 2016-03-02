@@ -52,6 +52,14 @@ use google\appengine\api\app_identity\AppIdentityService;
  */
 class AppIdentityCredentials extends CredentialsLoader
 {
+  /**
+   * Result of fetchAuthToken
+   */
+  protected $lastReceivedToken;
+
+  /**
+   * Array of OAuth2 scopes to be requested
+   */
   private $scope;
 
   public function __construct($scope = array())
@@ -104,8 +112,24 @@ class AppIdentityCredentials extends CredentialsLoader
     $scope = is_array($this->scope) ? $this->scope : explode(' ', $this->scope);
 
     $token = AppIdentityService::getAccessToken($scope);
+    $this->lastReceivedToken = $token;
 
     return $token;
+  }
+
+  /**
+   * Implements FetchAuthTokenInterface#getLastReceivedToken.
+   */
+  public function getLastReceivedToken()
+  {
+    if ($this->lastReceivedToken) {
+      return [
+        'access_token' => $this->lastReceivedToken['access_token'],
+        'expires_at' => $this->lastReceivedToken['expiration_time'],
+      ];
+    }
+
+    return null;
   }
 
   /**
