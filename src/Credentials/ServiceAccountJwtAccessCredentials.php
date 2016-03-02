@@ -31,12 +31,28 @@ use Google\Auth\OAuth2;
  */
 class ServiceAccountJwtAccessCredentials extends CredentialsLoader
 {
+
+  /**
+   * The OAuth2 instance used to conduct authorization.
+   */
+  protected $auth;
+
   /**
    * Create a new ServiceAccountJwtAccessCredentials.
    *
-   * @param array $jsonKey JSON credentials.
+   * @param string|array $jsonKey JSON credential file path or JSON credentials
+   *   as an associative array
    */
-  public function __construct(array $jsonKey) {
+  public function __construct($jsonKey) {
+    if (is_string($jsonKey)) {
+      if (!file_exists($jsonKey)) {
+        throw new \InvalidArgumentException('file does not exist');
+      }
+      $jsonKeyStream = file_get_contents($jsonKey);
+      if (!$jsonKey = json_decode($jsonKeyStream, true)) {
+        throw new \LogicException('invalid json for auth config');
+      }
+    }
     if (!array_key_exists('client_email', $jsonKey)) {
       throw new \InvalidArgumentException(
           'json key is missing the client_email field');
@@ -95,5 +111,13 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
   public function getCacheKey()
   {
     return $this->auth->getCacheKey();
+  }
+
+  /**
+   * Implements FetchAuthTokenInterface#getLastReceivedToken.
+   */
+  public function getLastReceivedToken()
+  {
+    return $this->auth->getLastReceivedToken();
   }
 }

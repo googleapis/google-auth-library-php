@@ -48,11 +48,6 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
   }
 
   /**
-   * The OAuth2 instance used to conduct authorization.
-   */
-  protected $auth;
-
-  /**
    * Create a credentials instance from the path specified in the environment.
    *
    * Creates a credentials instance from the path specified in the environment
