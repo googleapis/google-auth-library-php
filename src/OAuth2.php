@@ -34,9 +34,8 @@ use Psr\Http\Message\UriInterface;
  */
 class OAuth2 implements FetchAuthTokenInterface
 {
-
-  const DEFAULT_EXPIRY_MINUTES = 60;
-  const DEFAULT_SKEW = 60;
+  const DEFAULT_EXPIRY_SECONDS = 3600; // 1 hour
+  const DEFAULT_SKEW_SECONDS = 60; // 1 minute
   const JWT_URN = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
 
   /**
@@ -121,11 +120,6 @@ class OAuth2 implements FetchAuthTokenInterface
    * The target audience for assertions.
    */
   private $audience;
-
-  /**
-   * The target user for assertions.
-   */
-  private $principal;
 
   /**
    * The target sub when issuing assertions.
@@ -218,9 +212,6 @@ class OAuth2 implements FetchAuthTokenInterface
    * - state
    *   An arbitrary string designed to allow the client to maintain state.
    *
-   * - code
-   *   The authorization code received from the authorization server.
-   *
    * - redirectUri
    *   The redirection URI used in the initial request.
    *
@@ -235,9 +226,6 @@ class OAuth2 implements FetchAuthTokenInterface
    *
    * - audience
    *   Target audience for assertions
-   *
-   * - principal
-   *   Target user for assertions
    *
    * - expiry
    *   Number of seconds assertions are valid for
@@ -264,7 +252,7 @@ class OAuth2 implements FetchAuthTokenInterface
   public function __construct(array $config)
   {
     $opts = array_merge([
-      'expiry' => self::DEFAULT_EXPIRY_MINUTES,
+      'expiry' => self::DEFAULT_EXPIRY_SECONDS,
       'extensionParams' => [],
       'authorizationUri' => null,
       'redirectUri' => null,
@@ -275,7 +263,6 @@ class OAuth2 implements FetchAuthTokenInterface
       'clientId' => null,
       'clientSecret' => null,
       'issuer' => null,
-      'principal' => null,
       'sub' => null,
       'audience' => null,
       'signingKey' => null,
@@ -292,7 +279,6 @@ class OAuth2 implements FetchAuthTokenInterface
     $this->setClientId($opts['clientId']);
     $this->setClientSecret($opts['clientSecret']);
     $this->setIssuer($opts['issuer']);
-    $this->setPrincipal($opts['principal']);
     $this->setSub($opts['sub']);
     $this->setExpiry($opts['expiry']);
     $this->setAudience($opts['audience']);
@@ -348,7 +334,7 @@ class OAuth2 implements FetchAuthTokenInterface
     $now = time();
 
     $opts = array_merge([
-      'skew' => self::DEFAULT_SKEW
+      'skew' => self::DEFAULT_SKEW_SECONDS
     ], $config);
 
     $assertion = [
@@ -364,9 +350,6 @@ class OAuth2 implements FetchAuthTokenInterface
     }
     if (!(is_null($this->getScope()))) {
       $assertion['scope'] = $this->getScope();
-    }
-    if (!(is_null($this->getPrincipal()))) {
-      $assertion['prn'] = $this->getPrincipal();
     }
     if (!(is_null($this->getSub()))) {
       $assertion['sub'] = $this->getSub();
@@ -543,7 +526,9 @@ class OAuth2 implements FetchAuthTokenInterface
     $this->setExpiresIn($opts['expires_in']);
     // By default, the token is issued at `Time.now` when `expiresIn` is set,
     // but this can be used to supply a more precise time.
-    $this->setIssuedAt($opts['issued_at']);
+    if (!is_null($opts['issued_at'])) {
+      $this->setIssuedAt($opts['issued_at']);
+    }
 
     $this->setAccessToken($opts['access_token']);
     $this->setIdToken($opts['id_token']);
@@ -857,22 +842,6 @@ class OAuth2 implements FetchAuthTokenInterface
   public function setIssuer($issuer)
   {
     $this->issuer = $issuer;
-  }
-
-  /**
-   * Gets the target user for the assertions.
-   */
-  public function getPrincipal()
-  {
-    return $this->principal;
-  }
-
-  /**
-   * Sets the target user for the assertions.
-   */
-  public function setPrincipal($p)
-  {
-    $this->principal = $p;
   }
 
   /**

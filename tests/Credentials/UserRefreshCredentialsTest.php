@@ -97,19 +97,19 @@ class URCConstructorTest extends \PHPUnit_Framework_TestCase
   }
 
   /**
-   * @expectedException PHPUnit_Framework_Error_Warning
+   * @expectedException InvalidArgumentException
    */
   public function testFailsToInitalizeFromANonExistentFile()
   {
     $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
-    new UserRefreshCredentials('scope/1', null, $keyFile);
+    new UserRefreshCredentials('scope/1', $keyFile);
   }
 
   public function testInitalizeFromAFile()
   {
     $keyFile = __DIR__ . '/../fixtures2' . '/private.json';
     $this->assertNotNull(
-        new UserRefreshCredentials('scope/1', null, $keyFile)
+        new UserRefreshCredentials('scope/1', $keyFile)
     );
   }
 }
