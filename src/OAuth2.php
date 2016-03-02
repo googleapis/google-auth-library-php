@@ -212,9 +212,6 @@ class OAuth2 implements FetchAuthTokenInterface
    * - state
    *   An arbitrary string designed to allow the client to maintain state.
    *
-   * - code
-   *   The authorization code received from the authorization server.
-   *
    * - redirectUri
    *   The redirection URI used in the initial request.
    *

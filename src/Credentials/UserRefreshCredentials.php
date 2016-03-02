@@ -40,19 +40,21 @@ class UserRefreshCredentials extends CredentialsLoader
    * @param string|array $scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
    *
-   * @param array $jsonKey JSON credentials.
-   *
-   * @param string $jsonKeyPath the path to a file containing JSON credentials.  If
-   *   jsonKey is set, it is ignored.
+   * @param string|array $jsonKey JSON credential file path or JSON credentials
+   *   as an associative array
    */
   public function __construct(
     $scope,
-    $jsonKey,
-    $jsonKeyPath = null
+    $jsonKey
   ) {
-    if (is_null($jsonKey)) {
-      $jsonKeyStream = Psr7\stream_for(file_get_contents($jsonKeyPath));
-      $jsonKey = json_decode($jsonKeyStream->getContents(), true);
+    if (is_string($jsonKey)) {
+      if (!file_exists($jsonKey)) {
+        throw new \InvalidArgumentException('file does not exist');
+      }
+      $jsonKeyStream = Psr7\stream_for(file_get_contents($jsonKey));
+      if (!$jsonKey = json_decode($jsonKeyStream, true)) {
+        throw new \LogicException('invalid json for auth config');
+      }
     }
     if (!array_key_exists('client_id', $jsonKey)) {
       throw new \InvalidArgumentException(

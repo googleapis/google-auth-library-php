@@ -62,8 +62,6 @@ class ServiceAccountCredentials extends CredentialsLoader
    * @param string|array $scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
    *
-   * @param array $jsonKey JSON credentials.
-   *
    * @param string|array $jsonKey JSON credential file path or JSON credentials
    *   as an associative array
    *
