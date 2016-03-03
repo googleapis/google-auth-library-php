@@ -78,7 +78,7 @@ class FetchAuthTokenTest extends BaseTest
     $credentials = new GCECredentials();
     $property->setValue($credentials, [
       'access_token' => 'xyz',
-      'expiration_time' => strtotime('2001'),
+      'expires_at' => strtotime('2001'),
     ]);
 
     return $credentials;
