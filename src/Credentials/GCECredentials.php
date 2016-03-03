@@ -165,6 +165,7 @@ class GCECredentials extends CredentialsLoader
 
     // store this so we can retrieve it later
     $this->lastReceivedToken = $json;
+    $this->lastReceivedToken['expires_at'] = time() + $json['expires_in'];
 
     return $json;
   }
@@ -187,7 +188,7 @@ class GCECredentials extends CredentialsLoader
     if ($this->lastReceivedToken) {
       return [
         'access_token' => $this->lastReceivedToken['access_token'],
-        'expires_at' => $this->lastReceivedToken['expiration_time'],
+        'expires_at' => $this->lastReceivedToken['expires_at'],
       ];
     }
 

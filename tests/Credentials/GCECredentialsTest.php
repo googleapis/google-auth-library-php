@@ -107,5 +107,6 @@ class GCECredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     ]);
     $g = new GCECredentials();
     $this->assertEquals($wantedTokens, $g->fetchAuthToken($httpHandler));
+    $this->assertEquals(time() + 57, $g->getLastReceivedToken()['expires_at']);
   }
 }
