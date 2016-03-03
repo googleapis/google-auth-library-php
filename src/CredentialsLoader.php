@@ -28,7 +28,7 @@ use Psr\Http\Message\StreamInterface;
  */
 abstract class CredentialsLoader implements FetchAuthTokenInterface
 {
-  const TOKEN_CREDENTIAL_URI = 'https://www.googleapis.com/oauth2/v3/token';
+  const TOKEN_CREDENTIAL_URI = 'https://www.googleapis.com/oauth2/v4/token';
   const ENV_VAR = 'GOOGLE_APPLICATION_CREDENTIALS';
   const WELL_KNOWN_PATH = 'gcloud/application_default_credentials.json';
   const NON_WINDOWS_WELL_KNOWN_PATH_BASE = '.config';
