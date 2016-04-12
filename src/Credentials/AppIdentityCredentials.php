@@ -17,12 +17,12 @@
 
 namespace Google\Auth\Credentials;
 
-use google\appengine\api\app_identity\AppIdentityService;
 /*
  * The AppIdentityService class is automatically defined on App Engine,
  * so including this dependency is not necessary, and will result in a
  * PHP fatal error in the App Engine environment.
  */
+use google\appengine\api\app_identity\AppIdentityService;
 use Google\Auth\CredentialsLoader;
 
 /**
