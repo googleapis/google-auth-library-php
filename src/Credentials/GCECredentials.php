@@ -50,148 +50,152 @@ use GuzzleHttp\Psr7\Request;
  */
 class GCECredentials extends CredentialsLoader
 {
-  /**
-   * The metadata IP address on appengine instances.
-   *
-   * The IP is used instead of the domain 'metadata' to avoid slow responses
-   * when not on Compute Engine.
-   */
-  const METADATA_IP = '169.254.169.254';
+    /**
+     * The metadata IP address on appengine instances.
+     *
+     * The IP is used instead of the domain 'metadata' to avoid slow responses
+     * when not on Compute Engine.
+     */
+    const METADATA_IP = '169.254.169.254';
 
-  /**
-   * The metadata path of the default token.
-   */
-  const TOKEN_URI_PATH = 'v1/instance/service-accounts/default/token';
+    /**
+     * The metadata path of the default token.
+     */
+    const TOKEN_URI_PATH = 'v1/instance/service-accounts/default/token';
 
-  /**
-   * The header whose presence indicates GCE presence.
-   */
-  const FLAVOR_HEADER = 'Metadata-Flavor';
+    /**
+     * The header whose presence indicates GCE presence.
+     */
+    const FLAVOR_HEADER = 'Metadata-Flavor';
 
-  /**
-   * Flag used to ensure that the onGCE test is only done once;
-   */
-  private $hasCheckedOnGce = false;
+    /**
+     * Flag used to ensure that the onGCE test is only done once;.
+     */
+    private $hasCheckedOnGce = false;
 
-  /**
-   * Flag that stores the value of the onGCE check.
-   */
-  private $isOnGce = false;
+    /**
+     * Flag that stores the value of the onGCE check.
+     */
+    private $isOnGce = false;
 
-  /**
-   * Result of fetchAuthToken
-   */
-  protected $lastReceivedToken;
+    /**
+     * Result of fetchAuthToken.
+     */
+    protected $lastReceivedToken;
 
-  /**
-   * The full uri for accessing the default token.
-   */
-  public static function getTokenUri()
-  {
-    $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
-    return $base . self::TOKEN_URI_PATH;
-  }
+    /**
+     * The full uri for accessing the default token.
+     */
+    public static function getTokenUri()
+    {
+        $base = 'http://'.self::METADATA_IP.'/computeMetadata/';
 
-  /**
-   * Determines if this a GCE instance, by accessing the expected metadata
-   * host.
-   * If $httpHandler is not specified a the default HttpHandler is used.
-   *
-   * @param callable $httpHandler callback which delivers psr7 request
-   * @return true if this a GCEInstance false otherwise
-   */
-  public static function onGce(callable $httpHandler = null)
-  {
-    if (is_null($httpHandler)) {
-      $httpHandler = HttpHandlerFactory::build();
-    }
-    $checkUri = 'http://' . self::METADATA_IP;
-    try {
-      // Comment from: oauth2client/client.py
-      //
-      // Note: the explicit `timeout` below is a workaround. The underlying
-      // issue is that resolving an unknown host on some networks will take
-      // 20-30 seconds; making this timeout short fixes the issue, but
-      // could lead to false negatives in the event that we are on GCE, but
-      // the metadata resolution was particularly slow. The latter case is
-      // "unlikely".
-      $resp = $httpHandler(
-        new Request('GET', $checkUri),
-        ['timeout' => 0.3]
-      );
-      return $resp->getHeaderLine(self::FLAVOR_HEADER) == 'Google';
-    } catch (ClientException $e) {
-      return false;
-    } catch (ServerException $e) {
-      return false;
-    } catch (RequestException $e) {
-      return false;
-    }
-  }
-
-  /**
-   * Implements FetchAuthTokenInterface#fetchAuthToken.
-   *
-   * Fetches the auth tokens from the GCE metadata host if it is available.
-   * If $httpHandler is not specified a the default HttpHandler is used.
-   *
-   * @param callable $httpHandler callback which delivers psr7 request
-   * @return array the response
-   */
-  public function fetchAuthToken(callable $httpHandler = null)
-  {
-    if (is_null($httpHandler)) {
-      $httpHandler = HttpHandlerFactory::build();
-    }
-    if (!$this->hasCheckedOnGce) {
-      $this->isOnGce = self::onGce($httpHandler);
-    }
-    if (!$this->isOnGce) {
-      return array();  // return an empty array with no access token
-    }
-    $resp = $httpHandler(
-      new Request(
-        'GET',
-        self::getTokenUri(),
-        [self::FLAVOR_HEADER => 'Google']
-      )
-    );
-    $body = (string) $resp->getBody();
-
-    // Assume it's JSON; if it's not throw an exception
-    if (null === $json = json_decode($body, true)) {
-      throw new \Exception('Invalid JSON response');
+        return $base.self::TOKEN_URI_PATH;
     }
 
-    // store this so we can retrieve it later
-    $this->lastReceivedToken = $json;
-    $this->lastReceivedToken['expires_at'] = time() + $json['expires_in'];
+    /**
+     * Determines if this a GCE instance, by accessing the expected metadata
+     * host.
+     * If $httpHandler is not specified a the default HttpHandler is used.
+     *
+     * @param callable $httpHandler callback which delivers psr7 request
+     *
+     * @return true if this a GCEInstance false otherwise
+     */
+    public static function onGce(callable $httpHandler = null)
+    {
+        if (is_null($httpHandler)) {
+            $httpHandler = HttpHandlerFactory::build();
+        }
+        $checkUri = 'http://'.self::METADATA_IP;
+        try {
+            // Comment from: oauth2client/client.py
+            //
+            // Note: the explicit `timeout` below is a workaround. The underlying
+            // issue is that resolving an unknown host on some networks will take
+            // 20-30 seconds; making this timeout short fixes the issue, but
+            // could lead to false negatives in the event that we are on GCE, but
+            // the metadata resolution was particularly slow. The latter case is
+            // "unlikely".
+            $resp = $httpHandler(
+                new Request('GET', $checkUri),
+                ['timeout' => 0.3]
+            );
 
-    return $json;
-  }
-
-  /**
-   * Implements FetchAuthTokenInterface#getCacheKey.
-   *
-   * @return 'GOOGLE_AUTH_PHP_GCE'
-   */
-  public function getCacheKey()
-  {
-    return 'GOOGLE_AUTH_PHP_GCE';
-  }
-
-  /**
-   * Implements FetchAuthTokenInterface#getLastReceivedToken.
-   */
-  public function getLastReceivedToken()
-  {
-    if ($this->lastReceivedToken) {
-      return [
-        'access_token' => $this->lastReceivedToken['access_token'],
-        'expires_at' => $this->lastReceivedToken['expires_at'],
-      ];
+            return $resp->getHeaderLine(self::FLAVOR_HEADER) == 'Google';
+        } catch (ClientException $e) {
+            return false;
+        } catch (ServerException $e) {
+            return false;
+        } catch (RequestException $e) {
+            return false;
+        }
     }
 
-    return null;
-  }
+    /**
+     * Implements FetchAuthTokenInterface#fetchAuthToken.
+     *
+     * Fetches the auth tokens from the GCE metadata host if it is available.
+     * If $httpHandler is not specified a the default HttpHandler is used.
+     *
+     * @param callable $httpHandler callback which delivers psr7 request
+     *
+     * @return array the response
+     */
+    public function fetchAuthToken(callable $httpHandler = null)
+    {
+        if (is_null($httpHandler)) {
+            $httpHandler = HttpHandlerFactory::build();
+        }
+        if (!$this->hasCheckedOnGce) {
+            $this->isOnGce = self::onGce($httpHandler);
+        }
+        if (!$this->isOnGce) {
+            return array();  // return an empty array with no access token
+        }
+        $resp = $httpHandler(
+            new Request(
+                'GET',
+                self::getTokenUri(),
+                [self::FLAVOR_HEADER => 'Google']
+            )
+        );
+        $body = (string)$resp->getBody();
+
+        // Assume it's JSON; if it's not throw an exception
+        if (null === $json = json_decode($body, true)) {
+            throw new \Exception('Invalid JSON response');
+        }
+
+        // store this so we can retrieve it later
+        $this->lastReceivedToken = $json;
+        $this->lastReceivedToken['expires_at'] = time() + $json['expires_in'];
+
+        return $json;
+    }
+
+    /**
+     * Implements FetchAuthTokenInterface#getCacheKey.
+     *
+     * @return 'GOOGLE_AUTH_PHP_GCE'
+     */
+    public function getCacheKey()
+    {
+        return 'GOOGLE_AUTH_PHP_GCE';
+    }
+
+    /**
+     * Implements FetchAuthTokenInterface#getLastReceivedToken.
+     */
+    public function getLastReceivedToken()
+    {
+        if ($this->lastReceivedToken) {
+            return [
+                'access_token' => $this->lastReceivedToken['access_token'],
+                'expires_at' => $this->lastReceivedToken['expires_at'],
+            ];
+        }
+
+        return;
+    }
 }

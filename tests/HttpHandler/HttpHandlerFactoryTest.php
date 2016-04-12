@@ -21,19 +21,19 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 
 class HttpHandlerFactoryTest extends BaseTest
 {
-  public function testBuildsGuzzle5Handler()
-  {
-    $this->onlyGuzzle5();
+    public function testBuildsGuzzle5Handler()
+    {
+        $this->onlyGuzzle5();
 
-    $handler = HttpHandlerFactory::build();
-    $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle5HttpHandler', $handler);
-  }
+        $handler = HttpHandlerFactory::build();
+        $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle5HttpHandler', $handler);
+    }
 
-  public function testBuildsGuzzle6Handler()
-  {
-    $this->onlyGuzzle6();
+    public function testBuildsGuzzle6Handler()
+    {
+        $this->onlyGuzzle6();
 
-    $handler = HttpHandlerFactory::build();
-    $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle6HttpHandler', $handler);
-  }
+        $handler = HttpHandlerFactory::build();
+        $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle6HttpHandler', $handler);
+    }
 }

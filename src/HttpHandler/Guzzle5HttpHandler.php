@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 namespace Google\Auth\HttpHandler;
 
 use GuzzleHttp\ClientInterface;
@@ -24,45 +23,46 @@ use Psr\Http\Message\ResponseInterface;
 
 class Guzzle5HttpHandler
 {
-  /**
-   * @var ClientInterface
-   */
-  private $client;
+    /**
+     * @var ClientInterface
+     */
+    private $client;
 
-  /**
-   * @param ClientInterface $client
-   */
-  public function __construct(ClientInterface $client)
-  {
-    $this->client = $client;
-  }
+    /**
+     * @param ClientInterface $client
+     */
+    public function __construct(ClientInterface $client)
+    {
+        $this->client = $client;
+    }
 
-  /**
-   * Accepts a PSR-7 Request and an array of options and returns a PSR-7 response.
-   *
-   * @param RequestInterface $request
-   * @param array $options
-   * @return ResponseInterface
-   */
-  public function __invoke(RequestInterface $request, array $options = [])
-  {
-    $request = $this->client->createRequest(
-      $request->getMethod(),
-      $request->getUri(),
-      array_merge([
-        'headers' => $request->getHeaders(),
-        'body' => $request->getBody()
-      ], $options)
-    );
+    /**
+     * Accepts a PSR-7 Request and an array of options and returns a PSR-7 response.
+     *
+     * @param RequestInterface $request
+     * @param array $options
+     *
+     * @return ResponseInterface
+     */
+    public function __invoke(RequestInterface $request, array $options = [])
+    {
+        $request = $this->client->createRequest(
+            $request->getMethod(),
+            $request->getUri(),
+            array_merge([
+                'headers' => $request->getHeaders(),
+                'body' => $request->getBody(),
+            ], $options)
+        );
 
-    $response = $this->client->send($request);
+        $response = $this->client->send($request);
 
-    return new Response(
-      $response->getStatusCode(),
-      $response->getHeaders() ?: [],
-      $response->getBody(),
-      $response->getProtocolVersion(),
-      $response->getReasonPhrase()
-    );
-  }
+        return new Response(
+            $response->getStatusCode(),
+            $response->getHeaders() ?: [],
+            $response->getBody(),
+            $response->getProtocolVersion(),
+            $response->getReasonPhrase()
+        );
+    }
 }

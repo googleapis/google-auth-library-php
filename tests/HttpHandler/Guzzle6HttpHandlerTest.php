@@ -18,35 +18,33 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\HttpHandler\Guzzle6HttpHandler;
-use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
-
 
 class Guzzle6HttpHandlerTest extends BaseTest
 {
-  public function setUp()
-  {
-    $this->onlyGuzzle6();
+    public function setUp()
+    {
+        $this->onlyGuzzle6();
 
-    $this->mockRequest =
-      $this
-      ->getMockBuilder('Psr\Http\Message\RequestInterface')
-      ->getMock();
-    $this->mockClient =
-      $this
-      ->getMockBuilder('GuzzleHttp\Client')
-      ->getMock();
-  }
+        $this->mockRequest =
+            $this
+                ->getMockBuilder('Psr\Http\Message\RequestInterface')
+                ->getMock();
+        $this->mockClient =
+            $this
+                ->getMockBuilder('GuzzleHttp\Client')
+                ->getMock();
+    }
 
-  public function testSuccessfullySendsRequest()
-  {
-    $this->mockClient
-      ->expects($this->any())
-      ->method('send')
-      ->will($this->returnValue(new Response(200)));
+    public function testSuccessfullySendsRequest()
+    {
+        $this->mockClient
+            ->expects($this->any())
+            ->method('send')
+            ->will($this->returnValue(new Response(200)));
 
-    $handler = new Guzzle6HttpHandler($this->mockClient);
-    $response = $handler($this->mockRequest);
-    $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
-  }
+        $handler = new Guzzle6HttpHandler($this->mockClient);
+        $response = $handler($this->mockRequest);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
+    }
 }

@@ -21,63 +21,63 @@ use Google\Auth\Credentials\IAMCredentials;
 
 class IAMConstructorTest extends \PHPUnit_Framework_TestCase
 {
-  /**
-   * @expectedException InvalidArgumentException
-   */
-  public function testShouldFailIfSelectorIsNotString()
-  {
-    $notAString = new \stdClass();
-    $iam = new IAMCredentials(
-        $notAString,
-        ""
-    );
-  }
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testShouldFailIfSelectorIsNotString()
+    {
+        $notAString = new \stdClass();
+        $iam = new IAMCredentials(
+            $notAString,
+            ''
+        );
+    }
 
-  /**
-   * @expectedException InvalidArgumentException
-   */
-  public function testShouldFailIfTokenIsNotString()
-  {
-    $notAString = new \stdClass();
-    $iam = new IAMCredentials(
-        "",
-        $notAString
-    );
-  }
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testShouldFailIfTokenIsNotString()
+    {
+        $notAString = new \stdClass();
+        $iam = new IAMCredentials(
+            '',
+            $notAString
+        );
+    }
 
-  public function testInitializeSuccess()
-  {
-    $this->assertNotNull(
-        new IAMCredentials("iam-selector", "iam-token")
-    );
-  }
+    public function testInitializeSuccess()
+    {
+        $this->assertNotNull(
+            new IAMCredentials('iam-selector', 'iam-token')
+        );
+    }
 }
 
 class IAMUpdateMetadataCallbackTest extends \PHPUnit_Framework_TestCase
 {
-  public function testUpdateMetadataFunc()
-  {
-    $selector = 'iam-selector';
-    $token = 'iam-token';
-    $iam = new IAMCredentials(
-        $selector,
-        $token
-    );
+    public function testUpdateMetadataFunc()
+    {
+        $selector = 'iam-selector';
+        $token = 'iam-token';
+        $iam = new IAMCredentials(
+            $selector,
+            $token
+        );
 
-    $update_metadata = $iam->getUpdateMetadataFunc();
-    $this->assertTrue(is_callable($update_metadata));
+        $update_metadata = $iam->getUpdateMetadataFunc();
+        $this->assertTrue(is_callable($update_metadata));
 
-    $actual_metadata = call_user_func($update_metadata,
-                                      $metadata = array('foo' => 'bar'));
-    $this->assertTrue(
-        isset($actual_metadata[IAMCredentials::SELECTOR_KEY]));
-    $this->assertEquals(
-        $actual_metadata[IAMCredentials::SELECTOR_KEY],
-        $selector);
-    $this->assertTrue(
-        isset($actual_metadata[IAMCredentials::TOKEN_KEY]));
-    $this->assertEquals(
-        $actual_metadata[IAMCredentials::TOKEN_KEY],
-        $token);
-  }
+        $actual_metadata = call_user_func($update_metadata,
+            $metadata = array('foo' => 'bar'));
+        $this->assertTrue(
+            isset($actual_metadata[IAMCredentials::SELECTOR_KEY]));
+        $this->assertEquals(
+            $actual_metadata[IAMCredentials::SELECTOR_KEY],
+            $selector);
+        $this->assertTrue(
+            isset($actual_metadata[IAMCredentials::TOKEN_KEY]));
+        $this->assertEquals(
+            $actual_metadata[IAMCredentials::TOKEN_KEY],
+            $token);
+    }
 }

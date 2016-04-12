@@ -35,108 +35,110 @@ use Psr\Http\Message\RequestInterface;
  */
 class AuthTokenMiddleware
 {
-  use CacheTrait;
+    use CacheTrait;
 
-  const DEFAULT_CACHE_LIFETIME = 1500;
+    const DEFAULT_CACHE_LIFETIME = 1500;
 
-  /** @var An implementation of CacheInterface */
-  private $cache;
+    /** @var An implementation of CacheInterface */
+    private $cache;
 
-  /** @var callback */
-  private $httpHandler;
+    /** @var callback */
+    private $httpHandler;
 
-  /** @var An implementation of FetchAuthTokenInterface */
-  private $fetcher;
+    /** @var An implementation of FetchAuthTokenInterface */
+    private $fetcher;
 
-  /** @var cache configuration */
-  private $cacheConfig;
+    /** @var cache configuration */
+    private $cacheConfig;
 
-  /**
-   * Creates a new AuthTokenMiddleware.
-   *
-   * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
-   * @param array $cacheConfig configures the cache
-   * @param CacheInterface $cache (optional) caches the token.
-   * @param callable $httpHandler (optional) callback which delivers psr7 request
-   */
-  public function __construct(
-    FetchAuthTokenInterface $fetcher,
-    array $cacheConfig = null,
-    CacheInterface $cache = null,
-    callable $httpHandler = null
-  ) {
-    $this->fetcher = $fetcher;
-    $this->httpHandler = $httpHandler;
-    if (!is_null($cache)) {
-      $this->cache = $cache;
-      $this->cacheConfig = array_merge([
-        'lifetime' => self::DEFAULT_CACHE_LIFETIME,
-        'prefix'   => ''
-      ], $cacheConfig);
-    }
-  }
-
-  /**
-   * Updates the request with an Authorization header when auth is 'google_auth'.
-   *
-   *   use Google\Auth\Middleware\AuthTokenMiddleware;
-   *   use Google\Auth\OAuth2;
-   *   use GuzzleHttp\Client;
-   *   use GuzzleHttp\HandlerStack;
-   *
-   *   $config = [..<oauth config param>.];
-   *   $oauth2 = new OAuth2($config)
-   *   $middleware = new AuthTokenMiddleware(
-   *       $oauth2,
-   *       ['prefix' => 'OAuth2::'],
-   *       $cache = new Memcache()
-   *   );
-   *   $stack = HandlerStack::create();
-   *   $stack->push($middleware);
-   *
-   *   $client = new Client([
-   *       'handler' => $stack,
-   *       'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
-   *       'auth' => 'google_auth' // authorize all requests
-   *   ]);
-   *
-   *   $res = $client->get('myproject/taskqueues/myqueue');
-   */
-  public function __invoke(callable $handler)
-  {
-    return function (RequestInterface $request, array $options) use ($handler) {
-      // Requests using "auth"="google_auth" will be authorized.
-      if (!isset($options['auth']) || $options['auth'] !== 'google_auth') {
-        return $handler($request, $options);
-      }
-
-      $request = $request->withHeader('Authorization', 'Bearer ' . $this->fetchToken());
-      return $handler($request, $options);
-    };
-  }
-
-  /**
-   * Determine if token is available in the cache, if not call fetcher to
-   * fetch it.
-   *
-   * @return string
-   */
-  private function fetchToken()
-  {
-    // TODO: correct caching; update the call to setCachedValue to set the expiry
-    // to the value returned with the auth token.
-    //
-    // TODO: correct caching; enable the cache to be cleared.
-    $cached = $this->getCachedValue();
-    if (!empty($cached)) {
-      return $cached;
+    /**
+     * Creates a new AuthTokenMiddleware.
+     *
+     * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
+     * @param array $cacheConfig configures the cache
+     * @param CacheInterface $cache (optional) caches the token.
+     * @param callable $httpHandler (optional) callback which delivers psr7 request
+     */
+    public function __construct(
+        FetchAuthTokenInterface $fetcher,
+        array $cacheConfig = null,
+        CacheInterface $cache = null,
+        callable $httpHandler = null
+    ) {
+        $this->fetcher = $fetcher;
+        $this->httpHandler = $httpHandler;
+        if (!is_null($cache)) {
+            $this->cache = $cache;
+            $this->cacheConfig = array_merge([
+                'lifetime' => self::DEFAULT_CACHE_LIFETIME,
+                'prefix' => '',
+            ], $cacheConfig);
+        }
     }
 
-    $auth_tokens = $this->fetcher->fetchAuthToken($this->httpHandler);
+    /**
+     * Updates the request with an Authorization header when auth is 'google_auth'.
+     *
+     *   use Google\Auth\Middleware\AuthTokenMiddleware;
+     *   use Google\Auth\OAuth2;
+     *   use GuzzleHttp\Client;
+     *   use GuzzleHttp\HandlerStack;
+     *
+     *   $config = [..<oauth config param>.];
+     *   $oauth2 = new OAuth2($config)
+     *   $middleware = new AuthTokenMiddleware(
+     *       $oauth2,
+     *       ['prefix' => 'OAuth2::'],
+     *       $cache = new Memcache()
+     *   );
+     *   $stack = HandlerStack::create();
+     *   $stack->push($middleware);
+     *
+     *   $client = new Client([
+     *       'handler' => $stack,
+     *       'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
+     *       'auth' => 'google_auth' // authorize all requests
+     *   ]);
+     *
+     *   $res = $client->get('myproject/taskqueues/myqueue');
+     */
+    public function __invoke(callable $handler)
+    {
+        return function (RequestInterface $request, array $options) use ($handler) {
+            // Requests using "auth"="google_auth" will be authorized.
+            if (!isset($options['auth']) || $options['auth'] !== 'google_auth') {
+                return $handler($request, $options);
+            }
 
-    if (array_key_exists('access_token', $auth_tokens)) {
-      $this->setCachedValue($auth_tokens['access_token']);
-      return $auth_tokens['access_token'];
+            $request = $request->withHeader('Authorization', 'Bearer '.$this->fetchToken());
+
+            return $handler($request, $options);
+        };
     }
-  }
+
+    /**
+     * Determine if token is available in the cache, if not call fetcher to
+     * fetch it.
+     *
+     * @return string
+     */
+    private function fetchToken()
+    {
+        // TODO: correct caching; update the call to setCachedValue to set the expiry
+        // to the value returned with the auth token.
+        //
+        // TODO: correct caching; enable the cache to be cleared.
+        $cached = $this->getCachedValue();
+        if (!empty($cached)) {
+            return $cached;
+        }
+
+        $auth_tokens = $this->fetcher->fetchAuthToken($this->httpHandler);
+
+        if (array_key_exists('access_token', $auth_tokens)) {
+            $this->setCachedValue($auth_tokens['access_token']);
+
+            return $auth_tokens['access_token'];
+        }
+    }
 }
