@@ -361,7 +361,7 @@ class OAuth2 implements FetchAuthTokenInterface
     {
         $idToken = $this->getIdToken();
         if (is_null($idToken)) {
-            return;
+            return null;
         }
 
         $resp = $this->jwtDecode($idToken, $publicKey, $allowed_algs);
@@ -512,7 +512,7 @@ class OAuth2 implements FetchAuthTokenInterface
         }
 
         // If scope has not set, return null to indicate no caching.
-        return;
+        return null;
     }
 
     /**
@@ -671,6 +671,8 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Gets the authorization server's HTTP endpoint capable of authenticating
      * the end-user and obtaining authorization.
+     *
+     * @return UriInterface
      */
     public function getAuthorizationUri()
     {
@@ -680,6 +682,8 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Gets the authorization server's HTTP endpoint capable of issuing tokens
      * and refreshing expired tokens.
+     *
+     * @return string
      */
     public function getTokenCredentialUri()
     {
@@ -699,6 +703,8 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * Gets the redirection URI used in the initial request.
+     *
+     * @return string
      */
     public function getRedirectUri()
     {
@@ -731,6 +737,8 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * Gets the scope of the access requests as a space-delimited String.
+     *
+     * @return string
      */
     public function getScope()
     {
@@ -772,6 +780,8 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * Gets the current grant type.
+     *
+     * @return string
      */
     public function getGrantType()
     {
@@ -790,7 +800,7 @@ class OAuth2 implements FetchAuthTokenInterface
         } elseif (!is_null($this->issuer) && !is_null($this->signingKey)) {
             return self::JWT_URN;
         } else {
-            return;
+            return null;
         }
     }
 
@@ -817,6 +827,8 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * Gets an arbitrary string designed to allow the client to maintain state.
+     *
+     * @return string
      */
     public function getState()
     {
@@ -1089,6 +1101,8 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * Gets the time the current access token expires at.
+     *
+     * @return int
      */
     public function getExpiresAt()
     {
@@ -1098,11 +1112,13 @@ class OAuth2 implements FetchAuthTokenInterface
             return $this->issuedAt + $this->expiresIn;
         }
 
-        return;
+        return null;
     }
 
     /**
      * Returns true if the acccess token has expired.
+     *
+     * @return bool
      */
     public function isExpired()
     {
@@ -1208,7 +1224,7 @@ class OAuth2 implements FetchAuthTokenInterface
             ];
         }
 
-        return;
+        return null;
     }
 
     /**

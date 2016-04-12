@@ -25,7 +25,14 @@ class IAMCredentials
     const SELECTOR_KEY = 'x-goog-iam-authority-selector';
     const TOKEN_KEY = 'x-goog-iam-authorization-token';
 
+    /**
+     * @var string
+     */
     private $selector;
+
+    /**
+     * @var string
+     */
     private $token;
 
     /**
@@ -50,7 +57,7 @@ class IAMCredentials
     /**
      * export a callback function which updates runtime metadata.
      *
-     * @return an updateMetadata function
+     * @return array updateMetadata function
      */
     public function getUpdateMetadataFunc()
     {

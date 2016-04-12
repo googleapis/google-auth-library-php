@@ -41,16 +41,24 @@ class ScopedAccessTokenSubscriber implements SubscriberInterface
 
     const DEFAULT_CACHE_LIFETIME = 1500;
 
-    /** @var An implementation of CacheInterface */
+    /**
+     * @var CacheInterface
+     */
     private $cache;
 
-    /** @var The access token generator function */
+    /**
+     * @var callable The access token generator function
+     */
     private $tokenFunc;
 
-    /** @var The scopes used to generate the token */
+    /**
+     * @var array|string The scopes used to generate the token
+     */
     private $scopes;
 
-    /** @var cache configuration */
+    /**
+     * @var array
+     */
     private $cacheConfig;
 
     /**
@@ -83,7 +91,9 @@ class ScopedAccessTokenSubscriber implements SubscriberInterface
         }
     }
 
-    /* Implements SubscriberInterface */
+    /**
+     * @return array
+     */
     public function getEvents()
     {
         return ['before' => ['onBefore', RequestEvents::SIGN_REQUEST]];
@@ -114,6 +124,8 @@ class ScopedAccessTokenSubscriber implements SubscriberInterface
      *   $client->getEmitter()->attach($subscriber);
      *
      *   $res = $client->get('myproject/taskqueues/myqueue');
+     *
+     * @param BeforeEvent $event
      */
     public function onBefore(BeforeEvent $event)
     {

@@ -50,6 +50,7 @@ use GuzzleHttp\Psr7\Request;
  */
 class GCECredentials extends CredentialsLoader
 {
+    const cacheKey = 'GOOGLE_AUTH_PHP_GCE';
     /**
      * The metadata IP address on appengine instances.
      *
@@ -70,11 +71,15 @@ class GCECredentials extends CredentialsLoader
 
     /**
      * Flag used to ensure that the onGCE test is only done once;.
+     *
+     * @var bool
      */
     private $hasCheckedOnGce = false;
 
     /**
      * Flag that stores the value of the onGCE check.
+     *
+     * @var bool
      */
     private $isOnGce = false;
 
@@ -85,6 +90,8 @@ class GCECredentials extends CredentialsLoader
 
     /**
      * The full uri for accessing the default token.
+     *
+     * @return string
      */
     public static function getTokenUri()
     {
@@ -141,6 +148,8 @@ class GCECredentials extends CredentialsLoader
      * @param callable $httpHandler callback which delivers psr7 request
      *
      * @return array the response
+     *
+     * @throws \Exception
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
@@ -175,17 +184,15 @@ class GCECredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getCacheKey.
-     *
-     * @return 'GOOGLE_AUTH_PHP_GCE'
+     * @return string
      */
     public function getCacheKey()
     {
-        return 'GOOGLE_AUTH_PHP_GCE';
+        return self::cacheKey;
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getLastReceivedToken.
+     * @return array|null
      */
     public function getLastReceivedToken()
     {
@@ -196,6 +203,6 @@ class GCECredentials extends CredentialsLoader
             ];
         }
 
-        return;
+        return null;
     }
 }

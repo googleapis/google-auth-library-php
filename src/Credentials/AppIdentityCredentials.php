@@ -51,8 +51,12 @@ use Google\Auth\CredentialsLoader;
  */
 class AppIdentityCredentials extends CredentialsLoader
 {
+    const cacheKey = 'GOOGLE_AUTH_PHP_APPIDENTITY';
+
     /**
      * Result of fetchAuthToken.
+     *
+     * @array
      */
     protected $lastReceivedToken;
 
@@ -94,6 +98,8 @@ class AppIdentityCredentials extends CredentialsLoader
      *   ["expiration_time"]=>
      *   string(10) "1444339905"
      *  }
+     *
+     * @throws \Exception
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
@@ -118,7 +124,7 @@ class AppIdentityCredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getLastReceivedToken.
+     * @return array|null
      */
     public function getLastReceivedToken()
     {
@@ -129,16 +135,14 @@ class AppIdentityCredentials extends CredentialsLoader
             ];
         }
 
-        return;
+        return null;
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getCacheKey.
-     *
-     * @return 'GOOGLE_AUTH_PHP_APPIDENTITY'
+     * @return string
      */
     public function getCacheKey()
     {
-        return 'GOOGLE_AUTH_PHP_APPIDENTITY';
+        return self::cacheKey;
     }
 }

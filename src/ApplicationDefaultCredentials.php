@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use DomainException;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Middleware\AuthTokenMiddleware;
@@ -70,7 +71,9 @@ class ApplicationDefaultCredentials
      *   either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param object $cache an implementation of CacheInterface
+     * @param CacheInterface $cache an implementation of CacheInterface
+     *
+     * @return AuthTokenSubscriber
      *
      * @throws DomainException if no implementation can be obtained.
      */
@@ -95,8 +98,10 @@ class ApplicationDefaultCredentials
      * @param string|array scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
-     * @param cacheConfig configuration for the cache when it's present
-     * @param object $cache an implementation of CacheInterface
+     * @param array $cacheConfig configuration for the cache when it's present
+     * @param CacheInterface $cache
+     *
+     * @return AuthTokenMiddleware
      *
      * @throws DomainException if no implementation can be obtained.
      */
@@ -121,6 +126,8 @@ class ApplicationDefaultCredentials
      * @param string|array scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
+     *
+     * @return CredentialsLoader
      *
      * @throws DomainException if no implementation can be obtained.
      */

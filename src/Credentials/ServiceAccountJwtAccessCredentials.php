@@ -33,6 +33,8 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
 {
     /**
      * The OAuth2 instance used to conduct authorization.
+     *
+     * @var OAuth2
      */
     protected $auth;
 
@@ -94,12 +96,16 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
 
     /**
      * Implements FetchAuthTokenInterface#fetchAuthToken.
+     *
+     * @param callable $httpHandler
+     *
+     * @return array|void
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
         $audience = $this->auth->getAudience();
         if (empty($audience)) {
-            return;
+            return null;
         }
 
         $access_token = $this->auth->toJwt();
@@ -108,7 +114,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getCacheKey.
+     * @return string
      */
     public function getCacheKey()
     {
@@ -116,7 +122,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getLastReceivedToken.
+     * @return array
      */
     public function getLastReceivedToken()
     {

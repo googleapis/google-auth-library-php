@@ -41,16 +41,24 @@ class AuthTokenSubscriber implements SubscriberInterface
 
     const DEFAULT_CACHE_LIFETIME = 1500;
 
-    /** @var An implementation of CacheInterface */
+    /**
+     * @var CacheInterface
+     */
     private $cache;
 
-    /** @var callable */
+    /**
+     * @var callable
+     */
     private $httpHandler;
 
-    /** @var An implementation of FetchAuthTokenInterface */
+    /**
+     * @var FetchAuthTokenInterface
+     */
     private $fetcher;
 
-    /** @var cache configuration */
+    /**
+     * @var array
+     */
     private $cacheConfig;
 
     /**
@@ -78,7 +86,9 @@ class AuthTokenSubscriber implements SubscriberInterface
         }
     }
 
-    /* Implements SubscriberInterface */
+    /**
+     * @return array
+     */
     public function getEvents()
     {
         return ['before' => ['onBefore', RequestEvents::SIGN_REQUEST]];
@@ -106,6 +116,8 @@ class AuthTokenSubscriber implements SubscriberInterface
      *   $client->getEmitter()->attach($subscriber);
      *
      *   $res = $client->get('myproject/taskqueues/myqueue');
+     *
+     * @param BeforeEvent $event
      */
     public function onBefore(BeforeEvent $event)
     {

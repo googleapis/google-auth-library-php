@@ -29,12 +29,14 @@ use Google\Auth\OAuth2;
  * 'gcloud auth login' saves a file with these contents in well known
  * location
  *
- * cf [Application Default Credentials](http://goo.gl/mkAHpZ)
+ * @see [Application Default Credentials](http://goo.gl/mkAHpZ)
  */
 class UserRefreshCredentials extends CredentialsLoader
 {
     /**
      * The OAuth2 instance used to conduct authorization.
+     *
+     * @var OAuth2
      */
     protected $auth;
 
@@ -81,7 +83,9 @@ class UserRefreshCredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#fetchAuthToken.
+     * @param callable $httpHandler
+     *
+     * @return array
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
@@ -89,7 +93,7 @@ class UserRefreshCredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getCacheKey.
+     * @return string
      */
     public function getCacheKey()
     {
@@ -97,7 +101,7 @@ class UserRefreshCredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getLastReceivedToken.
+     * @return array
      */
     public function getLastReceivedToken()
     {

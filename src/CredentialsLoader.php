@@ -34,6 +34,10 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
     const NON_WINDOWS_WELL_KNOWN_PATH_BASE = '.config';
     const AUTH_METADATA_KEY = 'Authorization';
 
+    /**
+     * @param string $cause
+     * @return string
+     */
     private static function unableToReadEnv($cause)
     {
         $msg = 'Unable to read the credential file specified by ';
@@ -43,6 +47,9 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
         return $msg;
     }
 
+    /**
+     * @return bool
+     */
     private static function isOnWindows()
     {
         return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
@@ -58,7 +65,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * @param string|array scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
      *
-     * @return a Credentials instance | null
+     * @return ServiceAccountCredentials Credentials instance | null
      */
     public static function fromEnv($scope = null)
     {
@@ -87,7 +94,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * @param string|array scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
      *
-     * @return a Credentials instance | null
+     * @return ServiceAccountCredentials Credentials instance | null
      */
     public static function fromWellKnownFile($scope = null)
     {
@@ -111,14 +118,15 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      *
      * @param string|array scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
-     * @param StreamInterface jsonKeyStream read it to get the JSON credentials.
+     * @param StreamInterface $jsonKeyStream read it to get the JSON credentials.
+     *
+     * @return ServiceAccountCredentials|UserRefreshCredentials
      */
     public static function makeCredentials($scope, StreamInterface $jsonKeyStream)
     {
         $jsonKey = json_decode($jsonKeyStream->getContents(), true);
         if (!array_key_exists('type', $jsonKey)) {
-            throw new \InvalidArgumentException(
-                'json key is missing the type field');
+            throw new \InvalidArgumentException('json key is missing the type field');
         }
 
         if ($jsonKey['type'] == 'service_account') {
@@ -126,15 +134,14 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
         } elseif ($jsonKey['type'] == 'authorized_user') {
             return new UserRefreshCredentials($scope, $jsonKey);
         } else {
-            throw new \InvalidArgumentException(
-                'invalid value in the type field');
+            throw new \InvalidArgumentException('invalid value in the type field');
         }
     }
 
     /**
      * export a callback function which updates runtime metadata.
      *
-     * @return an updateMetadata function
+     * @return array updateMetadata function
      */
     public function getUpdateMetadataFunc()
     {

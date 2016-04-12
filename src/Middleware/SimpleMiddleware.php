@@ -28,7 +28,9 @@ use Psr\Http\Message\RequestInterface;
  */
 class SimpleMiddleware
 {
-    /** @var configuration */
+    /**
+     * @var array
+     */
     private $config;
 
     /**
@@ -67,6 +69,10 @@ class SimpleMiddleware
      *   ]);
      *
      *   $res = $client->get('drive/v2/rest');
+     *
+     * @param callable $handler
+     *
+     * @return \Closure
      */
     public function __invoke(callable $handler)
     {

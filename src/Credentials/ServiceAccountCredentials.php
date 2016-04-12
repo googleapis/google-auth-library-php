@@ -57,6 +57,8 @@ class ServiceAccountCredentials extends CredentialsLoader
 {
     /**
      * The OAuth2 instance used to conduct authorization.
+     *
+     * @var OAuth2
      */
     protected $auth;
 
@@ -104,7 +106,9 @@ class ServiceAccountCredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#fetchAuthToken.
+     * @param callable $httpHandler
+     *
+     * @return array
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
@@ -112,7 +116,7 @@ class ServiceAccountCredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getCacheKey.
+     * @return string
      */
     public function getCacheKey()
     {
@@ -125,7 +129,7 @@ class ServiceAccountCredentials extends CredentialsLoader
     }
 
     /**
-     * Implements FetchAuthTokenInterface#getLastReceivedToken.
+     * @return array
      */
     public function getLastReceivedToken()
     {

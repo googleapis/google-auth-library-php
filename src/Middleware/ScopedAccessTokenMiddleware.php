@@ -40,17 +40,35 @@ class ScopedAccessTokenMiddleware
 
     const DEFAULT_CACHE_LIFETIME = 1500;
 
-    /** @var An implementation of CacheInterface */
+    /**
+     * @var CacheInterface
+     */
     private $cache;
 
-    /** @var callback */
+    /**
+     * @var callback
+     */
     private $httpHandler;
 
-    /** @var An implementation of FetchAuthTokenInterface */
+    /**
+     * @var FetchAuthTokenInterface
+     */
     private $fetcher;
 
-    /** @var cache configuration */
+    /**
+     * @var array configuration
+     */
     private $cacheConfig;
+
+    /**
+     * @var callable
+     */
+    private $tokenFunc;
+
+    /**
+     * @var array|string
+     */
+    private $scopes;
 
     /**
      * Creates a new ScopedAccessTokenMiddleware.
@@ -110,6 +128,10 @@ class ScopedAccessTokenMiddleware
      *   ]);
      *
      *   $res = $client->get('myproject/taskqueues/myqueue');
+     *
+     * @param callable $handler
+     *
+     * @return \Closure
      */
     public function __invoke(callable $handler)
     {

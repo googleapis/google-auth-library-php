@@ -29,7 +29,9 @@ use GuzzleHttp\Event\SubscriberInterface;
  */
 class SimpleSubscriber implements SubscriberInterface
 {
-    /** @var configuration */
+    /**
+     * @var array
+     */
     private $config;
 
     /**
@@ -49,7 +51,9 @@ class SimpleSubscriber implements SubscriberInterface
         $this->config = array_merge([], $config);
     }
 
-    /* Implements SubscriberInterface */
+    /**
+     * @return array
+     */
     public function getEvents()
     {
         return ['before' => ['onBefore', RequestEvents::SIGN_REQUEST]];
@@ -71,6 +75,8 @@ class SimpleSubscriber implements SubscriberInterface
      *   $client->getEmitter()->attach($subscriber);
      *
      *   $res = $client->get('drive/v2/rest');
+     *
+     * @param BeforeEvent $event
      */
     public function onBefore(BeforeEvent $event)
     {
