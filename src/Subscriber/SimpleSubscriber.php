@@ -29,56 +29,62 @@ use GuzzleHttp\Event\SubscriberInterface;
  */
 class SimpleSubscriber implements SubscriberInterface
 {
-  /** @var configuration */
-  private $config;
+    /**
+     * @var array
+     */
+    private $config;
 
-  /**
-   * Create a new Simple plugin.
-   *
-   * The configuration array expects one option
-   * - key: required, otherwise InvalidArgumentException is thrown
-   *
-   * @param array $config Configuration array
-   */
-  public function __construct(array $config)
-  {
-    if (!isset($config['key'])) {
-      throw new \InvalidArgumentException('requires a key to have been set');
+    /**
+     * Create a new Simple plugin.
+     *
+     * The configuration array expects one option
+     * - key: required, otherwise InvalidArgumentException is thrown
+     *
+     * @param array $config Configuration array
+     */
+    public function __construct(array $config)
+    {
+        if (!isset($config['key'])) {
+            throw new \InvalidArgumentException('requires a key to have been set');
+        }
+
+        $this->config = array_merge([], $config);
     }
 
-    $this->config = array_merge([], $config);
-  }
-
-  /* Implements SubscriberInterface */
-  public function getEvents()
-  {
-    return ['before' => ['onBefore', RequestEvents::SIGN_REQUEST]];
-  }
-
-  /**
-   * Updates the request query with the developer key if auth is set to simple
-   *
-   *   use Google\Auth\Subscriber\SimpleSubscriber;
-   *   use GuzzleHttp\Client;
-   *
-   *   $my_key = 'is not the same as yours';
-   *   $subscriber = new SimpleSubscriber(['key' => $my_key]);
-   *
-   *   $client = new Client([
-   *      'base_url' => 'https://www.googleapis.com/discovery/v1/',
-   *      'defaults' => ['auth' => 'simple']
-   *   ]);
-   *   $client->getEmitter()->attach($subscriber);
-   *
-   *   $res = $client->get('drive/v2/rest');
-   */
-  public function onBefore(BeforeEvent $event)
-  {
-    // Requests using "auth"="simple" with the developer key.
-    $request = $event->getRequest();
-    if ($request->getConfig()['auth'] != 'simple') {
-      return;
+    /**
+     * @return array
+     */
+    public function getEvents()
+    {
+        return ['before' => ['onBefore', RequestEvents::SIGN_REQUEST]];
     }
-    $request->getQuery()->overwriteWith($this->config);
-  }
+
+    /**
+     * Updates the request query with the developer key if auth is set to simple.
+     *
+     *   use Google\Auth\Subscriber\SimpleSubscriber;
+     *   use GuzzleHttp\Client;
+     *
+     *   $my_key = 'is not the same as yours';
+     *   $subscriber = new SimpleSubscriber(['key' => $my_key]);
+     *
+     *   $client = new Client([
+     *      'base_url' => 'https://www.googleapis.com/discovery/v1/',
+     *      'defaults' => ['auth' => 'simple']
+     *   ]);
+     *   $client->getEmitter()->attach($subscriber);
+     *
+     *   $res = $client->get('drive/v2/rest');
+     *
+     * @param BeforeEvent $event
+     */
+    public function onBefore(BeforeEvent $event)
+    {
+        // Requests using "auth"="simple" with the developer key.
+        $request = $event->getRequest();
+        if ($request->getConfig()['auth'] != 'simple') {
+            return;
+        }
+        $request->getQuery()->overwriteWith($this->config);
+    }
 }

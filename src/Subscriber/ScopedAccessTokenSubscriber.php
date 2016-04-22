@@ -19,9 +19,9 @@ namespace Google\Auth\Subscriber;
 
 use Google\Auth\CacheInterface;
 use Google\Auth\CacheTrait;
+use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
-use GuzzleHttp\Event\BeforeEvent;
 
 /**
  * ScopedAccessTokenSubscriber is a Guzzle Subscriber that adds an Authorization
@@ -37,126 +37,140 @@ use GuzzleHttp\Event\BeforeEvent;
  */
 class ScopedAccessTokenSubscriber implements SubscriberInterface
 {
-  use CacheTrait;
+    use CacheTrait;
 
-  const DEFAULT_CACHE_LIFETIME = 1500;
+    const DEFAULT_CACHE_LIFETIME = 1500;
 
-  /** @var An implementation of CacheInterface */
-  private $cache;
+    /**
+     * @var CacheInterface
+     */
+    private $cache;
 
-  /** @var The access token generator function  */
-  private $tokenFunc;
+    /**
+     * @var callable The access token generator function
+     */
+    private $tokenFunc;
 
-  /** @var The scopes used to generate the token */
-  private $scopes;
+    /**
+     * @var array|string The scopes used to generate the token
+     */
+    private $scopes;
 
-  /** @var cache configuration */
-  private $cacheConfig;
+    /**
+     * @var array
+     */
+    private $cacheConfig;
 
-  /**
-   * Creates a new ScopedAccessTokenSubscriber.
-   *
-   * @param callable $tokenFunc a token generator function
-   * @param array|string $scopes the token authentication scopes
-   * @param array $cacheConfig configuration for the cache when it's present
-   * @param CacheInterface $cache an implementation of CacheInterface
-   */
-  public function __construct(
-    callable $tokenFunc,
-    $scopes,
-    array $cacheConfig = null,
-    CacheInterface $cache = null
-  ) {
-    $this->tokenFunc = $tokenFunc;
-    if (!(is_string($scopes) || is_array($scopes))) {
-      throw new \InvalidArgumentException(
-          'wants scope should be string or array');
-    }
-    $this->scopes = $scopes;
+    /**
+     * Creates a new ScopedAccessTokenSubscriber.
+     *
+     * @param callable $tokenFunc a token generator function
+     * @param array|string $scopes the token authentication scopes
+     * @param array $cacheConfig configuration for the cache when it's present
+     * @param CacheInterface $cache an implementation of CacheInterface
+     */
+    public function __construct(
+        callable $tokenFunc,
+        $scopes,
+        array $cacheConfig = null,
+        CacheInterface $cache = null
+    ) {
+        $this->tokenFunc = $tokenFunc;
+        if (!(is_string($scopes) || is_array($scopes))) {
+            throw new \InvalidArgumentException(
+                'wants scope should be string or array');
+        }
+        $this->scopes = $scopes;
 
-    if (!is_null($cache)) {
-      $this->cache = $cache;
-      $this->cacheConfig = array_merge([
-        'lifetime' => self::DEFAULT_CACHE_LIFETIME,
-        'prefix'   => ''
-      ], $cacheConfig);
-    }
-  }
-
-  /* Implements SubscriberInterface */
-  public function getEvents()
-  {
-    return ['before' => ['onBefore', RequestEvents::SIGN_REQUEST]];
-  }
-
-  /**
-   * Updates the request with an Authorization header when auth is 'scoped'.
-   *
-   *   E.g this could be used to authenticate using the AppEngine
-   *   AppIdentityService.
-   *
-   *   use google\appengine\api\app_identity\AppIdentityService;
-   *   use Google\Auth\Subscriber\ScopedAccessTokenSubscriber;
-   *   use GuzzleHttp\Client;
-   *
-   *   $scope = 'https://www.googleapis.com/auth/taskqueue'
-   *   $subscriber = new ScopedAccessToken(
-   *       'AppIdentityService::getAccessToken',
-   *       $scope,
-   *       ['prefix' => 'Google\Auth\ScopedAccessToken::'],
-   *       $cache = new Memcache()
-   *   );
-   *
-   *   $client = new Client([
-   *       'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
-   *       'defaults' => ['auth' => 'scoped']
-   *   ]);
-   *   $client->getEmitter()->attach($subscriber);
-   *
-   *   $res = $client->get('myproject/taskqueues/myqueue');
-   */
-  public function onBefore(BeforeEvent $event)
-  {
-    // Requests using "auth"="scoped" will be authorized.
-    $request = $event->getRequest();
-    if ($request->getConfig()['auth'] != 'scoped') {
-      return;
-    }
-    $auth_header = 'Bearer ' . $this->fetchToken();
-    $request->setHeader('Authorization', $auth_header);
-  }
-
-  /**
-   * @return string
-   */
-  private function getCacheKey()
-  {
-    $key = null;
-
-    if (is_string($this->scopes)) {
-      $key .= $this->scopes;
-    } else if (is_array($this->scopes)) {
-      $key .= implode(":", $this->scopes);
-    }
-    return $key;
-  }
-
-  /**
-   * Determine if token is available in the cache, if not call tokenFunc to
-   * fetch it.
-   *
-   * @return string
-   */
-  private function fetchToken()
-  {
-    $cached = $this->getCachedValue();
-
-    if (!empty($cached)) {
-      return $cached;
+        if (!is_null($cache)) {
+            $this->cache = $cache;
+            $this->cacheConfig = array_merge([
+                'lifetime' => self::DEFAULT_CACHE_LIFETIME,
+                'prefix' => '',
+            ], $cacheConfig);
+        }
     }
 
-    $token = call_user_func($this->tokenFunc, $this->scopes);
-    $this->setCachedValue($token);
-    return $token;
-  }
+    /**
+     * @return array
+     */
+    public function getEvents()
+    {
+        return ['before' => ['onBefore', RequestEvents::SIGN_REQUEST]];
+    }
+
+    /**
+     * Updates the request with an Authorization header when auth is 'scoped'.
+     *
+     *   E.g this could be used to authenticate using the AppEngine
+     *   AppIdentityService.
+     *
+     *   use google\appengine\api\app_identity\AppIdentityService;
+     *   use Google\Auth\Subscriber\ScopedAccessTokenSubscriber;
+     *   use GuzzleHttp\Client;
+     *
+     *   $scope = 'https://www.googleapis.com/auth/taskqueue'
+     *   $subscriber = new ScopedAccessToken(
+     *       'AppIdentityService::getAccessToken',
+     *       $scope,
+     *       ['prefix' => 'Google\Auth\ScopedAccessToken::'],
+     *       $cache = new Memcache()
+     *   );
+     *
+     *   $client = new Client([
+     *       'base_url' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
+     *       'defaults' => ['auth' => 'scoped']
+     *   ]);
+     *   $client->getEmitter()->attach($subscriber);
+     *
+     *   $res = $client->get('myproject/taskqueues/myqueue');
+     *
+     * @param BeforeEvent $event
+     */
+    public function onBefore(BeforeEvent $event)
+    {
+        // Requests using "auth"="scoped" will be authorized.
+        $request = $event->getRequest();
+        if ($request->getConfig()['auth'] != 'scoped') {
+            return;
+        }
+        $auth_header = 'Bearer '.$this->fetchToken();
+        $request->setHeader('Authorization', $auth_header);
+    }
+
+    /**
+     * @return string
+     */
+    private function getCacheKey()
+    {
+        $key = null;
+
+        if (is_string($this->scopes)) {
+            $key .= $this->scopes;
+        } elseif (is_array($this->scopes)) {
+            $key .= implode(':', $this->scopes);
+        }
+
+        return $key;
+    }
+
+    /**
+     * Determine if token is available in the cache, if not call tokenFunc to
+     * fetch it.
+     *
+     * @return string
+     */
+    private function fetchToken()
+    {
+        $cached = $this->getCachedValue();
+
+        if (!empty($cached)) {
+            return $cached;
+        }
+
+        $token = call_user_func($this->tokenFunc, $this->scopes);
+        $this->setCachedValue($token);
+
+        return $token;
+    }
 }

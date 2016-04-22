@@ -28,59 +28,66 @@ use Psr\Http\Message\RequestInterface;
  */
 class SimpleMiddleware
 {
-  /** @var configuration */
-  private $config;
+    /**
+     * @var array
+     */
+    private $config;
 
-  /**
-   * Create a new Simple plugin.
-   *
-   * The configuration array expects one option
-   * - key: required, otherwise InvalidArgumentException is thrown
-   *
-   * @param array $config Configuration array
-   */
-  public function __construct(array $config)
-  {
-    if (!isset($config['key'])) {
-      throw new \InvalidArgumentException('requires a key to have been set');
+    /**
+     * Create a new Simple plugin.
+     *
+     * The configuration array expects one option
+     * - key: required, otherwise InvalidArgumentException is thrown
+     *
+     * @param array $config Configuration array
+     */
+    public function __construct(array $config)
+    {
+        if (!isset($config['key'])) {
+            throw new \InvalidArgumentException('requires a key to have been set');
+        }
+
+        $this->config = array_merge(['key' => null], $config);
     }
 
-    $this->config = array_merge(['key' => null], $config);
-  }
+    /**
+     * Updates the request query with the developer key if auth is set to simple.
+     *
+     *   use Google\Auth\Middleware\SimpleMiddleware;
+     *   use GuzzleHttp\Client;
+     *   use GuzzleHttp\HandlerStack;
+     *
+     *   $my_key = 'is not the same as yours';
+     *   $middleware = new SimpleMiddleware(['key' => $my_key]);
+     *   $stack = HandlerStack::create();
+     *   $stack->push($middleware);
+     *
+     *   $client = new Client([
+     *       'handler' => $stack,
+     *       'base_uri' => 'https://www.googleapis.com/discovery/v1/',
+     *       'auth' => 'simple'
+     *   ]);
+     *
+     *   $res = $client->get('drive/v2/rest');
+     *
+     * @param callable $handler
+     *
+     * @return \Closure
+     */
+    public function __invoke(callable $handler)
+    {
+        return function (RequestInterface $request, array $options) use ($handler) {
+            // Requests using "auth"="scoped" will be authorized.
+            if (!isset($options['auth']) || $options['auth'] !== 'simple') {
+                return $handler($request, $options);
+            }
 
-  /**
-   * Updates the request query with the developer key if auth is set to simple
-   *
-   *   use Google\Auth\Middleware\SimpleMiddleware;
-   *   use GuzzleHttp\Client;
-   *   use GuzzleHttp\HandlerStack;
-   *
-   *   $my_key = 'is not the same as yours';
-   *   $middleware = new SimpleMiddleware(['key' => $my_key]);
-   *   $stack = HandlerStack::create();
-   *   $stack->push($middleware);
-   *
-   *   $client = new Client([
-   *       'handler' => $stack,
-   *       'base_uri' => 'https://www.googleapis.com/discovery/v1/',
-   *       'auth' => 'simple'
-   *   ]);
-   *
-   *   $res = $client->get('drive/v2/rest');
-   */
-  public function __invoke(callable $handler)
-  {
-    return function (RequestInterface $request, array $options) use ($handler) {
-      // Requests using "auth"="scoped" will be authorized.
-      if (!isset($options['auth']) || $options['auth'] !== 'simple') {
-        return $handler($request, $options);
-      }
+            $query = Psr7\parse_query($request->getUri()->getQuery());
+            $params = array_merge($query, $this->config);
+            $uri = $request->getUri()->withQuery(Psr7\build_query($params));
+            $request = $request->withUri($uri);
 
-      $query = Psr7\parse_query($request->getUri()->getQuery());
-      $params = array_merge($query, $this->config);
-      $uri = $request->getUri()->withQuery(Psr7\build_query($params));
-      $request = $request->withUri($uri);
-      return $handler($request, $options);
-    };
-  }
+            return $handler($request, $options);
+        };
+    }
 }

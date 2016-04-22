@@ -14,34 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 namespace Google\Auth\HttpHandler;
 
-use Google\Auth\HttpHandler\Guzzle5HttpHandler;
-use Google\Auth\HttpHandler\Guzzle6HttpHandler;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 
 class HttpHandlerFactory
 {
-  /**
-   * Builds out a default http handler for the installed version of guzzle.
-   *
-   * @return Guzzle5HttpHandler|Guzzle6HttpHandler
-   * @throws \Exception
-   */
-  public static function build(ClientInterface $client = null)
-  {
-    $version = ClientInterface::VERSION;
-    $client = $client ?: new Client();
+    /**
+     * Builds out a default http handler for the installed version of guzzle.
+     *
+     * @param ClientInterface $client
+     *
+     * @return Guzzle5HttpHandler|Guzzle6HttpHandler
+     *
+     * @throws \Exception
+     */
+    public static function build(ClientInterface $client = null)
+    {
+        $version = ClientInterface::VERSION;
+        $client = $client ?: new Client();
 
-    switch ($version[0]) {
-      case '5':
-          return new Guzzle5HttpHandler($client);
-      case '6':
-          return new Guzzle6HttpHandler($client);
-      default:
-          throw new \Exception('Version not supported');
+        switch ($version[0]) {
+            case '5':
+                return new Guzzle5HttpHandler($client);
+            case '6':
+                return new Guzzle6HttpHandler($client);
+            default:
+                throw new \Exception('Version not supported');
+        }
     }
-  }
 }

@@ -17,32 +17,25 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\Middleware\SimpleMiddleware;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Uri;
-
 class SimpleMiddlewareTest extends BaseTest
 {
-  private $mockRequest;
+    private $mockRequest;
 
-  /**
-   * @todo finish
-   */
-  protected function setUp()
-  {
-    $this->onlyGuzzle6();
+    /**
+     * @todo finish
+     */
+    protected function setUp()
+    {
+        $this->onlyGuzzle6();
 
-    $this->mockRequest =
-      $this
-      ->getMockBuilder('GuzzleHttp\Psr7\Request')
-      ->disableOriginalConstructor()
-      ->getMock();
-  }
+        $this->mockRequest =
+            $this
+                ->getMockBuilder('GuzzleHttp\Psr7\Request')
+                ->disableOriginalConstructor()
+                ->getMock();
+    }
 
-  public function testTest()
-  {
-
-  }
+    public function testTest()
+    {
+    }
 }

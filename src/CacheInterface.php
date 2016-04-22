@@ -22,30 +22,29 @@ namespace Google\Auth;
  */
 interface CacheInterface
 {
+    /**
+     * Retrieves the data for the given key, or false if the key is unknown or
+     * expired.
+     *
+     * @param string $key The key who's data to retrieve
+     * @param bool|int $expiration Expiration time in seconds
+     */
+    public function get($key, $expiration = false);
 
-  /**
-   * Retrieves the data for the given key, or false if the key is unknown or
-   * expired.
-   *
-   * @param String $key The key who's data to retrieve
-   * @param boolean|int $expiration Expiration time in seconds
-   */
-  public function get($key, $expiration = false);
+    /**
+     * Store the key => $value.
+     *
+     * Implementations will serialize $value.
+     *
+     * @param string $key the cachke key
+     * @param string $value data
+     */
+    public function set($key, $value);
 
-  /**
-   * Store the key => $value
-   *
-   * Implementations will serialize $value.
-   *
-   * @param string $key the cachke key
-   * @param string $value data
-   */
-  public function set($key, $value);
-
-  /**
-   * Removes the key/data pair.
-   *
-   * @param String $key
-   */
-  public function delete($key);
+    /**
+     * Removes the key/data pair.
+     *
+     * @param string $key
+     */
+    public function delete($key);
 }

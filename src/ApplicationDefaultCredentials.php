@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use DomainException;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Middleware\AuthTokenMiddleware;
@@ -59,96 +60,103 @@ use Google\Auth\Subscriber\AuthTokenSubscriber;
  */
 class ApplicationDefaultCredentials
 {
-  /**
-   * Obtains an AuthTokenSubscriber that uses the default FetchAuthTokenInterface
-   * implementation to use in this environment.
-   *
-   * If supplied, $scope is used to in creating the credentials instance if
-   * this does not fallback to the compute engine defaults.
-   *
-   * @param string|array scope the scope of the access request, expressed
-   *   either as an Array or as a space-delimited String.
-   * @param callable $httpHandler callback which delivers psr7 request
-   * @param array $cacheConfig configuration for the cache when it's present
-   * @param object $cache an implementation of CacheInterface
-   *
-   * @throws DomainException if no implementation can be obtained.
-   */
-  public static function getSubscriber(
-    $scope = null,
-    callable $httpHandler = null,
-    array $cacheConfig = null,
-    CacheInterface $cache = null
-  ) {
-    $creds = self::getCredentials($scope, $httpHandler);
+    /**
+     * Obtains an AuthTokenSubscriber that uses the default FetchAuthTokenInterface
+     * implementation to use in this environment.
+     *
+     * If supplied, $scope is used to in creating the credentials instance if
+     * this does not fallback to the compute engine defaults.
+     *
+     * @param string|array scope the scope of the access request, expressed
+     *   either as an Array or as a space-delimited String.
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @param array $cacheConfig configuration for the cache when it's present
+     * @param CacheInterface $cache an implementation of CacheInterface
+     *
+     * @return AuthTokenSubscriber
+     *
+     * @throws DomainException if no implementation can be obtained.
+     */
+    public static function getSubscriber(
+        $scope = null,
+        callable $httpHandler = null,
+        array $cacheConfig = null,
+        CacheInterface $cache = null
+    ) {
+        $creds = self::getCredentials($scope, $httpHandler);
 
-    return new AuthTokenSubscriber($creds, $cacheConfig, $cache, $httpHandler);
-  }
-
-  /**
-   * Obtains an AuthTokenMiddleware that uses the default FetchAuthTokenInterface
-   * implementation to use in this environment.
-   *
-   * If supplied, $scope is used to in creating the credentials instance if
-   * this does not fallback to the compute engine defaults.
-   *
-   * @param string|array scope the scope of the access request, expressed
-   *   either as an Array or as a space-delimited String.
-   * @param callable $httpHandler callback which delivers psr7 request
-   * @param cacheConfig configuration for the cache when it's present
-   * @param object $cache an implementation of CacheInterface
-   *
-   * @throws DomainException if no implementation can be obtained.
-   */
-  public static function getMiddleware(
-    $scope = null,
-    callable $httpHandler = null,
-    array $cacheConfig = null,
-    CacheInterface $cache = null
-  ) {
-    $creds = self::getCredentials($scope, $httpHandler);
-
-    return new AuthTokenMiddleware($creds, $cacheConfig, $cache, $httpHandler);
-  }
-
-  /**
-   * Obtains the default FetchAuthTokenInterface implementation to use
-   * in this environment.
-   *
-   * If supplied, $scope is used to in creating the credentials instance if
-   * this does not fallback to the Compute Engine defaults.
-   *
-   * @param string|array scope the scope of the access request, expressed
-   *   either as an Array or as a space-delimited String.
-   *
-   * @param callable $httpHandler callback which delivers psr7 request
-   * @throws DomainException if no implementation can be obtained.
-   */
-  public static function getCredentials($scope = null, callable $httpHandler = null)
-  {
-    $creds = CredentialsLoader::fromEnv($scope);
-    if (!is_null($creds)) {
-      return $creds;
+        return new AuthTokenSubscriber($creds, $cacheConfig, $cache, $httpHandler);
     }
-    $creds = CredentialsLoader::fromWellKnownFile($scope);
-    if (!is_null($creds)) {
-      return $creds;
-    }
-    if (AppIdentityCredentials::onAppEngine()) {
-      return new AppIdentityCredentials($scope);
-    }
-    if (GCECredentials::onGce($httpHandler)) {
-      return new GCECredentials();
-    }
-    throw new \DomainException(self::notFound());
-  }
 
-  private static function notFound()
-  {
-    $msg = 'Could not load the default credentials. Browse to ';
-    $msg .= 'https://developers.google.com';
-    $msg .= '/accounts/docs/application-default-credentials';
-    $msg .= ' for more information' ;
-    return $msg;
-  }
+    /**
+     * Obtains an AuthTokenMiddleware that uses the default FetchAuthTokenInterface
+     * implementation to use in this environment.
+     *
+     * If supplied, $scope is used to in creating the credentials instance if
+     * this does not fallback to the compute engine defaults.
+     *
+     * @param string|array scope the scope of the access request, expressed
+     *   either as an Array or as a space-delimited String.
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @param array $cacheConfig configuration for the cache when it's present
+     * @param CacheInterface $cache
+     *
+     * @return AuthTokenMiddleware
+     *
+     * @throws DomainException if no implementation can be obtained.
+     */
+    public static function getMiddleware(
+        $scope = null,
+        callable $httpHandler = null,
+        array $cacheConfig = null,
+        CacheInterface $cache = null
+    ) {
+        $creds = self::getCredentials($scope, $httpHandler);
+
+        return new AuthTokenMiddleware($creds, $cacheConfig, $cache, $httpHandler);
+    }
+
+    /**
+     * Obtains the default FetchAuthTokenInterface implementation to use
+     * in this environment.
+     *
+     * If supplied, $scope is used to in creating the credentials instance if
+     * this does not fallback to the Compute Engine defaults.
+     *
+     * @param string|array scope the scope of the access request, expressed
+     *   either as an Array or as a space-delimited String.
+     * @param callable $httpHandler callback which delivers psr7 request
+     *
+     * @return CredentialsLoader
+     *
+     * @throws DomainException if no implementation can be obtained.
+     */
+    public static function getCredentials($scope = null, callable $httpHandler = null)
+    {
+        $creds = CredentialsLoader::fromEnv($scope);
+        if (!is_null($creds)) {
+            return $creds;
+        }
+        $creds = CredentialsLoader::fromWellKnownFile($scope);
+        if (!is_null($creds)) {
+            return $creds;
+        }
+        if (AppIdentityCredentials::onAppEngine()) {
+            return new AppIdentityCredentials($scope);
+        }
+        if (GCECredentials::onGce($httpHandler)) {
+            return new GCECredentials();
+        }
+        throw new \DomainException(self::notFound());
+    }
+
+    private static function notFound()
+    {
+        $msg = 'Could not load the default credentials. Browse to ';
+        $msg .= 'https://developers.google.com';
+        $msg .= '/accounts/docs/application-default-credentials';
+        $msg .= ' for more information';
+
+        return $msg;
+    }
 }
