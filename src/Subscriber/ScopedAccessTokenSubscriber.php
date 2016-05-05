@@ -17,11 +17,11 @@
 
 namespace Google\Auth\Subscriber;
 
-use Google\Auth\CacheInterface;
 use Google\Auth\CacheTrait;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
+use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * ScopedAccessTokenSubscriber is a Guzzle Subscriber that adds an Authorization
@@ -42,7 +42,7 @@ class ScopedAccessTokenSubscriber implements SubscriberInterface
     const DEFAULT_CACHE_LIFETIME = 1500;
 
     /**
-     * @var CacheInterface
+     * @var CacheItemPoolInterface
      */
     private $cache;
 
@@ -67,13 +67,13 @@ class ScopedAccessTokenSubscriber implements SubscriberInterface
      * @param callable $tokenFunc a token generator function
      * @param array|string $scopes the token authentication scopes
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheInterface $cache an implementation of CacheInterface
+     * @param CacheItemPoolInterface $cache an implementation of CacheItemPoolInterface
      */
     public function __construct(
         callable $tokenFunc,
         $scopes,
         array $cacheConfig = null,
-        CacheInterface $cache = null
+        CacheItemPoolInterface $cache = null
     ) {
         $this->tokenFunc = $tokenFunc;
         if (!(is_string($scopes) || is_array($scopes))) {

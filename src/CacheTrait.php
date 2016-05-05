@@ -39,9 +39,9 @@ trait CacheTrait
             return;
         }
 
-        $key = $this->cacheConfig['prefix'].$fetcherKey;
-
-        return $this->cache->get($key, $this->cacheConfig['lifetime']);
+        $key = self::getValidKeyName($this->cacheConfig['prefix'].$fetcherKey);
+        $cacheItem = $this->cache->getItem($key);
+        return $cacheItem->get();
     }
 
     /**
@@ -62,7 +62,17 @@ trait CacheTrait
         if (is_null($fetcherKey)) {
             return;
         }
-        $key = $this->cacheConfig['prefix'].$fetcherKey;
-        $this->cache->set($key, $v);
+
+        $key = self::getValidKeyName($this->cacheConfig['prefix'].$fetcherKey);
+        $cacheItem = $this->cache->getItem($key);
+        $cacheItem->set($v);
+        $cacheItem->expiresAfter($this->cacheConfig['lifetime']);
+        return $this->cache->save($cacheItem);
+    }
+
+    public static function getValidKeyName($key)
+    {
+        // ensure we do not have illegal characters
+        return str_replace(['{','}','(',')','/','\\','@',':'], '-', $key);
     }
 }

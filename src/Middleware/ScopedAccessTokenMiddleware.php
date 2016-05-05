@@ -17,10 +17,10 @@
 
 namespace Google\Auth\Middleware;
 
-use Google\Auth\CacheInterface;
 use Google\Auth\CacheTrait;
 use Google\Auth\FetchAuthTokenInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * ScopedAccessTokenMiddleware is a Guzzle Middleware that adds an Authorization
@@ -41,7 +41,7 @@ class ScopedAccessTokenMiddleware
     const DEFAULT_CACHE_LIFETIME = 1500;
 
     /**
-     * @var CacheInterface
+     * @var CacheItemPoolInterface
      */
     private $cache;
 
@@ -76,13 +76,13 @@ class ScopedAccessTokenMiddleware
      * @param callable $tokenFunc a token generator function
      * @param array|string $scopes the token authentication scopes
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheInterface $cache an implementation of CacheInterface
+     * @param CacheItemPoolInterface $cache an implementation of CacheItemPoolInterface
      */
     public function __construct(
         callable $tokenFunc,
         $scopes,
         array $cacheConfig = null,
-        CacheInterface $cache = null
+        CacheItemPoolInterface $cache = null
     ) {
         $this->tokenFunc = $tokenFunc;
         if (!(is_string($scopes) || is_array($scopes))) {

@@ -24,6 +24,7 @@ use GuzzleHttp\Psr7\Response;
 class AuthTokenMiddlewareTest extends BaseTest
 {
     private $mockFetcher;
+    private $mockCacheItem;
     private $mockCache;
     private $mockRequest;
 
@@ -35,9 +36,13 @@ class AuthTokenMiddlewareTest extends BaseTest
             $this
                 ->getMockBuilder('Google\Auth\FetchAuthTokenInterface')
                 ->getMock();
+        $this->mockCacheItem =
+            $this
+                ->getMockBuilder('Psr\Cache\CacheItemInterface')
+                ->getMock();
         $this->mockCache =
             $this
-                ->getMockBuilder('Google\Auth\CacheInterface')
+                ->getMockBuilder('Psr\Cache\CacheItemPoolInterface')
                 ->getMock();
         $this->mockRequest =
             $this
@@ -106,12 +111,15 @@ class AuthTokenMiddlewareTest extends BaseTest
     {
         $cacheKey = 'myKey';
         $cachedValue = '2/abcdef1234567890';
-        $this->mockCache
+        $this->mockCacheItem
             ->expects($this->once())
             ->method('get')
-            ->with($this->equalTo($cacheKey),
-                $this->equalTo(AuthTokenMiddleware::DEFAULT_CACHE_LIFETIME))
             ->will($this->returnValue($cachedValue));
+        $this->mockCache
+            ->expects($this->once())
+            ->method('getItem')
+            ->with($this->equalTo($cacheKey))
+            ->will($this->returnValue($this->mockCacheItem));
         $this->mockFetcher
             ->expects($this->never())
             ->method('fetchAuthToken');
@@ -134,16 +142,18 @@ class AuthTokenMiddlewareTest extends BaseTest
 
     public function testGetsCachedAuthTokenUsingCacheOptions()
     {
-        $prefix = 'test_prefix:';
-        $lifetime = '70707';
+        $prefix = 'test_prefix-';
         $cacheKey = 'myKey';
         $cachedValue = '2/abcdef1234567890';
-        $this->mockCache
+        $this->mockCacheItem
             ->expects($this->once())
             ->method('get')
-            ->with($this->equalTo($prefix.$cacheKey),
-                $this->equalTo($lifetime))
             ->will($this->returnValue($cachedValue));
+        $this->mockCache
+            ->expects($this->once())
+            ->method('getItem')
+            ->with($this->equalTo($prefix.$cacheKey))
+            ->will($this->returnValue($this->mockCacheItem));
         $this->mockFetcher
             ->expects($this->never())
             ->method('fetchAuthToken');
@@ -160,7 +170,7 @@ class AuthTokenMiddlewareTest extends BaseTest
         // Run the test.
         $middleware = new AuthTokenMiddleware(
             $this->mockFetcher,
-            ['prefix' => $prefix, 'lifetime' => $lifetime],
+            ['prefix' => $prefix],
             $this->mockCache
         );
         $mock = new MockHandler([new Response(200)]);
@@ -170,20 +180,29 @@ class AuthTokenMiddlewareTest extends BaseTest
 
     public function testShouldSaveValueInCacheWithSpecifiedPrefix()
     {
+        $prefix = 'test_prefix-';
+        $lifetime = '70707';
+        $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
         $authResult = ['access_token' => $token];
-        $cacheKey = 'myKey';
-        $prefix = 'test_prefix:';
-        $this->mockCache
+        $this->mockCacheItem
             ->expects($this->any())
             ->method('get')
             ->will($this->returnValue(null));
-        $this->mockCache
+        $this->mockCacheItem
             ->expects($this->once())
             ->method('set')
-            ->with($this->equalTo($prefix.$cacheKey),
-                $this->equalTo($token))
+            ->with($this->equalTo($token))
             ->will($this->returnValue(false));
+        $this->mockCacheItem
+            ->expects($this->once())
+            ->method('expiresAfter')
+            ->with($this->equalTo($lifetime));
+        $this->mockCache
+            ->expects($this->any())
+            ->method('getItem')
+            ->with($this->equalTo($prefix.$cacheKey))
+            ->will($this->returnValue($this->mockCacheItem));
         $this->mockFetcher
             ->expects($this->any())
             ->method('getCacheKey')
@@ -201,7 +220,7 @@ class AuthTokenMiddlewareTest extends BaseTest
         // Run the test.
         $middleware = new AuthTokenMiddleware(
             $this->mockFetcher,
-            ['prefix' => $prefix],
+            ['prefix' => $prefix, 'lifetime' => $lifetime],
             $this->mockCache
         );
         $mock = new MockHandler([new Response(200)]);

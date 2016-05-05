@@ -17,10 +17,10 @@
 
 namespace Google\Auth\Middleware;
 
-use Google\Auth\CacheInterface;
 use Google\Auth\CacheTrait;
 use Google\Auth\FetchAuthTokenInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * AuthTokenMiddleware is a Guzzle Middleware that adds an Authorization header
@@ -40,7 +40,7 @@ class AuthTokenMiddleware
     const DEFAULT_CACHE_LIFETIME = 1500;
 
     /**
-     * @var CacheInterface
+     * @var CacheItemPoolInterface
      */
     private $cache;
 
@@ -64,13 +64,13 @@ class AuthTokenMiddleware
      *
      * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
      * @param array $cacheConfig configures the cache
-     * @param CacheInterface $cache (optional) caches the token.
+     * @param CacheItemPoolInterface $cache (optional) caches the token.
      * @param callable $httpHandler (optional) callback which delivers psr7 request
      */
     public function __construct(
         FetchAuthTokenInterface $fetcher,
         array $cacheConfig = null,
-        CacheInterface $cache = null,
+        CacheItemPoolInterface $cache = null,
         callable $httpHandler = null
     ) {
         $this->fetcher = $fetcher;
