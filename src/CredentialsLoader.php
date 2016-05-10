@@ -74,7 +74,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
             return;
         }
         if (!file_exists($path)) {
-            $cause = 'file '.$path.' does not exist';
+            $cause = 'file ' . $path . ' does not exist';
             throw new \DomainException(self::unableToReadEnv($cause));
         }
         $keyStream = Psr7\stream_for(file_get_contents($path));
@@ -167,7 +167,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
             return $metadata;
         }
         $metadata_copy = $metadata;
-        $metadata_copy[self::AUTH_METADATA_KEY] = array('Bearer '.$result['access_token']);
+        $metadata_copy[self::AUTH_METADATA_KEY] = array('Bearer ' . $result['access_token']);
 
         return $metadata_copy;
     }

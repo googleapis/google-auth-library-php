@@ -47,7 +47,7 @@ class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
             $testJson);
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'].':'.$o->getCacheKey(),
+            $testJson['client_email'] . ':' . $o->getCacheKey(),
             $sa->getCacheKey()
         );
     }
@@ -63,7 +63,7 @@ class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
             $sub);
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'].':'.$o->getCacheKey().':'.$sub,
+            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
             $sa->getCacheKey()
         );
     }
@@ -81,7 +81,7 @@ class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
 
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'].':'.$o->getCacheKey().':'.$sub,
+            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
             $sa->getCacheKey()
         );
     }
@@ -135,13 +135,13 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailsToInitalizeFromANonExistentFile()
     {
-        $keyFile = __DIR__.'/../fixtures'.'/does-not-exist-private.json';
+        $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
         new ServiceAccountCredentials('scope/1', $keyFile);
     }
 
     public function testInitalizeFromAFile()
     {
-        $keyFile = __DIR__.'/../fixtures'.'/private.json';
+        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
         $this->assertNotNull(
             new ServiceAccountCredentials('scope/1', $keyFile)
         );
@@ -165,15 +165,15 @@ class SACFromEnvTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailsIfEnvSpecifiesNonExistentFile()
     {
-        $keyFile = __DIR__.'/../fixtures'.'/does-not-exist-private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR.'='.$keyFile);
+        $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getCredentials('a scope');
     }
 
     public function testSucceedIfFileExists()
     {
-        $keyFile = __DIR__.'/../fixtures'.'/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR.'='.$keyFile);
+        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
     }
 }
@@ -190,13 +190,13 @@ class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         if ($this->originalHome != getenv('HOME')) {
-            putenv('HOME='.$this->originalHome);
+            putenv('HOME=' . $this->originalHome);
         }
     }
 
     public function testIsNullIfFileDoesNotExist()
     {
-        putenv('HOME='.__DIR__.'/../not_exists_fixtures');
+        putenv('HOME=' . __DIR__ . '/../not_exists_fixtures');
         $this->assertNull(
             ServiceAccountCredentials::fromWellKnownFile('a scope')
         );
@@ -204,7 +204,7 @@ class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
 
     public function testSucceedIfFileIsPresent()
     {
-        putenv('HOME='.__DIR__.'/../fixtures');
+        putenv('HOME=' . __DIR__ . '/../fixtures');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -218,7 +218,7 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->privateKey =
-            file_get_contents(__DIR__.'/../fixtures'.'/private.pem');
+            file_get_contents(__DIR__ . '/../fixtures' . '/private.pem');
     }
 
     private function createTestJson()
@@ -303,7 +303,7 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
             isset($actual_metadata[CredentialsLoader::AUTH_METADATA_KEY]));
         $this->assertEquals(
             $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
-            array('Bearer '.$access_token));
+            array('Bearer ' . $access_token));
     }
 }
 
@@ -314,7 +314,7 @@ class SACJwtAccessTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->privateKey =
-            file_get_contents(__DIR__.'/../fixtures'.'/private.pem');
+            file_get_contents(__DIR__ . '/../fixtures' . '/private.pem');
     }
 
     private function createTestJson()
@@ -440,7 +440,7 @@ class SACJwtAccessComboTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->privateKey =
-            file_get_contents(__DIR__.'/../fixtures'.'/private.pem');
+            file_get_contents(__DIR__ . '/../fixtures' . '/private.pem');
     }
 
     private function createTestJson()

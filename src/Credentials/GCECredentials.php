@@ -95,9 +95,9 @@ class GCECredentials extends CredentialsLoader
      */
     public static function getTokenUri()
     {
-        $base = 'http://'.self::METADATA_IP.'/computeMetadata/';
+        $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
 
-        return $base.self::TOKEN_URI_PATH;
+        return $base . self::TOKEN_URI_PATH;
     }
 
     /**
@@ -114,7 +114,7 @@ class GCECredentials extends CredentialsLoader
         if (is_null($httpHandler)) {
             $httpHandler = HttpHandlerFactory::build();
         }
-        $checkUri = 'http://'.self::METADATA_IP;
+        $checkUri = 'http://' . self::METADATA_IP;
         try {
             // Comment from: oauth2client/client.py
             //

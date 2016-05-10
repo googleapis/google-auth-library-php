@@ -110,7 +110,7 @@ class AppIdentityCredentials extends CredentialsLoader
         if (!class_exists('google\appengine\api\app_identity\AppIdentityService')) {
             throw new \Exception(
                 'This class must be run in App Engine, or you must include the AppIdentityService '
-                .'mock class defined in tests/mocks/AppIdentityService.php'
+                . 'mock class defined in tests/mocks/AppIdentityService.php'
             );
         }
 

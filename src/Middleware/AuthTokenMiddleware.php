@@ -19,8 +19,8 @@ namespace Google\Auth\Middleware;
 
 use Google\Auth\CacheTrait;
 use Google\Auth\FetchAuthTokenInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * AuthTokenMiddleware is a Guzzle Middleware that adds an Authorization header
@@ -122,7 +122,7 @@ class AuthTokenMiddleware
                 return $handler($request, $options);
             }
 
-            $request = $request->withHeader('Authorization', 'Bearer '.$this->fetchToken());
+            $request = $request->withHeader('Authorization', 'Bearer ' . $this->fetchToken());
 
             return $handler($request, $options);
         };

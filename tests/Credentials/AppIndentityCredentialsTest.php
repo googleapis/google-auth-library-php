@@ -62,7 +62,7 @@ class AppIdentityCredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCa
     public function testReturnsExpectedToken()
     {
         // include the mock AppIdentityService class
-        require_once __DIR__.'/../mocks/AppIdentityService.php';
+        require_once __DIR__ . '/../mocks/AppIdentityService.php';
 
         $wantedToken = [
             'access_token' => '1/abdef1234567890',
@@ -81,7 +81,7 @@ class AppIdentityCredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCa
     public function testScopeIsAlwaysArray()
     {
         // include the mock AppIdentityService class
-        require_once __DIR__.'/../mocks/AppIdentityService.php';
+        require_once __DIR__ . '/../mocks/AppIdentityService.php';
 
         $scope1 = ['scopeA', 'scopeB'];
         $scope2 = 'scopeA scopeB';

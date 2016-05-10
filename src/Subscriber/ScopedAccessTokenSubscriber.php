@@ -134,7 +134,7 @@ class ScopedAccessTokenSubscriber implements SubscriberInterface
         if ($request->getConfig()['auth'] != 'scoped') {
             return;
         }
-        $auth_header = 'Bearer '.$this->fetchToken();
+        $auth_header = 'Bearer ' . $this->fetchToken();
         $request->setHeader('Authorization', $auth_header);
     }
 

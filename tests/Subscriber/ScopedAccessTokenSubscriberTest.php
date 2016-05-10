@@ -18,7 +18,6 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\Subscriber\ScopedAccessTokenSubscriber;
-use Google\Auth\CacheTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
@@ -131,7 +130,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $this->mockCache
             ->expects($this->once())
             ->method('getItem')
-            ->with($prefix.$this->getValidKeyName(self::TEST_SCOPE))
+            ->with($prefix . $this->getValidKeyName(self::TEST_SCOPE))
             ->will($this->returnValue($this->mockCacheItem));
 
         // Run the test
@@ -205,7 +204,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $this->mockCache
             ->expects($this->exactly(2))
             ->method('getItem')
-            ->with($prefix.$this->getValidKeyName(self::TEST_SCOPE))
+            ->with($prefix . $this->getValidKeyName(self::TEST_SCOPE))
             ->will($this->returnValue($this->mockCacheItem));
 
         // Run the test

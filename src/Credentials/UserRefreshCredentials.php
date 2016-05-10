@@ -97,7 +97,7 @@ class UserRefreshCredentials extends CredentialsLoader
      */
     public function getCacheKey()
     {
-        return $this->auth->getClientId().':'.$this->auth->getCacheKey();
+        return $this->auth->getClientId() . ':' . $this->auth->getCacheKey();
     }
 
     /**

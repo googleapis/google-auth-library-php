@@ -404,7 +404,7 @@ class OAuth2 implements FetchAuthTokenInterface
         ];
         foreach ($assertion as $k => $v) {
             if (is_null($v)) {
-                throw new \DomainException($k.' should not be null');
+                throw new \DomainException($k . ' should not be null');
             }
         }
         if (!(is_null($this->getScope()))) {

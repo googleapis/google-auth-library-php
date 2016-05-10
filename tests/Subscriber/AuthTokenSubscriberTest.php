@@ -144,7 +144,7 @@ class AuthTokenSubscriberTest extends BaseTest
         $this->mockCache
             ->expects($this->once())
             ->method('getItem')
-            ->with($this->equalTo($prefix.$cacheKey))
+            ->with($this->equalTo($prefix . $cacheKey))
             ->will($this->returnValue($this->mockCacheItem));
         $this->mockFetcher
             ->expects($this->never())
@@ -190,7 +190,7 @@ class AuthTokenSubscriberTest extends BaseTest
         $this->mockCache
             ->expects($this->exactly(2))
             ->method('getItem')
-            ->with($this->equalTo($prefix.$cacheKey))
+            ->with($this->equalTo($prefix . $cacheKey))
             ->will($this->returnValue($this->mockCacheItem));
         $this->mockFetcher
             ->expects($this->any())
