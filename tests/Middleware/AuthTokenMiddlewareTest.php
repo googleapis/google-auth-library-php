@@ -227,4 +227,57 @@ class AuthTokenMiddlewareTest extends BaseTest
         $callable = $middleware($mock);
         $callable($this->mockRequest, ['auth' => 'google_auth']);
     }
+
+    public function testShouldNotifyTokenCallback()
+    {
+        $prefix = 'test_prefix-';
+        $cacheKey = 'myKey';
+        $token = '1/abcdef1234567890';
+        $authResult = ['access_token' => $token];
+        $this->mockCacheItem
+            ->expects($this->any())
+            ->method('get')
+            ->will($this->returnValue(null));
+        $this->mockCache
+            ->expects($this->any())
+            ->method('getItem')
+            ->with($this->equalTo($prefix . $cacheKey))
+            ->will($this->returnValue($this->mockCacheItem));
+        $this->mockFetcher
+            ->expects($this->any())
+            ->method('getCacheKey')
+            ->will($this->returnValue($cacheKey));
+        $this->mockFetcher
+            ->expects($this->once())
+            ->method('fetchAuthToken')
+            ->will($this->returnValue($authResult));
+        $this->mockRequest
+            ->expects($this->once())
+            ->method('withHeader')
+            ->will($this->returnValue($this->mockRequest));
+
+        $called  = false;
+        $params = [
+            'phpunit' => $this,
+            'key' => $this->getValidKeyName($prefix . $cacheKey),
+            'value' => $token
+        ];
+        $tokenCallback = function ($key, $value) use ($params, &$called) {
+            $params['phpunit']->assertEquals($params['key'], $key);
+            $params['phpunit']->assertEquals($params['value'], $value);
+            $called = true;
+        };
+        // Run the test.
+        $middleware = new AuthTokenMiddleware(
+            $this->mockFetcher,
+            ['prefix' => $prefix],
+            $this->mockCache,
+            null,
+            $tokenCallback
+        );
+        $mock = new MockHandler([new Response(200)]);
+        $callable = $middleware($mock);
+        $callable($this->mockRequest, ['auth' => 'google_auth']);
+        $this->assertTrue($called);
+    }
 }

@@ -214,4 +214,56 @@ class AuthTokenSubscriberTest extends BaseTest
         $this->assertSame($request->getHeader('Authorization'),
             'Bearer 1/abcdef1234567890');
     }
+
+    public function testShouldNotifyTokenCallback()
+    {
+        $prefix = 'test_prefix-';
+        $cacheKey = 'myKey';
+        $token = '1/abcdef1234567890';
+        $authResult = ['access_token' => $token];
+        $this->mockCacheItem
+            ->expects($this->any())
+            ->method('get')
+            ->will($this->returnValue(null));
+        $this->mockCache
+            ->expects($this->any())
+            ->method('getItem')
+            ->with($this->equalTo($prefix . $cacheKey))
+            ->will($this->returnValue($this->mockCacheItem));
+        $this->mockFetcher
+            ->expects($this->any())
+            ->method('getCacheKey')
+            ->will($this->returnValue($cacheKey));
+        $this->mockFetcher
+            ->expects($this->once())
+            ->method('fetchAuthToken')
+            ->will($this->returnValue($authResult));
+
+        $called  = false;
+        $params = [
+            'phpunit' => $this,
+            'key' => $this->getValidKeyName($prefix . $cacheKey),
+            'value' => $token
+        ];
+        $tokenCallback = function ($key, $value) use ($params, &$called) {
+            $params['phpunit']->assertEquals($params['key'], $key);
+            $params['phpunit']->assertEquals($params['value'], $value);
+            $called = true;
+        };
+        // Run the test
+        $a = new AuthTokenSubscriber(
+            $this->mockFetcher,
+            ['prefix' => $prefix],
+            $this->mockCache,
+            null,
+            $tokenCallback
+        );
+
+        $client = new Client();
+        $request = $client->createRequest('GET', 'http://testing.org',
+            ['auth' => 'google_auth']);
+        $before = new BeforeEvent(new Transaction($client, $request));
+        $a->onBefore($before);
+        $this->assertTrue($called);
+    }
 }
