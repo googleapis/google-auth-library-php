@@ -135,7 +135,7 @@ class AuthTokenSubscriber implements SubscriberInterface
         // TODO: correct caching; enable the cache to be cleared.
         $cached = $this->getCachedValue();
         if (!empty($cached)) {
-            $request->setHeader('Authorization', 'Bearer '.$cached);
+            $request->setHeader('Authorization', 'Bearer ' . $cached);
 
             return;
         }
@@ -143,7 +143,7 @@ class AuthTokenSubscriber implements SubscriberInterface
         // Fetch the auth token.
         $auth_tokens = $this->fetcher->fetchAuthToken($this->httpHandler);
         if (array_key_exists('access_token', $auth_tokens)) {
-            $request->setHeader('Authorization', 'Bearer '.$auth_tokens['access_token']);
+            $request->setHeader('Authorization', 'Bearer ' . $auth_tokens['access_token']);
             $this->setCachedValue($auth_tokens['access_token']);
         }
     }

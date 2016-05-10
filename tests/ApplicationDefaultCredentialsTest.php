@@ -34,7 +34,7 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         if ($this->originalHome != getenv('HOME')) {
-            putenv('HOME='.$this->originalHome);
+            putenv('HOME=' . $this->originalHome);
         }
         putenv(ServiceAccountCredentials::ENV_VAR);  // removes it from
     }
@@ -44,15 +44,15 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsFailsEnvSpecifiesNonExistentFile()
     {
-        $keyFile = __DIR__.'/fixtures'.'/does-not-exist-private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR.'='.$keyFile);
+        $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getCredentials('a scope');
     }
 
     public function testLoadsOKIfEnvSpecifiedIsValid()
     {
-        $keyFile = __DIR__.'/fixtures'.'/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR.'='.$keyFile);
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -60,7 +60,7 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
-        putenv('HOME='.__DIR__.'/fixtures');
+        putenv('HOME=' . __DIR__ . '/fixtures');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -71,7 +71,7 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
-        putenv('HOME='.__DIR__.'/not_exist_fixtures');
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
         // simulate not being GCE by return 500
         $httpHandler = getHandler([
             buildResponse(500),
@@ -113,7 +113,7 @@ class ADCGetMiddlewareTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         if ($this->originalHome != getenv('HOME')) {
-            putenv('HOME='.$this->originalHome);
+            putenv('HOME=' . $this->originalHome);
         }
         putenv(ServiceAccountCredentials::ENV_VAR);  // removes it if assigned
     }
@@ -123,21 +123,21 @@ class ADCGetMiddlewareTest extends \PHPUnit_Framework_TestCase
      */
     public function testIsFailsEnvSpecifiesNonExistentFile()
     {
-        $keyFile = __DIR__.'/fixtures'.'/does-not-exist-private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR.'='.$keyFile);
+        $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getMiddleware('a scope');
     }
 
     public function testLoadsOKIfEnvSpecifiedIsValid()
     {
-        $keyFile = __DIR__.'/fixtures'.'/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR.'='.$keyFile);
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope'));
     }
 
     public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
-        putenv('HOME='.__DIR__.'/fixtures');
+        putenv('HOME=' . __DIR__ . '/fixtures');
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope'));
     }
 
@@ -146,7 +146,7 @@ class ADCGetMiddlewareTest extends \PHPUnit_Framework_TestCase
      */
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
-        putenv('HOME='.__DIR__.'/not_exist_fixtures');
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
 
         // simulate not being GCE by return 500
         $httpHandler = getHandler([
@@ -190,7 +190,7 @@ class ADCGetSubscriberTest extends BaseTest
     protected function tearDown()
     {
         if ($this->originalHome != getenv('HOME')) {
-            putenv('HOME='.$this->originalHome);
+            putenv('HOME=' . $this->originalHome);
         }
         putenv(ServiceAccountCredentials::ENV_VAR);  // removes it if assigned
     }
@@ -200,21 +200,21 @@ class ADCGetSubscriberTest extends BaseTest
      */
     public function testIsFailsEnvSpecifiesNonExistentFile()
     {
-        $keyFile = __DIR__.'/fixtures'.'/does-not-exist-private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR.'='.$keyFile);
+        $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getSubscriber('a scope');
     }
 
     public function testLoadsOKIfEnvSpecifiedIsValid()
     {
-        $keyFile = __DIR__.'/fixtures'.'/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR.'='.$keyFile);
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $this->assertNotNull(ApplicationDefaultCredentials::getSubscriber('a scope'));
     }
 
     public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
-        putenv('HOME='.__DIR__.'/fixtures');
+        putenv('HOME=' . __DIR__ . '/fixtures');
         $this->assertNotNull(ApplicationDefaultCredentials::getSubscriber('a scope'));
     }
 
@@ -223,7 +223,7 @@ class ADCGetSubscriberTest extends BaseTest
      */
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
-        putenv('HOME='.__DIR__.'/not_exist_fixtures');
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
 
         // simulate not being GCE by return 500
         $httpHandler = getHandler([

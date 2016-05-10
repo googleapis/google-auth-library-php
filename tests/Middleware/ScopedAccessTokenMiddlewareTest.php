@@ -18,7 +18,6 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\Middleware\ScopedAccessTokenMiddleware;
-use Google\Auth\CacheTrait;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 
@@ -69,7 +68,7 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer '.$token)
+            ->with('Authorization', 'Bearer ' . $token)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test
@@ -97,7 +96,7 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer '.$cachedValue)
+            ->with('Authorization', 'Bearer ' . $cachedValue)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test
@@ -126,12 +125,12 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockCache
             ->expects($this->once())
             ->method('getItem')
-            ->with($this->equalTo($prefix.$this->getValidKeyName(self::TEST_SCOPE)))
+            ->with($this->equalTo($prefix . $this->getValidKeyName(self::TEST_SCOPE)))
             ->will($this->returnValue($this->mockCacheItem));
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer '.$cachedValue)
+            ->with('Authorization', 'Bearer ' . $cachedValue)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test
@@ -169,7 +168,7 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer '.$token)
+            ->with('Authorization', 'Bearer ' . $token)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test
@@ -208,12 +207,12 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockCache
             ->expects($this->exactly(2))
             ->method('getItem')
-            ->with($this->equalTo($prefix.$this->getValidKeyName(self::TEST_SCOPE)))
+            ->with($this->equalTo($prefix . $this->getValidKeyName(self::TEST_SCOPE)))
             ->will($this->returnValue($this->mockCacheItem));
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer '.$token)
+            ->with('Authorization', 'Bearer ' . $token)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test

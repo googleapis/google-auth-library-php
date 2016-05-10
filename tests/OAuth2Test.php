@@ -441,8 +441,8 @@ class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
 
     public function testCanRS256EncodeAValidPayload()
     {
-        $publicKey = file_get_contents(__DIR__.'/fixtures'.'/public.pem');
-        $privateKey = file_get_contents(__DIR__.'/fixtures'.'/private.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
         $testConfig = $this->signingMinimal;
         $o = new OAuth2($testConfig);
         $o->setSigningAlgorithm('RS256');
@@ -742,9 +742,9 @@ class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->publicKey =
-            file_get_contents(__DIR__.'/fixtures'.'/public.pem');
+            file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
         $this->privateKey =
-            file_get_contents(__DIR__.'/fixtures'.'/private.pem');
+            file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
     }
 
     /**

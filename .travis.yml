@@ -1,5 +1,8 @@
 language: php
 
+branches:
+  only: [master]
+
 sudo: false
 
 php:
@@ -10,27 +13,15 @@ php:
   - hhvm
 
 env:
-  global:
-    - FIREBASE_JWT_VERSION=3.0.0
   matrix:
-    - GUZZLE_VERSION=5.3
-    - GUZZLE_VERSION=~6.0
-
-matrix:
-  exclude:
-    - php: 5.4
-      env: GUZZLE_VERSION=~6.0
-  # run one test with minimum firebase version
-  include:
-    - php: 5.5
-      env: FIREBASE_JWT_VERSION=2.0.0 GUZZLE_VERSION=~5.3
+    - COMPOSER_CMD="composer install" RUN_CS_FIXER=true
+    - COMPOSER_CMD="composer update --prefer-lowest"
 
 before_script:
-  - composer install
-  - composer require firebase/php-jwt:$FIREBASE_JWT_VERSION
-  - composer require guzzlehttp/guzzle:$GUZZLE_VERSION
+  - $(echo $COMPOSER_CMD)
 
 script:
   - vendor/bin/phpunit
-  - vendor/bin/phplint src/
-  - vendor/bin/phplint tests/
+  - if [ "${RUN_CS_FIXER}" = "true" ]; then
+      vendor/bin/php-cs-fixer fix --dry-run --diff --config-file=.php_cs .;
+    fi

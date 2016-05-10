@@ -39,7 +39,7 @@ trait CacheTrait
             return;
         }
 
-        $key = $this->getValidKeyName($this->cacheConfig['prefix'].$fetcherKey);
+        $key = $this->getValidKeyName($this->cacheConfig['prefix'] . $fetcherKey);
         $cacheItem = $this->cache->getItem($key);
         return $cacheItem->get();
     }
@@ -63,7 +63,7 @@ trait CacheTrait
             return;
         }
 
-        $key = $this->getValidKeyName($this->cacheConfig['prefix'].$fetcherKey);
+        $key = $this->getValidKeyName($this->cacheConfig['prefix'] . $fetcherKey);
         $cacheItem = $this->cache->getItem($key);
         $cacheItem->set($v);
         $cacheItem->expiresAfter($this->cacheConfig['lifetime']);
@@ -73,6 +73,6 @@ trait CacheTrait
     private function getValidKeyName($key)
     {
         // ensure we do not have illegal characters
-        return str_replace(['{','}','(',')','/','\\','@',':'], '-', $key);
+        return str_replace(['{', '}', '(', ')', '/', '\\', '@', ':'], '-', $key);
     }
 }
