@@ -100,7 +100,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $this->mockCache
             ->expects($this->once())
             ->method('getItem')
-            ->with(CacheTrait::getValidKeyName(self::TEST_SCOPE))
+            ->with($this->getValidKeyName(self::TEST_SCOPE))
             ->will($this->returnValue($this->mockCacheItem));
 
         // Run the test
@@ -131,7 +131,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $this->mockCache
             ->expects($this->once())
             ->method('getItem')
-            ->with($prefix.CacheTrait::getValidKeyName(self::TEST_SCOPE))
+            ->with($prefix.$this->getValidKeyName(self::TEST_SCOPE))
             ->will($this->returnValue($this->mockCacheItem));
 
         // Run the test
@@ -167,7 +167,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $this->mockCache
             ->expects($this->exactly(2))
             ->method('getItem')
-            ->with(CacheTrait::getValidKeyName(self::TEST_SCOPE))
+            ->with($this->getValidKeyName(self::TEST_SCOPE))
             ->will($this->returnValue($this->mockCacheItem));
         $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array(),
             $this->mockCache);
@@ -205,7 +205,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $this->mockCache
             ->expects($this->exactly(2))
             ->method('getItem')
-            ->with($prefix.CacheTrait::getValidKeyName(self::TEST_SCOPE))
+            ->with($prefix.$this->getValidKeyName(self::TEST_SCOPE))
             ->will($this->returnValue($this->mockCacheItem));
 
         // Run the test

@@ -21,4 +21,12 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $this->markTestSkipped('Guzzle 5 only');
         }
     }
+
+    /**
+     * @see Google\Auth\$this->getValidKeyName
+     */
+    public function getValidKeyName($key)
+    {
+        return str_replace(['{','}','(',')','/','\\','@',':'], '-', $key);
+    }
 }
