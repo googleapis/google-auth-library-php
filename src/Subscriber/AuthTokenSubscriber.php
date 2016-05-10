@@ -17,12 +17,12 @@
 
 namespace Google\Auth\Subscriber;
 
-use Google\Auth\CacheInterface;
 use Google\Auth\CacheTrait;
 use Google\Auth\FetchAuthTokenInterface;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Event\RequestEvents;
 use GuzzleHttp\Event\SubscriberInterface;
+use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * AuthTokenSubscriber is a Guzzle Subscriber that adds an Authorization header
@@ -42,7 +42,7 @@ class AuthTokenSubscriber implements SubscriberInterface
     const DEFAULT_CACHE_LIFETIME = 1500;
 
     /**
-     * @var CacheInterface
+     * @var CacheItemPoolInterface
      */
     private $cache;
 
@@ -66,13 +66,13 @@ class AuthTokenSubscriber implements SubscriberInterface
      *
      * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
      * @param array $cacheConfig configures the cache
-     * @param CacheInterface $cache (optional) caches the token.
+     * @param CacheItemPoolInterface $cache (optional) caches the token.
      * @param callable $httpHandler (optional) http client to fetch the token.
      */
     public function __construct(
         FetchAuthTokenInterface $fetcher,
         array $cacheConfig = null,
-        CacheInterface $cache = null,
+        CacheItemPoolInterface $cache = null,
         callable $httpHandler = null
     ) {
         $this->fetcher = $fetcher;

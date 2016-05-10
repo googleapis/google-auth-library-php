@@ -22,6 +22,7 @@ use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
+use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * ApplicationDefaultCredentials obtains the default credentials for
@@ -71,7 +72,7 @@ class ApplicationDefaultCredentials
      *   either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheInterface $cache an implementation of CacheInterface
+     * @param CacheItemPoolInterface $cache an implementation of CacheItemPoolInterface
      *
      * @return AuthTokenSubscriber
      *
@@ -81,7 +82,7 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheInterface $cache = null
+        CacheItemPoolInterface $cache = null
     ) {
         $creds = self::getCredentials($scope, $httpHandler);
 
@@ -99,7 +100,7 @@ class ApplicationDefaultCredentials
      *   either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheInterface $cache
+     * @param CacheItemPoolInterface $cache
      *
      * @return AuthTokenMiddleware
      *
@@ -109,7 +110,7 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheInterface $cache = null
+        CacheItemPoolInterface $cache = null
     ) {
         $creds = self::getCredentials($scope, $httpHandler);
 
