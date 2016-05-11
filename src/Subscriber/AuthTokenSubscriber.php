@@ -157,7 +157,7 @@ class AuthTokenSubscriber implements SubscriberInterface
             // notify the callback if applicable
             if ($this->tokenCallback) {
                 $cacheKey = $this->cacheConfig['prefix'] . $this->fetcher->getCacheKey();
-                $this->tokenCallback->__invoke($cacheKey, $auth_tokens['access_token']);
+                call_user_func($this->tokenCallback, $cacheKey, $auth_tokens['access_token']);
             }
         }
     }

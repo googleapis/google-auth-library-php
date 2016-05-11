@@ -215,7 +215,8 @@ class AuthTokenSubscriberTest extends BaseTest
             'Bearer 1/abcdef1234567890');
     }
 
-    public function testShouldNotifyTokenCallback()
+    /** @dataProvider provideShouldNotifyTokenCallback */
+    public function testShouldNotifyTokenCallback(callable $tokenCallback)
     {
         $prefix = 'test_prefix-';
         $cacheKey = 'myKey';
@@ -239,17 +240,10 @@ class AuthTokenSubscriberTest extends BaseTest
             ->method('fetchAuthToken')
             ->will($this->returnValue($authResult));
 
-        $called  = false;
-        $params = [
-            'phpunit' => $this,
-            'key' => $this->getValidKeyName($prefix . $cacheKey),
-            'value' => $token
-        ];
-        $tokenCallback = function ($key, $value) use ($params, &$called) {
-            $params['phpunit']->assertEquals($params['key'], $key);
-            $params['phpunit']->assertEquals($params['value'], $value);
-            $called = true;
-        };
+        SubscriberCallback::$expectedKey = $this->getValidKeyName($prefix . $cacheKey);
+        SubscriberCallback::$expectedValue = $token;
+        SubscriberCallback::$called = false;
+
         // Run the test
         $a = new AuthTokenSubscriber(
             $this->mockFetcher,
@@ -264,6 +258,54 @@ class AuthTokenSubscriberTest extends BaseTest
             ['auth' => 'google_auth']);
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertTrue($called);
+        $this->assertTrue(SubscriberCallback::$called);
     }
+
+    public function provideShouldNotifyTokenCallback()
+    {
+        SubscriberCallback::$phpunit = $this;
+        $anonymousFunc = function ($key, $value) {
+            SubscriberCallback::staticInvoke($key, $value);
+        };
+        return [
+            ['Google\Auth\Tests\SubscriberCallbackFunction'],
+            ['Google\Auth\Tests\SubscriberCallback::staticInvoke'],
+            [['Google\Auth\Tests\SubscriberCallback', 'staticInvoke']],
+            [$anonymousFunc],
+            [[new SubscriberCallback, 'staticInvoke']],
+            [[new SubscriberCallback, 'methodInvoke']],
+            [new SubscriberCallback],
+        ];
+    }
+}
+
+class SubscriberCallback
+{
+    public static $phpunit;
+    public static $expectedKey;
+    public static $expectedValue;
+    public static $called = false;
+
+    public function __invoke($key, $value)
+    {
+        self::$phpunit->assertEquals(self::$expectedKey, $key);
+        self::$phpunit->assertEquals(self::$expectedValue, $value);
+        self::$called = true;
+    }
+
+    public function methodInvoke($key, $value)
+    {
+        return $this($key, $value);
+    }
+
+    public static function staticInvoke($key, $value)
+    {
+        $instance = new self();
+        return $instance($key, $value);
+    }
+}
+
+function SubscriberCallbackFunction($key, $value)
+{
+    return SubscriberCallback::staticInvoke($key, $value);
 }
