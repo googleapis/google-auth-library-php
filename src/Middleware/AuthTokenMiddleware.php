@@ -160,8 +160,7 @@ class AuthTokenMiddleware
 
             // notify the callback if applicable
             if ($this->tokenCallback) {
-                $cacheKey = $this->cacheConfig['prefix'] . $this->fetcher->getCacheKey();
-                call_user_func($this->tokenCallback, $cacheKey, $auth_tokens['access_token']);
+                call_user_func($this->tokenCallback, $this->getFullCacheKey(), $auth_tokens['access_token']);
             }
 
             return $auth_tokens['access_token'];

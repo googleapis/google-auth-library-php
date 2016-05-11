@@ -29,17 +29,11 @@ trait CacheTrait
             return;
         }
 
-        if (isset($this->fetcher)) {
-            $fetcherKey = $this->fetcher->getCacheKey();
-        } else {
-            $fetcherKey = $this->getCacheKey();
-        }
-
-        if (is_null($fetcherKey)) {
+        $key = $this->getFullCacheKey();
+        if (is_null($key)) {
             return;
         }
 
-        $key = $this->getValidKeyName($this->cacheConfig['prefix'] . $fetcherKey);
         $cacheItem = $this->cache->getItem($key);
         return $cacheItem->get();
     }
@@ -53,6 +47,19 @@ trait CacheTrait
             return;
         }
 
+        $key = $this->getFullCacheKey();
+        if (is_null($key)) {
+            return;
+        }
+
+        $cacheItem = $this->cache->getItem($key);
+        $cacheItem->set($v);
+        $cacheItem->expiresAfter($this->cacheConfig['lifetime']);
+        return $this->cache->save($cacheItem);
+    }
+
+    private function getFullCacheKey()
+    {
         if (isset($this->fetcher)) {
             $fetcherKey = $this->fetcher->getCacheKey();
         } else {
@@ -63,15 +70,8 @@ trait CacheTrait
             return;
         }
 
-        $key = $this->getValidKeyName($this->cacheConfig['prefix'] . $fetcherKey);
-        $cacheItem = $this->cache->getItem($key);
-        $cacheItem->set($v);
-        $cacheItem->expiresAfter($this->cacheConfig['lifetime']);
-        return $this->cache->save($cacheItem);
-    }
+        $key = $this->cacheConfig['prefix'] . $fetcherKey;
 
-    private function getValidKeyName($key)
-    {
         // ensure we do not have illegal characters
         return str_replace(['{', '}', '(', ')', '/', '\\', '@', ':'], '-', $key);
     }
