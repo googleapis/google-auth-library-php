@@ -227,4 +227,99 @@ class AuthTokenMiddlewareTest extends BaseTest
         $callable = $middleware($mock);
         $callable($this->mockRequest, ['auth' => 'google_auth']);
     }
+
+    /** @dataProvider provideShouldNotifyTokenCallback */
+    public function testShouldNotifyTokenCallback(callable $tokenCallback)
+    {
+        $prefix = 'test_prefix-';
+        $cacheKey = 'myKey';
+        $token = '1/abcdef1234567890';
+        $authResult = ['access_token' => $token];
+        $this->mockCacheItem
+            ->expects($this->any())
+            ->method('get')
+            ->will($this->returnValue(null));
+        $this->mockCache
+            ->expects($this->any())
+            ->method('getItem')
+            ->with($this->equalTo($prefix . $cacheKey))
+            ->will($this->returnValue($this->mockCacheItem));
+        $this->mockFetcher
+            ->expects($this->any())
+            ->method('getCacheKey')
+            ->will($this->returnValue($cacheKey));
+        $this->mockFetcher
+            ->expects($this->once())
+            ->method('fetchAuthToken')
+            ->will($this->returnValue($authResult));
+        $this->mockRequest
+            ->expects($this->once())
+            ->method('withHeader')
+            ->will($this->returnValue($this->mockRequest));
+
+        MiddlewareCallback::$expectedKey = $this->getValidKeyName($prefix . $cacheKey);
+        MiddlewareCallback::$expectedValue = $token;
+        MiddlewareCallback::$called = false;
+
+        // Run the test.
+        $middleware = new AuthTokenMiddleware(
+            $this->mockFetcher,
+            ['prefix' => $prefix],
+            $this->mockCache,
+            null,
+            $tokenCallback
+        );
+        $mock = new MockHandler([new Response(200)]);
+        $callable = $middleware($mock);
+        $callable($this->mockRequest, ['auth' => 'google_auth']);
+        $this->assertTrue(MiddlewareCallback::$called);
+    }
+
+    public function provideShouldNotifyTokenCallback()
+    {
+        MiddlewareCallback::$phpunit = $this;
+        $anonymousFunc = function ($key, $value) {
+            MiddlewareCallback::staticInvoke($key, $value);
+        };
+        return [
+            ['Google\Auth\Tests\MiddlewareCallbackFunction'],
+            ['Google\Auth\Tests\MiddlewareCallback::staticInvoke'],
+            [['Google\Auth\Tests\MiddlewareCallback', 'staticInvoke']],
+            [$anonymousFunc],
+            [[new MiddlewareCallback, 'staticInvoke']],
+            [[new MiddlewareCallback, 'methodInvoke']],
+            [new MiddlewareCallback],
+        ];
+    }
+}
+
+class MiddlewareCallback
+{
+    public static $phpunit;
+    public static $expectedKey;
+    public static $expectedValue;
+    public static $called = false;
+
+    public function __invoke($key, $value)
+    {
+        self::$phpunit->assertEquals(self::$expectedKey, $key);
+        self::$phpunit->assertEquals(self::$expectedValue, $value);
+        self::$called = true;
+    }
+
+    public function methodInvoke($key, $value)
+    {
+        return $this($key, $value);
+    }
+
+    public static function staticInvoke($key, $value)
+    {
+        $instance = new self();
+        return $instance($key, $value);
+    }
+}
+
+function MiddlewareCallbackFunction($key, $value)
+{
+    return MiddlewareCallback::staticInvoke($key, $value);
 }

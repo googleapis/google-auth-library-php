@@ -62,21 +62,29 @@ class AuthTokenSubscriber implements SubscriberInterface
     private $cacheConfig;
 
     /**
+     * @var callable
+     */
+    private $tokenCallback;
+
+    /**
      * Creates a new AuthTokenSubscriber.
      *
      * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
      * @param array $cacheConfig configures the cache
      * @param CacheItemPoolInterface $cache (optional) caches the token.
      * @param callable $httpHandler (optional) http client to fetch the token.
+     * @param callable $tokenCallback (optional) function to be called when a new token is fetched.
      */
     public function __construct(
         FetchAuthTokenInterface $fetcher,
         array $cacheConfig = null,
         CacheItemPoolInterface $cache = null,
-        callable $httpHandler = null
+        callable $httpHandler = null,
+        callable $tokenCallback = null
     ) {
         $this->fetcher = $fetcher;
         $this->httpHandler = $httpHandler;
+        $this->tokenCallback = $tokenCallback;
         if (!is_null($cache)) {
             $this->cache = $cache;
             $this->cacheConfig = array_merge([
@@ -145,6 +153,12 @@ class AuthTokenSubscriber implements SubscriberInterface
         if (array_key_exists('access_token', $auth_tokens)) {
             $request->setHeader('Authorization', 'Bearer ' . $auth_tokens['access_token']);
             $this->setCachedValue($auth_tokens['access_token']);
+
+            // notify the callback if applicable
+            if ($this->tokenCallback) {
+                $cacheKey = $this->cacheConfig['prefix'] . $this->fetcher->getCacheKey();
+                call_user_func($this->tokenCallback, $cacheKey, $auth_tokens['access_token']);
+            }
         }
     }
 }
