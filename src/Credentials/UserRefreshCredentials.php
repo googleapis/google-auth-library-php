@@ -80,6 +80,8 @@ class UserRefreshCredentials extends CredentialsLoader
             'scope' => $scope,
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
         ]);
+
+        $this->jsonKey = $jsonKey;
     }
 
     /**

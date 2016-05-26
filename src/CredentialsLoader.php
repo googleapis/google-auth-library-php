@@ -35,6 +35,11 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
     const AUTH_METADATA_KEY = 'Authorization';
 
     /**
+     * @var array|null
+     */
+    protected $jsonKey;
+
+    /**
      * @param string $cause
      * @return string
      */
@@ -170,5 +175,15 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
         $metadata_copy[self::AUTH_METADATA_KEY] = array('Bearer ' . $result['access_token']);
 
         return $metadata_copy;
+    }
+
+    /**
+     * Get the contents of the json keyfile, if it exists
+     *
+     * @return array|null
+     */
+    public function getJsonKey()
+    {
+        return $this->jsonKey;
     }
 }

@@ -33,6 +33,7 @@ function createTestJson()
         'client_email' => 'test@example.com',
         'client_id' => 'client123',
         'type' => 'service_account',
+        'project_id' => 'project_id'
     ];
 }
 
@@ -128,6 +129,18 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
             $scope,
             $testJson
         );
+    }
+
+    public function testShouldPopulateKeyFile()
+    {
+        $testJson = createTestJson();
+        $scope = ['scope/1', 'scope/2'];
+        $sa = new ServiceAccountCredentials(
+            $scope,
+            $testJson
+        );
+
+        $this->assertEquals($sa->getJsonKey(), $testJson);
     }
 
     /**
