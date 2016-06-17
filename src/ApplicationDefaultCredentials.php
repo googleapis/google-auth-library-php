@@ -139,7 +139,8 @@ class ApplicationDefaultCredentials
         if (!is_null($jsonKey)) {
             return CredentialsLoader::makeCredentials($scope, $jsonKey);
         }
-        if (AppIdentityCredentials::onAppEngine()) {
+        if (AppIdentityCredentials::onAppEngine() &&
+            !GCECredentials::onAppEngineFlexible()) {
             return new AppIdentityCredentials($scope);
         }
         if (GCECredentials::onGce($httpHandler)) {
