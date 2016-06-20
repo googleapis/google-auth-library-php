@@ -48,7 +48,7 @@ you're building an application that uses Google Compute Engine.
 
 To use `Application Default Credentials`, You first need to download a set of
 JSON credentials for your project. Go to **APIs & Auth** > **Credentials** in
-the [Google Developers Console](developer console) and select
+the [Google Developers Console][developer console] and select
 **Service account** from the **Add credentials** dropdown.
 
 > This file is your *only copy* of these credentials. It should never be
