@@ -18,7 +18,6 @@
 namespace Google\Auth\Middleware;
 
 use Google\Auth\CacheTrait;
-use Google\Auth\FetchAuthTokenInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\RequestInterface;
 
@@ -44,16 +43,6 @@ class ScopedAccessTokenMiddleware
      * @var CacheItemPoolInterface
      */
     private $cache;
-
-    /**
-     * @var callback
-     */
-    private $httpHandler;
-
-    /**
-     * @var FetchAuthTokenInterface
-     */
-    private $fetcher;
 
     /**
      * @var array configuration
