@@ -54,7 +54,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
             $this->isValidKey($key);
             $items[$key] = $this->hasItem($key) ? clone $this->items[$key] : new Item($key);
         }
-        
+
         return $items;
     }
 
@@ -149,7 +149,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
         if (!is_string($key) || preg_match("#[$invalidCharacters]#", $key)) {
             throw new InvalidArgumentException('The provided key is not valid: ' . var_export($key, true));
         }
-        
+
         return true;
     }
 }

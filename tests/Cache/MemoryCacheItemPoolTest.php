@@ -41,7 +41,7 @@ class MemoryCacheItemPoolTest extends \PHPUnit_Framework_TestCase
     public function testGetsFreshItem()
     {
         $item = $this->pool->getItem('item');
-        
+
         $this->assertInstanceOf('Google\Auth\Cache\Item', $item);
         $this->assertNull($item->get());
         $this->assertFalse($item->isHit());
@@ -91,7 +91,7 @@ class MemoryCacheItemPoolTest extends \PHPUnit_Framework_TestCase
     {
         $key = 'item';
         $this->saveItem($key, 'value');
-        
+
         $this->assertTrue($this->pool->deleteItem($key));
         $this->assertFalse($this->pool->hasItem($key));
     }
