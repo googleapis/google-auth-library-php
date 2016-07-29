@@ -22,7 +22,7 @@ use Psr\Cache\CacheItemInterface;
 /**
  * A cache item.
  */
-class Item implements CacheItemInterface
+final class Item implements CacheItemInterface
 {
     /**
      * @var string

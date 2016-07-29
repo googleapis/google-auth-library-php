@@ -23,7 +23,7 @@ use Psr\Cache\CacheItemPoolInterface;
 /**
  * Simple in-memory cache implementation.
  */
-class MemoryCacheItemPool implements CacheItemPoolInterface
+final class MemoryCacheItemPool implements CacheItemPoolInterface
 {
     /**
      * @var CacheItemInterface[]
