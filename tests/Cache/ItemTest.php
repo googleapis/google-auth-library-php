@@ -29,7 +29,7 @@ class ItemTest extends \PHPUnit_Framework_TestCase
     public function testGetsKey()
     {
         $key = 'item';
-        
+
         $this->assertEquals($key, $this->getItem($key)->getKey());
     }
 
