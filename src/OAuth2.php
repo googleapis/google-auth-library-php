@@ -597,9 +597,9 @@ class OAuth2 implements FetchAuthTokenInterface
 
         $this->setAccessToken($opts['access_token']);
         $this->setIdToken($opts['id_token']);
-        // We expect refresh_token to be unset when an access token is obtained
-        // using a currently valid refresh token - in this case, we do not want
-        // to replace the existing refresh token with null
+        // The refresh token should only be updated if a value is explicitly
+        // passed in, as some access token responses do not include a refresh
+        // token.
         if (array_key_exists('refresh_token', $opts)) {
             $this->setRefreshToken($opts['refresh_token']);
         }
