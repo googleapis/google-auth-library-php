@@ -491,6 +491,11 @@ class OAuth2 implements FetchAuthTokenInterface
 
         $response = $httpHandler($this->generateCredentialsRequest());
         $credentials = $this->parseTokenResponse($response);
+        // We expect the refresh token returned to be unset when the grant
+        // type of the request was refresh_token, and the current refresh
+        // token, used in the request, has not expired. In that case, we
+        // should not overwrite the current refesh token with null
+        $credentials = $this->addRefreshToken($credentials);
         $this->updateToken($credentials);
 
         return $credentials;
@@ -1297,6 +1302,26 @@ class OAuth2 implements FetchAuthTokenInterface
         if ($clientId && $clientSecret) {
             $params['client_id'] = $clientId;
             $params['client_secret'] = $clientSecret;
+        }
+
+        return $params;
+    }
+
+    /**
+     * If the 'refresh_token' key is not set in the input array and the current
+     * refresh token is not null, sets 'refresh_token' to be the current refresh
+     * token in the input array.
+     *
+     * @param array $params
+     *
+     * @return array
+     */
+    private function addRefreshToken(&$params)
+    {
+        $refreshToken = $this->getRefreshToken();
+
+        if (!isset($params['refresh_token']) && !is_null($refreshToken)) {
+            $params['refresh_token'] = $refreshToken;
         }
 
         return $params;
