@@ -100,18 +100,24 @@ final class Item implements CacheItemInterface
      */
     public function expiresAt($expiration)
     {
-        // We test for two types here due to the fact the DateTimeInterface
-        // was not introduced until PHP 5.5. Checking for the DateTime type as
-        // well allows us to support 5.4.
-        if ($expiration instanceof \DateTimeInterface) {
+        if ($this->isValidExpiration($expiration)) {
             $this->expiration = $expiration;
-        } elseif ($expiration instanceof \DateTime) {
-            $this->expiration = $expiration;
-        } else {
-            $this->expiration = null;
+
+            return $this;
         }
 
-        return $this;
+        $implementationMessage = interface_exists('DateTimeInterface')
+            ? 'implement interface DateTimeInterface'
+            : 'be an instance of DateTime';
+
+        $error = sprintf(
+            'Argument 1 passed to %s::expiresAt() must %s, %s given',
+            get_class($this),
+            $implementationMessage,
+            gettype($expiration)
+        );
+
+        $this->handleError($error);
     }
 
     /**
@@ -119,14 +125,61 @@ final class Item implements CacheItemInterface
      */
     public function expiresAfter($time)
     {
-        if (is_numeric($time)) {
+        if (is_int($time)) {
             $this->expiration = new \DateTime("now + $time seconds");
         } elseif ($time instanceof \DateInterval) {
             $this->expiration = (new \DateTime())->add($time);
+        } elseif ($time === null) {
+            $this->expiration = $time;
         } else {
-            $this->expiration = null;
+            $message = 'Argument 1 passed to %s::expiresAfter() must be an ' .
+                       'instance of DateInterval or of the type integer, %s given';
+            $error = sprintf($message, get_class($this), gettype($expiration));
+
+            $this->handleError($error);
         }
 
         return $this;
+    }
+
+    /**
+     * Handles an error.
+     *
+     * @param string $error
+     * @throws \TypeError
+     */
+    private function handleError($error)
+    {
+        if (class_exists('TypeError')) {
+            throw new \TypeError($error);
+        }
+
+        trigger_error($error, E_USER_ERROR);
+    }
+
+    /**
+     * Determines if an expiration is valid based on the rules defined by PSR6.
+     *
+     * @param mixed $expiration
+     * @return bool
+     */
+    private function isValidExpiration($expiration)
+    {
+        if ($expiration === null) {
+            return true;
+        }
+
+        // We test for two types here due to the fact the DateTimeInterface
+        // was not introduced until PHP 5.5. Checking for the DateTime type as
+        // well allows us to support 5.4.
+        if ($expiration instanceof \DateTimeInterface) {
+            return true;
+        }
+
+        if ($expiration instanceof \DateTime) {
+            return true;
+        }
+
+        return false;
     }
 }
