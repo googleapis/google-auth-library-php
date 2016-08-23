@@ -68,7 +68,7 @@ putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 
 Before making your API call, you must be sure the API you're calling has been
 enabled. Go to **APIs & Auth** > **APIs** in the
-[Google Developers Console](developer console) and enable the APIs you'd like to
+[Google Developers Console][developer console] and enable the APIs you'd like to
 call. For the example below, you must enable the `Drive API`.
 
 #### Call the APIs
