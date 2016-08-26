@@ -61,7 +61,7 @@ class AuthTokenSubscriberTest extends BaseTest
             ['auth' => 'not_google_auth']);
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
-        $this->assertSame($request->getHeader('Authorization'), '');
+        $this->assertSame($request->getHeader('authorization'), '');
     }
 
     public function testAddsTheTokenAsAnAuthorizationHeader()
@@ -79,7 +79,7 @@ class AuthTokenSubscriberTest extends BaseTest
             ['auth' => 'google_auth']);
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertSame($request->getHeader('Authorization'),
+        $this->assertSame($request->getHeader('authorization'),
             'Bearer 1/abcdef1234567890');
     }
 
@@ -98,7 +98,7 @@ class AuthTokenSubscriberTest extends BaseTest
             ['auth' => 'google_auth']);
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertSame($request->getHeader('Authorization'), '');
+        $this->assertSame($request->getHeader('authorization'), '');
     }
 
     public function testUsesCachedAuthToken()
@@ -134,7 +134,7 @@ class AuthTokenSubscriberTest extends BaseTest
             ['auth' => 'google_auth']);
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertSame($request->getHeader('Authorization'),
+        $this->assertSame($request->getHeader('authorization'),
             'Bearer 2/abcdef1234567890');
     }
 
@@ -172,7 +172,7 @@ class AuthTokenSubscriberTest extends BaseTest
             ['auth' => 'google_auth']);
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertSame($request->getHeader('Authorization'),
+        $this->assertSame($request->getHeader('authorization'),
             'Bearer 2/abcdef1234567890');
     }
 
@@ -222,7 +222,7 @@ class AuthTokenSubscriberTest extends BaseTest
             ['auth' => 'google_auth']);
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertSame($request->getHeader('Authorization'),
+        $this->assertSame($request->getHeader('authorization'),
             'Bearer 1/abcdef1234567890');
     }
 

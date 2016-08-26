@@ -82,7 +82,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $s->onBefore($before);
         $this->assertSame(
             'Bearer 1/abcdef1234567890',
-            $request->getHeader('Authorization')
+            $request->getHeader('authorization')
         );
     }
 
@@ -112,7 +112,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $s->onBefore($before);
         $this->assertSame(
             'Bearer 2/abcdef1234567890',
-            $request->getHeader('Authorization')
+            $request->getHeader('authorization')
         );
     }
 
@@ -144,7 +144,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $s->onBefore($before);
         $this->assertSame(
             'Bearer 2/abcdef1234567890',
-            $request->getHeader('Authorization')
+            $request->getHeader('authorization')
         );
     }
 
@@ -177,7 +177,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $s->onBefore($before);
         $this->assertSame(
             'Bearer 2/abcdef1234567890',
-            $request->getHeader('Authorization')
+            $request->getHeader('authorization')
         );
     }
 
@@ -218,7 +218,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $s->onBefore($before);
         $this->assertSame(
             'Bearer 2/abcdef1234567890',
-            $request->getHeader('Authorization')
+            $request->getHeader('authorization')
         );
     }
 
@@ -233,6 +233,6 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
             ['auth' => 'notscoped']);
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
-        $this->assertSame('', $request->getHeader('Authorization'));
+        $this->assertSame('', $request->getHeader('authorization'));
     }
 }
