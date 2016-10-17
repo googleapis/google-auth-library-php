@@ -805,7 +805,7 @@ class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
         $o = new OAuth2($testConfig);
         $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, 'RS256');
         $o->setIdToken($jwtIdToken);
-        $o->verifyIdToken($this->publicKey);
+        $o->verifyIdToken($this->publicKey, ['RS256']);
     }
 
     /**
@@ -824,7 +824,7 @@ class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
         $o = new OAuth2($testConfig);
         $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, 'RS256');
         $o->setIdToken($jwtIdToken);
-        $o->verifyIdToken($this->publicKey);
+        $o->verifyIdToken($this->publicKey, ['RS256']);
     }
 
     public function testShouldReturnAValidIdToken()
