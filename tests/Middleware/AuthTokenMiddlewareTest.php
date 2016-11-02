@@ -148,7 +148,7 @@ class AuthTokenMiddlewareTest extends BaseTest
 
     public function testGetsCachedAuthTokenUsingCacheOptions()
     {
-        $prefix = 'test_prefix-';
+        $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
         $cachedValue = '2/abcdef1234567890';
         $this->mockCacheItem
@@ -187,7 +187,7 @@ class AuthTokenMiddlewareTest extends BaseTest
 
     public function testShouldSaveValueInCacheWithSpecifiedPrefix()
     {
-        $prefix = 'test_prefix-';
+        $prefix = 'test_prefix_';
         $lifetime = '70707';
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
@@ -239,7 +239,7 @@ class AuthTokenMiddlewareTest extends BaseTest
     /** @dataProvider provideShouldNotifyTokenCallback */
     public function testShouldNotifyTokenCallback(callable $tokenCallback)
     {
-        $prefix = 'test_prefix-';
+        $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
         $authResult = ['access_token' => $token];

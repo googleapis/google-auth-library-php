@@ -67,6 +67,6 @@ trait CacheTrait
         $key = $this->cacheConfig['prefix'] . $key;
 
         // ensure we do not have illegal characters
-        return str_replace(['{', '}', '(', ')', '/', '\\', '@', ':'], '-', $key);
+        return preg_replace('|[^a-zA-Z0-9_\.!]|', '', $key);
     }
 }
