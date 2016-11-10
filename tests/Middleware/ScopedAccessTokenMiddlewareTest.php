@@ -68,7 +68,7 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ' . $token)
+            ->with('authorization', 'Bearer ' . $token)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test
@@ -96,7 +96,7 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ' . $cachedValue)
+            ->with('authorization', 'Bearer ' . $cachedValue)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test
@@ -130,7 +130,7 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ' . $cachedValue)
+            ->with('authorization', 'Bearer ' . $cachedValue)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test
@@ -168,7 +168,7 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ' . $token)
+            ->with('authorization', 'Bearer ' . $token)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test
@@ -212,7 +212,7 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ' . $token)
+            ->with('authorization', 'Bearer ' . $token)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test

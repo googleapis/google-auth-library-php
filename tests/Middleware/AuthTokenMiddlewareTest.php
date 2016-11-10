@@ -78,7 +78,7 @@ class AuthTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ' . $authResult['access_token'])
+            ->with('authorization', 'Bearer ' . $authResult['access_token'])
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test.
@@ -98,7 +98,7 @@ class AuthTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ')
+            ->with('authorization', 'Bearer ')
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test.
@@ -131,7 +131,7 @@ class AuthTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ' . $cachedValue)
+            ->with('authorization', 'Bearer ' . $cachedValue)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test.
@@ -170,7 +170,7 @@ class AuthTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ' . $cachedValue)
+            ->with('authorization', 'Bearer ' . $cachedValue)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test.
@@ -221,7 +221,7 @@ class AuthTokenMiddlewareTest extends BaseTest
         $this->mockRequest
             ->expects($this->once())
             ->method('withHeader')
-            ->with('Authorization', 'Bearer ' . $token)
+            ->with('authorization', 'Bearer ' . $token)
             ->will($this->returnValue($this->mockRequest));
 
         // Run the test.
