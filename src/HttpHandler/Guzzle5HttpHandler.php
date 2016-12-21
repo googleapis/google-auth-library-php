@@ -44,10 +44,8 @@ class Guzzle5HttpHandler
      *
      * @return ResponseInterface
      */
-    public function __invoke(RequestInterface $request, array $options = array())
+    public function __invoke(RequestInterface $request, array $options = ['verify' => '../cert/cacert.pem'])
     {
-        $options = array('verify' => __DIR__.'/../cert/cacert.pem');
-
         $request = $this->client->createRequest(
             $request->getMethod(),
             $request->getUri(),
