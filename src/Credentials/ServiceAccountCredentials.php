@@ -103,6 +103,8 @@ class ServiceAccountCredentials extends CredentialsLoader
             'sub' => $sub,
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
         ]);
+
+        $this->jsonKey = $jsonKey;
     }
 
     /**

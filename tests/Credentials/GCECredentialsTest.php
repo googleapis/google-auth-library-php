@@ -121,4 +121,10 @@ class GCECredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($wantedTokens, $g->fetchAuthToken($httpHandler));
         $this->assertEquals(time() + 57, $g->getLastReceivedToken()['expires_at']);
     }
+
+    public function testKeyFileReturnsNull()
+    {
+        $gce = new GCECredentials();
+        $this->assertNull($gce->getJsonKey());
+    }
 }
