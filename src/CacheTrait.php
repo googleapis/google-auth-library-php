@@ -37,7 +37,9 @@ trait CacheTrait
         }
 
         $cacheItem = $this->cache->getItem($key);
-        return $cacheItem->get();
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
     }
 
     /**
