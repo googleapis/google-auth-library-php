@@ -86,6 +86,10 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         };
         $this->mockCacheItem
             ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(true));
+        $this->mockCacheItem
+            ->expects($this->once())
             ->method('get')
             ->will($this->returnValue($cachedValue));
         $this->mockCache
@@ -120,6 +124,10 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         };
         $this->mockCacheItem
             ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(true));
+        $this->mockCacheItem
+            ->expects($this->once())
             ->method('get')
             ->will($this->returnValue($cachedValue));
         $this->mockCache
@@ -151,6 +159,10 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) use ($token) {
             return $token;
         };
+        $this->mockCacheItem
+            ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(true));
         $this->mockCacheItem
             ->expects($this->once())
             ->method('get')
@@ -191,6 +203,10 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) use ($token) {
             return $token;
         };
+        $this->mockCacheItem
+            ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(true));
         $this->mockCacheItem
             ->expects($this->once())
             ->method('get')

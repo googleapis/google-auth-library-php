@@ -46,6 +46,10 @@ class CacheTraitTest extends \PHPUnit_Framework_TestCase
         $expectedValue = '1234';
         $this->mockCacheItem
             ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(true));
+        $this->mockCacheItem
+            ->expects($this->once())
             ->method('get')
             ->will($this->returnValue($expectedValue));
         $this->mockCache
@@ -66,6 +70,10 @@ class CacheTraitTest extends \PHPUnit_Framework_TestCase
         $key = 'this-key-has-@-illegal-characters';
         $expectedKey = 'thiskeyhasillegalcharacters';
         $expectedValue = '1234';
+        $this->mockCacheItem
+            ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(true));
         $this->mockCacheItem
             ->expects($this->once())
             ->method('get')
@@ -92,6 +100,10 @@ class CacheTraitTest extends \PHPUnit_Framework_TestCase
         $expectedKey = str_replace('-', '', $key);
         $expectedKey = substr(hash('sha256', $expectedKey), 0, 64);
         $expectedValue = '1234';
+        $this->mockCacheItem
+            ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(true));
         $this->mockCacheItem
             ->expects($this->once())
             ->method('get')
