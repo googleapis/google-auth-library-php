@@ -94,6 +94,10 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         };
         $this->mockCacheItem
             ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(true));
+        $this->mockCacheItem
+            ->expects($this->once())
             ->method('get')
             ->will($this->returnValue($cachedValue));
         $this->mockCache
@@ -123,6 +127,10 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) {
             return '';
         };
+        $this->mockCacheItem
+            ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(true));
         $this->mockCacheItem
             ->expects($this->once())
             ->method('get')
@@ -156,7 +164,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         };
         $this->mockCacheItem
             ->expects($this->once())
-            ->method('get')
+            ->method('isHit')
             ->will($this->returnValue(false));
         $this->mockCacheItem
             ->expects($this->once())
@@ -191,7 +199,7 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         };
         $this->mockCacheItem
             ->expects($this->once())
-            ->method('get')
+            ->method('isHit')
             ->will($this->returnValue(false));
         $this->mockCacheItem
             ->expects($this->once())
