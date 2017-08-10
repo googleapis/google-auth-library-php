@@ -74,7 +74,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
     public function clear()
     {
         $this->items = [];
-        $this->deferred = [];
+        $this->deferredItems = [];
 
         return true;
     }
