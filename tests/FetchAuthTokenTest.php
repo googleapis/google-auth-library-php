@@ -60,6 +60,7 @@ class FetchAuthTokenTest extends BaseTest
             $mockFetcher,
             [
                 'base_url' => 'https://www.googleapis.com/books/v1/',
+                'base_uri' => 'https://www.googleapis.com/books/v1/',
                 'exceptions' => false,
                 'defaults' => ['exceptions' => false]
             ],
