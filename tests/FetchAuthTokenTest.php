@@ -28,44 +28,68 @@ use Google\Auth\OAuth2;
 
 class FetchAuthTokenTest extends BaseTest
 {
-    /** @dataProvider provideAuthTokenFetcher */
-    public function testGetLastReceivedToken(FetchAuthTokenInterface $fetcher)
+    private $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
+
+    /** @dataProvider provideMakeHttpClient */
+    public function testMakeHttpClient($fetcherClass)
     {
-        $accessToken = $fetcher->getLastReceivedToken();
+        $mockFetcher = $this->getMockBuilder($fetcherClass)
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $this->assertNotNull($accessToken);
-        $this->assertArrayHasKey('access_token', $accessToken);
-        $this->assertArrayHasKey('expires_at', $accessToken);
+        $mockFetcher
+            ->expects($this->once())
+            ->method('fetchAuthToken')
+            ->will($this->returnCallback(function ($httpHandler) {
+                return $httpHandler();
+            }));
 
-        $this->assertEquals('xyz', $accessToken['access_token']);
-        $this->assertEquals(strtotime('2001'), $accessToken['expires_at']);
+        $httpHandlerCalled = false;
+        $httpHandler = function () use (&$httpHandlerCalled) {
+            $httpHandlerCalled = true;
+            return ['access_token' => 'xyz'];
+        };
+
+        $tokenCallbackCalled = false;
+        $tokenCallback = function ($cacheKey, $accessToken) use (&$tokenCallbackCalled) {
+            $tokenCallbackCalled = true;
+            $this->assertEquals('xyz', $accessToken);
+        };
+
+        $client = CredentialsLoader::makeHttpClient(
+            $mockFetcher,
+            [
+                'base_url' => 'https://www.googleapis.com/books/v1/',
+                'base_uri' => 'https://www.googleapis.com/books/v1/',
+                'exceptions' => false,
+                'defaults' => ['exceptions' => false]
+            ],
+            $httpHandler,
+            $tokenCallback
+        );
+
+        $response = $client->get(
+            'volumes?q=Henry+David+Thoreau&country=US'
+        );
+
+        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertTrue($httpHandlerCalled);
+        $this->assertTrue($tokenCallbackCalled);
     }
 
-    public function provideAuthTokenFetcher()
+    public function provideMakeHttpClient()
     {
-        $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
-        $jsonPath = sprintf(
-            '%s/fixtures/.config/%s',
-            __DIR__,
-            CredentialsLoader::WELL_KNOWN_PATH
-        );
-        $jsonPath2 = sprintf(
-            '%s/fixtures2/.config/%s',
-            __DIR__,
-            CredentialsLoader::WELL_KNOWN_PATH
-        );
-
         return [
-            [$this->getAppIdentityCredentials()],
-            [$this->getGCECredentials()],
-            [$this->getServiceAccountCredentials($scopes, $jsonPath)],
-            [$this->getServiceAccountJwtAccessCredentials($jsonPath)],
-            [$this->getUserRefreshCredentials($scopes, $jsonPath2)],
-            [$this->getOAuth2()],
+            ['Google\Auth\Credentials\AppIdentityCredentials'],
+            ['Google\Auth\Credentials\GCECredentials'],
+            ['Google\Auth\Credentials\ServiceAccountCredentials'],
+            ['Google\Auth\Credentials\ServiceAccountJwtAccessCredentials'],
+            ['Google\Auth\Credentials\UserRefreshCredentials'],
+            ['Google\Auth\OAuth2'],
         ];
     }
 
-    private function getAppIdentityCredentials()
+    public function testAppIdentityCredentialsGetLastReceivedToken()
     {
         $class = new \ReflectionClass(
             'Google\Auth\Credentials\AppIdentityCredentials'
@@ -79,10 +103,10 @@ class FetchAuthTokenTest extends BaseTest
             'expiration_time' => strtotime('2001'),
         ]);
 
-        return $credentials;
+        $this->assertGetLastReceivedToken($credentials);
     }
 
-    private function getGCECredentials()
+    public function testGCECredentialsGetLastReceivedToken()
     {
         $class = new \ReflectionClass(
             'Google\Auth\Credentials\GCECredentials'
@@ -96,25 +120,37 @@ class FetchAuthTokenTest extends BaseTest
             'expires_at' => strtotime('2001'),
         ]);
 
-        return $credentials;
+        $this->assertGetLastReceivedToken($credentials);
     }
 
-    private function getServiceAccountCredentials($scopes, $jsonPath)
+    public function testServiceAccountCredentialsGetLastReceivedToken()
     {
+        $jsonPath = sprintf(
+            '%s/fixtures/.config/%s',
+            __DIR__,
+            CredentialsLoader::WELL_KNOWN_PATH
+        );
+
         $class = new \ReflectionClass(
             'Google\Auth\Credentials\ServiceAccountCredentials'
         );
         $property = $class->getProperty('auth');
         $property->setAccessible(true);
 
-        $credentials = new ServiceAccountCredentials($scopes, $jsonPath);
+        $credentials = new ServiceAccountCredentials($this->scopes, $jsonPath);
         $property->setValue($credentials, $this->getOAuth2Mock());
 
-        return $credentials;
+        $this->assertGetLastReceivedToken($credentials);
     }
 
-    private function getServiceAccountJwtAccessCredentials($jsonPath)
+    public function testServiceAccountJwtAccessCredentialsGetLastReceivedToken()
     {
+        $jsonPath = sprintf(
+            '%s/fixtures/.config/%s',
+            __DIR__,
+            CredentialsLoader::WELL_KNOWN_PATH
+        );
+
         $class = new \ReflectionClass(
             'Google\Auth\Credentials\ServiceAccountJwtAccessCredentials'
         );
@@ -124,21 +160,27 @@ class FetchAuthTokenTest extends BaseTest
         $credentials = new ServiceAccountJwtAccessCredentials($jsonPath);
         $property->setValue($credentials, $this->getOAuth2Mock());
 
-        return $credentials;
+        $this->assertGetLastReceivedToken($credentials);
     }
 
-    private function getUserRefreshCredentials($scopes, $jsonPath)
+    public function testUserRefreshCredentialsGetLastReceivedToken()
     {
+        $jsonPath = sprintf(
+            '%s/fixtures2/.config/%s',
+            __DIR__,
+            CredentialsLoader::WELL_KNOWN_PATH
+        );
+
         $class = new \ReflectionClass(
             'Google\Auth\Credentials\UserRefreshCredentials'
         );
         $property = $class->getProperty('auth');
         $property->setAccessible(true);
 
-        $credentials = new UserRefreshCredentials($scopes, $jsonPath);
+        $credentials = new UserRefreshCredentials($this->scopes, $jsonPath);
         $property->setValue($credentials, $this->getOAuth2Mock());
 
-        return $credentials;
+        $this->assertGetLastReceivedToken($credentials);
     }
 
     private function getOAuth2()
@@ -148,7 +190,7 @@ class FetchAuthTokenTest extends BaseTest
             'expires_at' => strtotime('2001'),
         ]);
 
-        return $oauth;
+        $this->assertGetLastReceivedToken($oauth);
     }
 
     private function getOAuth2Mock()
@@ -166,5 +208,17 @@ class FetchAuthTokenTest extends BaseTest
             ]));
 
         return $mock;
+    }
+
+    private function assertGetLastReceivedToken(FetchAuthTokenInterface $fetcher)
+    {
+        $accessToken = $fetcher->getLastReceivedToken();
+
+        $this->assertNotNull($accessToken);
+        $this->assertArrayHasKey('access_token', $accessToken);
+        $this->assertArrayHasKey('expires_at', $accessToken);
+
+        $this->assertEquals('xyz', $accessToken['access_token']);
+        $this->assertEquals(strtotime('2001'), $accessToken['expires_at']);
     }
 }

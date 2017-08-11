@@ -106,7 +106,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
     /**
      * Create a new Credentials instance.
      *
-     * @param string|array scope the scope of the access request, expressed
+     * @param string|array $scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
      * @param array $jsonKey the JSON credentials.
      *
@@ -124,6 +124,53 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
             return new UserRefreshCredentials($scope, $jsonKey);
         } else {
             throw new \InvalidArgumentException('invalid value in the type field');
+        }
+    }
+
+    /**
+     * Create an authorized HTTP Client from an instance of FetchAuthTokenInterface.
+     *
+     * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
+     * @param array $httpClientOptoins (optional) Array of request options to apply.
+     * @param callable $httpHandler (optional) http client to fetch the token.
+     * @param callable $tokenCallback (optional) function to be called when a new token is fetched.
+     *
+     * @return \GuzzleHttp\Client
+     */
+    public static function makeHttpClient(
+        FetchAuthTokenInterface $fetcher,
+        array $httpClientOptions = [],
+        callable $httpHandler = null,
+        callable $tokenCallback = null
+    ) {
+        $version = \GuzzleHttp\ClientInterface::VERSION;
+
+        switch ($version[0]) {
+            case '5':
+                $client = new \GuzzleHttp\Client($httpClientOptions);
+                $client->setDefaultOption('auth', 'google_auth');
+                $subscriber = new Subscriber\AuthTokenSubscriber(
+                    $fetcher,
+                    $httpHandler,
+                    $tokenCallback
+                );
+                $client->getEmitter()->attach($subscriber);
+                return $client;
+            case '6':
+                $middleware = new Middleware\AuthTokenMiddleware(
+                    $fetcher,
+                    $httpHandler,
+                    $tokenCallback
+                );
+                $stack = \GuzzleHttp\HandlerStack::create();
+                $stack->push($middleware);
+
+                return new \GuzzleHttp\Client([
+                   'handler' => $stack,
+                   'auth' => 'google_auth',
+                ] + $httpClientOptions);
+            default:
+                throw new \Exception('Version not supported');
         }
     }
 
