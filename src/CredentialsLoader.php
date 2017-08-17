@@ -89,8 +89,13 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      */
     public static function fromWellKnownFile()
     {
-        $rootEnv = self::isOnWindows() ? 'APPDATA' : 'HOME';
-        $path = [getenv($rootEnv)];
+        if (self::isOnWindows()) {
+            $rootEnv = 'APPDATA';
+            $path = [getenv($rootEnv)];
+        } else {
+            $userInfo = posix_getpwuid(posix_getuid());
+            $path = [$userInfo['dir']];
+        }
         if (!self::isOnWindows()) {
             $path[] = self::NON_WINDOWS_WELL_KNOWN_PATH_BASE;
         }
