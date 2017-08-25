@@ -92,7 +92,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
         if (array_key_exists('argv', $_SERVER) && strpos($_SERVER['argv'][0], 'phpunit') !== false) {
             $rootEnv = 'HOME';
             $path = [getenv($rootEnv)];
-        } else if (self::isOnWindows()) {
+        } elseif (self::isOnWindows()) {
             $rootEnv = 'APPDATA';
             $path = [getenv($rootEnv)];
         } else {
