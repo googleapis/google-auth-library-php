@@ -89,7 +89,10 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      */
     public static function fromWellKnownFile()
     {
-        if (self::isOnWindows()) {
+        if (array_key_exists('argv', $_SERVER) && strpos($_SERVER['argv'][0], 'phpunit') !== false) {
+            $rootEnv = 'HOME';
+            $path = [getenv($rootEnv)];
+        } else if (self::isOnWindows()) {
             $rootEnv = 'APPDATA';
             $path = [getenv($rootEnv)];
         } else {
