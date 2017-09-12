@@ -51,7 +51,6 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
         $items = [];
 
         foreach ($keys as $key) {
-            $this->isValidKey($key);
             $items[$key] = $this->hasItem($key) ? clone $this->items[$key] : new Item($key);
         }
 
