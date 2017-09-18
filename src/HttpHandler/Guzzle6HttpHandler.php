@@ -31,6 +31,9 @@ class Guzzle6HttpHandler
      */
     public function __invoke(RequestInterface $request, array $options = [])
     {
+        $options += [
+            'verify' => __DIR__ . '/../cert/cacert.pem'
+        ];
         return $this->client->send($request, $options);
     }
 }
