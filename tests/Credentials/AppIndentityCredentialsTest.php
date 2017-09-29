@@ -33,6 +33,12 @@ class AppIdentityCredentialsOnAppEngineTest extends \PHPUnit_Framework_TestCase
         $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
         $this->assertTrue(AppIdentityCredentials::onAppEngine());
     }
+
+    public function testIsTrueWhenAppEngineRuntimeIsPhp()
+    {
+        $_SERVER['APPENGINE_RUNTIME'] = 'php';
+        $this->assertTrue(AppIdentityCredentials::onAppEngine());
+    }
 }
 
 class AppIdentityCredentialsGetCacheKeyTest extends \PHPUnit_Framework_TestCase
