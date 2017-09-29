@@ -454,6 +454,21 @@ class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
     }
 
+    public function testCanHaveAdditionalClaims()
+    {
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+        $testConfig = $this->signingMinimal;
+        $targetAud = '123@456.com';
+        $testConfig['additionalClaims'] = ['target_audience' => $targetAud];
+        $o = new OAuth2($testConfig);
+        $o->setSigningAlgorithm('RS256');
+        $o->setSigningKey($privateKey);
+        $payload = $o->toJwt();
+        $roundTrip = $this->jwtDecode($payload, $publicKey, array('RS256'));
+        $this->assertEquals($roundTrip->target_audience, $targetAud);
+    }
+
     private function jwtDecode()
     {
         $args = func_get_args();

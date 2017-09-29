@@ -239,6 +239,12 @@ class OAuth2 implements FetchAuthTokenInterface
     private $extensionParams;
 
     /**
+     * When using the toJwt function, these claims will be added to the JWT
+     * payload.
+     */
+    private $additionalClaims;
+
+    /**
      * Create a new OAuthCredentials.
      *
      * The configuration array accepts various options
@@ -322,6 +328,7 @@ class OAuth2 implements FetchAuthTokenInterface
             'signingKey' => null,
             'signingAlgorithm' => null,
             'scope' => null,
+            'additionalClaims' => [],
         ], $config);
 
         $this->setAuthorizationUri($opts['authorizationUri']);
@@ -340,6 +347,7 @@ class OAuth2 implements FetchAuthTokenInterface
         $this->setSigningAlgorithm($opts['signingAlgorithm']);
         $this->setScope($opts['scope']);
         $this->setExtensionParams($opts['extensionParams']);
+        $this->setAdditionalClaims($opts['additionalClaims']);
         $this->updateToken($opts);
     }
 
@@ -413,6 +421,7 @@ class OAuth2 implements FetchAuthTokenInterface
         if (!(is_null($this->getSub()))) {
             $assertion['sub'] = $this->getSub();
         }
+        $assertion += $this->getAdditionalClaims();
 
         return $this->jwtEncode($assertion, $this->getSigningKey(),
             $this->getSigningAlgorithm());
@@ -1210,6 +1219,26 @@ class OAuth2 implements FetchAuthTokenInterface
     public function setRefreshToken($refreshToken)
     {
         $this->refreshToken = $refreshToken;
+    }
+
+    /**
+     * Sets additional claims to be included in the JWT token
+     *
+     * @param array $additionalClaims
+     */
+    public function setAdditionalClaims(array $additionalClaims)
+    {
+        $this->additionalClaims = $additionalClaims;
+    }
+
+    /**
+     * Gets the additional claims to be included in the JWT token.
+     *
+     * @return array
+     */
+    public function getAdditionalClaims()
+    {
+        return $this->additionalClaims;
     }
 
     /**
