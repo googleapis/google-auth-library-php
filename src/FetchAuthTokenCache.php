@@ -50,8 +50,8 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface
     public function __construct(
         FetchAuthTokenInterface $fetcher,
         array $cacheConfig = null,
-        +        CacheItemPoolInterface $cache,
-        +        callable $httpHandler = null
+        CacheItemPoolInterface $cache,
+        callable $httpHandler = null
     ) {
         $this->fetcher = $fetcher;
         $this->cache = $cache;
