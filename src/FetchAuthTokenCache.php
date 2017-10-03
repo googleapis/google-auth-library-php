@@ -42,10 +42,16 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface
      */
     private $cache;
 
+    /**
+     * @var callable
+     */
+    private $httpHandler;
+
     public function __construct(
         FetchAuthTokenInterface $fetcher,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache
+        +        CacheItemPoolInterface $cache,
+        +        callable $httpHandler = null
     ) {
         $this->fetcher = $fetcher;
         $this->cache = $cache;
@@ -53,6 +59,7 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface
             'lifetime' => 1500,
             'prefix' => '',
         ], (array) $cacheConfig);
+        $this->httpHandler = $httpHandler;
     }
 
     /**
@@ -79,6 +86,10 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface
         $cached = $this->getCachedValue($cacheKey);
         if (!empty($cached)) {
             return ['access_token' => $cached];
+        }
+
+        if ($httpHandler === null) {
+            $httpHandler = $this->httpHandler;
         }
 
         $auth_token = $this->fetcher->fetchAuthToken($httpHandler);
