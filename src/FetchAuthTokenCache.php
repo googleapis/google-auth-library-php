@@ -43,7 +43,7 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface
     private $cache;
 
     /**
-     * @var callable
+     * @var callable|null
      */
     private $httpHandler;
 
