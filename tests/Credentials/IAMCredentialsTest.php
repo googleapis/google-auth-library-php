@@ -18,8 +18,9 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\Credentials\IAMCredentials;
+use PHPUnit\Framework\TestCase;
 
-class IAMConstructorTest extends \PHPUnit_Framework_TestCase
+class IAMConstructorTest extends TestCase
 {
     /**
      * @expectedException InvalidArgumentException
@@ -53,7 +54,7 @@ class IAMConstructorTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class IAMUpdateMetadataCallbackTest extends \PHPUnit_Framework_TestCase
+class IAMUpdateMetadataCallbackTest extends TestCase
 {
     public function testUpdateMetadataFunc()
     {

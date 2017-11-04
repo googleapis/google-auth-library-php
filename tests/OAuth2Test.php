@@ -20,8 +20,9 @@ namespace Google\Auth\Tests;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
-class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
+class OAuth2AuthorizationUriTest extends TestCase
 {
     private $minimal = [
         'authorizationUri' => 'https://accounts.test.org/insecure/url',
@@ -170,7 +171,7 @@ class OAuth2AuthorizationUriTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class OAuth2GrantTypeTest extends \PHPUnit_Framework_TestCase
+class OAuth2GrantTypeTest extends TestCase
 {
     private $minimal = [
         'authorizationUri' => 'https://accounts.test.org/insecure/url',
@@ -232,7 +233,7 @@ class OAuth2GrantTypeTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class OAuth2GetCacheKeyTest extends \PHPUnit_Framework_TestCase
+class OAuth2GetCacheKeyTest extends TestCase
 {
     private $minimal = [
         'clientID' => 'aClientID',
@@ -259,7 +260,7 @@ class OAuth2GetCacheKeyTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class OAuth2TimingTest extends \PHPUnit_Framework_TestCase
+class OAuth2TimingTest extends TestCase
 {
     private $minimal = [
         'authorizationUri' => 'https://accounts.test.org/insecure/url',
@@ -319,7 +320,7 @@ class OAuth2TimingTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class OAuth2GeneralTest extends \PHPUnit_Framework_TestCase
+class OAuth2GeneralTest extends TestCase
 {
     private $minimal = [
         'authorizationUri' => 'https://accounts.test.org/insecure/url',
@@ -363,7 +364,7 @@ class OAuth2GeneralTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
+class OAuth2JwtTest extends TestCase
 {
     private $signingMinimal = [
         'signingKey' => 'example_key',
@@ -481,7 +482,7 @@ class OAuth2JwtTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class OAuth2GenerateAccessTokenRequestTest extends \PHPUnit_Framework_TestCase
+class OAuth2GenerateAccessTokenRequestTest extends TestCase
 {
     private $tokenRequestMinimal = [
         'tokenCredentialUri' => 'https://tokens_r_us/test',
@@ -629,7 +630,7 @@ class OAuth2GenerateAccessTokenRequestTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class OAuth2FetchAuthTokenTest extends \PHPUnit_Framework_TestCase
+class OAuth2FetchAuthTokenTest extends TestCase
 {
     private $fetchAuthTokenMinimal = [
         'tokenCredentialUri' => 'https://tokens_r_us/test',
@@ -774,7 +775,7 @@ class OAuth2FetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class OAuth2VerifyIdTokenTest extends \PHPUnit_Framework_TestCase
+class OAuth2VerifyIdTokenTest extends TestCase
 {
     private $publicKey;
     private $privateKey;
