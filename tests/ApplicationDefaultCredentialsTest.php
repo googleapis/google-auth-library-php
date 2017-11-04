@@ -21,8 +21,9 @@ use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use GuzzleHttp\Psr7;
+use PHPUnit\Framework\TestCase;
 
-class ADCGetTest extends \PHPUnit_Framework_TestCase
+class ADCGetTest extends TestCase
 {
     private $originalHome;
 
@@ -101,7 +102,7 @@ class ADCGetTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class ADCGetMiddlewareTest extends \PHPUnit_Framework_TestCase
+class ADCGetMiddlewareTest extends TestCase
 {
     private $originalHome;
 

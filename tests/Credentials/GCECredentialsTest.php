@@ -20,8 +20,9 @@ namespace Google\Auth\Tests;
 use Google\Auth\Credentials\GCECredentials;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
-class GCECredentialsOnGCETest extends \PHPUnit_Framework_TestCase
+class GCECredentialsOnGCETest extends TestCase
 {
     public function testIsFalseOnClientErrorStatus()
     {
@@ -56,7 +57,7 @@ class GCECredentialsOnGCETest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class GCECredentialsOnAppEngineFlexibleTest extends \PHPUnit_Framework_TestCase
+class GCECredentialsOnAppEngineFlexibleTest extends TestCase
 {
     public function testIsFalseByDefault()
     {
@@ -70,7 +71,7 @@ class GCECredentialsOnAppEngineFlexibleTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class GCECredentialsGetCacheKeyTest extends \PHPUnit_Framework_TestCase
+class GCECredentialsGetCacheKeyTest extends TestCase
 {
     public function testShouldNotBeEmpty()
     {
@@ -79,7 +80,7 @@ class GCECredentialsGetCacheKeyTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class GCECredentialsFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
+class GCECredentialsFetchAuthTokenTest extends TestCase
 {
     public function testShouldBeEmptyIfNotOnGCE()
     {
