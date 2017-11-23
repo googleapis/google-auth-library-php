@@ -11,21 +11,24 @@ php:
   - 5.6
   - 7.0
   - 7.1
+  - 7.2
 
 env:
-  - COMPOSER_CMD="composer install"
-  - COMPOSER_CMD="composer update --prefer-lowest"
+  -
+  - COMPOSER_ARGS="--prefer-lowest"
 matrix:
   include:
-    - php: "7.0"
-      env: RUN_CS_FIXER=true COMPOSER_CMD="composer install"
+    - php: "7.2"
+      env: RUN_CS_FIXER=true
 
 before_script:
-  - $COMPOSER_CMD
+  - composer update $COMPOSER_ARGS
 
 script:
   - if [ "${RUN_CS_FIXER}" = "true" ]; then
+      composer require --dev "friendsofphp/php-cs-fixer:^1.11";
       vendor/bin/php-cs-fixer fix --dry-run --diff --config-file=.php_cs .;
     else
+      composer require --dev "phpunit/phpunit:^4.8";
       vendor/bin/phpunit;
     fi
