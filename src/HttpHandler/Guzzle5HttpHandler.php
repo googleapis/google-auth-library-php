@@ -83,7 +83,6 @@ class Guzzle5HttpHandler
                 try {
                     $futureResponse->wait();
                 } catch (Exception $e) {
-                    throw $e;
                     // The promise is already delivered when the exception is
                     // thrown, so don't rethrow it.
                 }
@@ -99,7 +98,7 @@ class Guzzle5HttpHandler
                 return $this->createPsr7Response($response);
             },
             function (Exception $e) {
-                return new RejectedPromise($e->getMessage());
+                return new RejectedPromise($e);
             }
         );
     }

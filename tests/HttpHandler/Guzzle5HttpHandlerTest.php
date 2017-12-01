@@ -152,10 +152,10 @@ class Guzzle5HttpHandlerTest extends BaseTest
     }
 
     /**
-     * @expectedException GuzzleHttp\Promise\RejectionException
+     * @expectedException Exception
      * @expectedExceptionMessage This is a test rejection message
      */
-    public function testPromiseHandlesError()
+    public function testPromiseHandlesException()
     {
         $this->mockClient
             ->expects($this->any())
