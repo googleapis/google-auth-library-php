@@ -18,6 +18,7 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\HttpHandler\Guzzle6HttpHandler;
+use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Psr7\Response;
 
 class Guzzle6HttpHandlerTest extends BaseTest
@@ -46,5 +47,22 @@ class Guzzle6HttpHandlerTest extends BaseTest
         $handler = new Guzzle6HttpHandler($this->mockClient);
         $response = $handler($this->mockRequest);
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
+    }
+
+    public function testSuccessfullySendsRequestAsync()
+    {
+        $this->mockClient
+            ->expects($this->any())
+            ->method('sendAsync')
+            ->will($this->returnValue(new Promise(function () use (&$promise) {
+                return $promise->resolve(new Response(200, [], 'Body Text'));
+            })));
+
+        $handler = new Guzzle6HttpHandler($this->mockClient);
+        $promise = $handler->async($this->mockRequest);
+        $response = $promise->wait();
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('Body Text', (string) $response->getBody());
     }
 }
