@@ -72,8 +72,10 @@ class Guzzle5HttpHandler
         }
 
         $futureResponse = $this->client->send(
-            $this->createGuzzle5Request($request, $options),
-            ['future' => true] + $options
+            $this->createGuzzle5Request(
+                $request,
+                ['future' => true] + $options
+            )
         );
 
         $promise = new Promise(
