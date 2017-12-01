@@ -55,11 +55,14 @@ class Guzzle6HttpHandlerTest extends BaseTest
             ->expects($this->any())
             ->method('sendAsync')
             ->will($this->returnValue(new Promise(function () use (&$promise) {
-                return $promise->resolve(new Response(200));
+                return $promise->resolve(new Response(200, [], 'Body Text'));
             })));
 
         $handler = new Guzzle6HttpHandler($this->mockClient);
         $promise = $handler->async($this->mockRequest);
-        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $promise->wait());
+        $response = $promise->wait();
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('Body Text', (string) $response->getBody());
     }
 }

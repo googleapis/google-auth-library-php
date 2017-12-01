@@ -23,6 +23,7 @@ use Google\Auth\HttpHandler\Guzzle5HttpHandler;
 use GuzzleHttp\Message\FutureResponse;
 use GuzzleHttp\Message\Response;
 use GuzzleHttp\Ring\Future\CompletedFutureValue;
+use GuzzleHttp\Stream\Stream;
 
 class Guzzle5HttpHandlerTest extends BaseTest
 {
@@ -52,10 +53,15 @@ class Guzzle5HttpHandlerTest extends BaseTest
 
     public function testSuccessfullySendsRequest()
     {
+        $response = new Response(
+            200,
+            [],
+            Stream::factory('Body Text')
+        );
         $this->mockClient
             ->expects($this->any())
             ->method('send')
-            ->will($this->returnValue(new Response(200)));
+            ->will($this->returnValue($response));
         $this->mockClient
             ->expects($this->any())
             ->method('createRequest')
@@ -64,6 +70,8 @@ class Guzzle5HttpHandlerTest extends BaseTest
         $handler = new Guzzle5HttpHandler($this->mockClient);
         $response = $handler($this->mockPsr7Request);
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('Body Text', (string) $response->getBody());
     }
 
     public function testAsyncWithoutGuzzlePromiseThrowsException()
@@ -107,11 +115,16 @@ class Guzzle5HttpHandlerTest extends BaseTest
 
     public function testSuccessfullySendsRequestAsync()
     {
+        $response = new Response(
+            200,
+            [],
+            Stream::factory('Body Text')
+        );
         $this->mockClient
             ->expects($this->any())
             ->method('send')
             ->will($this->returnValue(new FutureResponse(
-                new CompletedFutureValue(new Response(200))
+                new CompletedFutureValue($response)
             )));
         $this->mockClient
             ->expects($this->any())
@@ -121,6 +134,8 @@ class Guzzle5HttpHandlerTest extends BaseTest
         $handler = new Guzzle5HttpHandler($this->mockClient);
         $promise = $handler->async($this->mockPsr7Request);
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $promise->wait());
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('Body Text', (string) $response->getBody());
     }
 
     /**
