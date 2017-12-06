@@ -610,7 +610,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $this->assertEquals('POST', $req->getMethod());
         $fields = Psr7\parse_query((string)$req->getBody());
         $this->assertEquals(OAuth2::JWT_URN, $fields['grant_type']);
-        $this->assertTrue(array_key_exists('assertion', $fields));
+        $this->assertArrayHasKey('assertion', $fields);
     }
 
     public function testGeneratesExtendedRequests()

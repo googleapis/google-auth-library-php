@@ -66,17 +66,15 @@ class IAMUpdateMetadataCallbackTest extends TestCase
         );
 
         $update_metadata = $iam->getUpdateMetadataFunc();
-        $this->assertTrue(is_callable($update_metadata));
+        $this->assertInternalType('callable', $update_metadata);
 
         $actual_metadata = call_user_func($update_metadata,
             $metadata = array('foo' => 'bar'));
-        $this->assertTrue(
-            isset($actual_metadata[IAMCredentials::SELECTOR_KEY]));
+        $this->assertArrayHasKey(IAMCredentials::SELECTOR_KEY, $actual_metadata);
         $this->assertEquals(
             $actual_metadata[IAMCredentials::SELECTOR_KEY],
             $selector);
-        $this->assertTrue(
-            isset($actual_metadata[IAMCredentials::TOKEN_KEY]));
+        $this->assertArrayHasKey(IAMCredentials::TOKEN_KEY, $actual_metadata);
         $this->assertEquals(
             $actual_metadata[IAMCredentials::TOKEN_KEY],
             $token);
