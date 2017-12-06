@@ -21,6 +21,7 @@ use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
+use PHPUnit\Framework\TestCase;
 
 // Creates a standard JSON auth object for testing.
 function createURCTestJson()
@@ -33,7 +34,7 @@ function createURCTestJson()
     ];
 }
 
-class URCGetCacheKeyTest extends \PHPUnit_Framework_TestCase
+class URCGetCacheKeyTest extends TestCase
 {
     public function testShouldBeTheSameAsOAuth2WithTheSameScope()
     {
@@ -50,7 +51,7 @@ class URCGetCacheKeyTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class URCConstructorTest extends \PHPUnit_Framework_TestCase
+class URCConstructorTest extends TestCase
 {
     /**
      * @expectedException InvalidArgumentException
@@ -111,7 +112,7 @@ class URCConstructorTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class URCFromEnvTest extends \PHPUnit_Framework_TestCase
+class URCFromEnvTest extends TestCase
 {
     protected function tearDown()
     {
@@ -141,7 +142,7 @@ class URCFromEnvTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class URCFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
+class URCFromWellKnownFileTest extends TestCase
 {
     private $originalHome;
 
@@ -174,7 +175,7 @@ class URCFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class URCFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
+class URCFetchAuthTokenTest extends TestCase
 {
     /**
      * @expectedException GuzzleHttp\Exception\ClientException

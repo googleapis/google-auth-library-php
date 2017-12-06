@@ -23,6 +23,7 @@ use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
+use PHPUnit\Framework\TestCase;
 
 // Creates a standard JSON auth object for testing.
 function createTestJson()
@@ -36,7 +37,7 @@ function createTestJson()
     ];
 }
 
-class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
+class SACGetCacheKeyTest extends TestCase
 {
     public function testShouldBeTheSameAsOAuth2WithTheSameScope()
     {
@@ -87,7 +88,7 @@ class SACGetCacheKeyTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class SACConstructorTest extends \PHPUnit_Framework_TestCase
+class SACConstructorTest extends TestCase
 {
     /**
      * @expectedException InvalidArgumentException
@@ -148,7 +149,7 @@ class SACConstructorTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class SACFromEnvTest extends \PHPUnit_Framework_TestCase
+class SACFromEnvTest extends TestCase
 {
     protected function tearDown()
     {
@@ -178,7 +179,7 @@ class SACFromEnvTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
+class SACFromWellKnownFileTest extends TestCase
 {
     private $originalHome;
 
@@ -211,7 +212,7 @@ class SACFromWellKnownFileTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
+class SACFetchAuthTokenTest extends TestCase
 {
     private $privateKey;
 
@@ -307,7 +308,7 @@ class SACFetchAuthTokenTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class SACJwtAccessTest extends \PHPUnit_Framework_TestCase
+class SACJwtAccessTest extends TestCase
 {
     private $privateKey;
 
@@ -433,7 +434,7 @@ class SACJwtAccessTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-class SACJwtAccessComboTest extends \PHPUnit_Framework_TestCase
+class SACJwtAccessComboTest extends TestCase
 {
     private $privateKey;
 

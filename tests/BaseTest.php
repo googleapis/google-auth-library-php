@@ -3,8 +3,9 @@
 namespace Google\Auth\tests;
 
 use GuzzleHttp\ClientInterface;
+use PHPUnit\Framework\TestCase;
 
-abstract class BaseTest extends \PHPUnit_Framework_TestCase
+abstract class BaseTest extends TestCase
 {
     public function onlyGuzzle6()
     {
