@@ -1,3 +1,9 @@
+## v1.2.1 (23/12/2017)
+
+### Changes
+
+* [#180] (https://github.com/google/google-auth-library-php/issues/180): Fix bug when merging headers on Guzzle5 http handler (@erictinocopro[])
+
 ## 1.0.0 (12/06/2017)
 
 ### Changes
@@ -16,3 +22,4 @@
 
 [@bshaffer]: https://github.com/bshaffer
 [@stanley-cheung]: https://github.com/stanley-cheung
+[@erictinocopro]: https://github.com/erictinocopro
