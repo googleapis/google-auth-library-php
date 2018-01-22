@@ -114,7 +114,7 @@ class ApplicationDefaultCredentials
     ) {
         $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
 
-        return new AuthTokenMiddleware($creds, $cacheConfig);
+        return new AuthTokenMiddleware($creds, $httpHandler);
     }
 
     /**
