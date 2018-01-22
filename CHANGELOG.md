@@ -1,3 +1,24 @@
+## 1.2.0 (6/12/2017)
+
+### Changes
+
+ * Adds async method to HTTP handlers (#176)
+ * Misc bug fixes and improvements (#177, #175, #178)
+
+## 1.1.0 (10/10/2017)
+
+### Changes
+
+ * Supports additional claims in JWT tokens (#171)
+ * Adds makeHttpClient for creating authorized Guzzle clients (#162)
+ * Misc bug fixes/improvements (#168, #161, #167, #170, #143)
+
+## 1.0.1 (31/07/2017)
+
+### Changes
+
+* Adds support for Firebase 5.0 (#159)
+
 ## 1.0.0 (12/06/2017)
 
 ### Changes
