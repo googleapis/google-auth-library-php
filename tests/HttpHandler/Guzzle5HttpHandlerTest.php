@@ -175,4 +175,43 @@ class Guzzle5HttpHandlerTest extends BaseTest
         $promise = $handler->async($this->mockPsr7Request);
         $promise->wait();
     }
+
+    public function testCreateGuzzle5Request()
+    {
+        $requestHeaders = [
+            'header1' => 'value1',
+            'header2' => 'value2',
+        ];
+        $this->mockPsr7Request
+            ->expects($this->once())
+            ->method('getHeaders')
+            ->will($this->returnValue($requestHeaders));
+        $mockBody = $this->getMock('Psr\Http\Message\StreamInterface');
+        $this->mockPsr7Request
+            ->expects($this->once())
+            ->method('getBody')
+            ->will($this->returnValue($mockBody));
+        $this->mockClient
+            ->expects($this->once())
+            ->method('createRequest')
+            ->with(null, null, [
+                'headers' => $requestHeaders + ['header3' => 'value3'],
+                'body' => $mockBody,
+            ])
+            ->will($this->returnValue(
+                $this->getMock('GuzzleHttp\Message\RequestInterface')
+            ));
+        $this->mockClient
+            ->expects($this->once())
+            ->method('send')
+            ->will($this->returnValue(
+                $this->getMock('GuzzleHttp\Message\ResponseInterface')
+            ));
+        $handler = new Guzzle5HttpHandler($this->mockClient);
+        $handler($this->mockPsr7Request, [
+            'headers' => [
+                'header3' => 'value3'
+            ]
+        ]);
+    }
 }
