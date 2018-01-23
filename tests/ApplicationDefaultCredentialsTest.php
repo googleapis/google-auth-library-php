@@ -22,7 +22,6 @@ use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use GuzzleHttp\Psr7;
 use PHPUnit\Framework\TestCase;
-use Psr\Cache\CacheItemPoolInterface;
 
 class ADCGetTest extends TestCase
 {
@@ -163,13 +162,12 @@ class ADCGetMiddlewareTest extends TestCase
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
-        // simulate not being GCE by return 500
         $httpHandler = getHandler([
             buildResponse(200),
         ]);
 
         $cacheOptions = [];
-        $cachePool = $this->getMock(CacheItemPoolInterface::class);
+        $cachePool = $this->getMock('Psr\Cache\CacheItemPoolInterface');
 
         $middleware = ApplicationDefaultCredentials::getMiddleware(
             'a scope',
@@ -307,13 +305,12 @@ class ADCGetSubscriberTest extends BaseTest
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
-        // simulate not being GCE by return 500
         $httpHandler = getHandler([
             buildResponse(200),
         ]);
 
         $cacheOptions = [];
-        $cachePool = $this->getMock(CacheItemPoolInterface::class);
+        $cachePool = $this->getMock('Psr\Cache\CacheItemPoolInterface');
 
         $subscriber = ApplicationDefaultCredentials::getSubscriber(
             'a scope',
