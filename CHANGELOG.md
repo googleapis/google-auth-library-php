@@ -1,3 +1,10 @@
+## 1.2.1 (24/01/2018)
+
+### Changes
+
+ * Fixes array merging bug in Guzzle5HttpHandler (#186)
+ * Fixes constructor argument bug in Subscriber & Middleware (#184)
+
 ## 1.2.0 (6/12/2017)
 
 ### Changes
