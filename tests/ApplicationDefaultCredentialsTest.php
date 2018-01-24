@@ -157,6 +157,26 @@ class ADCGetMiddlewareTest extends TestCase
         ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler);
     }
 
+    public function testWithCacheOptions()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+
+        $httpHandler = getHandler([
+            buildResponse(200),
+        ]);
+
+        $cacheOptions = [];
+        $cachePool = $this->getMock('Psr\Cache\CacheItemPoolInterface');
+
+        $middleware = ApplicationDefaultCredentials::getMiddleware(
+            'a scope',
+            $httpHandler,
+            $cacheOptions,
+            $cachePool
+        );
+    }
+
     public function testSuccedsIfNoDefaultFilesButIsOnGCE()
     {
         $wantedTokens = [
@@ -278,6 +298,26 @@ class ADCGetSubscriberTest extends BaseTest
         ]);
 
         ApplicationDefaultCredentials::getSubscriber('a scope', $httpHandler);
+    }
+
+    public function testWithCacheOptions()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+
+        $httpHandler = getHandler([
+            buildResponse(200),
+        ]);
+
+        $cacheOptions = [];
+        $cachePool = $this->getMock('Psr\Cache\CacheItemPoolInterface');
+
+        $subscriber = ApplicationDefaultCredentials::getSubscriber(
+            'a scope',
+            $httpHandler,
+            $cacheOptions,
+            $cachePool
+        );
     }
 
     public function testSuccedsIfNoDefaultFilesButIsOnGCE()
