@@ -102,13 +102,13 @@ class GCECredentials extends CredentialsLoader
 
     /**
      * Determines if this an App Engine Flexible instance, by accessing the
-     * GAE_VM environment variable.
+     * GAE_INSTANCE environment variable.
      *
      * @return true if this an App Engine Flexible Instance, false otherwise
      */
     public static function onAppEngineFlexible()
     {
-        return isset($_SERVER['GAE_VM']) && 'true' === $_SERVER['GAE_VM'];
+        return substr(getenv('GAE_INSTANCE'), 0, 4) === 'aef-';
     }
 
     /**

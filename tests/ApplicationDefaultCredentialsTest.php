@@ -217,6 +217,7 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
         // removes it if assigned
         putenv('HOME=' . $this->originalHome);
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $this->originalServiceAccount);
+        putenv('GAE_INSTANCE');
     }
 
     public function testAppEngineStandard()
@@ -231,7 +232,7 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
     public function testAppEngineFlexible()
     {
         $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
-        $_SERVER['GAE_VM'] = 'true';
+        putenv('GAE_INSTANCE=aef-default-20180313t154438');
         $httpHandler = getHandler([
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         ]);
