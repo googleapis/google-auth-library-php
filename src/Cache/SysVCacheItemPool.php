@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 namespace Google\Auth\Cache;
 
 use Psr\Cache\CacheItemInterface;
@@ -27,8 +26,8 @@ use Psr\Cache\CacheItemPoolInterface;
  * it doesn't provide any locking mechanism. If multiple processes write to
  * this ItemPool, you have to avoid race condition manually in your code.
  */
-class SysVCacheItemPool implements CacheItemPoolInterface {
-
+class SysVCacheItemPool implements CacheItemPoolInterface
+{
     const VAR_KEY = 1;
 
     const DEFAULT_PROJ = 'A';
