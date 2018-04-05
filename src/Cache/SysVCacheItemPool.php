@@ -67,15 +67,13 @@ class SysVCacheItemPool implements CacheItemPoolInterface
             $this->options['perm']
         );
         if ($shmid !== false) {
-            try {
-                return shm_put_var(
-                    $shmid,
-                    $this->options['variableKey'],
-                    $this->items
-                );
-            } finally {
-                shm_detach($shmid);
-            }
+            $ret = shm_put_var(
+                $shmid,
+                $this->options['variableKey'],
+                $this->items
+            );
+            shm_detach($shmid);
+            return $ret;
         }
         return false;
     }
@@ -93,17 +91,14 @@ class SysVCacheItemPool implements CacheItemPoolInterface
             $this->options['perm']
         );
         if ($shmid !== false) {
-            try {
-                $data = @shm_get_var($shmid, $this->options['variableKey']);
-                if (!empty($data)) {
-                    $this->items = $data;
-                } else {
-                    $this->items = [];
-                }
-                return true;
-            } finally {
-                shm_detach($shmid);
+            $data = @shm_get_var($shmid, $this->options['variableKey']);
+            if (!empty($data)) {
+                $this->items = $data;
+            } else {
+                $this->items = [];
             }
+            shm_detach($shmid);
+            return true;
         }
         return false;
     }
