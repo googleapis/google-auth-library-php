@@ -2,8 +2,8 @@
 
 ### Changes
 
- * Fixes usage of deprecated env var for GAE Flex #189
- * fix - guzzlehttp/psr7 dependency version definition #190
+ * Fixes usage of deprecated env var for GAE Flex (#189)
+ * fix - guzzlehttp/psr7 dependency version definition (#190)
  * Added SystemV shared memory based CacheItemPool (#191)
 
 ## 1.2.1 (24/01/2018)
