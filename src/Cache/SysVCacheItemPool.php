@@ -143,6 +143,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->loadItems();
         return current($this->getItems([$key]));
     }
+
     /**
      * {@inheritdoc}
      */
@@ -157,6 +158,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         }
         return $items;
     }
+
     /**
      * {@inheritdoc}
      */
@@ -165,6 +167,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->loadItems();
         return isset($this->items[$key]) && $this->items[$key]->isHit();
     }
+
     /**
      * {@inheritdoc}
      */
@@ -174,6 +177,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->deferredItems = [];
         return $this->saveCurrentItems();
     }
+
     /**
      * {@inheritdoc}
      */
@@ -181,6 +185,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     {
         return $this->deleteItems([$key]);
     }
+
     /**
      * {@inheritdoc}
      */
@@ -191,6 +196,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         }
         return $this->saveCurrentItems();
     }
+
     /**
      * {@inheritdoc}
      */
@@ -199,6 +205,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->items[$item->getKey()] = $item;
         return $this->saveCurrentItems();
     }
+
     /**
      * {@inheritdoc}
      */
@@ -207,6 +214,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->deferredItems[$item->getKey()] = $item;
         return true;
     }
+
     /**
      * {@inheritdoc}
      */

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2018 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,16 @@ class SysVCacheItemPoolTest extends TestCase
         $this->assertInstanceOf('Google\Auth\Cache\Item', $item);
         $this->assertNull($item->get());
         $this->assertFalse($item->isHit());
+    }
+
+    public function testCacheAmongProcesses()
+    {
+        $expectedValue = 'val-' . rand();
+        exec(sprintf('php %s/sysv_cache_creator.php %s', __DIR__, $expectedValue));
+        $this->assertEquals(
+            $expectedValue,
+            $this->pool->getItem('separate-process-item')->get()
+        );
     }
 
     public function testGetsExistingItem()
@@ -142,5 +152,9 @@ class SysVCacheItemPoolTest extends TestCase
         $this->assertTrue($this->pool->commit());
         $this->assertTrue($this->pool->hasItem($keys[0]));
         $this->assertTrue($this->pool->hasItem($keys[1]));
+        $this->assertEquals(
+            $item->get(),
+            $this->pool->getItem($keys[1])->get()
+        );
     }
 }
