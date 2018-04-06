@@ -1,9 +1,9 @@
-## 1.2.2 (06/04/2018)
+## 1.3.0 (06/04/2018)
 
 ### Changes
 
  * Added SystemV shared memory based CacheItemPool (#191)
-   Fixes usage of deprecated env var for GAE Flex #189
+ * Fixes usage of deprecated env var for GAE Flex #189
 
 ## 1.2.1 (24/01/2018)
 
