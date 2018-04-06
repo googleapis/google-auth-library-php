@@ -19,8 +19,8 @@ namespace Google\Auth\Tests;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use Google\Auth\Cache\SysVCacheItemPool;
 use Google\Auth\Cache\Item;
+use Google\Auth\Cache\SysVCacheItemPool;
 
 $value = $argv[1];
 // Use the same variableKey in the test.
@@ -28,4 +28,3 @@ $pool = new SysVCacheItemPool(['variableKey' => 99]);
 $item = new Item('separate-process-item');
 $item->set($value);
 $pool->save($item);
-
