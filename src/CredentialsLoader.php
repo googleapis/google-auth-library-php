@@ -120,11 +120,13 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
 
         if ($jsonKey['type'] == 'service_account') {
             return new ServiceAccountCredentials($scope, $jsonKey);
-        } elseif ($jsonKey['type'] == 'authorized_user') {
-            return new UserRefreshCredentials($scope, $jsonKey);
-        } else {
-            throw new \InvalidArgumentException('invalid value in the type field');
         }
+
+        if ($jsonKey['type'] == 'authorized_user') {
+            return new UserRefreshCredentials($scope, $jsonKey);
+        }
+
+        throw new \InvalidArgumentException('invalid value in the type field');
     }
 
     /**

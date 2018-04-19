@@ -516,7 +516,9 @@ class OAuth2 implements FetchAuthTokenInterface
     {
         if (is_string($this->scope)) {
             return $this->scope;
-        } elseif (is_array($this->scope)) {
+        }
+
+        if (is_array($this->scope)) {
             return implode(':', $this->scope);
         }
 
@@ -543,14 +545,14 @@ class OAuth2 implements FetchAuthTokenInterface
             parse_str($body, $res);
 
             return $res;
-        } else {
-            // Assume it's JSON; if it's not throw an exception
-            if (null === $res = json_decode($body, true)) {
-                throw new \Exception('Invalid JSON response');
-            }
-
-            return $res;
         }
+
+        // Assume it's JSON; if it's not throw an exception
+        if (null === $res = json_decode($body, true)) {
+            throw new \Exception('Invalid JSON response');
+        }
+
+        return $res;
     }
 
     /**
@@ -804,15 +806,21 @@ class OAuth2 implements FetchAuthTokenInterface
         // state.
         if (!is_null($this->code)) {
             return 'authorization_code';
-        } elseif (!is_null($this->refreshToken)) {
-            return 'refresh_token';
-        } elseif (!is_null($this->username) && !is_null($this->password)) {
-            return 'password';
-        } elseif (!is_null($this->issuer) && !is_null($this->signingKey)) {
-            return self::JWT_URN;
-        } else {
-            return null;
         }
+
+        if (!is_null($this->refreshToken)) {
+            return 'refresh_token';
+        }
+
+        if (!is_null($this->username) && !is_null($this->password)) {
+            return 'password';
+        }
+
+        if (!is_null($this->issuer) && !is_null($this->signingKey)) {
+            return self::JWT_URN;
+        }
+
+        return null;
     }
 
     /**
@@ -1119,7 +1127,9 @@ class OAuth2 implements FetchAuthTokenInterface
     {
         if (!is_null($this->expiresAt)) {
             return $this->expiresAt;
-        } elseif (!is_null($this->issuedAt) && !is_null($this->expiresIn)) {
+        }
+
+        if (!is_null($this->issuedAt) && !is_null($this->expiresIn)) {
             return $this->issuedAt + $this->expiresIn;
         }
 
