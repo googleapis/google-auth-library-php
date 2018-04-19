@@ -547,7 +547,7 @@ class OAuth2 implements FetchAuthTokenInterface
             return $res;
         }
 
-// Assume it's JSON; if it's not throw an exception
+        // Assume it's JSON; if it's not throw an exception
         if (null === $res = json_decode($body, true)) {
             throw new \Exception('Invalid JSON response');
         }
