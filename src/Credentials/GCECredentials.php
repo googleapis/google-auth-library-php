@@ -70,6 +70,19 @@ class GCECredentials extends CredentialsLoader
     const FLAVOR_HEADER = 'Metadata-Flavor';
 
     /**
+     * Note: the explicit `timeout` and `tries` below is a workaround. The underlying
+     * issue is that resolving an unknown host on some networks will take
+     * 20-30 seconds; making this timeout short fixes the issue, but
+     * could lead to false negatives in the event that we are on GCE, but
+     * the metadata resolution was particularly slow. The latter case is
+     * "unlikely" since the expected 4-nines time is about 0.5 seconds.
+     * This allows us to limit the total ping maximum timeout to 1.5 seconds
+     * for developer desktop scenarios.
+     */
+    const MAX_COMPUTE_PING_TRIES = 3;
+    const COMPUTE_PING_CONNECTION_TIMEOUT_S = 0.5;
+
+    /**
      * Flag used to ensure that the onGCE test is only done once;.
      *
      * @var bool
@@ -126,28 +139,29 @@ class GCECredentials extends CredentialsLoader
             $httpHandler = HttpHandlerFactory::build();
         }
         $checkUri = 'http://' . self::METADATA_IP;
-        try {
-            // Comment from: oauth2client/client.py
-            //
-            // Note: the explicit `timeout` below is a workaround. The underlying
-            // issue is that resolving an unknown host on some networks will take
-            // 20-30 seconds; making this timeout short fixes the issue, but
-            // could lead to false negatives in the event that we are on GCE, but
-            // the metadata resolution was particularly slow. The latter case is
-            // "unlikely".
-            $resp = $httpHandler(
-                new Request('GET', $checkUri),
-                ['timeout' => 0.3]
-            );
+        for ($i = 1; $i <= self::MAX_COMPUTE_PING_TRIES; $i++) {
+            try {
+                // Comment from: oauth2client/client.py
+                //
+                // Note: the explicit `timeout` below is a workaround. The underlying
+                // issue is that resolving an unknown host on some networks will take
+                // 20-30 seconds; making this timeout short fixes the issue, but
+                // could lead to false negatives in the event that we are on GCE, but
+                // the metadata resolution was particularly slow. The latter case is
+                // "unlikely".
+                $resp = $httpHandler(
+                    new Request('GET', $checkUri),
+                    ['timeout' => self::COMPUTE_PING_CONNECTION_TIMEOUT_S]
+                );
 
-            return $resp->getHeaderLine(self::FLAVOR_HEADER) == 'Google';
-        } catch (ClientException $e) {
-            return false;
-        } catch (ServerException $e) {
-            return false;
-        } catch (RequestException $e) {
-            return false;
+                return $resp->getHeaderLine(self::FLAVOR_HEADER) == 'Google';
+            } catch (ClientException $e) {
+            } catch (ServerException $e) {
+            } catch (RequestException $e) {
+            }
+            $httpHandler = HttpHandlerFactory::build();
         }
+        return false;
     }
 
     /**
