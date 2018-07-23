@@ -33,6 +33,11 @@ use Google\Auth\OAuth2;
  */
 class UserRefreshCredentials extends CredentialsLoader
 {
+    const CLOUD_SDK_CLIENT_ID =
+        '764086051850-6qr4p6gpi6hn506pt8ejuq83di341hur.apps.googleusercontent.com';
+
+    const SUPPRESS_CLOUD_SDK_CREDS_WARNING_ENV = 'SUPPRESS_GCLOUD_CREDS_WARNING';
+
     /**
      * The OAuth2 instance used to conduct authorization.
      *
@@ -80,16 +85,22 @@ class UserRefreshCredentials extends CredentialsLoader
             'scope' => $scope,
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
         ]);
-        trigger_error(
-            'Your application has authenticated using end user credentials '
-            . 'from Gooogle Cloud SDK. We recommend that most server '
-            . 'applications use service accounts instead. If your application '
-            . 'continues to use end user credentials from Cloud SDK, you might '
-            . 'receive a "quota exceeded" or "API not enabled" error. For '
-            . 'more information about service accounts, see '
-            . 'https://cloud.google.com/docs/authentication/.',
-            E_USER_WARNING
-        );
+        if ($jsonKey['client_id'] === self::CLOUD_SDK_CLIENT_ID
+            && getenv(self::SUPPRESS_CLOUD_SDK_CREDS_WARNING_ENV) !== 'true') {
+            trigger_error(
+                'Your application has authenticated using end user credentials '
+                . 'from Gooogle Cloud SDK. We recommend that most server '
+                . 'applications use service accounts instead. If your '
+                . 'application continues to use end user credentials '
+                . 'from Cloud SDK, you might receive a "quota exceeded" '
+                . 'or "API not enabled" error. For more information about '
+                . 'service accounts, see '
+                . 'https://cloud.google.com/docs/authentication/. '
+                . 'To disable this warning, set '
+                . self::SUPPRESS_CLOUD_SDK_CREDS_WARNING_ENV
+                . ' environment variable to "true".',
+                E_USER_WARNING);
+        }
     }
 
     /**
