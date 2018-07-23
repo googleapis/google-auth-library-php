@@ -21,7 +21,7 @@ use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
-use PHPUnit\Framework\Error\Warning
+use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
 // Creates a standard JSON auth object for testing.
