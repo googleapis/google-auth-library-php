@@ -1,3 +1,9 @@
+## 1.3.2 (07/23/2018)
+
+### Changes
+
+ * Only emits a warning for gcloud credentials (#202)
+
 ## 1.3.1 (07/19/2018)
 
 ### Changes
