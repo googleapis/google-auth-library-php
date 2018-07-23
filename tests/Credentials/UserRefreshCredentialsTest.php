@@ -110,6 +110,15 @@ class URCConstructorTest extends TestCase
             new UserRefreshCredentials('scope/1', $keyFile)
         );
     }
+
+    public function testGcloudWarning()
+    {
+        putenv('SUPPRESS_GCLOUD_CREDS_WARNING=false');
+        $keyFile = __DIR__ . '/../fixtures2' . '/gcloud.json';
+        $this->assertNotNull(
+            new UserRefreshCredentials('scope/1', $keyFile)
+        );
+    }
 }
 
 class URCFromEnvTest extends TestCase
