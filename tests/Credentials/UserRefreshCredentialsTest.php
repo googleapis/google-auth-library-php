@@ -21,6 +21,7 @@ use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
+use PHPUnit\Framework\Error\Warning
 use PHPUnit\Framework\TestCase;
 
 // Creates a standard JSON auth object for testing.
@@ -111,10 +112,22 @@ class URCConstructorTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException Warning
+     */
     public function testGcloudWarning()
     {
         putenv('SUPPRESS_GCLOUD_CREDS_WARNING=false');
         $keyFile = __DIR__ . '/../fixtures2' . '/gcloud.json';
+        $this->assertNotNull(
+            new UserRefreshCredentials('scope/1', $keyFile)
+        );
+    }
+
+    public function testValid3LOauthCreds()
+    {
+        putenv('SUPPRESS_GCLOUD_CREDS_WARNING=false');
+        $keyFile = __DIR__ . '/../fixtures2' . '/valid_oauth_creds.json';
         $this->assertNotNull(
             new UserRefreshCredentials('scope/1', $keyFile)
         );
