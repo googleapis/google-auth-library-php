@@ -89,7 +89,7 @@ class UserRefreshCredentials extends CredentialsLoader
             && getenv(self::SUPPRESS_CLOUD_SDK_CREDS_WARNING_ENV) !== 'true') {
             trigger_error(
                 'Your application has authenticated using end user credentials '
-                . 'from Gooogle Cloud SDK. We recommend that most server '
+                . 'from Google Cloud SDK. We recommend that most server '
                 . 'applications use service accounts instead. If your '
                 . 'application continues to use end user credentials '
                 . 'from Cloud SDK, you might receive a "quota exceeded" '
