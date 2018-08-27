@@ -1,3 +1,11 @@
+## 1.3.3 (08/27/2018)
+
+### Changes
+
+ * Add retry and increase timeout for GCE credentials (#195)
+ * [Docs] Fix spelling (#204)
+ * Update token url (#206)
+
 ## 1.3.2 (07/23/2018)
 
 ### Changes
