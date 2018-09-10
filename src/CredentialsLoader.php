@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Google\Auth\Credentials\InsecureCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 
@@ -174,6 +175,16 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
             default:
                 throw new \Exception('Version not supported');
         }
+    }
+
+    /**
+     * Create a new instance of InsecureCredentials.
+     *
+     * @return InsecureCredentials
+     */
+    public static function makeInsecureCredentials()
+    {
+        return new InsecureCredentials();
     }
 
     /**
