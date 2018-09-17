@@ -1,3 +1,9 @@
+## 1.4.0 (09/17/2018)
+
+### Changes
+
+ * Add support for insecure credentials (#208)
+
 ## 1.3.3 (08/27/2018)
 
 ### Changes
