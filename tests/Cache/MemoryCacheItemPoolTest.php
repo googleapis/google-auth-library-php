@@ -23,6 +23,7 @@ use Psr\Cache\InvalidArgumentException;
 
 class MemoryCacheItemPoolTest extends TestCase
 {
+    /** @var MemoryCacheItemPool */
     private $pool;
 
     public function setUp()
