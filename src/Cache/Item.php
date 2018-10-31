@@ -81,7 +81,8 @@ final class Item implements CacheItemInterface
             return true;
         }
 
-        return Clock::now()->getTimestamp() < (clone $this->expiration)->getTimestamp();
+        return Clock::now()->setTimezone(new \DateTimeZone('UTC'))->getTimestamp()
+            < (clone $this->expiration)->setTimezone(new \DateTimeZone('UTC'))->getTimestamp();
     }
 
     /**
