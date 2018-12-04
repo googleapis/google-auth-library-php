@@ -172,7 +172,11 @@ class GCECredentials extends CredentialsLoader
      *
      * @param callable $httpHandler callback which delivers psr7 request
      *
-     * @return array the response
+     * @return array A set of auth related metadata, containing the following
+     * keys:
+     *   - access_token (string)
+     *   - expires_in (int)
+     *   - token_type (string)
      *
      * @throws \Exception
      */

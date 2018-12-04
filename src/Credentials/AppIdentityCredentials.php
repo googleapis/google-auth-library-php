@@ -99,13 +99,10 @@ class AppIdentityCredentials extends CredentialsLoader
      *
      * @param callable $httpHandler callback which delivers psr7 request
      *
-     * @return array the auth metadata:
-     *  array(2) {
-     *   ["access_token"]=>
-     *   string(3) "xyz"
-     *   ["expiration_time"]=>
-     *   string(10) "1444339905"
-     *  }
+     * @return array A set of auth related metadata, containing the following
+     * keys:
+     *   - access_token (string)
+     *   - expiration_time (string)
      *
      * @throws \Exception
      */

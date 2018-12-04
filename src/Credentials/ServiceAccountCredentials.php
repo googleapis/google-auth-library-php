@@ -108,7 +108,11 @@ class ServiceAccountCredentials extends CredentialsLoader
     /**
      * @param callable $httpHandler
      *
-     * @return array
+     * @return array A set of auth related metadata, containing the following
+     * keys:
+     *   - access_token (string)
+     *   - expires_in (int)
+     *   - token_type (string)
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
