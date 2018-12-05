@@ -159,7 +159,6 @@ class GCECredentials extends CredentialsLoader
             } catch (ServerException $e) {
             } catch (RequestException $e) {
             }
-            $httpHandler = HttpHandlerFactory::build();
         }
         return false;
     }
