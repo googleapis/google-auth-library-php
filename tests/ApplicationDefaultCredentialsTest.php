@@ -73,9 +73,11 @@ class ADCGetTest extends TestCase
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
-        // simulate not being GCE by return 500
+        // simulate not being GCE and retry attempts by returning multiple 500s
         $httpHandler = getHandler([
             buildResponse(500),
+            buildResponse(500),
+            buildResponse(500)
         ]);
 
         ApplicationDefaultCredentials::getCredentials('a scope', $httpHandler);
@@ -149,9 +151,11 @@ class ADCGetMiddlewareTest extends TestCase
     {
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
 
-        // simulate not being GCE by return 500
+        // simulate not being GCE and retry attempts by returning multiple 500s
         $httpHandler = getHandler([
             buildResponse(500),
+            buildResponse(500),
+            buildResponse(500)
         ]);
 
         ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler);
