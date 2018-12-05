@@ -201,12 +201,15 @@ class Guzzle5HttpHandlerTest extends BaseTest
             ->will($this->returnValue(
                 $this->getMock('GuzzleHttp\Message\RequestInterface')
             ));
+        $responseMock = $this->getMockBuilder('GuzzleHttp\Message\ResponseInterface')
+            ->getMock();
+        $responseMock
+            ->method('getStatusCode')
+            ->will($this->returnValue(200));
         $this->mockClient
             ->expects($this->once())
             ->method('send')
-            ->will($this->returnValue(
-                $this->getMock('GuzzleHttp\Message\ResponseInterface')
-            ));
+            ->will($this->returnValue($responseMock));
         $handler = new Guzzle5HttpHandler($this->mockClient);
         $handler($this->mockPsr7Request, [
             'headers' => [
