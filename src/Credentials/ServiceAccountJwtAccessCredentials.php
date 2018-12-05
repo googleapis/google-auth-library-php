@@ -99,7 +99,9 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
      *
      * @param callable $httpHandler
      *
-     * @return array|void
+     * @return array|void A set of auth related metadata, containing the
+     * following keys:
+     *   - access_token (string)
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
