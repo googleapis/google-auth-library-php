@@ -26,6 +26,7 @@ class GCECredentialsOnGCETest extends TestCase
 {
     public function testIsFalseOnClientErrorStatus()
     {
+        // simulate retry attempts by returning multiple 400s
         $httpHandler = getHandler([
             buildResponse(400),
         ]);
@@ -34,8 +35,11 @@ class GCECredentialsOnGCETest extends TestCase
 
     public function testIsFalseOnServerErrorStatus()
     {
+        // simulate retry attempts by returning multiple 400s
         $httpHandler = getHandler([
             buildResponse(500),
+            buildResponse(500),
+            buildResponse(500)
         ]);
         $this->assertFalse(GCECredentials::onGCE($httpHandler));
     }
@@ -90,8 +94,11 @@ class GCECredentialsFetchAuthTokenTest extends TestCase
 {
     public function testShouldBeEmptyIfNotOnGCE()
     {
+        // simulate retry attempts by returning multiple 400s
         $httpHandler = getHandler([
             buildResponse(500),
+            buildResponse(500),
+            buildResponse(500)
         ]);
         $g = new GCECredentials();
         $this->assertEquals(array(), $g->fetchAuthToken($httpHandler));
