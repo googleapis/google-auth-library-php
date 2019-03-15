@@ -97,6 +97,20 @@ class URCConstructorTest extends TestCase
     /**
      * @expectedException InvalidArgumentException
      */
+    public function testShouldFailIfJsonDoesNotHaveClientId()
+    {
+        $testJson = createURCTestJson();
+        unset($testJson['client_id']);
+        $scope = ['scope/1', 'scope/2'];
+        $sa = new UserRefreshCredentials(
+            $scope,
+            $testJson
+        );
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
     public function testFailsToInitalizeFromANonExistentFile()
     {
         $keyFile = __DIR__ . '/../fixtures/does-not-exist-private.json';
@@ -109,6 +123,24 @@ class URCConstructorTest extends TestCase
         $this->assertNotNull(
             new UserRefreshCredentials('scope/1', $keyFile)
         );
+    }
+
+    /**
+     * @expectedException LogicException
+     */
+    public function testFailsToInitializeFromInvalidJsonData()
+    {
+        $tmp = tmpfile();
+        fwrite($tmp, '{');
+
+        $path = stream_get_meta_data($tmp)['uri'];
+
+        try {
+            new UserRefreshCredentials('scope/1', $path);
+        } catch (\Exception $e) {
+            fclose($tmp);
+            throw $e;
+        }
     }
 
     /**
@@ -246,5 +278,15 @@ class URCFetchAuthTokenTest extends TestCase
         );
         $tokens = $sa->fetchAuthToken($httpHandler);
         $this->assertEquals($testJson, $tokens);
+    }
+}
+
+class URCGetClientNameTest extends TestCase
+{
+    public function testReturnsClientId()
+    {
+        $testJson = createURCTestJson();
+        $sa = new UserRefreshCredentials('scope/1', $testJson);
+        $this->assertEquals($testJson['client_id'], $sa->getClientName());
     }
 }

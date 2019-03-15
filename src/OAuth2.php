@@ -1269,6 +1269,20 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
+     * Get the client ID.
+     *
+     * Alias of {@see Google\Auth\OAuth2::getClientId()}.
+     *
+     * @param callable $httpHandler
+     * @return string
+     * @access private
+     */
+    public function getClientName(callable $httpHandler = null)
+    {
+        return $this->getClientId();
+    }
+
+    /**
      * @todo handle uri as array
      *
      * @param string $uri

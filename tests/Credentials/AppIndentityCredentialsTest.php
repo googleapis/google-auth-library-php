@@ -22,38 +22,54 @@ use google\appengine\api\app_identity\AppIdentityService;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use PHPUnit\Framework\TestCase;
 
-class AppIdentityCredentialsOnAppEngineTest extends TestCase
+/**
+ * If a test includes mocks/AppIdentityService.php, be sure to use the
+ * `@runInSeparateProcess` annotation.
+ *
+ * @group credentials
+ * @group credentials-appidentity
+ */
+class AppIdentityCredentialsTest extends TestCase
 {
-    public function testIsFalseByDefault()
+    public function testOnAppEngineIsFalseByDefault()
     {
         $this->assertFalse(AppIdentityCredentials::onAppEngine());
     }
 
-    public function testIsTrueWhenServerSoftwareIsGoogleAppEngine()
+    /**
+     * @runInSeparateProcess
+     */
+    public function testOnAppEngineIsTrueWhenServerSoftwareIsGoogleAppEngine()
     {
-        $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
+        $this->imitateInAppEngine();
         $this->assertTrue(AppIdentityCredentials::onAppEngine());
     }
 
-    public function testIsTrueWhenAppEngineRuntimeIsPhp()
+    /**
+     * @runInSeparateProcess
+     */
+    public function testOnAppEngineIsTrueWhenAppEngineRuntimeIsPhp()
+    {
+        $this->imitateInAppEngine();
+        $this->assertTrue(AppIdentityCredentials::onAppEngine());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testOnAppEngineIsTrueInDevelopmentServer()
     {
         $_SERVER['APPENGINE_RUNTIME'] = 'php';
         $this->assertTrue(AppIdentityCredentials::onAppEngine());
     }
-}
 
-class AppIdentityCredentialsGetCacheKeyTest extends TestCase
-{
-    public function testShouldBeEmpty()
+    public function testGetCacheKeyShouldBeEmpty()
     {
         $g = new AppIdentityCredentials();
         $this->assertEmpty($g->getCacheKey());
     }
-}
 
-class AppIdentityCredentialsFetchAuthTokenTest extends TestCase
-{
-    public function testShouldBeEmptyIfNotOnAppEngine()
+    public function testFetchAuthTokenShouldBeEmptyIfNotOnAppEngine()
     {
         $g = new AppIdentityCredentials();
         $this->assertEquals(array(), $g->fetchAuthToken());
@@ -66,10 +82,12 @@ class AppIdentityCredentialsFetchAuthTokenTest extends TestCase
         $g = new AppIdentityCredentials();
     }
 
-    public function testReturnsExpectedToken()
+    /**
+     * @runInSeparateProcess
+     */
+    public function testFetchAuthTokenReturnsExpectedToken()
     {
-        // include the mock AppIdentityService class
-        require_once __DIR__ . '/../mocks/AppIdentityService.php';
+        $this->imitateInAppEngine();
 
         $wantedToken = [
             'access_token' => '1/abdef1234567890',
@@ -79,22 +97,20 @@ class AppIdentityCredentialsFetchAuthTokenTest extends TestCase
 
         AppIdentityService::$accessToken = $wantedToken;
 
-        $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
-
         $g = new AppIdentityCredentials();
         $this->assertEquals($wantedToken, $g->fetchAuthToken());
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testScopeIsAlwaysArray()
     {
-        // include the mock AppIdentityService class
-        require_once __DIR__ . '/../mocks/AppIdentityService.php';
+        $this->imitateInAppEngine();
 
         $scope1 = ['scopeA', 'scopeB'];
         $scope2 = 'scopeA scopeB';
         $scope3 = 'scopeA';
-
-        $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
 
         $g = new AppIdentityCredentials($scope1);
         $g->fetchAuthToken();
@@ -107,5 +123,103 @@ class AppIdentityCredentialsFetchAuthTokenTest extends TestCase
         $g = new AppIdentityCredentials($scope3);
         $g->fetchAuthToken();
         $this->assertEquals([$scope3], AppIdentityService::$scope);
+    }
+
+    /**
+     * @dataProvider appEngineRequired
+     */
+    public function testMethodsFailWhenNotInAppEngine($method, $args = [], $expected = null)
+    {
+        if ($expected === null) {
+            $this->expectException('\Exception');
+        }
+
+        $creds = new AppIdentityCredentials;
+        $res = call_user_func_array([$creds, $method], $args);
+
+        if ($expected) {
+            $this->assertEquals($expected, $res);
+        }
+    }
+
+    public function appEngineRequired()
+    {
+        return [
+            ['fetchAuthToken', [], []],
+            ['signBlob', ['foo']],
+            ['getClientName']
+        ];
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testSignBlob()
+    {
+        $this->imitateInAppEngine();
+
+        $creds = new AppIdentityCredentials;
+        $string = 'test';
+        $res = $creds->signBlob($string);
+
+        $this->assertEquals(base64_encode('Signed: ' . $string), $res);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testGetClientName()
+    {
+        $this->imitateInAppEngine();
+
+        $creds = new AppIdentityCredentials;
+
+        $expected = 'foobar';
+        AppIdentityService::$serviceAccountName = $expected;
+
+        $this->assertEquals($expected, $creds->getClientName());
+
+        AppIdentityService::$serviceAccountName = 'notreturned';
+        $this->assertEquals($expected, $creds->getClientName());
+    }
+
+    public function testGetLastReceivedTokenNullByDefault()
+    {
+        $creds = new AppIdentityCredentials;
+        $this->assertNull($creds->getLastReceivedToken());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testGetLastReceviedTokenCaches()
+    {
+        $this->imitateInAppEngine();
+
+        $creds = new AppIdentityCredentials;
+
+        $wantedToken = [
+            'access_token' => '1/abdef1234567890',
+            'expires_in' => '57',
+            'expiration_time' => time() + 57,
+            'token_type' => 'Bearer',
+        ];
+
+        AppIdentityService::$accessToken = $wantedToken;
+
+        $creds->fetchAuthToken();
+
+        $this->assertEquals([
+            'access_token' => $wantedToken['access_token'],
+            'expires_at' => $wantedToken['expiration_time']
+        ], $creds->getLastReceivedToken());
+    }
+
+    private function imitateInAppEngine()
+    {
+        // include the mock AppIdentityService class
+        require_once __DIR__ . '/../mocks/AppIdentityService.php';
+        $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
+        // $_SERVER['APPENGINE_RUNTIME'] = 'php';
     }
 }
