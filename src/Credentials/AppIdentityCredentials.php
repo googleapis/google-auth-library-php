@@ -66,7 +66,7 @@ class AppIdentityCredentials extends CredentialsLoader implements SignBlobInterf
     private $scope;
 
     /**
-     * @var array
+     * @var string
      */
     private $clientName;
 
