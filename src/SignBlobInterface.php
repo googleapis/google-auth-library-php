@@ -20,7 +20,7 @@ namespace Google\Auth;
 /**
  * Describes a class which supports signing arbitrary strings.
  */
-interface SignBlobInterface
+interface SignBlobInterface extends FetchAuthTokenInterface
 {
     /**
      * Sign a string using the method which is best for a given credentials type.
