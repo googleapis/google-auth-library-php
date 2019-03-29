@@ -131,7 +131,11 @@ class AppIdentityCredentialsTest extends TestCase
     public function testMethodsFailWhenNotInAppEngine($method, $args = [], $expected = null)
     {
         if ($expected === null) {
-            $this->expectException('\Exception');
+            if (method_exists($this, 'expectException')) {
+                $this->expectException('\Exception');
+            } else {
+                $this->setExpectedException('\Exception');
+            }
         }
 
         $creds = new AppIdentityCredentials;

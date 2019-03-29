@@ -176,7 +176,7 @@ class GCECredentialsTest extends TestCase
             'token_type' => 'Bearer',
         ];
 
-        $iam = $this->prophesize(Iam::class);
+        $iam = $this->prophesize('Google\Auth\Iam');
         $iam->signBlob($expectedEmail, $expectedAccessToken, $stringToSign)
             ->shouldBeCalled()
             ->willReturn($resultString);
@@ -207,7 +207,7 @@ class GCECredentialsTest extends TestCase
             'token_type' => 'Bearer',
         ];
 
-        $iam = $this->prophesize(Iam::class);
+        $iam = $this->prophesize('Google\Auth\Iam');
         $iam->signBlob($expectedEmail, $expectedAccessToken, $stringToSign)
             ->shouldBeCalled()
             ->willReturn($resultString);
@@ -244,7 +244,7 @@ class GCECredentialsTest extends TestCase
             'token_type' => 'Bearer',
         ];
 
-        $iam = $this->prophesize(Iam::class);
+        $iam = $this->prophesize('Google\Auth\Iam');
         $iam->signBlob($expectedEmail, $expectedAccessToken, $stringToSign)
             ->shouldBeCalled()
             ->willReturn($resultString);
