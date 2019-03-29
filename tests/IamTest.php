@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\tests;
 
 use Google\Auth\Iam;
 use GuzzleHttp\Psr7;
@@ -62,7 +62,7 @@ class IamTest extends TestCase
             $expectedDelegates
         ) {
             $this->assertEquals($expectedUri, (string) $request->getUri());
-            $this->assertEquals('Bearer '. $expectedAccessToken, $request->getHeaderLine('Authorization'));
+            $this->assertEquals('Bearer ' . $expectedAccessToken, $request->getHeaderLine('Authorization'));
             $this->assertEquals([
                 'delegates' => $expectedDelegates,
                 'payload' => base64_encode($expectedString)

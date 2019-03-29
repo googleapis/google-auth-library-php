@@ -23,7 +23,8 @@ use PHPUnit\Framework\TestCase;
 class ServiceAccountSignerTraitTest extends TestCase
 {
     const STRING_TO_SIGN = 'hello world';
-    const SIGNED_STRING = 'ZPeNGA9xcqwMQ7OEfNdLuwgxO+rJ59mhetIZrqWncY0uv+IZN0' .
+
+    private $signedString = 'ZPeNGA9xcqwMQ7OEfNdLuwgxO+rJ59mhetIZrqWncY0uv+IZN0' .
         'T4F3mg2sJVRD3awswFFdfMK20Xrnqo0dr8XdlgOkS5NIG38yrDagXsBf1ypAfji1sm22' .
         'UCyxkaPdB6eRczMXwJReu6q4LCJmx/Xr46kU/ZDNhrBkj6vjoD8yo=';
 
@@ -38,7 +39,7 @@ class ServiceAccountSignerTraitTest extends TestCase
             'forceOpenssl' => $useOpenSsl
         ]);
 
-        $this->assertEquals(self::SIGNED_STRING, $res);
+        $this->assertEquals($this->signedString, $res);
     }
 
     public function useOpenSsl()

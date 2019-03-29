@@ -23,9 +23,8 @@ namespace Google\Auth\Credentials;
  * PHP fatal error in the App Engine environment.
  */
 use google\appengine\api\app_identity\AppIdentityService;
-use Google\Auth\SignBlobInterface;
-
 use Google\Auth\CredentialsLoader;
+use Google\Auth\SignBlobInterface;
 
 /**
  * AppIdentityCredentials supports authorization on Google App Engine.

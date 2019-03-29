@@ -21,7 +21,7 @@ class AppIdentityService
     public static function signForApp($stringToSign)
     {
         return [
-            'signature' => 'Signed: '. $stringToSign
+            'signature' => 'Signed: ' . $stringToSign
         ];
     }
 
