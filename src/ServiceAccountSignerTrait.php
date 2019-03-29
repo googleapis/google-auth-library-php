@@ -45,7 +45,7 @@ trait ServiceAccountSignerTrait
         $privateKey = $this->auth->getSigningKey();
 
         $signedString = '';
-        if (class_exists(RSA::class) && !$forceOpenssl) {
+        if (class_exists('RSA') && !$forceOpenssl) {
             $rsa = new RSA;
             $rsa->loadKey($privateKey);
             $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1);
