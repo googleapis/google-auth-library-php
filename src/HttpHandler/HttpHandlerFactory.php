@@ -22,7 +22,17 @@ use GuzzleHttp\ClientInterface;
 class HttpHandlerFactory
 {
     /**
+     * Save the HttpHandler to prevent many instances being created.
+     *
+     * @var callable
+     */
+    private static $httpHandler;
+
+    /**
      * Builds out a default http handler for the installed version of guzzle.
+     *
+     * If a handler has been previously created, it will be returned instead
+     * of a new handler being created.
      *
      * @param ClientInterface $client
      *
@@ -32,16 +42,35 @@ class HttpHandlerFactory
      */
     public static function build(ClientInterface $client = null)
     {
+        if (self::$httpHandler) {
+            return self::$httpHandler;
+        }
+
         $version = ClientInterface::VERSION;
         $client = $client ?: new Client();
 
-        switch ($version[0]) {
+        switch (substr($version, 0, 1)) {
             case '5':
-                return new Guzzle5HttpHandler($client);
+                self::$httpHandler = new Guzzle5HttpHandler($client);
+                break;
             case '6':
-                return new Guzzle6HttpHandler($client);
+                self::$httpHandler = new Guzzle6HttpHandler($client);
+                break;
             default:
-                throw new \Exception('Version not supported');
+                throw new \Exception(sprintf('Version %s not supported', $version));
         }
+
+        return self::$httpHandler;
+    }
+
+    /**
+     * Modify the saved handler.
+     *
+     * @param callable $httpHandler If null, the saved handler will be dropped.
+     * @return void
+     */
+    public static function setHandler(callable $httpHandler = null)
+    {
+        self::$httpHandler = $httpHandler;
     }
 }

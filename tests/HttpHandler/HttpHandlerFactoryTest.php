@@ -25,6 +25,7 @@ class HttpHandlerFactoryTest extends BaseTest
     {
         $this->onlyGuzzle5();
 
+        HttpHandlerFactory::setHandler(null);
         $handler = HttpHandlerFactory::build();
         $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle5HttpHandler', $handler);
     }
@@ -33,6 +34,7 @@ class HttpHandlerFactoryTest extends BaseTest
     {
         $this->onlyGuzzle6();
 
+        HttpHandlerFactory::setHandler(null);
         $handler = HttpHandlerFactory::build();
         $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle6HttpHandler', $handler);
     }

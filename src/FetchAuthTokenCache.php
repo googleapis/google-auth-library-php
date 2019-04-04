@@ -121,12 +121,14 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface
      * Sign a blob using the fetcher.
      *
      * @param string $stringToSign The string to sign.
-     * @param array $options [optional] Configuration options.
+     * @param bool $forceOpenssl Require use of OpenSSL for local signing. Does
+     *        not apply to signing done using external services. **Defaults to**
+     *        `false`.
      * @return string The resulting signature.
      * @throws \RuntimeException If the fetcher does not implement
      *     `Google\Auth\SignBlobInterface`.
      */
-    public function signBlob($stringToSign, array $options = [])
+    public function signBlob($stringToSign, $forceOpenSsl =  false)
     {
         if (!$this->fetcher instanceof SignBlobInterface) {
             throw new \RuntimeException(
@@ -135,6 +137,6 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface
             );
         }
 
-        return $this->fetcher->signBlob($stringToSign, $options);
+        return $this->fetcher->signBlob($stringToSign, $forceOpenSsl);
     }
 }

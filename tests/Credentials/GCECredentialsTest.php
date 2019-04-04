@@ -18,6 +18,7 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Iam;
 use GuzzleHttp\Psr7;
 use PHPUnit\Framework\TestCase;
@@ -187,43 +188,10 @@ class GCECredentialsTest extends TestCase
             buildResponse(200, [], Psr7\stream_for(json_encode($token)))
         ]);
 
-        $creds = new GCECredentials;
-        $signature = $creds->signBlob($stringToSign, [
-            'httpHandler' => $httpHandler,
-            'iam' => $iam->reveal()
-        ]);
-    }
+        HttpHandlerFactory::setHandler($httpHandler);
 
-    public function testSignBlobWithAccessToken()
-    {
-        $expectedEmail = 'test@test.com';
-        $expectedAccessToken = 'token';
-        $notExpectedAccessToken = 'othertoken';
-        $stringToSign = 'inputString';
-        $resultString = 'foobar';
-        $token = [
-            'access_token' => $notExpectedAccessToken,
-            'expires_in' => '57',
-            'token_type' => 'Bearer',
-        ];
-
-        $iam = $this->prophesize('Google\Auth\Iam');
-        $iam->signBlob($expectedEmail, $expectedAccessToken, $stringToSign)
-            ->shouldBeCalled()
-            ->willReturn($resultString);
-
-        $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for($expectedEmail)),
-            buildResponse(200, [], Psr7\stream_for(json_encode($token)))
-        ]);
-
-        $creds = new GCECredentials;
-        $signature = $creds->signBlob($stringToSign, [
-            'httpHandler' => $httpHandler,
-            'iam' => $iam->reveal(),
-            'accessToken' => $expectedAccessToken
-        ]);
+        $creds = new GCECredentials($iam->reveal());
+        $signature = $creds->signBlob($stringToSign);
     }
 
     public function testSignBlobWithLastReceivedAccessToken()
@@ -256,13 +224,12 @@ class GCECredentialsTest extends TestCase
             buildResponse(200, [], Psr7\stream_for(json_encode($token2)))
         ]);
 
-        $creds = new GCECredentials;
+        HttpHandlerFactory::setHandler($httpHandler);
+
+        $creds = new GCECredentials($iam->reveal());
         // cache a token
         $creds->fetchAuthToken($httpHandler);
 
-        $signature = $creds->signBlob($stringToSign, [
-            'httpHandler' => $httpHandler,
-            'iam' => $iam->reveal(),
-        ]);
+        $signature = $creds->signBlob($stringToSign);
     }
 }

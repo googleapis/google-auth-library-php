@@ -128,13 +128,13 @@ class AppIdentityCredentials extends CredentialsLoader implements SignBlobInterf
     /**
      * Sign a string using AppIdentityService.
      *
-     * @param string $stringToSign
-     * @param array $options Configuration options. None are available for this
-     *       implementation.
+     * @param string $stringToSign The string to sign.
+     * @param bool $forceOpenSsl [optional] Does not apply to this credentials
+     *        type.
      * @return string The signature, base64-encoded.
      * @throws \Exception If AppEngine SDK or mock is not available.
      */
-    public function signBlob($stringToSign, array $options = [])
+    public function signBlob($stringToSign, $forceOpenSsl = false)
     {
         $this->checkAppEngineContext();
 

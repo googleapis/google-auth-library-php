@@ -28,20 +28,12 @@ trait ServiceAccountSignerTrait
      * Sign a string using the service account private key.
      *
      * @param string $stringToSign
-     * @param array $options [optional] {
-     *     Configuration options.
-     *
-     *     @type bool $forceOpenssl Whether to use OpenSSL regardless of whether
-     *           phpseclib is installed. **Defaults to** `false.
-     * }
-     * @return void
+     * @param array bool $forceOpenssl Whether to use OpenSSL regardless of
+     *        whether phpseclib is installed. **Defaults to** `false.
+     * @return string
      */
-    public function signBlob($stringToSign, array $options = [])
+    public function signBlob($stringToSign, $forceOpenssl = false)
     {
-        $forceOpenssl = isset($options['forceOpenssl'])
-            ? $options['forceOpenssl']
-            : false;
-
         $privateKey = $this->auth->getSigningKey();
 
         $signedString = '';

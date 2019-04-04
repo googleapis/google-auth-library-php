@@ -115,6 +115,19 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     private $clientName;
 
     /**
+     * @var Iam
+     */
+    private $iam;
+
+    /**
+     * @param Iam $iam [optional] An IAM instance.
+     */
+    public function __construct(Iam $iam = null)
+    {
+        $this->iam = $iam;
+    }
+
+    /**
      * The full uri for accessing the default token.
      *
      * @return string
@@ -287,34 +300,24 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      *
      * @see https://cloud.google.com/iam/credentials/reference/rest/v1/projects.serviceAccounts/signBlob SignBlob
      *
-     * @param string $stringToSign
-     * @param array $options [optional] {
-     *     Configuration options
-     *
-     *     @type callable $httpHandler An HTTP Handler to deliver PSR7 requests.
-     *     @type string $accessToken An authorized access token. If not provided,
-     *           one will be fetched.
-     * }
+     * @param string $stringToSign The string to sign.
+     * @param bool $forceOpenSsl [optional] Does not apply to this credentials
+     *        type.
      * @return string
      */
-    public function signBlob($stringToSign, array $options = [])
+    public function signBlob($stringToSign, $forceOpenSsl = false)
     {
-        $httpHandler = isset($options['httpHandler'])
-            ? $options['httpHandler']
-            : HttpHandlerFactory::build();
+        $httpHandler = HttpHandlerFactory::build();
 
         // Providing a signer is useful for testing, but it's undocumented
         // because it's not something a user would generally need to do.
-        $signer = isset($options['iam'])
-            ? $options['iam']
-            : new Iam($httpHandler);
+        $signer = $this->iam ?: new Iam($httpHandler);
 
         $email = $this->getClientName($httpHandler);
 
-        if (isset($options['accessToken'])) {
-            $accessToken = $options['accessToken'];
-        } elseif ($this->getLastReceivedToken()) {
-            $accessToken = $this->getLastReceivedToken()['access_token'];
+        $previousToken = $this->getLastReceivedToken();
+        if ($previousToken) {
+            $accessToken = $previousToken['access_token'];
         } else {
             $accessToken = $this->fetchAuthToken($httpHandler)['access_token'];
         }

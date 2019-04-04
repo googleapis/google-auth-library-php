@@ -193,12 +193,11 @@ class FetchAuthTokenCacheTest extends BaseTest
     public function testSignBlob()
     {
         $stringToSign = 'foobar';
-        $options = ['foo' => 'bar'];
         $signature = 'helloworld';
 
         $mockFetcher = $this->prophesize('Google\Auth\SignBlobInterface');
         $mockFetcher->willImplement('Google\Auth\FetchAuthTokenInterface');
-        $mockFetcher->signBlob($stringToSign, $options)
+        $mockFetcher->signBlob($stringToSign, true)
             ->shouldBeCalled()
             ->willReturn($signature);
 
@@ -208,7 +207,7 @@ class FetchAuthTokenCacheTest extends BaseTest
             $this->mockCache
         );
 
-        $this->assertEquals($signature, $fetcher->signBlob($stringToSign, $options));
+        $this->assertEquals($signature, $fetcher->signBlob($stringToSign, true));
     }
 
     /**
