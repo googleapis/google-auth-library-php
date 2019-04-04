@@ -19,7 +19,6 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
-use Google\Auth\Iam;
 use GuzzleHttp\Psr7;
 use PHPUnit\Framework\TestCase;
 
