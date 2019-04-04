@@ -49,7 +49,7 @@ class HttpHandlerFactory
         $version = ClientInterface::VERSION;
         $client = $client ?: new Client();
 
-        switch (substr($version, 0, 1)) {
+        switch ($version[0]) {
             case '5':
                 self::$httpHandler = new Guzzle5HttpHandler($client);
                 break;
