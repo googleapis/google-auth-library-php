@@ -18,9 +18,11 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\Credentials\GCECredentials;
-use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\HttpHandler\HttpClientCache;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 
 /**
  * @group credentials
@@ -181,13 +183,15 @@ class GCECredentialsTest extends TestCase
             ->shouldBeCalled()
             ->willReturn($resultString);
 
-        $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for($expectedEmail)),
-            buildResponse(200, [], Psr7\stream_for(json_encode($token)))
-        ]);
+        $client = $this->prophesize(ClientInterface::class);
+        $client->send(Argument::any(), Argument::any())
+            ->willReturn(
+                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                buildResponse(200, [], Psr7\stream_for($expectedEmail)),
+                buildResponse(200, [], Psr7\stream_for(json_encode($token)))
+            );
 
-        HttpHandlerFactory::setHandler($httpHandler);
+        HttpClientCache::setHttpClient($client->reveal());
 
         $creds = new GCECredentials($iam->reveal());
         $signature = $creds->signBlob($stringToSign);
@@ -216,18 +220,20 @@ class GCECredentialsTest extends TestCase
             ->shouldBeCalled()
             ->willReturn($resultString);
 
-        $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for(json_encode($token1))),
-            buildResponse(200, [], Psr7\stream_for($expectedEmail)),
-            buildResponse(200, [], Psr7\stream_for(json_encode($token2)))
-        ]);
+        $client = $this->prophesize(ClientInterface::class);
+        $client->send(Argument::any(), Argument::any())
+            ->willReturn(
+                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                buildResponse(200, [], Psr7\stream_for(json_encode($token1))),
+                buildResponse(200, [], Psr7\stream_for($expectedEmail)),
+                buildResponse(200, [], Psr7\stream_for(json_encode($token2)))
+            );
 
-        HttpHandlerFactory::setHandler($httpHandler);
+        HttpClientCache::setHttpClient($client->reveal());
 
         $creds = new GCECredentials($iam->reveal());
         // cache a token
-        $creds->fetchAuthToken($httpHandler);
+        $creds->fetchAuthToken();
 
         $signature = $creds->signBlob($stringToSign);
     }

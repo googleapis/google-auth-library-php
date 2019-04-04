@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Request;
@@ -495,7 +496,7 @@ class OAuth2 implements FetchAuthTokenInterface
     public function fetchAuthToken(callable $httpHandler = null)
     {
         if (is_null($httpHandler)) {
-            $httpHandler = HttpHandlerFactory::build();
+            $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
         $response = $httpHandler($this->generateCredentialsRequest());

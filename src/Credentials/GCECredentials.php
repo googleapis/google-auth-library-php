@@ -18,6 +18,7 @@
 namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
+use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Iam;
 use Google\Auth\SignBlobInterface;
@@ -173,7 +174,8 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      */
     public static function onGce(callable $httpHandler = null)
     {
-        $httpHandler = $httpHandler ?: HttpHandlerFactory::build();
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         $checkUri = 'http://' . self::METADATA_IP;
         for ($i = 1; $i <= self::MAX_COMPUTE_PING_TRIES; $i++) {
@@ -218,7 +220,8 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        $httpHandler = $httpHandler ?: HttpHandlerFactory::build();
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         if (!$this->hasCheckedOnGce) {
             $this->isOnGce = self::onGce($httpHandler);
@@ -277,7 +280,8 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             return $this->clientName;
         }
 
-        $httpHandler = $httpHandler ?: HttpHandlerFactory::build();
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         if (!$this->hasCheckedOnGce) {
             $this->isOnGce = self::onGce($httpHandler);
@@ -307,7 +311,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      */
     public function signBlob($stringToSign, $forceOpenSsl = false)
     {
-        $httpHandler = HttpHandlerFactory::build();
+        $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         // Providing a signer is useful for testing, but it's undocumented
         // because it's not something a user would generally need to do.

@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7;
 
@@ -41,7 +42,8 @@ class Iam
      */
     public function __construct(callable $httpHandler = null)
     {
-        $this->httpHandler = $httpHandler ?: HttpHandlerFactory::build();
+        $this->httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
     }
 
     /**
