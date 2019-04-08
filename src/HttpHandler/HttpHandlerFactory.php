@@ -33,10 +33,7 @@ class HttpHandlerFactory
      */
     public static function build(ClientInterface $client = null)
     {
-        if (!$client) {
-            $client = HttpClientCache::getHttpClient() ?: new Client();
-            HttpClientCache::setHttpClient($client);
-        }
+        $client = $client ?: new Client();
 
         $version = ClientInterface::VERSION;
         switch ($version[0]) {
