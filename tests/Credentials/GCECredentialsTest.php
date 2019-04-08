@@ -168,6 +168,11 @@ class GCECredentialsTest extends TestCase
 
     public function testSignBlob()
     {
+        $guzzleVersion = ClientInterface::VERSION;
+        if ($guzzleVersion[0] === '5') {
+            $this->markTestSkipped('Only compatible with guzzle 6+');
+        }
+
         $expectedEmail = 'test@test.com';
         $expectedAccessToken = 'token';
         $stringToSign = 'inputString';
@@ -183,7 +188,7 @@ class GCECredentialsTest extends TestCase
             ->shouldBeCalled()
             ->willReturn($resultString);
 
-        $client = $this->prophesize(ClientInterface::class);
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
@@ -199,6 +204,11 @@ class GCECredentialsTest extends TestCase
 
     public function testSignBlobWithLastReceivedAccessToken()
     {
+        $guzzleVersion = ClientInterface::VERSION;
+        if ($guzzleVersion[0] === '5') {
+            $this->markTestSkipped('Only compatible with guzzle 6+');
+        }
+
         $expectedEmail = 'test@test.com';
         $expectedAccessToken = 'token';
         $notExpectedAccessToken = 'othertoken';
@@ -220,7 +230,7 @@ class GCECredentialsTest extends TestCase
             ->shouldBeCalled()
             ->willReturn($resultString);
 
-        $client = $this->prophesize(ClientInterface::class);
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),

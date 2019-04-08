@@ -28,31 +28,24 @@ class HttpHandlerFactory
      * of a new handler being created.
      *
      * @param ClientInterface $client
-     *
      * @return Guzzle5HttpHandler|Guzzle6HttpHandler
-     *
      * @throws \Exception
      */
     public static function build(ClientInterface $client = null)
     {
-        $version = ClientInterface::VERSION;
-
         if (!$client) {
             $client = HttpClientCache::getHttpClient() ?: new Client();
             HttpClientCache::setHttpClient($client);
         }
 
+        $version = ClientInterface::VERSION;
         switch ($version[0]) {
             case '5':
-                $handler = new Guzzle5HttpHandler($client);
-                break;
+                return new Guzzle5HttpHandler($client);
             case '6':
-                $handler = new Guzzle6HttpHandler($client);
-                break;
+                return new Guzzle6HttpHandler($client);
             default:
                 throw new \Exception(sprintf('Version %s not supported', $version));
         }
-
-        return $handler;
     }
 }
