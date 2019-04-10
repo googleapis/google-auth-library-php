@@ -112,8 +112,10 @@ class AppIdentityCredentials extends CredentialsLoader implements SignBlobInterf
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        if (!self::onAppEngine()) {
-            return array();
+        try {
+            $this->checkAppEngineContext();
+        } catch (\Exception $e) {
+            return [];
         }
 
         // AppIdentityService expects an array when multiple scopes are supplied

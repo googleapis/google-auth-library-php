@@ -24,25 +24,22 @@ class HttpHandlerFactory
     /**
      * Builds out a default http handler for the installed version of guzzle.
      *
-     * If a handler has been previously created, it will be returned instead
-     * of a new handler being created.
-     *
      * @param ClientInterface $client
      * @return Guzzle5HttpHandler|Guzzle6HttpHandler
      * @throws \Exception
      */
     public static function build(ClientInterface $client = null)
     {
+        $version = ClientInterface::VERSION;
         $client = $client ?: new Client();
 
-        $version = ClientInterface::VERSION;
         switch ($version[0]) {
             case '5':
                 return new Guzzle5HttpHandler($client);
             case '6':
                 return new Guzzle6HttpHandler($client);
             default:
-                throw new \Exception(sprintf('Version %s not supported', $version));
+                throw new \Exception('Version not supported');
         }
     }
 }

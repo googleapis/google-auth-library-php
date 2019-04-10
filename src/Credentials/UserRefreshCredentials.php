@@ -141,7 +141,7 @@ class UserRefreshCredentials extends CredentialsLoader
      * @param callable $httpHandler Not used by this credentials type.
      * @return string
      */
-    public function getClientName(callable $httphandler = null)
+    public function getClientName(callable $httpHandler = null)
     {
         return $this->auth->getClientId();
     }

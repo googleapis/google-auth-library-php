@@ -267,7 +267,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     }
 
     /**
-     * Get the Client ID from GCE metadata.
+     * Get the client name from GCE metadata.
      *
      * Subsequent calls will return a cached value.
      *
@@ -320,11 +320,9 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
         $email = $this->getClientName($httpHandler);
 
         $previousToken = $this->getLastReceivedToken();
-        if ($previousToken) {
-            $accessToken = $previousToken['access_token'];
-        } else {
-            $accessToken = $this->fetchAuthToken($httpHandler)['access_token'];
-        }
+        $accessToken = $previousToken
+            ? $previousToken['access_token']
+            : $this->fetchAuthToken($httpHandler)['access_token'];
 
         return $signer->signBlob($email, $accessToken, $stringToSign);
     }
