@@ -116,7 +116,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     private $clientName;
 
     /**
-     * @var Iam
+     * @var Iam|null
      */
     private $iam;
 

@@ -69,7 +69,7 @@ class InsecureCredentials implements FetchAuthTokenInterface
     }
 
     /**
-     * Get the client ID. In this case, it returns an empty string.
+     * Get the client name. In this case, it returns an empty string.
      *
      * @param callable $httpHandler Not used in this implementation.
      * @return string

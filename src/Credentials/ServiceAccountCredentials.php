@@ -184,7 +184,9 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
     }
 
     /**
-     * Get the keyfile client email.
+     * Get the client name from the keyfile.
+     *
+     * In this case, it returns the keyfile's client_email key.
      *
      * @param callable $httpHandler Not used by this credentials type.
      * @return string
