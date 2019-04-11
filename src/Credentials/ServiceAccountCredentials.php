@@ -19,6 +19,8 @@ namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
+use Google\Auth\ServiceAccountSignerTrait;
+use Google\Auth\SignBlobInterface;
 
 /**
  * ServiceAccountCredentials supports authorization using a Google service
@@ -53,8 +55,10 @@ use Google\Auth\OAuth2;
  *
  *   $res = $client->get('myproject/taskqueues/myqueue');
  */
-class ServiceAccountCredentials extends CredentialsLoader
+class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface
 {
+    use ServiceAccountSignerTrait;
+
     /**
      * The OAuth2 instance used to conduct authorization.
      *
@@ -177,5 +181,18 @@ class ServiceAccountCredentials extends CredentialsLoader
     public function setSub($sub)
     {
         $this->auth->setSub($sub);
+    }
+
+    /**
+     * Get the client name from the keyfile.
+     *
+     * In this case, it returns the keyfile's client_email key.
+     *
+     * @param callable $httpHandler Not used by this credentials type.
+     * @return string
+     */
+    public function getClientName(callable $httpHandler = null)
+    {
+        return $this->auth->getIssuer();
     }
 }

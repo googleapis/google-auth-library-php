@@ -53,7 +53,7 @@ class Guzzle5HttpHandlerTest extends BaseTest
 
     public function testSuccessfullySendsRealRequest()
     {
-        $request = new \GuzzleHttp\Psr7\Request('get', 'http://httpbin.org/get');
+        $request = new \GuzzleHttp\Psr7\Request('get', 'https://httpbin.org/get');
         $client = new \GuzzleHttp\Client();
         $handler = new Guzzle5HttpHandler($client);
         $response = $handler($request);
@@ -61,7 +61,7 @@ class Guzzle5HttpHandlerTest extends BaseTest
         $this->assertEquals(200, $response->getStatusCode());
         $json = json_decode((string) $response->getBody(), true);
         $this->assertArrayHasKey('url', $json);
-        $this->assertEquals($request->getUri(), $json['url']);
+        $this->assertEquals((string) $request->getUri(), $json['url']);
     }
 
     public function testSuccessfullySendsMockRequest()

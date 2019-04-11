@@ -20,8 +20,11 @@ namespace Google\Auth;
 use DomainException;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\HttpHandler\HttpClientCache;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
+use GuzzleHttp\Client;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
@@ -143,6 +146,15 @@ class ApplicationDefaultCredentials
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
             ?: CredentialsLoader::fromWellKnownFile();
+
+        if (!$httpHandler) {
+            if (!($client = HttpClientCache::getHttpClient())) {
+                $client = new Client();
+                HttpClientCache::setHttpClient($client);
+            }
+
+            $httpHandler = HttpHandlerFactory::build($client);
+        }
 
         if (!is_null($jsonKey)) {
             $creds = CredentialsLoader::makeCredentials($scope, $jsonKey);

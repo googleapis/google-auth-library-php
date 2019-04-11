@@ -19,6 +19,8 @@ namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
+use Google\Auth\ServiceAccountSignerTrait;
+use Google\Auth\SignBlobInterface;
 
 /**
  * Authenticates requests using Google's Service Account credentials via
@@ -29,8 +31,10 @@ use Google\Auth\OAuth2;
  * console (via 'Generate new Json Key').  It is not part of any OAuth2
  * flow, rather it creates a JWT and sends that as a credential.
  */
-class ServiceAccountJwtAccessCredentials extends CredentialsLoader
+class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements SignBlobInterface
 {
+    use ServiceAccountSignerTrait;
+
     /**
      * The OAuth2 instance used to conduct authorization.
      *
@@ -129,5 +133,18 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
     public function getLastReceivedToken()
     {
         return $this->auth->getLastReceivedToken();
+    }
+
+    /**
+     * Get the client name from the keyfile.
+     *
+     * In this case, it returns the keyfile's client_email key.
+     *
+     * @param callable $httpHandler Not used by this credentials type.
+     * @return string
+     */
+    public function getClientName(callable $httpHandler = null)
+    {
+        return $this->auth->getIssuer();
     }
 }

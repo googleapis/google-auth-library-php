@@ -20,6 +20,10 @@ namespace Google\Auth\Tests;
 use Google\Auth\Credentials\InsecureCredentials;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @group credentials
+ * @group credentials-insecure
+ */
 class InsecureCredentialsTest extends TestCase
 {
     public function testFetchAuthToken()
@@ -38,5 +42,11 @@ class InsecureCredentialsTest extends TestCase
     {
         $insecure = new InsecureCredentials();
         $this->assertEquals(['access_token' => ''], $insecure->getLastReceivedToken());
+    }
+
+    public function testGetClientName()
+    {
+        $creds = new InsecureCredentials;
+        $this->assertEquals('', $creds->getClientName());
     }
 }

@@ -25,9 +25,7 @@ class HttpHandlerFactory
      * Builds out a default http handler for the installed version of guzzle.
      *
      * @param ClientInterface $client
-     *
      * @return Guzzle5HttpHandler|Guzzle6HttpHandler
-     *
      * @throws \Exception
      */
     public static function build(ClientInterface $client = null)

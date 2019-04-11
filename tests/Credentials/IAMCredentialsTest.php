@@ -20,6 +20,10 @@ namespace Google\Auth\Tests;
 use Google\Auth\Credentials\IAMCredentials;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @group credentials
+ * @group credentials-iam
+ */
 class IAMConstructorTest extends TestCase
 {
     /**

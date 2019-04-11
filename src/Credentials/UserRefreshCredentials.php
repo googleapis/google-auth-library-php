@@ -134,4 +134,15 @@ class UserRefreshCredentials extends CredentialsLoader
     {
         return $this->auth->getLastReceivedToken();
     }
+
+    /**
+     * Get the client name.
+     *
+     * @param callable $httpHandler Not used by this credentials type.
+     * @return string
+     */
+    public function getClientName(callable $httpHandler = null)
+    {
+        return $this->auth->getClientId();
+    }
 }

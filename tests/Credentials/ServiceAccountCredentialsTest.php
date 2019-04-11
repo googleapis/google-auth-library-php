@@ -147,6 +147,24 @@ class SACConstructorTest extends TestCase
             new ServiceAccountCredentials('scope/1', $keyFile)
         );
     }
+
+    /**
+     * @expectedException LogicException
+     */
+    public function testFailsToInitializeFromInvalidJsonData()
+    {
+        $tmp = tmpfile();
+        fwrite($tmp, '{');
+
+        $path = stream_get_meta_data($tmp)['uri'];
+
+        try {
+            new ServiceAccountCredentials('scope/1', $path);
+        } catch (\Exception $e) {
+            fclose($tmp);
+            throw $e;
+        }
+    }
 }
 
 class SACFromEnvTest extends TestCase
@@ -310,6 +328,16 @@ class SACFetchAuthTokenTest extends TestCase
     }
 }
 
+class SACGetClientNameTest extends TestCase
+{
+    public function testReturnsClientEmail()
+    {
+        $testJson = createTestJson();
+        $sa = new ServiceAccountCredentials('scope/1', $testJson);
+        $this->assertEquals($testJson['client_email'], $sa->getClientName());
+    }
+}
+
 class SACJwtAccessTest extends TestCase
 {
     private $privateKey;
@@ -326,6 +354,41 @@ class SACJwtAccessTest extends TestCase
         $testJson['private_key'] = $this->privateKey;
 
         return $testJson;
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testFailsToInitalizeFromANonExistentFile()
+    {
+        $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
+        new ServiceAccountJwtAccessCredentials($keyFile);
+    }
+
+    public function testInitalizeFromAFile()
+    {
+        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
+        $this->assertNotNull(
+            new ServiceAccountJwtAccessCredentials($keyFile)
+        );
+    }
+
+    /**
+     * @expectedException LogicException
+     */
+    public function testFailsToInitializeFromInvalidJsonData()
+    {
+        $tmp = tmpfile();
+        fwrite($tmp, '{');
+
+        $path = stream_get_meta_data($tmp)['uri'];
+
+        try {
+            new ServiceAccountJwtAccessCredentials($path);
+        } catch (\Exception $e) {
+            fclose($tmp);
+            throw $e;
+        }
     }
 
     /**
@@ -517,5 +580,26 @@ class SACJwtAccessComboTest extends TestCase
             CredentialsLoader::AUTH_METADATA_KEY,
             $actual_metadata
         );
+    }
+}
+
+class SACJWTGetCacheKeyTest extends TestCase
+{
+    public function testShouldBeTheSameAsOAuth2WithTheSameScope()
+    {
+        $testJson = createTestJson();
+        $scope = ['scope/1', 'scope/2'];
+        $sa = new ServiceAccountJwtAccessCredentials($testJson);
+        $this->assertNull($sa->getCacheKey());
+    }
+}
+
+class SACJWTGetClientNameTest extends TestCase
+{
+    public function testReturnsClientEmail()
+    {
+        $testJson = createTestJson();
+        $sa = new ServiceAccountJwtAccessCredentials($testJson);
+        $this->assertEquals($testJson['client_email'], $sa->getClientName());
     }
 }
