@@ -194,9 +194,11 @@ class ProjectIdProviderShellMock extends ProjectIdProvider
 {
     private static $output;
 
-    public static function setOutput($output) {
+    public static function setOutput($output)
+    {
         self::$output = $output;
     }
+
     protected static function execute($command)
     {
         return self::$output;
