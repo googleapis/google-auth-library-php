@@ -34,11 +34,6 @@ use GuzzleHttp\Psr7\Request;
 class ProjectIdProvider
 {
     /**
-     * @var callable
-     */
-    const METADATA_SERVICE = 'http://169.254.169.254/computeMetadata/v1/project/project-id';
-
-    /**
      * Determines the project id for the current project. If one cannot be determined, a DomainException
      * is thrown. The project is determined from the following locations respectively:
      *
@@ -164,8 +159,9 @@ class ProjectIdProvider
         // Make a request to the meta data service to get project id
         // If we can't talk to the service and get a request exception, return null
         try {
+            $uri = sprintf('http://%s/computeMetadata/v1/project/project-id', GCECredentials::METADATA_IP);
             $response = $httpHandler(
-                new Request('GET', self::METADATA_SERVICE, ['Metadata-Flavor' => 'Google'])
+                new Request('GET', $uri, ['Metadata-Flavor' => 'Google'])
             );
 
             return (string) $response->getBody();

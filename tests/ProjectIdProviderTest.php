@@ -94,7 +94,7 @@ class ProjectIdProviderTest extends TestCase
 
     public function testFromSdk()
     {
-//         This JSON is an example of what is returned from the SDK command
+        // This JSON is an example of what is returned from the SDK command
         $config = [
             'configuration' => [
                 'active_configuration' => 'example-configuration',
