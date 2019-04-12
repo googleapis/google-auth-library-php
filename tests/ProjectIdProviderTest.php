@@ -108,7 +108,6 @@ class ProjectIdProviderTest extends TestCase
 
         $output = json_encode($config);
 
-
         $id = $this->mockSdkOutput($output);
         $this->assertEquals($id, 'project-id-from-sdk');
 
@@ -141,6 +140,8 @@ class ProjectIdProviderTest extends TestCase
 
     public function testAppEngineStandard()
     {
+        $_SERVER['APPENGINE_RUNTIME'] = 'php';
+
         putenv('APPLICATION_ID=p~example-project-name');
         $id = $this->invokeReflectionMethod('fromAppEngineStandard');
         $this->assertEquals($id, 'example-project-name');
@@ -149,6 +150,8 @@ class ProjectIdProviderTest extends TestCase
         putenv('APPLICATION_ID');
         $id = $this->invokeReflectionMethod('fromAppEngineStandard');
         $this->assertNull($id);
+
+        unset($_SERVER['APPENGINE_RUNTIME']);
     }
 
     public function testComputeEngineMetaData()

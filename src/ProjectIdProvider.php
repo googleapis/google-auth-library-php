@@ -18,14 +18,15 @@
 namespace Google\Auth;
 
 use DomainException;
+use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
 
 /**
- * ProjectIdProvider encapsulates the behavior for determining a google-cloud project id.
+ * ProjectIdProvider encapsulates the behavior for determining a google-cloud project ID.
  *
- * This class allows you to dynamically determine the application's project id. For example:
+ * This class allows you to dynamically determine the application's project ID. For example:
  *
  *   $provider = new Google\Auth\ProjectIdProvider();
  *   $projectId = $provider->getProjectId();
@@ -34,7 +35,7 @@ use GuzzleHttp\Psr7\Request;
 class ProjectIdProvider
 {
     /**
-     * Determines the project id for the current project. If one cannot be determined, a DomainException
+     * Determines the project ID for the current project. If one cannot be determined, a DomainException
      * is thrown. The project is determined from the following locations respectively:
      *
      *   1. A Credentials file supplied via the GOOGLE_APPLICATION_CREDENTIALS env variable
@@ -49,7 +50,7 @@ class ProjectIdProvider
      */
     public static function getProjectId(callable $httpHandler = null)
     {
-        // List of sources for determining a project id
+        // List of sources for determining a project ID
         $sources = [
             'self::fromApplicationDefaultCredentials' => [],
             'self::fromSdk' => [],
@@ -57,7 +58,7 @@ class ProjectIdProvider
             'self::fromComputeEngineMetaData' => [$httpHandler],
         ];
 
-        // Look through all of the sources until we find a project id
+        // Look through all of the sources until we find a project ID
         foreach ($sources as $callable => $args) {
             $id = call_user_func_array($callable, $args);
             if ($id !== null) {
@@ -65,11 +66,11 @@ class ProjectIdProvider
             }
         }
 
-        throw new DomainException('Could not determine project id');
+        throw new DomainException('Could not determine project ID');
     }
 
     /**
-     * Check for a project id in the Key File specified in the GOOGLE_APPLICATION_CREDENTIALS
+     * Check for a project ID in the Key File specified in the GOOGLE_APPLICATION_CREDENTIALS
      * environment variable
      *
      * @return string|null
@@ -86,7 +87,7 @@ class ProjectIdProvider
     }
 
     /**
-     * Attempts to retrieve a project id from the gcloud sdk
+     * Attempts to retrieve a project ID from the gcloud sdk
      *
      * @return string|null
      */
@@ -109,19 +110,23 @@ class ProjectIdProvider
             return null;
         }
 
-        // the configuration should contain a project id at the specified path
+        // the configuration should contain a project ID at the specified path
         if (isset($config['configuration']['properties']['core']['project'])) {
             return $config['configuration']['properties']['core']['project'];
         }
     }
 
     /**
-     * Check for the project id available in App Engine Standard Environments
+     * Check for the project ID available in App Engine Standard Environments
      *
      * @return string|null
      */
     private static function fromAppEngineStandard()
     {
+        if (!AppIdentityCredentials::onAppEngine()) {
+            return null;
+        }
+
         $appId = getenv('APPLICATION_ID');
 
         // if we didn't find it, return null
@@ -129,7 +134,7 @@ class ProjectIdProvider
             return null;
         }
 
-        // find the project id embedded in the string
+        // find the project ID embedded in the string
         // looks something like p~project-name
         $position = strpos($appId, '~');
 
@@ -156,7 +161,7 @@ class ProjectIdProvider
             $httpHandler = HttpHandlerFactory::build();
         }
 
-        // Make a request to the meta data service to get project id
+        // Make a request to the meta data service to get project ID
         // If we can't talk to the service and get a request exception, return null
         try {
             $uri = sprintf('http://%s/computeMetadata/v1/project/project-id', GCECredentials::METADATA_IP);
