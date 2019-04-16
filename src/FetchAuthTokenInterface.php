@@ -52,13 +52,4 @@ interface FetchAuthTokenInterface
      * }
      */
     public function getLastReceivedToken();
-
-    /**
-     * Returns the current Client Name.
-     *
-     * @param callable $httpHandler callback which delivers psr7 request, if
-     *     one is required to obtain a client name.
-     * @return string
-     */
-    public function getClientName(callable $httpHandler = null);
 }

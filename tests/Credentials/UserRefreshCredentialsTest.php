@@ -280,13 +280,3 @@ class URCFetchAuthTokenTest extends TestCase
         $this->assertEquals($testJson, $tokens);
     }
 }
-
-class URCGetClientNameTest extends TestCase
-{
-    public function testReturnsClientId()
-    {
-        $testJson = createURCTestJson();
-        $sa = new UserRefreshCredentials('scope/1', $testJson);
-        $this->assertEquals($testJson['client_id'], $sa->getClientName());
-    }
-}

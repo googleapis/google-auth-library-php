@@ -176,7 +176,7 @@ class FetchAuthTokenCacheTest extends BaseTest
     {
         $name = 'test@example.com';
 
-        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+        $mockFetcher = $this->prophesize('Google\Auth\SignBlobInterface');
         $mockFetcher->getClientName(null)
             ->shouldBeCalled()
             ->willReturn($name);
