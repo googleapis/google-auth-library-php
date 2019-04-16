@@ -1,3 +1,9 @@
+## 1.5.1 (04/16/2019)
+
+* [fix] Moved `getClientName()` from `Google\Auth\FetchAuthTokenInterface`
+  to `Google\Auth\SignBlobInterface`, and removed `getClientName()` from
+  `InsecureCredentials` and `UserRefreshCredentials`. (#223)
+
 ## 1.5.0 (04/15/2019)
 
 ### Changes
