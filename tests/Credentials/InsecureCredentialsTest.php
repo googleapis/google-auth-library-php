@@ -43,10 +43,4 @@ class InsecureCredentialsTest extends TestCase
         $insecure = new InsecureCredentials();
         $this->assertEquals(['access_token' => ''], $insecure->getLastReceivedToken());
     }
-
-    public function testGetClientName()
-    {
-        $creds = new InsecureCredentials;
-        $this->assertEquals('', $creds->getClientName());
-    }
 }

@@ -67,15 +67,4 @@ class InsecureCredentials implements FetchAuthTokenInterface
     {
         return $this->token;
     }
-
-    /**
-     * Get the client name. In this case, it returns an empty string.
-     *
-     * @param callable $httpHandler Not used in this implementation.
-     * @return string
-     */
-    public function getClientName(callable $httpHandler = null)
-    {
-        return '';
-    }
 }
