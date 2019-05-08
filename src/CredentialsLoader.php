@@ -66,6 +66,9 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
     public static function fromEnv()
     {
         $path = getenv(self::ENV_VAR);
+        if ($credentials = json_decode($path, true)) {
+            return $credentials;
+        }
         if (empty($path)) {
             return;
         }
