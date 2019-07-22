@@ -30,6 +30,20 @@ use Prophecy\Argument;
  */
 class GCECredentialsTest extends TestCase
 {
+    public function testOnGceMetadataFlavorHeader()
+    {
+        $hasHeader = false;
+        $dummyHandler = function ($request) use (&$hasHeader) {
+            $hasHeader = $request->getHeaderLine(GCECredentials::FLAVOR_HEADER) === 'Google';
+
+            return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+        };
+
+        $onGce = GCECredentials::onGce($dummyHandler);
+        $this->assertTrue($hasHeader);
+        $this->assertTrue($onGce);
+    }
+
     public function testOnGCEIsFalseOnClientErrorStatus()
     {
         // simulate retry attempts by returning multiple 400s
