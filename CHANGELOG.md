@@ -1,3 +1,7 @@
+## 1.5.2 (07/22/2019)
+
+* [fix] Add `Metadata-Flavor` header to initial GCE metadata call. (#232)
+
 ## 1.5.1 (04/16/2019)
 
 * [fix] Moved `getClientName()` from `Google\Auth\FetchAuthTokenInterface`
