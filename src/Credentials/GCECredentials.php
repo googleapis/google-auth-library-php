@@ -121,11 +121,19 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     private $iam;
 
     /**
-     * @param Iam $iam [optional] An IAM instance.
+     * @var string|array|null
      */
-    public function __construct(Iam $iam = null)
+    private $scope;
+
+    /**
+     * @param Iam $iam [optional] An IAM instance.
+     * @param string|array $scope [optional] the scope of the access request,
+     *        expressed either as an array or as a space-delimited string.
+     */
+    public function __construct(Iam $iam = null, $scope = null)
     {
         $this->iam = $iam;
+        $this->scope = $scope;
     }
 
     /**
@@ -235,7 +243,19 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             return array();  // return an empty array with no access token
         }
 
-        $json = $this->getFromMetadata($httpHandler, self::getTokenUri());
+        $tokenUri = self::getTokenUri();
+        if ($this->scope) {
+            $scope = $this->scope;
+            if (is_string($this->scope)) {
+                $scope = explode(' ', $this->scope);
+            }
+
+            $scope = implode(',', $scope);
+
+            $tokenUri = $tokenUri . '?scopes='. $scope;
+        }
+
+        $json = $this->getFromMetadata($httpHandler, $tokenUri);
         if (null === $json = json_decode($json, true)) {
             throw new \Exception('Invalid JSON response');
         }
