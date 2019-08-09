@@ -23,6 +23,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\Promise\ReturnPromise;
 
 /**
  * @group credentials
@@ -142,6 +143,49 @@ class GCECredentialsTest extends TestCase
         $g = new GCECredentials();
         $this->assertEquals($wantedTokens, $g->fetchAuthToken($httpHandler));
         $this->assertEquals(time() + 57, $g->getLastReceivedToken()['expires_at']);
+    }
+
+    /**
+     * @dataProvider scopes
+     */
+    public function testFetchAuthTokenCustomScope($scope, $expected)
+    {
+        $guzzleVersion = ClientInterface::VERSION;
+        if ($guzzleVersion[0] === '5') {
+            $this->markTestSkipped('Only compatible with guzzle 6+');
+        }
+
+        $uri = null;
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->will(function() use (&$uri) {
+                $this->send(Argument::any(), Argument::any())->will(function ($args) use (&$uri) {
+                    $uri = $args[0]->getUri();
+
+                    return buildResponse(200, [], Psr7\stream_for('{"expires_in": 0}'));
+                });
+
+                return buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            });
+
+        HttpClientCache::setHttpClient($client->reveal());
+
+        $g = new GCECredentials(null, $scope);
+        $g->fetchAuthToken();
+        parse_str($uri->getQuery(), $query);
+
+        $this->assertArrayHasKey('scopes', $query);
+        $this->assertEquals($expected, $query['scopes']);
+    }
+
+    public function scopes()
+    {
+        return [
+            ['foobar', 'foobar'],
+            [['foobar'], 'foobar'],
+            ['hello world', 'hello,world'],
+            [['hello', 'world'], 'hello,world']
+        ];
     }
 
     public function testGetLastReceivedTokenIsNullByDefault()

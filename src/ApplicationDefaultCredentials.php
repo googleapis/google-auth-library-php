@@ -161,7 +161,7 @@ class ApplicationDefaultCredentials
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($scope);
         } elseif (GCECredentials::onGce($httpHandler)) {
-            $creds = new GCECredentials();
+            $creds = new GCECredentials(null, $scope);
         }
 
         if (is_null($creds)) {
