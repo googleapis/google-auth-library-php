@@ -34,6 +34,7 @@ class IamTest extends TestCase
         $expectedEmail = 'test@test.com';
         $expectedAccessToken = 'token';
         $expectedString = 'toSign';
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
 
         $expectedServiceAccount = sprintf(Iam::SERVICE_ACCOUNT_NAME, $expectedEmail);
         $expectedUri = Iam::IAM_API_ROOT . '/' . sprintf(
@@ -52,15 +53,17 @@ class IamTest extends TestCase
             $expectedDelegates[] = $expectedServiceAccount;
         }
 
-        $httpHandler = function (Psr7\Request $request) use (
+        $httpHandler = function (Psr7\Request $request, array $options = []) use (
             $expectedEmail,
             $expectedAccessToken,
             $expectedString,
             $expectedServiceAccount,
             $expectedUri,
             $expectedResponse,
-            $expectedDelegates
+            $expectedDelegates,
+            $httpOptions
         ) {
+            $this->assertEquals($httpOptions, $options);
             $this->assertEquals($expectedUri, (string) $request->getUri());
             $this->assertEquals('Bearer ' . $expectedAccessToken, $request->getHeaderLine('Authorization'));
             $this->assertEquals([
@@ -73,7 +76,7 @@ class IamTest extends TestCase
             ])));
         };
 
-        $iam = new Iam($httpHandler);
+        $iam = new Iam($httpHandler, $httpOptions);
         $res = $iam->signBlob(
             $expectedEmail,
             $expectedAccessToken,

@@ -25,11 +25,13 @@ interface FetchAuthTokenInterface
     /**
      * Fetches the auth tokens based on the current state.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return array a hash of auth tokens
      */
-    public function fetchAuthToken(callable $httpHandler = null);
+    public function fetchAuthToken(callable $httpHandler = null, array $httpOptions = []);
 
     /**
      * Obtains a key that can used to cache the results of #fetchAuthToken.

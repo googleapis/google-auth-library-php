@@ -28,16 +28,24 @@ trait ServiceAccountSignerTrait
      * Sign a string using the service account private key.
      *
      * @param string $stringToSign
-     * @param bool $forceOpenssl Whether to use OpenSSL regardless of
+     * @param bool $forceOpenSsl Whether to use OpenSSL regardless of
      *        whether phpseclib is installed. **Defaults to** `false`.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     *        Unused by this implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client. Unused by this implementation.
      * @return string
      */
-    public function signBlob($stringToSign, $forceOpenssl = false)
-    {
+    public function signBlob(
+        $stringToSign,
+        $forceOpenSsl = false,
+        callable $httpHandler = null,
+        array $httpOptions = []
+    ) {
         $privateKey = $this->auth->getSigningKey();
 
         $signedString = '';
-        if (class_exists('\\phpseclib\\Crypt\\RSA') && !$forceOpenssl) {
+        if (class_exists('\\phpseclib\\Crypt\\RSA') && !$forceOpenSsl) {
             $rsa = new RSA;
             $rsa->loadKey($privateKey);
             $rsa->setSignatureMode(RSA::SIGNATURE_PKCS1);

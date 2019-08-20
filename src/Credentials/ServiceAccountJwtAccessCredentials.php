@@ -80,14 +80,17 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Si
      *
      * @param array $metadata metadata hashmap
      * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return array updated metadata hashmap
      */
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null
+        callable $httpHandler = null,
+        array $httpOptions = []
     ) {
         if (empty($authUri)) {
             return $metadata;
@@ -95,19 +98,27 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Si
 
         $this->auth->setAudience($authUri);
 
-        return parent::updateMetadata($metadata, $authUri, $httpHandler);
+        return parent::updateMetadata(
+            $metadata,
+            $authUri,
+            $httpHandler,
+            $httpOptions
+        );
     }
 
     /**
      * Implements FetchAuthTokenInterface#fetchAuthToken.
      *
-     * @param callable $httpHandler
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     *        Unused by this implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client. Unused by this implementation.
      *
      * @return array|void A set of auth related metadata, containing the
      * following keys:
      *   - access_token (string)
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $httpOptions = [])
     {
         $audience = $this->auth->getAudience();
         if (empty($audience)) {
@@ -140,10 +151,13 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Si
      *
      * In this case, it returns the keyfile's client_email key.
      *
-     * @param callable $httpHandler Not used by this credentials type.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     *        Unused by this implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client. Unused by this implementation.
      * @return string
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(callable $httpHandler = null, array $httpOptions = [])
     {
         return $this->auth->getIssuer();
     }

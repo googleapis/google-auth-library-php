@@ -489,17 +489,19 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Fetches the auth tokens based on the current state.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return array the response
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $httpOptions = [])
     {
         if (is_null($httpHandler)) {
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
-        $response = $httpHandler($this->generateCredentialsRequest());
+        $response = $httpHandler($this->generateCredentialsRequest(), $httpOptions);
         $credentials = $this->parseTokenResponse($response);
         $this->updateToken($credentials);
 

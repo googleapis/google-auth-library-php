@@ -134,7 +134,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * Create an authorized HTTP Client from an instance of FetchAuthTokenInterface.
      *
      * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
-     * @param array $httpClientOptoins (optional) Array of request options to apply.
+     * @param array $httpClientOptions (optional) Array of request options to apply.
      * @param callable $httpHandler (optional) http client to fetch the token.
      * @param callable $tokenCallback (optional) function to be called when a new token is fetched.
      *
@@ -202,16 +202,19 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      *
      * @param array $metadata metadata hashmap
      * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return array updated metadata hashmap
      */
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null
+        callable $httpHandler = null,
+        array $httpOptions = []
     ) {
-        $result = $this->fetchAuthToken($httpHandler);
+        $result = $this->fetchAuthToken($httpHandler, $httpOptions);
         if (!isset($result['access_token'])) {
             return $metadata;
         }

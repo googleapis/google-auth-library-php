@@ -36,12 +36,15 @@ class InsecureCredentials implements FetchAuthTokenInterface
     /**
      * Fetches the auth token. In this case it returns an empty string.
      *
-     * @param callable $httpHandler
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     *        Unused by this implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client. Unused by this implementation.
      * @return array A set of auth related metadata, containing the following
      * keys:
      *   - access_token (string)
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $httpOptions = [])
     {
         return $this->token;
     }

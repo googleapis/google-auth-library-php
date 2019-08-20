@@ -26,19 +26,28 @@ interface SignBlobInterface extends FetchAuthTokenInterface
      * Sign a string using the method which is best for a given credentials type.
      *
      * @param string $stringToSign The string to sign.
-     * @param bool $forceOpenssl Require use of OpenSSL for local signing. Does
+     * @param bool $forceOpenSsl Require use of OpenSSL for local signing. Does
      *        not apply to signing done using external services. **Defaults to**
      *        `false`.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      * @return string The resulting signature. Value should be base64-encoded.
      */
-    public function signBlob($stringToSign, $forceOpenssl = false);
+    public function signBlob(
+        $stringToSign,
+        $forceOpenSsl = false,
+        callable $httpHandler = null,
+        array $httpOptions = []
+    );
 
     /**
      * Returns the current Client Name.
      *
-     * @param callable $httpHandler callback which delivers psr7 request, if
-     *     one is required to obtain a client name.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      * @return string
      */
-    public function getClientName(callable $httpHandler = null);
+    public function getClientName(callable $httpHandler = null, array $httpOptions = []);
 }

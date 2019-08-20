@@ -186,13 +186,16 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     /**
      * Determines if this a GCE instance, by accessing the expected metadata
      * host.
-     * If $httpHandler is not specified a the default HttpHandler is used.
+     * If $httpHandler is not specified a default HttpHandler is used.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client. Please note a timeout of `0.5` seconds
+     *        will take precedent over any provided timeout value.
      *
      * @return true if this a GCEInstance false otherwise
      */
-    public static function onGce(callable $httpHandler = null)
+    public static function onGce(callable $httpHandler = null, array $httpOptions = [])
     {
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
@@ -214,7 +217,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
                         $checkUri,
                         [self::FLAVOR_HEADER => 'Google']
                     ),
-                    ['timeout' => self::COMPUTE_PING_CONNECTION_TIMEOUT_S]
+                    ['timeout' => self::COMPUTE_PING_CONNECTION_TIMEOUT_S] + $httpOptions
                 );
 
                 return $resp->getHeaderLine(self::FLAVOR_HEADER) == 'Google';
@@ -232,7 +235,9 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      * Fetches the auth tokens from the GCE metadata host if it is available.
      * If $httpHandler is not specified a the default HttpHandler is used.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpHandler Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return array A set of auth related metadata, containing the following
      * keys:
@@ -242,20 +247,24 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      *
      * @throws \Exception
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $httpOptions = [])
     {
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         if (!$this->hasCheckedOnGce) {
-            $this->isOnGce = self::onGce($httpHandler);
+            $this->isOnGce = self::onGce($httpHandler, $httpOptions);
             $this->hasCheckedOnGce = true;
         }
         if (!$this->isOnGce) {
             return array();  // return an empty array with no access token
         }
 
-        $json = $this->getFromMetadata($httpHandler, $this->tokenUri);
+        $json = $this->getFromMetadata(
+            $httpHandler,
+            $httpOptions,
+            $this->tokenUri
+        );
         if (null === $json = json_decode($json, true)) {
             throw new \Exception('Invalid JSON response');
         }
@@ -295,10 +304,12 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      *
      * Subsequent calls will return a cached value.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      * @return string
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(callable $httpHandler = null, array $httpOptions = [])
     {
         if ($this->clientName) {
             return $this->clientName;
@@ -308,7 +319,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         if (!$this->hasCheckedOnGce) {
-            $this->isOnGce = self::onGce($httpHandler);
+            $this->isOnGce = self::onGce($httpHandler, $httpOptions);
             $this->hasCheckedOnGce = true;
         }
 
@@ -316,7 +327,11 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             return '';
         }
 
-        $this->clientName = $this->getFromMetadata($httpHandler, self::getClientNameUri());
+        $this->clientName = $this->getFromMetadata(
+            $httpHandler,
+            $httpOptions,
+            self::getClientNameUri()
+        );
 
         return $this->clientName;
     }
@@ -331,22 +346,30 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      * @param string $stringToSign The string to sign.
      * @param bool $forceOpenSsl [optional] Does not apply to this credentials
      *        type.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      * @return string
      */
-    public function signBlob($stringToSign, $forceOpenSsl = false)
-    {
-        $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+    public function signBlob(
+        $stringToSign,
+        $forceOpenSsl = false,
+        callable $httpHandler = null,
+        array $httpOptions = []
+    ) {
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         // Providing a signer is useful for testing, but it's undocumented
         // because it's not something a user would generally need to do.
-        $signer = $this->iam ?: new Iam($httpHandler);
+        $signer = $this->iam ?: new Iam($httpHandler, $httpOptions);
 
-        $email = $this->getClientName($httpHandler);
+        $email = $this->getClientName($httpHandler, $httpOptions);
 
         $previousToken = $this->getLastReceivedToken();
         $accessToken = $previousToken
             ? $previousToken['access_token']
-            : $this->fetchAuthToken($httpHandler)['access_token'];
+            : $this->fetchAuthToken($httpHandler, $httpOptions)['access_token'];
 
         return $signer->signBlob($email, $accessToken, $stringToSign);
     }
@@ -354,18 +377,21 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     /**
      * Fetch the value of a GCE metadata server URI.
      *
-     * @param callable $httpHandler An HTTP Handler to deliver PSR7 requests.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      * @param string $uri The metadata URI.
      * @return string
      */
-    private function getFromMetadata(callable $httpHandler, $uri)
+    private function getFromMetadata(callable $httpHandler, array $httpOptions, $uri)
     {
         $resp = $httpHandler(
             new Request(
                 'GET',
                 $uri,
                 [self::FLAVOR_HEADER => 'Google']
-            )
+            ),
+            $httpOptions
         );
 
         return (string) $resp->getBody();

@@ -61,13 +61,15 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface
      * Checks the cache for a valid auth token and fetches the auth tokens
      * from the supplied fetcher.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return array the response
      *
      * @throws \Exception
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $httpOptions = [])
     {
         // Use the cached value if its available.
         //
@@ -81,7 +83,7 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface
             return ['access_token' => $cached];
         }
 
-        $auth_token = $this->fetcher->fetchAuthToken($httpHandler);
+        $auth_token = $this->fetcher->fetchAuthToken($httpHandler, $httpOptions);
 
         if (isset($auth_token['access_token'])) {
             $this->setCachedValue($cacheKey, $auth_token['access_token']);
@@ -109,27 +111,36 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface
     /**
      * Get the client name from the fetcher.
      *
-     * @param callable $httpHandler An HTTP handler to deliver PSR7 requests.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      * @return string
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(callable $httpHandler = null, array $httpOptions = [])
     {
-        return $this->fetcher->getClientName($httpHandler);
+        return $this->fetcher->getClientName($httpHandler, $httpOptions);
     }
 
     /**
      * Sign a blob using the fetcher.
      *
      * @param string $stringToSign The string to sign.
-     * @param bool $forceOpenssl Require use of OpenSSL for local signing. Does
+     * @param bool $forceOpenSsl Require use of OpenSSL for local signing. Does
      *        not apply to signing done using external services. **Defaults to**
      *        `false`.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      * @return string The resulting signature.
      * @throws \RuntimeException If the fetcher does not implement
      *     `Google\Auth\SignBlobInterface`.
      */
-    public function signBlob($stringToSign, $forceOpenSsl =  false)
-    {
+    public function signBlob(
+        $stringToSign,
+        $forceOpenSsl = false,
+        callable $httpHandler = null,
+        array $httpOptions = []
+    ) {
         if (!$this->fetcher instanceof SignBlobInterface) {
             throw new \RuntimeException(
                 'Credentials fetcher does not implement ' .
@@ -137,6 +148,11 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface
             );
         }
 
-        return $this->fetcher->signBlob($stringToSign, $forceOpenSsl);
+        return $this->fetcher->signBlob(
+            $stringToSign,
+            $forceOpenSsl,
+            $httpHandler,
+            $httpOptions
+        );
     }
 }

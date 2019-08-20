@@ -52,6 +52,28 @@ class AuthTokenMiddlewareTest extends BaseTest
                 ->getMock();
     }
 
+    public function testAcceptsHttpOptions()
+    {
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $this->mockFetcher
+            ->expects($this->any())
+            ->method('fetchAuthToken')
+            ->with(
+                null,
+                $httpOptions
+            )
+            ->will($this->returnValue([]));
+        $this->mockRequest
+            ->expects($this->once())
+            ->method('withHeader')
+            ->will($this->returnValue($this->mockRequest));
+
+        $middleware = new AuthTokenMiddleware($this->mockFetcher, null, null, $httpOptions);
+        $mock = new MockHandler([new Response(200)]);
+        $callable = $middleware($mock);
+        $callable($this->mockRequest, ['auth' => 'google_auth']);
+    }
+
     public function testOnlyTouchesWhenAuthConfigScoped()
     {
         $this->mockFetcher

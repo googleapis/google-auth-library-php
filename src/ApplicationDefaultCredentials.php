@@ -38,7 +38,7 @@ use Psr\Cache\CacheItemPoolInterface;
  * described in the link.
  *
  * It provides three factory methods:
- * - #get returns the computed credentials object
+ * - #getCredentials returns the computed credentials object
  * - #getSubscriber returns an AuthTokenSubscriber built from the credentials object
  * - #getMiddleware returns an AuthTokenMiddleware built from the credentials object
  *
@@ -71,11 +71,13 @@ class ApplicationDefaultCredentials
      * If supplied, $scope is used to in creating the credentials instance if
      * this does not fallback to the compute engine defaults.
      *
-     * @param string|array scope the scope of the access request, expressed
-     *   either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache an implementation of CacheItemPoolInterface
+     * @param string|array scope The scope of the access request, expressed
+     *        either as an array or as a space-delimited string.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $cacheConfig Configuration for the cache when it's present.
+     * @param CacheItemPoolInterface $cache A PSR-6 cache implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return AuthTokenSubscriber
      *
@@ -85,11 +87,18 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        CacheItemPoolInterface $cache = null,
+        array $httpOptions = []
     ) {
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
+        $creds = self::getCredentials(
+            $scope,
+            $httpHandler,
+            $cacheConfig,
+            $cache,
+            $httpOptions
+        );
 
-        return new AuthTokenSubscriber($creds, $httpHandler);
+        return new AuthTokenSubscriber($creds, $httpHandler, null, $httpOptions);
     }
 
     /**
@@ -99,11 +108,13 @@ class ApplicationDefaultCredentials
      * If supplied, $scope is used to in creating the credentials instance if
      * this does not fallback to the compute engine defaults.
      *
-     * @param string|array scope the scope of the access request, expressed
-     *   either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache
+     * @param string|array scope The scope of the access request, expressed
+     *        either as an array or as a space-delimited string.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $cacheConfig Configuration for the cache when it's present.
+     * @param CacheItemPoolInterface $cache A PSR-6 cache implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return AuthTokenMiddleware
      *
@@ -113,11 +124,12 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        CacheItemPoolInterface $cache = null,
+        array $httpOptions = []
     ) {
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
+        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $httpOptions);
 
-        return new AuthTokenMiddleware($creds, $httpHandler);
+        return new AuthTokenMiddleware($creds, $httpHandler, null, $httpOptions);
     }
 
     /**
@@ -127,11 +139,15 @@ class ApplicationDefaultCredentials
      * If supplied, $scope is used to in creating the credentials instance if
      * this does not fallback to the Compute Engine defaults.
      *
-     * @param string|array scope the scope of the access request, expressed
-     *   either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache
+     * @param string|array scope The scope of the access request, expressed
+     *        either as an array or as a space-delimited string.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $cacheConfig Configuration for the cache when it's present.
+     * @param CacheItemPoolInterface $cache A PSR-6 cache implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client used to check if the execution context is
+     *        GCE. Please note a timeout of `0.5` seconds will
+     *        take precedent over any provided timeout value.
      *
      * @return CredentialsLoader
      *
@@ -141,7 +157,8 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        CacheItemPoolInterface $cache = null,
+        array $httpOptions = []
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -160,7 +177,7 @@ class ApplicationDefaultCredentials
             $creds = CredentialsLoader::makeCredentials($scope, $jsonKey);
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($scope);
-        } elseif (GCECredentials::onGce($httpHandler)) {
+        } elseif (GCECredentials::onGce($httpHandler, $httpOptions)) {
             $creds = new GCECredentials(null, $scope);
         }
 

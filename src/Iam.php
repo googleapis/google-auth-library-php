@@ -38,12 +38,21 @@ class Iam
     private $httpHandler;
 
     /**
-     * @param callable $httpHandler [optional] The HTTP Handler to send requests.
+     * @var array
      */
-    public function __construct(callable $httpHandler = null)
+    private $httpOptions;
+
+    /**
+     * @param callable $httpHandler [optional] A callback which delivers a PSR-7
+     *        request.
+     * @param array $httpOptions [optional] Configuration options provided to
+     *        the underlying HTTP client.
+     */
+    public function __construct(callable $httpHandler = null, array $httpOptions = [])
     {
         $this->httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+        $this->httpOptions = $httpOptions;
     }
 
     /**
@@ -91,7 +100,7 @@ class Iam
             Psr7\stream_for(json_encode($body))
         );
 
-        $res = $httpHandler($request);
+        $res = $httpHandler($request, $this->httpOptions);
         $body = json_decode((string) $res->getBody(), true);
 
         return $body['signedBlob'];

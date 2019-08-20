@@ -39,6 +39,11 @@ class AuthTokenMiddleware
     private $httpHandler;
 
     /**
+     * @var array
+     */
+    private $httpOptions;
+
+    /**
      * @var FetchAuthTokenInterface
      */
     private $fetcher;
@@ -51,18 +56,24 @@ class AuthTokenMiddleware
     /**
      * Creates a new AuthTokenMiddleware.
      *
-     * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
-     * @param callable $httpHandler (optional) callback which delivers psr7 request
-     * @param callable $tokenCallback (optional) function to be called when a new token is fetched.
+     * @param FetchAuthTokenInterface $fetcher Used to fetch an auth token.
+     * @param callable $httpHandler (optional) A callback which delivers a PSR-7
+     *        request.
+     * @param callable $tokenCallback (optional) A function to be called when a
+     *        new token is fetched.
+     * @param array $httpOptions (optional) Configuration options provided to the
+     *        underlying HTTP client.
      */
     public function __construct(
         FetchAuthTokenInterface $fetcher,
         callable $httpHandler = null,
-        callable $tokenCallback = null
+        callable $tokenCallback = null,
+        array $httpOptions = []
     ) {
         $this->fetcher = $fetcher;
         $this->httpHandler = $httpHandler;
         $this->tokenCallback = $tokenCallback;
+        $this->httpOptions = $httpOptions;
     }
 
     /**
@@ -112,7 +123,7 @@ class AuthTokenMiddleware
      */
     private function fetchToken()
     {
-        $auth_tokens = $this->fetcher->fetchAuthToken($this->httpHandler);
+        $auth_tokens = $this->fetcher->fetchAuthToken($this->httpHandler, $this->httpOptions);
 
         if (array_key_exists('access_token', $auth_tokens)) {
             // notify the callback if applicable

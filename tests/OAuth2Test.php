@@ -20,6 +20,7 @@ namespace Google\Auth\Tests;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\RequestInterface;
 use PHPUnit\Framework\TestCase;
 
 class OAuth2AuthorizationUriTest extends TestCase
@@ -772,6 +773,18 @@ class OAuth2FetchAuthTokenTest extends TestCase
         $this->assertEquals('an_access_token', $o->getAccessToken());
         $this->assertEquals('an_id_token', $o->getIdToken());
         $this->assertEquals('a_refresh_token', $o->getRefreshToken());
+    }
+
+    public function testFetchAuthTokenAcceptsHttpOptions()
+    {
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $testConfig = $this->fetchAuthTokenMinimal;
+        $httpHandler = function (RequestInterface $request, array $options = []) use ($httpOptions) {
+            $this->assertEquals($httpOptions, $options);
+            return new Response(200, [], '{"access_token":"abc"}');
+        };
+        $o = new OAuth2($testConfig);
+        $o->fetchAuthToken($httpHandler, $httpOptions);
     }
 }
 

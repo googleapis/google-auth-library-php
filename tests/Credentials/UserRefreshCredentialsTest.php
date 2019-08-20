@@ -279,4 +279,27 @@ class URCFetchAuthTokenTest extends TestCase
         $tokens = $sa->fetchAuthToken($httpHandler);
         $this->assertEquals($testJson, $tokens);
     }
+
+    public function testFetchAuthTokenAcceptsHttpOptions()
+    {
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $mockOauth2 = $this->getMockBuilder('Google\Auth\OAuth2')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mockOauth2->method('fetchAuthToken')
+            ->with(
+                null,
+                $httpOptions
+            )
+            ->willReturn(['access_token' => 'abc']);
+        $class = new \ReflectionClass('Google\Auth\Credentials\UserRefreshCredentials');
+        $property = $class->getProperty('auth');
+        $property->setAccessible(true);
+        $sa = new UserRefreshCredentials(
+            ['scope/1', 'scope/2'],
+            createURCTestJson()
+        );
+        $property->setValue($sa, $mockOauth2);
+        $sa->fetchAuthToken(null, $httpOptions);
+    }
 }

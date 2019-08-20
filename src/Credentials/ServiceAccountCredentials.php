@@ -110,7 +110,9 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
     }
 
     /**
-     * @param callable $httpHandler
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return array A set of auth related metadata, containing the following
      * keys:
@@ -118,9 +120,9 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      *   - expires_in (int)
      *   - token_type (string)
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $httpOptions = [])
     {
-        return $this->auth->fetchAuthToken($httpHandler);
+        return $this->auth->fetchAuthToken($httpHandler, $httpOptions);
     }
 
     /**
@@ -149,19 +151,27 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      *
      * @param array $metadata metadata hashmap
      * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return array updated metadata hashmap
      */
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null
+        callable $httpHandler = null,
+        array $httpOptions = []
     ) {
         // scope exists. use oauth implementation
         $scope = $this->auth->getScope();
         if (!is_null($scope)) {
-            return parent::updateMetadata($metadata, $authUri, $httpHandler);
+            return parent::updateMetadata(
+                $metadata,
+                $authUri,
+                $httpHandler,
+                $httpOptions
+            );
         }
 
         // no scope found. create jwt with the auth uri
@@ -171,7 +181,12 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
         );
         $jwtCreds = new ServiceAccountJwtAccessCredentials($credJson);
 
-        return $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
+        return $jwtCreds->updateMetadata(
+            $metadata,
+            $authUri,
+            $httpHandler,
+            $httpOptions
+        );
     }
 
     /**
@@ -188,10 +203,13 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      *
      * In this case, it returns the keyfile's client_email key.
      *
-     * @param callable $httpHandler Not used by this credentials type.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     *        Unused by this implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client. Unused by this implementation.
      * @return string
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(callable $httpHandler = null, array $httpOptions = [])
     {
         return $this->auth->getIssuer();
     }

@@ -53,6 +53,33 @@ class AuthTokenSubscriberTest extends BaseTest
         $this->assertArrayHasKey('before', $a->getEvents());
     }
 
+    public function testAcceptsHttpOptionz()
+    {
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $this->mockFetcher
+            ->expects($this->once())
+            ->method('fetchAuthToken')
+            ->with(
+                null,
+                $httpOptions
+            )
+            ->will($this->returnValue([]));
+        $a = new AuthTokenSubscriber(
+            $this->mockFetcher,
+            null,
+            null,
+            $httpOptions
+        );
+        $client = new Client();
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'google_auth']
+        );
+        $before = new BeforeEvent(new Transaction($client, $request));
+        $a->onBefore($before);
+    }
+
     public function testOnlyTouchesWhenAuthConfigScoped()
     {
         $s = new AuthTokenSubscriber($this->mockFetcher);

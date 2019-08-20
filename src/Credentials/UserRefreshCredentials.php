@@ -104,7 +104,9 @@ class UserRefreshCredentials extends CredentialsLoader
     }
 
     /**
-     * @param callable $httpHandler
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      *
      * @return array A set of auth related metadata, containing the following
      * keys:
@@ -114,9 +116,9 @@ class UserRefreshCredentials extends CredentialsLoader
      *   - token_type (string)
      *   - id_token (string)
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $httpOptions = [])
     {
-        return $this->auth->fetchAuthToken($httpHandler);
+        return $this->auth->fetchAuthToken($httpHandler, $httpOptions);
     }
 
     /**

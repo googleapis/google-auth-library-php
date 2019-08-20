@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\tests;
+namespace Google\Auth\Tests;
 
 use Google\Auth\FetchAuthTokenCache;
 
@@ -35,6 +35,41 @@ class FetchAuthTokenCacheTest extends BaseTest
             $this
                 ->getMockBuilder('Psr\Cache\CacheItemPoolInterface')
                 ->getMock();
+    }
+
+    public function testAcceptsHttpOptions()
+    {
+        $cacheKey = 'myKey';
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $this->mockFetcher
+            ->expects($this->once())
+            ->method('fetchAuthToken')
+            ->with(
+                null,
+                $httpOptions
+            )
+            ->willReturn([]);
+        $this->mockFetcher
+            ->expects($this->any())
+            ->method('getCacheKey')
+            ->will($this->returnValue($cacheKey));
+        $this->mockCacheItem
+            ->expects($this->once())
+            ->method('isHit')
+            ->will($this->returnValue(false));
+        $this->mockCache
+            ->expects($this->once())
+            ->method('getItem')
+            ->with($this->equalTo($cacheKey))
+            ->will($this->returnValue($this->mockCacheItem));
+
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher,
+            null,
+            $this->mockCache
+        );
+
+        $cachedFetcher->fetchAuthToken(null, $httpOptions);
     }
 
     public function testUsesCachedAuthToken()
@@ -172,12 +207,13 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals($token, $fetcher->getLastReceivedToken()['access_token']);
     }
 
-    public function testGetClientName()
+    public function testGetClientNameAndAcceptsHttpOptions()
     {
         $name = 'test@example.com';
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
 
         $mockFetcher = $this->prophesize('Google\Auth\SignBlobInterface');
-        $mockFetcher->getClientName(null)
+        $mockFetcher->getClientName(null, $httpOptions)
             ->shouldBeCalled()
             ->willReturn($name);
 
@@ -187,17 +223,18 @@ class FetchAuthTokenCacheTest extends BaseTest
             $this->mockCache
         );
 
-        $this->assertEquals($name, $fetcher->getClientName());
+        $this->assertEquals($name, $fetcher->getClientName(null, $httpOptions));
     }
 
-    public function testSignBlob()
+    public function testSignBlobAndAcceptsHttpOptions()
     {
         $stringToSign = 'foobar';
         $signature = 'helloworld';
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
 
         $mockFetcher = $this->prophesize('Google\Auth\SignBlobInterface');
         $mockFetcher->willImplement('Google\Auth\FetchAuthTokenInterface');
-        $mockFetcher->signBlob($stringToSign, true)
+        $mockFetcher->signBlob($stringToSign, true, null, $httpOptions)
             ->shouldBeCalled()
             ->willReturn($signature);
 
@@ -207,7 +244,15 @@ class FetchAuthTokenCacheTest extends BaseTest
             $this->mockCache
         );
 
-        $this->assertEquals($signature, $fetcher->signBlob($stringToSign, true));
+        $this->assertEquals(
+            $signature,
+            $fetcher->signBlob(
+                $stringToSign,
+                true,
+                null,
+                $httpOptions
+            )
+        );
     }
 
     /**

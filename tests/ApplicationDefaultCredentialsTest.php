@@ -21,9 +21,11 @@ use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\RequestInterface;
 use PHPUnit\Framework\TestCase;
 
-class ADCGetTest extends TestCase
+class ADCGetCredentialsTest extends TestCase
 {
     private $originalHome;
 
@@ -101,6 +103,26 @@ class ADCGetTest extends TestCase
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope', $httpHandler)
         );
+    }
+
+    public function testAcceptsHttpOptions()
+    {
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $called = false;
+        $httpHandler = function (RequestInterface $request, array $options = []) use ($httpOptions, &$called) {
+            $called = true;
+            $this->assertEquals($httpOptions + ['timeout' => 0.5], $options);
+            return new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+        };
+        $credentials = ApplicationDefaultCredentials::getCredentials(
+            'a scope',
+            $httpHandler,
+            null,
+            null,
+            $httpOptions
+        );
+
+        $this->assertTrue($called);
     }
 }
 

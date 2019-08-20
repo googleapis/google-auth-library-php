@@ -103,14 +103,17 @@ class AppIdentityCredentials extends CredentialsLoader implements SignBlobInterf
      * As the AppIdentityService uses protobufs to fetch the access token,
      * the GuzzleHttp\ClientInterface instance passed in will not be used.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     *        Unused by this implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client. Unused by this implementation.
      *
      * @return array A set of auth related metadata, containing the following
      *     keys:
      *         - access_token (string)
      *         - expiration_time (string)
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $httpOptions = [])
     {
         try {
             $this->checkAppEngineContext();
@@ -133,11 +136,18 @@ class AppIdentityCredentials extends CredentialsLoader implements SignBlobInterf
      * @param string $stringToSign The string to sign.
      * @param bool $forceOpenSsl [optional] Does not apply to this credentials
      *        type.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client.
      * @return string The signature, base64-encoded.
      * @throws \Exception If AppEngine SDK or mock is not available.
      */
-    public function signBlob($stringToSign, $forceOpenSsl = false)
-    {
+    public function signBlob(
+        $stringToSign,
+        $forceOpenSsl = false,
+        callable $httpHandler = null,
+        array $httpOptions = []
+    ) {
         $this->checkAppEngineContext();
 
         return base64_encode(AppIdentityService::signForApp($stringToSign)['signature']);
@@ -148,11 +158,14 @@ class AppIdentityCredentials extends CredentialsLoader implements SignBlobInterf
      *
      * Subsequent calls to this method will return a cached value.
      *
-     * @param callable $httpHandler Not used in this implementation.
+     * @param callable $httpHandler A callback which delivers a PSR-7 request.
+     *        Unused by this implementation.
+     * @param array $httpOptions Configuration options provided to the
+     *        underlying HTTP client. Unused by this implementation.
      * @return string
      * @throws \Exception If AppEngine SDK or mock is not available.
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(callable $httpHandler = null, array $httpOptions = [])
     {
         $this->checkAppEngineContext();
 

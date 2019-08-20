@@ -21,9 +21,11 @@ use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7;
-use PHPUnit\Framework\TestCase;
+use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
 use Prophecy\Promise\ReturnPromise;
+use Psr\Http\Message\RequestInterface;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group credentials
@@ -81,6 +83,20 @@ class GCECredentialsTest extends TestCase
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         ]);
         $this->assertTrue(GCECredentials::onGCE($httpHandler));
+    }
+
+    public function testOnGCEAcceptsHttpOptions()
+    {
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $called = false;
+        $httpHandler = function ($request, array $options = []) use ($httpOptions, &$called) {
+            $called = true;
+            $this->assertEquals($httpOptions + ['timeout' => 0.5], $options);
+            return new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+        };
+        GCECredentials::onGce($httpHandler, $httpOptions);
+
+        $this->assertTrue($called);
     }
 
     public function testOnAppEngineFlexIsFalseByDefault()
@@ -188,6 +204,30 @@ class GCECredentialsTest extends TestCase
         ];
     }
 
+    public function testFetchAuthTokenAcceptsHttpOptions()
+    {
+        $creds = new GCECredentials;
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $callCount = 0;
+        $httpHandler = function (RequestInterface $request, array $options = []) use (&$callCount, $httpOptions) {
+            $callCount++;
+
+            if ($callCount === 1) {
+                $this->assertEquals($httpOptions + ['timeout' => 0.5], $options);
+                return new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+
+            $this->assertEquals($httpOptions, $options);
+            return new Response(200, [], Psr7\stream_for('{"expires_in": 0}'));
+        };
+        $creds->fetchAuthToken(
+            $httpHandler,
+            $httpOptions
+        );
+
+        $this->assertEquals(2, $callCount);
+    }
+
     public function testGetLastReceivedTokenIsNullByDefault()
     {
         $creds = new GCECredentials;
@@ -209,6 +249,28 @@ class GCECredentialsTest extends TestCase
 
         // call again to test cached value
         $this->assertEquals($expected, $creds->getClientName($httpHandler));
+    }
+
+    public function testGetClientNameAcceptsHttpOptions()
+    {
+        $creds = new GCECredentials;
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $callCount = 0;
+        $httpHandler = function (RequestInterface $request, array $options = []) use (&$callCount, $httpOptions) {
+            $callCount++;
+
+            if ($callCount === 1) {
+                $this->assertEquals($httpOptions + ['timeout' => 0.5], $options);
+                return new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+
+            $this->assertEquals($httpOptions, $options);
+            return new Response(200, [], Psr7\stream_for('a name'));
+        };
+        $creds = new GCECredentials;
+        $creds->getClientName($httpHandler, $httpOptions);
+
+        $this->assertEquals(2, $callCount);
     }
 
     public function testGetClientNameShouldBeEmptyIfNotOnGCE()
@@ -304,5 +366,38 @@ class GCECredentialsTest extends TestCase
         $creds->fetchAuthToken();
 
         $signature = $creds->signBlob($stringToSign);
+    }
+
+    public function testSignBlobAcceptsHttpOptions()
+    {
+        $creds = new GCECredentials();
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $callCount = 0;
+        $httpHandler = function (RequestInterface $request, array $options = []) use (&$callCount, $httpOptions) {
+            $callCount++;
+
+            switch ($callCount) {
+                case 1:
+                    $this->assertEquals($httpOptions + ['timeout' => 0.5], $options);
+                    return new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+                case 2:
+                    $this->assertEquals($httpOptions, $options);
+                    return new Response(200, [], Psr7\stream_for('a name'));
+                case 3:
+                    $this->assertEquals($httpOptions, $options);
+                    return new Response(200, [], Psr7\stream_for('{"expires_in": 0, "access_token": "abc"}'));
+            }
+
+            $this->assertEquals($httpOptions, $options);
+            return new Response(200, [], Psr7\stream_for('{"signedBlob": "signedData"}'));
+        };
+        $creds->signBlob(
+            'input',
+            false,
+            $httpHandler,
+            $httpOptions
+        );
+
+        $this->assertEquals(4, $callCount);
     }
 }

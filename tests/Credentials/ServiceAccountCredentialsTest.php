@@ -23,6 +23,8 @@ use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\RequestInterface;
 use PHPUnit\Framework\TestCase;
 
 // Creates a standard JSON auth object for testing.
@@ -298,6 +300,34 @@ class SACFetchAuthTokenTest extends TestCase
         $this->assertEquals($testJson, $tokens);
     }
 
+    public function testFetchTokenAcceptsHttpOptions()
+    {
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $testJson = $this->createTestJson();
+        $testJsonText = json_encode($testJson);
+        $scope = ['scope/1', 'scope/2'];
+        $mockOauth2 = $this->getMockBuilder('Google\Auth\OAuth2')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mockOauth2->method('fetchAuthToken')
+            ->with(
+                null,
+                $httpOptions
+            )
+            ->willReturn(['access_token' => 'abc']);
+        $class = new \ReflectionClass(
+            'Google\Auth\Credentials\ServiceAccountCredentials'
+        );
+        $property = $class->getProperty('auth');
+        $property->setAccessible(true);
+        $sa = new ServiceAccountCredentials(
+            $scope,
+            $testJson
+        );
+        $property->setValue($sa, $mockOauth2);
+        $sa->fetchAuthToken(null, $httpOptions);
+    }
+
     public function testUpdateMetadataFunc()
     {
         $testJson = $this->createTestJson();
@@ -325,6 +355,44 @@ class SACFetchAuthTokenTest extends TestCase
         $this->assertEquals(
             $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
             array('Bearer ' . $access_token));
+    }
+
+    public function testUpdateMetadataFuncAcceptsHttpOptions()
+    {
+        $testJson = $this->createTestJson();
+        $scope = ['scope/1', 'scope/2'];
+        $httpOptions = ['proxy' => 'xxx.xxx.xxx.xxx'];
+        $mockOauth2 = $this->getMockBuilder('Google\Auth\OAuth2')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mockOauth2
+            ->expects($this->once())
+            ->method('getScope')
+            ->willReturn('a scope');
+        $mockOauth2
+            ->expects($this->once())
+            ->method('fetchAuthToken')
+            ->with(
+                null,
+                $httpOptions
+            )
+            ->willReturn(['access_token' => 'abc']);
+        $class = new \ReflectionClass(
+            'Google\Auth\Credentials\ServiceAccountCredentials'
+        );
+        $property = $class->getProperty('auth');
+        $property->setAccessible(true);
+        $sa = new ServiceAccountCredentials(
+            $scope,
+            $testJson
+        );
+        $property->setValue($sa, $mockOauth2);
+        $sa->updateMetadata(
+            ['foo' => 'bar'],
+            null,
+            null,
+            $httpOptions
+        );
     }
 }
 
