@@ -69,6 +69,9 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
         if (empty($path)) {
             return;
         }
+        if(!is_null(json_decode($path, true))) {
+            return json_decode($path, true);
+        }
         if (!file_exists($path)) {
             $cause = 'file ' . $path . ' does not exist';
             throw new \DomainException(self::unableToReadEnv($cause));

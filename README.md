@@ -61,6 +61,12 @@ Once downloaded, store the path to this file in the
 putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 ```
 
+or put the contents of the file directly into the environment variable
+
+```php
+putenv('GOOGLE_APPLICATION_CREDENTIALS={"private_key_id": "key123","private_key": "privatekey","client_email": "hello@youarecool.com","client_id": "client123","type": "service_account"}');
+```
+
 > PHP's `putenv` function is just one way to set an environment variable.
 > Consider using `.htaccess` or apache configuration files as well.
 

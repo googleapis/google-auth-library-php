@@ -195,6 +195,13 @@ class SACFromEnvTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
     }
+
+    public function testSucceedIfEnvIsJsonString()
+    {
+        $keyFile = file_get_contents(__DIR__ . '/../fixtures' . '/private.json');
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
+    }
 }
 
 class SACFromWellKnownFileTest extends TestCase
