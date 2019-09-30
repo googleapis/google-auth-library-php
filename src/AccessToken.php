@@ -57,6 +57,12 @@ class AccessToken
         callable $httpHandler = null,
         CacheItemPoolInterface $cache = null
     ) {
+        // @codeCoverageIgnoreStart
+        if (!class_exists('phpseclib\Crypt\RSA')) {
+            throw new \RuntimeException('Please require phpseclib/phpseclib v2 to use this utility.');
+        }
+        // @codeCoverageIgnoreEnd
+
         $this->httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         $this->cache = $cache ?: new MemoryCacheItemPool();
@@ -78,13 +84,14 @@ class AccessToken
      *        from which to retrieve certificates, if not cached. This value
      *        should only be provided in limited circumstances in which you are
      *        sure of the behavior.
+     * @param array $options [optional] Configuration options.
      * @return array|bool the token payload, if successful, or false if not.
      */
-    public function verify($token, $audience = null, $certsLocation = null)
+    public function verify($token, $audience = null, $certsLocation = null, array $options = [])
     {
         // Check signature against each available cert.
         // allow the loop to complete unless a known bad result is encountered.
-        $certs = $this->getFederatedSignOnCerts($certsLocation);
+        $certs = $this->getFederatedSignOnCerts($certsLocation, $options);
         foreach ($certs as $cert) {
             $rsa = new RSA();
             $rsa->loadKey([
@@ -120,9 +127,14 @@ class AccessToken
                 return (array) $payload;
             } catch (ExpiredException $e) {
                 return false;
+            } catch (\ExpiredException $e) {
+                // (firebase/php-jwt 2)
+                return false;
             } catch (SignatureInvalidException $e) {
                 // continue
-            } catch (\DomainException $e) {
+            } catch (\SignatureInvalidException $e) {
+                // continue (firebase/php-jwt 2)
+            }catch (\DomainException $e) {
                 // continue
             }
         }
@@ -135,9 +147,10 @@ class AccessToken
      * token, if a token isn't provided.
      *
      * @param string|array $token The token (access token or a refresh token) that should be revoked.
+     * @param array $options [optional] Configuration options.
      * @return boolean Returns True if the revocation was successful, otherwise False.
      */
-    public function revoke($token)
+    public function revoke($token, array $options = [])
     {
         if (is_array($token)) {
             if (isset($token['refresh_token'])) {
@@ -155,7 +168,7 @@ class AccessToken
 
         $httpHandler = $this->httpHandler;
 
-        $response = $httpHandler($request);
+        $response = $httpHandler($request, $options);
 
         return $response->getStatusCode() == 200;
     }
@@ -167,9 +180,10 @@ class AccessToken
      *
      * @param string $location [optional] The location from which to retrieve
      *        certs.
+     * @param array $options [optional] Configuration options.
      * @return array
      */
-    private function getFederatedSignOnCerts($location = null)
+    private function getFederatedSignOnCerts($location = null, array $options = [])
     {
         $cacheItem = $this->cache->getItem('federated_signon_certs_v3');
         $certs = $cacheItem ? $cacheItem->get() : null;
@@ -177,7 +191,8 @@ class AccessToken
         $gotNewCerts = false;
         if (!$certs) {
             $certs = $this->retrieveCertsFromLocation(
-                $location ?: self::FEDERATED_SIGNON_CERT_URL
+                $location ?: self::FEDERATED_SIGNON_CERT_URL,
+                $options
             );
 
             $gotNewCerts = true;
@@ -204,10 +219,11 @@ class AccessToken
      * Retrieve and cache a certificates file.
      *
      * @param $url string location
+     * @param array $options [optional] Configuration options.
      * @throws \RuntimeException
      * @return array certificates
      */
-    private function retrieveCertsFromLocation($url)
+    private function retrieveCertsFromLocation($url, array $options = [])
     {
         // If we're retrieving a local file, just grab it.
         if (strpos($url, 'http') !== 0) {
@@ -222,7 +238,7 @@ class AccessToken
         }
 
         $httpHandler = $this->httpHandler;
-        $response = $httpHandler(new Request('GET', $url));
+        $response = $httpHandler(new Request('GET', $url), $options);
 
         if ($response->getStatusCode() == 200) {
             return json_decode((string) $response->getBody(), true);
@@ -239,10 +255,14 @@ class AccessToken
      */
     private function configureJwtService()
     {
-        if (property_exists('Firebase\JWT\JWT', 'leeway') && JWT::$leeway < 1) {
+        $class = class_exists('Firebase\JWT\JWT')
+            ? 'Firebase\JWT\JWT'
+            : '\JWT';
+
+        if (property_exists($class, 'leeway') && $class::$leeway < 1) {
             // Ensures JWT leeway is at least 1
             // @see https://github.com/google/google-api-php-client/issues/827
-            JWT::$leeway = 1;
+            $class::$leeway = 1;
         }
     }
 
@@ -276,6 +296,9 @@ class AccessToken
      */
     protected function callJwtStatic($method, array $args = [])
     {
-        return call_user_func_array(['Firebase\JWT\JWT', $method], $args);
+        $class = class_exists('Firebase\JWT\JWT')
+            ? 'Firebase\JWT\JWT'
+            : 'JWT';
+        return call_user_func_array([$class, $method], $args);
     }
 }

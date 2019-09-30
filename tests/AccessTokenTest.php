@@ -135,14 +135,22 @@ class AccessTokenTest extends TestCase
                 false,
                 null,
                 function () {
-                    throw new ExpiredException('expired!');
+                    if (class_exists('Firebase\JWT\ExpiredException')) {
+                        throw new ExpiredException('expired!');
+                    } else {
+                        throw new \ExpiredException('expired');
+                    }
                 }
             ], [
                 $this->payload,
                 false,
                 null,
                 function () {
-                    throw new SignatureInvalidException('expired!');
+                    if (class_exists('Firebase\JWT\SignatureInvalidException')) {
+                        throw new SignatureInvalidException('invalid!');
+                    } else {
+                        throw new \SignatureInvalidException('invalid');
+                    }
                 }
             ], [
                 $this->payload,
