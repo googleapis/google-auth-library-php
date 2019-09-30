@@ -99,7 +99,9 @@ class AccessTokenTest extends TestCase
             return (object) $payload;
         };
 
-        $res = $token->verify($this->token, $audience);
+        $res = $token->verify($this->token, [
+            'audience' => $audience
+        ]);
         $this->assertEquals($expected, $res);
     }
 
@@ -197,7 +199,9 @@ class AccessTokenTest extends TestCase
             return (object) $this->payload;
         };
 
-        $token->verify($this->token, null, $certsLocation);
+        $token->verify($this->token, [
+            'certsLocation' => $certsLocation
+        ]);
     }
 
     /**
@@ -223,7 +227,9 @@ class AccessTokenTest extends TestCase
             $this->jwt->reveal()
         );
 
-        $token->verify($this->token, null, $certsLocation);
+        $token->verify($this->token, [
+            'certsLocation' => $certsLocation
+        ]);
     }
 
     /**
@@ -251,7 +257,9 @@ class AccessTokenTest extends TestCase
             $this->jwt->reveal()
         );
 
-        $token->verify($this->token, null, $certsLocation);
+        $token->verify($this->token, [
+            'certsLocation' => $certsLocation
+        ]);
     }
 
     public function testRetrieveCertsFromLocationRemote()

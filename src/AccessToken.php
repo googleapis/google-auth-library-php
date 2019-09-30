@@ -79,19 +79,27 @@ class AccessToken
      * accepted.  By default, the id token must have been issued to this OAuth2 client.
      *
      * @param string $token The JSON Web Token to be verified.
-     * @param string $audience [optional] The indended recipient of the token.
-     * @param string $certsLocation [optional] The location (remote or local)
-     *        from which to retrieve certificates, if not cached. This value
-     *        should only be provided in limited circumstances in which you are
-     *        sure of the behavior.
-     * @param array $options [optional] Configuration options.
+     * @param array $options [optional] {
+     *     Configuration options.
+     *
+     *     @type string $audience The indended recipient of the token.
+     *     @type string $certsLocation The location (remote or local) from which
+     *        to retrieve certificates, if not cached. This value should only be
+     *        provided in limited circumstances in which you are sure of the
+     *        behavior.
+     * }
      * @return array|bool the token payload, if successful, or false if not.
      */
-    public function verify($token, $audience = null, $certsLocation = null, array $options = [])
+    public function verify($token, array $options = [])
     {
+        $options += [
+            'audience' => null,
+            'certsLocation' => self::FEDERATED_SIGNON_CERT_URL,
+        ];
+
         // Check signature against each available cert.
         // allow the loop to complete unless a known bad result is encountered.
-        $certs = $this->getFederatedSignOnCerts($certsLocation, $options);
+        $certs = $this->getFederatedSignOnCerts($options['certsLocation'], $options);
         foreach ($certs as $cert) {
             $rsa = new RSA();
             $rsa->loadKey([
@@ -112,7 +120,7 @@ class AccessToken
                 ]);
 
                 if (property_exists($payload, 'aud')) {
-                    if ($audience && $payload->aud != $audience) {
+                    if ($options['audience'] && $payload->aud != $options['audience']) {
                         return false;
                     }
                 }
@@ -178,22 +186,18 @@ class AccessToken
      * Returns certs as array structure, where keys are key ids, and values
      * are PEM encoded certificates.
      *
-     * @param string $location [optional] The location from which to retrieve
-     *        certs.
+     * @param string $location The location from which to retrieve certs.
      * @param array $options [optional] Configuration options.
      * @return array
      */
-    private function getFederatedSignOnCerts($location = null, array $options = [])
+    private function getFederatedSignOnCerts($location, array $options = [])
     {
         $cacheItem = $this->cache->getItem('federated_signon_certs_v3');
         $certs = $cacheItem ? $cacheItem->get() : null;
 
         $gotNewCerts = false;
         if (!$certs) {
-            $certs = $this->retrieveCertsFromLocation(
-                $location ?: self::FEDERATED_SIGNON_CERT_URL,
-                $options
-            );
+            $certs = $this->retrieveCertsFromLocation($location, $options);
 
             $gotNewCerts = true;
         }
