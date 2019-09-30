@@ -134,7 +134,7 @@ class AccessToken
                 // continue
             } catch (\SignatureInvalidException $e) {
                 // continue (firebase/php-jwt 2)
-            }catch (\DomainException $e) {
+            } catch (\DomainException $e) {
                 // continue
             }
         }
