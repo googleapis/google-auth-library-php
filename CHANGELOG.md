@@ -1,3 +1,10 @@
+## 1.6.0 (10/01/2019)
+
+* [feat] Add utility for verifying and revoking access tokens. (#243)
+* [docs] Fix README console terminology. (#242)
+* [feat] Support custom scopes with GCECredentials. (#239)
+* [fix] Fix phpseclib existence check. (#237)
+
 ## 1.5.2 (07/22/2019)
 
 * [fix] Move loadItems call out of `SysVCacheItemPool` constructor. (#229)
