@@ -30,7 +30,9 @@ use phpseclib\Math\BigInteger;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
- * Wrapper around Google Access Tokens which provides convenience functions
+ * Wrapper around Google Access Tokens which provides convenience functions.
+ *
+ * @experimental
  */
 class AccessToken
 {
@@ -89,17 +91,24 @@ class AccessToken
      *        behavior.
      * }
      * @return array|bool the token payload, if successful, or false if not.
+     * @throws \InvalidArgumentException If certs could not be retrieved from a local file.
+     * @throws \InvalidArgumentException If received certs are in an invalid format.
+     * @throws \RuntimeException If certs could not be retrieved from a remote location.
      */
     public function verify($token, array $options = [])
     {
-        $options += [
-            'audience' => null,
-            'certsLocation' => self::FEDERATED_SIGNON_CERT_URL,
-        ];
+        $audience = isset($options['audience'])
+            ? $options['audience']
+            : null;
+        $certsLocation = isset($options['certsLocation'])
+            ? $options['certsLocation']
+            : self::FEDERATED_SIGNON_CERT_URL;
+
+        unset($options['audience'], $options['certsLocation']);
 
         // Check signature against each available cert.
         // allow the loop to complete unless a known bad result is encountered.
-        $certs = $this->getFederatedSignOnCerts($options['certsLocation'], $options);
+        $certs = $this->getFederatedSignOnCerts($certsLocation, $options);
         foreach ($certs as $cert) {
             $rsa = new RSA();
             $rsa->loadKey([
@@ -120,14 +129,14 @@ class AccessToken
                 ]);
 
                 if (property_exists($payload, 'aud')) {
-                    if ($options['audience'] && $payload->aud != $options['audience']) {
+                    if ($audience && $payload->aud != $audience) {
                         return false;
                     }
                 }
 
                 // support HTTP and HTTPS issuers
                 // @see https://developers.google.com/identity/sign-in/web/backend-auth
-                $issuers = array(self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS);
+                $issuers = [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
                 if (!isset($payload->iss) || !in_array($payload->iss, $issuers)) {
                     return false;
                 }
@@ -189,6 +198,7 @@ class AccessToken
      * @param string $location The location from which to retrieve certs.
      * @param array $options [optional] Configuration options.
      * @return array
+     * @throws \InvalidArgumentException If received certs are in an invalid format.
      */
     private function getFederatedSignOnCerts($location, array $options = [])
     {
@@ -208,7 +218,7 @@ class AccessToken
             );
         }
 
-        // Push cacheing off until after verifying certs are in a valid format.
+        // Push caching off until after verifying certs are in a valid format.
         // Don't want to cache bad data.
         if ($gotNewCerts) {
             $cacheItem->expiresAt(new \DateTime('+1 hour'));
@@ -226,6 +236,8 @@ class AccessToken
      * @param array $options [optional] Configuration options.
      * @throws \RuntimeException
      * @return array certificates
+     * @throws \InvalidArgumentException If certs could not be retrieved from a local file.
+     * @throws \RuntimeException If certs could not be retrieved from a remote location.
      */
     private function retrieveCertsFromLocation($url, array $options = [])
     {
