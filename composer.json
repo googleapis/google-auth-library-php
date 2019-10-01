@@ -21,7 +21,7 @@
     "phpseclib/phpseclib": "^2"
   },
   "suggest": {
-    "phpseclib/phpseclib": "May be used in place of OpenSSL for signing strings. Please require version ^2."
+    "phpseclib/phpseclib": "May be used in place of OpenSSL for signing strings or for token management. Please require version ^2."
   },
   "autoload": {
     "psr-4": {
