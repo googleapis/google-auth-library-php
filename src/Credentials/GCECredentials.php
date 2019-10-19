@@ -21,6 +21,7 @@ use Google\Auth\CredentialsLoader;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Iam;
+use Google\Auth\FetchIdTokenInterface;
 use Google\Auth\SignBlobInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
@@ -51,7 +52,7 @@ use GuzzleHttp\Psr7\Request;
  *
  *   $res = $client->get('myproject/taskqueues/myqueue');
  */
-class GCECredentials extends CredentialsLoader implements SignBlobInterface
+class GCECredentials extends CredentialsLoader implements SignBlobInterface, FetchIdTokenInterface
 {
     const cacheKey = 'GOOGLE_AUTH_PHP_GCE';
 
@@ -67,6 +68,11 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      * The metadata path of the default token.
      */
     const TOKEN_URI_PATH = 'v1/instance/service-accounts/default/token';
+
+    /**
+     * The metadata path of the default id token.
+     */
+    const ID_TOKEN_URI_PATH = 'v1/instance/service-accounts/default/identity';
 
     /**
      * The metadata path of the client ID.
@@ -126,11 +132,18 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     private $tokenUri;
 
     /**
+     * @var string
+     */
+    private $idTokenUri;
+
+    /**
      * @param Iam $iam [optional] An IAM instance.
      * @param string|array $scope [optional] the scope of the access request,
      *        expressed either as an array or as a space-delimited string.
+     * @param string $targetAudience [optional] the target audience for
+     *        the ID token.
      */
-    public function __construct(Iam $iam = null, $scope = null)
+    public function __construct(Iam $iam = null, $scope = null, $targetAudience = null)
     {
         $this->iam = $iam;
 
@@ -146,6 +159,13 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
         }
 
         $this->tokenUri = $tokenUri;
+
+        $idTokenUri = self::getIdTokenUri();
+        if ($targetAudience) {
+            $idTokenUri . '?audience=' . $targetAudience;
+        }
+
+        $this->idTokenUri = $idTokenUri;
     }
 
     /**
@@ -158,6 +178,18 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
 
         return $base . self::TOKEN_URI_PATH;
+    }
+
+    /**
+     * The full uri for accessing the default ID token.
+     *
+     * @return string
+     */
+    public static function getIdTokenUri()
+    {
+        $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
+
+        return $base . self::ID_TOKEN_URI_PATH;
     }
 
     /**
@@ -265,6 +297,34 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
         $this->lastReceivedToken['expires_at'] = time() + $json['expires_in'];
 
         return $json;
+    }
+
+    /**
+     * Implements FetchIdTokenInterface#fetchIdToken.
+     *
+     * Fetches the ID tokens from the GCE metadata host if it is available.
+     * If $httpHandler is not specified a the default HttpHandler is used.
+     *
+     * @param callable $httpHandler callback which delivers psr7 request
+     *
+     * @return string An ID token.
+     *
+     * @throws \Exception
+     */
+    public function fetchIdToken(callable $httpHandler = null)
+    {
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+
+        if (!$this->hasCheckedOnGce) {
+            $this->isOnGce = self::onGce($httpHandler);
+            $this->hasCheckedOnGce = true;
+        }
+        if (!$this->isOnGce) {
+            return '';  // return empty string
+        }
+
+        return $this->getFromMetadata($httpHandler, $this->idTokenUri);
     }
 
     /**

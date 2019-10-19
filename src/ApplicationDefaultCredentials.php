@@ -173,6 +173,49 @@ class ApplicationDefaultCredentials
         return $creds;
     }
 
+    /**
+     * Obtains the default FetchIdTokenInterface implementation to use
+     * in this environment.
+     *
+     * @param string $targetAudience The target audience for the ID token.
+     * @param callable $httpHandler callback which delivers psr7 request
+     *
+     * @return CredentialsLoader
+     *
+     * @throws DomainException if no implementation can be obtained.
+     */
+    public static function getIdTokenCredential(
+        $targetAudience,
+        callable $httpHandler = null
+    ) {
+        $creds = null;
+        $jsonKey = CredentialsLoader::fromEnv()
+            ?: CredentialsLoader::fromWellKnownFile();
+
+        if (!$httpHandler) {
+            if (!($client = HttpClientCache::getHttpClient())) {
+                $client = new Client();
+                HttpClientCache::setHttpClient($client);
+            }
+
+            $httpHandler = HttpHandlerFactory::build($client);
+        }
+
+        if (!is_null($jsonKey)) {
+            $creds = CredentialsLoader::makeCredentials(null, $jsonKey, $targetAudience);
+        } elseif (GCECredentials::onGce($httpHandler)) {
+            $creds = new GCECredentials(null, null, $targetAudience);
+        }
+
+        if (is_null($creds)) {
+            throw new \DomainException(self::notFound());
+        }
+        if (!is_null($cache)) {
+            $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
+        }
+        return $creds;
+    }
+
     private static function notFound()
     {
         $msg = 'Could not load the default credentials. Browse to ';

@@ -131,6 +131,32 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
     }
 
     /**
+     * Create a new Credentials instance.
+     *
+     * @param $targetAudience The target audience for the ID token.
+     * @param array $jsonKey the JSON credentials.
+     *
+     * @return ServiceAccountCredentials
+     */
+    public static function makeIdTokenCredentials($targetAudience, array $jsonKey)
+    {
+        if (!array_key_exists('type', $jsonKey)) {
+            throw new \InvalidArgumentException('json key is missing the type field');
+        }
+
+        if ($jsonKey['type'] == 'authorized_user') {
+            throw new \InvalidArgumentException(
+                'credentials must be of type service_account to fetch ID tokens');
+        }
+
+        if ($jsonKey['type'] == 'service_account') {
+            return new ServiceAccountCredentials(null, $jsonKey, $targetAudience);
+        }
+
+        throw new \InvalidArgumentException('invalid value in the type field');
+    }
+
+    /**
      * Create an authorized HTTP Client from an instance of FetchAuthTokenInterface.
      *
      * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token

@@ -33,7 +33,7 @@ use Psr\Http\Message\UriInterface;
  * - service account authorization
  * - authorization where a user already has an access token
  */
-class OAuth2 implements FetchAuthTokenInterface
+class OAuth2 implements FetchAuthTokenInterface, FetchIdTokenInterface
 {
     const DEFAULT_EXPIRY_SECONDS = 3600; // 1 hour
     const DEFAULT_SKEW_SECONDS = 60; // 1 minute
@@ -504,6 +504,36 @@ class OAuth2 implements FetchAuthTokenInterface
         $this->updateToken($credentials);
 
         return $credentials;
+    }
+
+    /**
+     * Fetches the auth tokens based on the current state.
+     *
+     * @param callable $httpHandler callback which delivers psr7 request
+     *
+     * @return array the response
+     */
+    public function fetchIdToken(callable $httpHandler = null)
+    {
+        if (is_null($httpHandler)) {
+            $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+        }
+
+        if ($this->scope) {
+            throw new InvalidArgumentException(
+                'Scopes must not be set when fetching an ID token');
+        }
+
+        if (empty($this->additionalClaims['target_audience'])) {
+            throw new InvalidArgumentException(
+                'target_audience must be set in addtionalClaims when fetching an ID token');
+        }
+
+        $response = $httpHandler($this->generateCredentialsRequest());
+        $credentials = $this->parseTokenResponse($response);
+        $this->updateToken($credentials);
+
+        return $this->getIdToken();
     }
 
     /**
