@@ -69,6 +69,11 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     const TOKEN_URI_PATH = 'v1/instance/service-accounts/default/token';
 
     /**
+     * The metadata path of the default id token.
+     */
+    const ID_TOKEN_URI_PATH = 'v1/instance/service-accounts/default/identity';
+
+    /**
      * The metadata path of the client ID.
      */
     const CLIENT_ID_URI_PATH = 'v1/instance/service-accounts/default/email';
@@ -126,14 +131,27 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     private $tokenUri;
 
     /**
+     * @var int
+     */
+    private $tokenType;
+
+    /**
      * @param Iam $iam [optional] An IAM instance.
      * @param string|array $scope [optional] the scope of the access request,
      *        expressed either as an array or as a space-delimited string.
+     * @param string $targetAudience [optional] the target audience for
+     *        the ID token.
      */
-    public function __construct(Iam $iam = null, $scope = null)
+    public function __construct(Iam $iam = null, $scope = null, $targetAudience = null)
     {
         $this->iam = $iam;
 
+        if ($scope && $targetAudience) {
+            throw new InvalidArgumentException(
+                'Scope and targetAudience cannot both be supplied');
+        }
+
+        $tokenType = self::TOKEN_TYPE_ACCESS_TOKEN;
         $tokenUri = self::getTokenUri();
         if ($scope) {
             if (is_string($scope)) {
@@ -143,9 +161,16 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             $scope = implode(',', $scope);
 
             $tokenUri = $tokenUri . '?scopes='. $scope;
+        } elseif ($targetAudience) {
+            $tokenUri = self::getIdTokenUri();
+            if ($targetAudience) {
+                $tokenUri . '?audience=' . $targetAudience;
+            }
+            $tokenType = self::TOKEN_TYPE_ID_TOKEN;
         }
 
         $this->tokenUri = $tokenUri;
+        $this->tokenType = $tokenType;
     }
 
     /**
@@ -158,6 +183,18 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
 
         return $base . self::TOKEN_URI_PATH;
+    }
+
+    /**
+     * The full uri for accessing the default ID token.
+     *
+     * @return string
+     */
+    public static function getIdTokenUri()
+    {
+        $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
+
+        return $base . self::ID_TOKEN_URI_PATH;
     }
 
     /**
@@ -234,11 +271,14 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      *
      * @param callable $httpHandler callback which delivers psr7 request
      *
-     * @return array A set of auth related metadata, containing the following
-     * keys:
+     * @return array A set of auth related metadata, based on the token type.
+     *
+     * Access tokens have the following keys:
      *   - access_token (string)
      *   - expires_in (int)
      *   - token_type (string)
+     * ID tokens have the following keys:
+     *   - id_token (string)
      *
      * @throws \Exception
      */
@@ -255,8 +295,13 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             return array();  // return an empty array with no access token
         }
 
-        $json = $this->getFromMetadata($httpHandler, $this->tokenUri);
-        if (null === $json = json_decode($json, true)) {
+        $response = $this->getFromMetadata($httpHandler, $this->tokenUri);
+
+        if ($this->tokenType == self::TOKEN_TYPE_ID_TOKEN) {
+            return ['id_token' => $response];
+        }
+
+        if (null === $json = json_decode($response, true)) {
             throw new \Exception('Invalid JSON response');
         }
 

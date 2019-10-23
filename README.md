@@ -123,6 +123,38 @@ $subscriber = ApplicationDefaultCredentials::getSubscriber($scopes);
 $client->getEmitter()->attach($subscriber);
 
 ```
+#### Call using an ID Token
+
+```php
+use Google\Auth\ApplicationDefaultCredentials;
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+
+// specify the path to your application credentials
+putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+
+// Provide the target audience, for example the Client ID associated with an IAP
+// application
+$targetAudience = 'IAP_CLIENT_ID.apps.googleusercontent.com';
+
+// create middleware
+$middleware = ApplicationDefaultCredentials::getMiddleware(null, null, null, null, $targetAudience);
+$stack = HandlerStack::create();
+$stack->push($middleware);
+
+// create the HTTP client
+$client = new Client([
+  'handler' => $stack,
+  'base_uri' => 'https://IAP_PROJECT_ID.googleapis.com',
+  'auth' => 'google_id_token'
+]);
+
+// make the request
+$response = $client->get('/');
+
+// show the result!
+print_r((string) $response->getBody());
+```
 
 ## License
 

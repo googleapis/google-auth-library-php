@@ -113,9 +113,16 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        CacheItemPoolInterface $cache = null,
+        $targetAudience = null
+
     ) {
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
+        if ($scope && $targetAudience) {
+            throw new InvalidArgumentException(
+                'Scope and targetAudience cannot both be supplied');
+        }
+
+        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $targetAudience);
 
         return new AuthTokenMiddleware($creds, $httpHandler);
     }
@@ -141,8 +148,14 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        CacheItemPoolInterface $cache = null,
+        $targetAudience = null
     ) {
+        if ($scope && $targetAudience) {
+            throw new InvalidArgumentException(
+                'Scope and targetAudience cannot both be supplied');
+        }
+
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
             ?: CredentialsLoader::fromWellKnownFile();
@@ -157,11 +170,11 @@ class ApplicationDefaultCredentials
         }
 
         if (!is_null($jsonKey)) {
-            $creds = CredentialsLoader::makeCredentials($scope, $jsonKey);
-        } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
+            $creds = CredentialsLoader::makeCredentials($scope, $jsonKey, $targetAudience);
+        } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible() && is_null($targetAudience)) {
             $creds = new AppIdentityCredentials($scope);
         } elseif (GCECredentials::onGce($httpHandler)) {
-            $creds = new GCECredentials(null, $scope);
+            $creds = new GCECredentials(null, $scope, $targetAudience);
         }
 
         if (is_null($creds)) {
