@@ -1,3 +1,7 @@
+## 1.6.1 (10/29/2019)
+
+* [fix] Handle DST correctly for cache item expirations. (#246)
+
 ## 1.6.0 (10/01/2019)
 
 * [feat] Add utility for verifying and revoking access tokens. (#243)
