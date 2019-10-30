@@ -124,7 +124,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
         }
 
         if ($jsonKey['type'] == 'service_account') {
-            return new ServiceAccountCredentials($scope, $jsonKey, $targetAudience);
+            return new ServiceAccountCredentials($scope, $jsonKey, null, $targetAudience);
         }
 
         if ($jsonKey['type'] == 'authorized_user') {
