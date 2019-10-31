@@ -163,9 +163,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             $tokenUri = $tokenUri . '?scopes='. $scope;
         } elseif ($targetAudience) {
             $tokenUri = self::getIdTokenUri();
-            if ($targetAudience) {
-                $tokenUri . '?audience=' . $targetAudience;
-            }
+            $tokenUri .= '?audience=' . $targetAudience;
             $tokenType = self::TOKEN_TYPE_ID_TOKEN;
         }
 

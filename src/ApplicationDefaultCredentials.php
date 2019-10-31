@@ -18,6 +18,7 @@
 namespace Google\Auth;
 
 use DomainException;
+use InvalidArgumentException;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;

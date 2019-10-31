@@ -41,6 +41,20 @@ class ADCGetTest extends TestCase
     }
 
     /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testFailsIfBothScopeAndTargetAudienceAreSupplied()
+    {
+        ApplicationDefaultCredentials::getCredentials(
+            'a scope',
+            null,
+            null,
+            null,
+            'a target audience'
+        );
+    }
+
+    /**
      * @expectedException DomainException
      */
     public function testIsFailsEnvSpecifiesNonExistentFile()
@@ -200,6 +214,117 @@ class ADCGetMiddlewareTest extends TestCase
     }
 }
 
+class ADCGetCredentialsWithTargetAudienceTest extends TestCase
+{
+    private $originalHome;
+
+    protected function setUp()
+    {
+        $this->originalHome = getenv('HOME');
+    }
+
+    protected function tearDown()
+    {
+        if ($this->originalHome != getenv('HOME')) {
+            putenv('HOME=' . $this->originalHome);
+        }
+        putenv(ServiceAccountCredentials::ENV_VAR);  // removes it from
+    }
+
+    /**
+     * @expectedException DomainException
+     */
+    public function testIsFailsEnvSpecifiesNonExistentFile()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'a target audience');
+    }
+
+    public function testLoadsOKIfEnvSpecifiedIsValid()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'a target audience');
+    }
+
+    public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures');
+        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'a target audience');
+    }
+
+    /**
+     * @expectedException DomainException
+     */
+    public function testFailsIfNotOnGceAndNoDefaultFileFound()
+    {
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+
+        // simulate not being GCE and retry attempts by returning multiple 500s
+        $httpHandler = getHandler([
+            buildResponse(500),
+            buildResponse(500),
+            buildResponse(500)
+        ]);
+
+        ApplicationDefaultCredentials::getCredentials(null, $httpHandler, null, null, 'a target audience');
+    }
+
+    public function testWithCacheOptions()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+
+        $httpHandler = getHandler([
+            buildResponse(200),
+        ]);
+
+        $cacheOptions = [];
+        $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+
+        $credentials = ApplicationDefaultCredentials::getCredentials(
+            null,
+            $httpHandler,
+            $cacheOptions,
+            $cachePool->reveal(),
+            'a target audience'
+        );
+
+        $this->assertInstanceOf('Google\Auth\FetchAuthTokenCache', $credentials);
+    }
+
+    public function testSuccedsIfNoDefaultFilesButIsOnGCE()
+    {
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+        $wantedTokens = [
+            'access_token' => '1/abdef1234567890',
+            'expires_in' => '57',
+            'token_type' => 'Bearer',
+        ];
+        $jsonTokens = json_encode($wantedTokens);
+
+        // simulate the response from GCE.
+        $httpHandler = getHandler([
+            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+        ]);
+
+        $credentials = ApplicationDefaultCredentials::getCredentials(
+            null,
+            $httpHandler,
+            null,
+            null,
+            'a target audience'
+        );
+
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\GCECredentials',
+            $credentials
+        );
+    }
+}
+
 class ADCGetCredentialsAppEngineTest extends BaseTest
 {
     private $originalHome;
@@ -243,6 +368,41 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
         $this->assertInstanceOf(
             'Google\Auth\Credentials\GCECredentials',
             ApplicationDefaultCredentials::getCredentials(null, $httpHandler)
+        );
+    }
+
+    /**
+     * @expectedException DomainException
+     */
+    public function testAppEngineStandardIdToken()
+    {
+        $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
+        ApplicationDefaultCredentials::getCredentials(
+            null,
+            null,
+            null,
+            null,
+            'a target audience'
+        );
+    }
+
+    public function testAppEngineFlexibleIdToken()
+    {
+        $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
+        putenv('GAE_INSTANCE=aef-default-20180313t154438');
+        $httpHandler = getHandler([
+            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+        ]);
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            null,
+            $httpHandler,
+            null,
+            null,
+            'a target audience'
+        );
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\GCECredentials',
+            $creds
         );
     }
 }
