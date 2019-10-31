@@ -377,12 +377,21 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
     public function testAppEngineStandardIdToken()
     {
         $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
-        ApplicationDefaultCredentials::getCredentials(
+        $httpHandler = getHandler([
+            buildResponse(503),
+            buildResponse(503),
+            buildResponse(503),
+        ]);
+        $credentials = ApplicationDefaultCredentials::getCredentials(
             null,
-            null,
+            $httpHandler,
             null,
             null,
             'a target audience'
+        );
+        $this->assertNotInstanceOf(
+            'Google\Auth\Credentials\AppIdentityCredentials',
+            $credentials
         );
     }
 

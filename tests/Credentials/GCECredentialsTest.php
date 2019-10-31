@@ -151,7 +151,7 @@ class GCECredentialsTest extends TestCase
         $httpHandler = function ($request) use (&$timesCalled, $expectedToken) {
             $timesCalled++;
             if ($timesCalled == 1) {
-                return buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
             }
             $this->assertEquals(
                 '/computeMetadata/' . GCECredentials::ID_TOKEN_URI_PATH,
@@ -161,7 +161,7 @@ class GCECredentialsTest extends TestCase
                 'audience=a+target+audience',
                 $request->getUri()->getQuery()
             );
-            return buildResponse(200, [], Psr7\stream_for($expectedToken['id_token']));
+            return new Psr7\Response(200, [], Psr7\stream_for($expectedToken['id_token']));
 
         };
         $g = new GCECredentials(null, null, 'a+target+audience');

@@ -341,7 +341,7 @@ class SACFetchAuthTokenTest extends TestCase
             $this->assertArrayHasKey('target_audience', $jwtParams);
             $this->assertEquals('a target audience', $jwtParams['target_audience']);
 
-            return buildResponse(200, [], Psr7\stream_for(json_encode($expectedToken)));
+            return new Psr7\Response(200, [], Psr7\stream_for(json_encode($expectedToken)));
 
         };
         $sa = new ServiceAccountCredentials(null, $testJson, null, 'a target audience');
