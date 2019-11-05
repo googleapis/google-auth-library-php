@@ -861,7 +861,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
     }
 
-    public function testReturnsPayloadWhenNoKeyGiven()
+    public function testSkipsJwtVerificationWithNoKey()
     {
         $testConfig = $this->verifyIdTokenMinimal;
         $now = time();
@@ -884,6 +884,34 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
     }
 
+    public function testRunsJwtVerificationWithKey()
+    {
+        $testConfig = $this->verifyIdTokenMinimal;
+        $now = time();
+        $origIdToken = [
+            'aud' => $testConfig['audience'],
+            'iss' => $testConfig['issuer'],
+            'exp' => $now + 65, // arbitrary
+            'iat' => $now,
+        ];
+        $o = new OAuth2MockJwt($testConfig);
+        $alg = 'RS256';
+        $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, $alg);
+        $o->setIdToken($jwtIdToken);
+
+        $called = false;
+        $o->callable = function () use (&$called, $testConfig) {
+            $called = true;
+            return (object) [
+                'aud' => $testConfig['audience'],
+            ];
+        };
+
+        $roundTrip = $o->verifyIdToken('foo');
+        $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
+        $this->assertTrue($called);
+    }
+
     private function jwtEncode()
     {
         $args = func_get_args();
@@ -902,6 +930,7 @@ class OAuth2MockJwt extends OAuth2
 
     protected function jwtDecode($idToken, $publicKey, $allowedAlgs)
     {
+        $callable = $this->callable;
         return $callable($idToken, $publicKey, $allowedAlgs);
     }
 }
