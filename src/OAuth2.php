@@ -17,6 +17,9 @@
 
 namespace Google\Auth;
 
+use Firebase\JWT\BeforeValidException;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\SignatureInvalidException;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7;
@@ -365,6 +368,13 @@ class OAuth2 implements FetchAuthTokenInterface
      * @param array $allowed_algs List of supported verification algorithms
      *
      * @return null|object
+     * @throws \DomainException if the token is missing an audience.
+     * @throws \DomainException if the audience does not match the one set in
+     *         the OAuth2 class instance.
+     * @throws \UnexpectedValueException If the token is invalid
+     * @throws SignatureInvalidException If the signature is invalid.
+     * @throws BeforeValidException If the token is not yet valid.
+     * @throws ExpiredException If the token has expired.
      */
     public function verifyIdToken($publicKey = null, $allowed_algs = array())
     {
@@ -373,9 +383,16 @@ class OAuth2 implements FetchAuthTokenInterface
             return null;
         }
 
-        $resp = $this->jwtDecode($idToken, $publicKey, $allowed_algs);
+        // If no key is given, decode the payload without verification and proceed.
+        if (!$publicKey) {
+            $parts = explode('.', $idToken);
+            $resp = json_decode(base64_decode($parts[1]));
+        } else {
+            $resp = $this->jwtDecode($idToken, $publicKey, $allowed_algs);
+        }
+
         if (!property_exists($resp, 'aud')) {
-            throw new \DomainException('No audience found the id token');
+            throw new \DomainException('No audience found in the id token');
         }
         if ($resp->aud != $this->getAudience()) {
             throw new \DomainException('Wrong audience present in the id token');
@@ -1306,7 +1323,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @return object
      */
-    private function jwtDecode($idToken, $publicKey, $allowedAlgs)
+    protected function jwtDecode($idToken, $publicKey, $allowedAlgs)
     {
         if (class_exists('Firebase\JWT\JWT')) {
             return \Firebase\JWT\JWT::decode($idToken, $publicKey, $allowedAlgs);

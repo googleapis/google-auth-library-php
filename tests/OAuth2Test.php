@@ -861,6 +861,29 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
     }
 
+    public function testReturnsPayloadWhenNoKeyGiven()
+    {
+        $testConfig = $this->verifyIdTokenMinimal;
+        $now = time();
+        $origIdToken = [
+            'aud' => $testConfig['audience'],
+            'iss' => $testConfig['issuer'],
+            'exp' => $now + 65, // arbitrary
+            'iat' => $now,
+        ];
+        $o = new OAuth2MockJwt($testConfig);
+        $alg = 'RS256';
+        $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, $alg);
+        $o->setIdToken($jwtIdToken);
+
+        $o->callable = function () {
+            $this->assertTrue(false, 'Should not be called.');
+        };
+
+        $roundTrip = $o->verifyIdToken();
+        $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
+    }
+
     private function jwtEncode()
     {
         $args = func_get_args();
@@ -870,5 +893,15 @@ class OAuth2VerifyIdTokenTest extends TestCase
         }
 
         return call_user_func_array("$class::encode", $args);
+    }
+}
+
+class OAuth2MockJwt extends OAuth2
+{
+    public $callable;
+
+    protected function jwtDecode($idToken, $publicKey, $allowedAlgs)
+    {
+        return $callable($idToken, $publicKey, $allowedAlgs);
     }
 }
