@@ -15,58 +15,50 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\tests;
+namespace Google\Auth\Tests;
 
 use Google\Auth\FetchAuthTokenCache;
+use Prophecy\Argument;
 
 class FetchAuthTokenCacheTest extends BaseTest
 {
+    private $mockFetcher;
+    private $mockCacheItem;
+    private $mockCache;
+    private $mockSigner;
+
     protected function setUp()
     {
-        $this->mockFetcher =
-            $this
-                ->getMockBuilder('Google\Auth\FetchAuthTokenInterface')
-                ->getMock();
-        $this->mockCacheItem =
-            $this
-                ->getMockBuilder('Psr\Cache\CacheItemInterface')
-                ->getMock();
-        $this->mockCache =
-            $this
-                ->getMockBuilder('Psr\Cache\CacheItemPoolInterface')
-                ->getMock();
+        $this->mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+        $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $this->mockSigner = $this->prophesize('Google\Auth\SignBlobInterface');
     }
 
     public function testUsesCachedAuthToken()
     {
         $cacheKey = 'myKey';
         $cachedValue = '2/abcdef1234567890';
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(true));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('get')
-            ->will($this->returnValue($cachedValue));
-        $this->mockCache
-            ->expects($this->once())
-            ->method('getItem')
-            ->with($this->equalTo($cacheKey))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockFetcher
-            ->expects($this->never())
-            ->method('fetchAuthToken');
-        $this->mockFetcher
-            ->expects($this->any())
-            ->method('getCacheKey')
-            ->will($this->returnValue($cacheKey));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
 
         // Run the test.
         $cachedFetcher = new FetchAuthTokenCache(
-            $this->mockFetcher,
+            $this->mockFetcher->reveal(),
             null,
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $accessToken = $cachedFetcher->fetchAuthToken();
         $this->assertEquals($accessToken, ['access_token' => $cachedValue]);
@@ -77,32 +69,26 @@ class FetchAuthTokenCacheTest extends BaseTest
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
         $cachedValue = '2/abcdef1234567890';
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(true));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('get')
-            ->will($this->returnValue($cachedValue));
-        $this->mockCache
-            ->expects($this->once())
-            ->method('getItem')
-            ->with($this->equalTo($prefix . $cacheKey))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockFetcher
-            ->expects($this->never())
-            ->method('fetchAuthToken');
-        $this->mockFetcher
-            ->expects($this->any())
-            ->method('getCacheKey')
-            ->will($this->returnValue($cacheKey));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($prefix . $cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
 
         // Run the test
         $cachedFetcher = new FetchAuthTokenCache(
-            $this->mockFetcher,
+            $this->mockFetcher->reveal(),
             ['prefix' => $prefix],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $accessToken = $cachedFetcher->fetchAuthToken();
         $this->assertEquals($accessToken, ['access_token' => $cachedValue]);
@@ -115,38 +101,31 @@ class FetchAuthTokenCacheTest extends BaseTest
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
         $authResult = ['access_token' => $token];
-        $this->mockCacheItem
-            ->expects($this->any())
-            ->method('get')
-            ->will($this->returnValue(null));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('set')
-            ->with($this->equalTo($token))
-            ->will($this->returnValue(false));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('expiresAfter')
-            ->with($this->equalTo($lifetime));
-        $this->mockCache
-            ->expects($this->exactly(2))
-            ->method('getItem')
-            ->with($this->equalTo($prefix . $cacheKey))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockFetcher
-            ->expects($this->any())
-            ->method('getCacheKey')
-            ->will($this->returnValue($cacheKey));
-        $this->mockFetcher
-            ->expects($this->once())
-            ->method('fetchAuthToken')
-            ->will($this->returnValue($authResult));
+        $this->mockCacheItem->get(Argument::any())
+            ->willReturn(null);
+        $this->mockCacheItem->isHit()
+            ->willReturn(false);
+        $this->mockCacheItem->set($token)
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->expiresAfter($lifetime)
+            ->shouldBeCalledTimes(1);
+        $this->mockCache->getItem($prefix . $cacheKey)
+            ->shouldBeCalledTimes(2)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))
+            ->shouldBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->willReturn($cacheKey);
+        $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->shouldBeCalledTimes(1)
+            ->willReturn($authResult);
 
         // Run the test
         $cachedFetcher = new FetchAuthTokenCache(
-            $this->mockFetcher,
+            $this->mockFetcher->reveal(),
             ['prefix' => $prefix, 'lifetime' => $lifetime],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $accessToken = $cachedFetcher->fetchAuthToken();
         $this->assertEquals($accessToken, ['access_token' => $token]);
@@ -166,7 +145,7 @@ class FetchAuthTokenCacheTest extends BaseTest
         $fetcher = new FetchAuthTokenCache(
             $mockFetcher->reveal(),
             [],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
 
         $this->assertEquals($token, $fetcher->getLastReceivedToken()['access_token']);
@@ -176,15 +155,14 @@ class FetchAuthTokenCacheTest extends BaseTest
     {
         $name = 'test@example.com';
 
-        $mockFetcher = $this->prophesize('Google\Auth\SignBlobInterface');
-        $mockFetcher->getClientName(null)
+        $this->mockSigner->getClientName(null)
             ->shouldBeCalled()
             ->willReturn($name);
 
         $fetcher = new FetchAuthTokenCache(
-            $mockFetcher->reveal(),
+            $this->mockSigner->reveal(),
             [],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
 
         $this->assertEquals($name, $fetcher->getClientName());
@@ -195,16 +173,15 @@ class FetchAuthTokenCacheTest extends BaseTest
         $stringToSign = 'foobar';
         $signature = 'helloworld';
 
-        $mockFetcher = $this->prophesize('Google\Auth\SignBlobInterface');
-        $mockFetcher->willImplement('Google\Auth\FetchAuthTokenInterface');
-        $mockFetcher->signBlob($stringToSign, true)
+        $this->mockSigner->willImplement('Google\Auth\FetchAuthTokenInterface');
+        $this->mockSigner->signBlob($stringToSign, true)
             ->shouldBeCalled()
             ->willReturn($signature);
 
         $fetcher = new FetchAuthTokenCache(
-            $mockFetcher->reveal(),
+            $this->mockSigner->reveal(),
             [],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
 
         $this->assertEquals($signature, $fetcher->signBlob($stringToSign, true));
@@ -215,12 +192,11 @@ class FetchAuthTokenCacheTest extends BaseTest
      */
     public function testSignBlobInvalidFetcher()
     {
-        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
-        $mockFetcher->signBlob('test')
+        $this->mockFetcher->signBlob('test')
             ->shouldNotbeCalled();
 
         $fetcher = new FetchAuthTokenCache(
-            $mockFetcher->reveal(),
+            $this->mockFetcher->reveal(),
             [],
             $this->mockCache
         );

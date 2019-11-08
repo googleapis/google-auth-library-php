@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Subscriber;
 
 use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
+use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
+use Prophecy\Argument;
 
 class AuthTokenSubscriberTest extends BaseTest
 {
@@ -33,29 +35,20 @@ class AuthTokenSubscriberTest extends BaseTest
     {
         $this->onlyGuzzle5();
 
-        $this->mockFetcher =
-            $this
-                ->getMockBuilder('Google\Auth\FetchAuthTokenInterface')
-                ->getMock();
-        $this->mockCacheItem =
-            $this
-                ->getMockBuilder('Psr\Cache\CacheItemInterface')
-                ->getMock();
-        $this->mockCache =
-            $this
-                ->getMockBuilder('Psr\Cache\CacheItemPoolInterface')
-                ->getMock();
+        $this->mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+        $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
     }
 
     public function testSubscribesToEvents()
     {
-        $a = new AuthTokenSubscriber($this->mockFetcher);
+        $a = new AuthTokenSubscriber($this->mockFetcher->reveal());
         $this->assertArrayHasKey('before', $a->getEvents());
     }
 
     public function testOnlyTouchesWhenAuthConfigScoped()
     {
-        $s = new AuthTokenSubscriber($this->mockFetcher);
+        $s = new AuthTokenSubscriber($this->mockFetcher->reveal());
         $client = new Client();
         $request = $client->createRequest('GET', 'http://testing.org',
             ['auth' => 'not_google_auth']);
@@ -67,35 +60,41 @@ class AuthTokenSubscriberTest extends BaseTest
     public function testAddsTheTokenAsAnAuthorizationHeader()
     {
         $authResult = ['access_token' => '1/abcdef1234567890'];
-        $this->mockFetcher
-            ->expects($this->once())
-            ->method('fetchAuthToken')
-            ->will($this->returnValue($authResult));
+        $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->shouldBeCalledTimes(1)
+            ->willReturn($authResult);
 
         // Run the test.
-        $a = new AuthTokenSubscriber($this->mockFetcher);
+        $a = new AuthTokenSubscriber($this->mockFetcher->reveal());
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'google_auth']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'google_auth']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertSame($request->getHeader('authorization'),
-            'Bearer 1/abcdef1234567890');
+        $this->assertSame(
+            $request->getHeader('authorization'),
+            'Bearer 1/abcdef1234567890'
+        );
     }
 
     public function testDoesNotAddAnAuthorizationHeaderOnNoAccessToken()
     {
         $authResult = ['not_access_token' => '1/abcdef1234567890'];
-        $this->mockFetcher
-            ->expects($this->once())
-            ->method('fetchAuthToken')
-            ->will($this->returnValue($authResult));
+        $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->shouldBeCalledTimes(1)
+            ->willReturn($authResult);
 
         // Run the test.
-        $a = new AuthTokenSubscriber($this->mockFetcher);
+        $a = new AuthTokenSubscriber($this->mockFetcher->reveal());
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'google_auth']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'google_auth']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
         $this->assertSame($request->getHeader('authorization'), '');
@@ -105,41 +104,39 @@ class AuthTokenSubscriberTest extends BaseTest
     {
         $cacheKey = 'myKey';
         $cachedValue = '2/abcdef1234567890';
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(true));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('get')
-            ->will($this->returnValue($cachedValue));
-        $this->mockCache
-            ->expects($this->once())
-            ->method('getItem')
-            ->with($this->equalTo($cacheKey))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockFetcher
-            ->expects($this->never())
-            ->method('fetchAuthToken');
-        $this->mockFetcher
-            ->expects($this->any())
-            ->method('getCacheKey')
-            ->will($this->returnValue($cacheKey));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->willReturn($cacheKey);
 
         // Run the test.
         $cachedFetcher = new FetchAuthTokenCache(
-            $this->mockFetcher,
+            $this->mockFetcher->reveal(),
             null,
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $a = new AuthTokenSubscriber($cachedFetcher);
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'google_auth']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'google_auth']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertSame($request->getHeader('authorization'),
-            'Bearer 2/abcdef1234567890');
+        $this->assertSame(
+            $request->getHeader('authorization'),
+            'Bearer 2/abcdef1234567890'
+        );
     }
 
     public function testGetsCachedAuthTokenUsingCachePrefix()
@@ -147,41 +144,39 @@ class AuthTokenSubscriberTest extends BaseTest
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
         $cachedValue = '2/abcdef1234567890';
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(true));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('get')
-            ->will($this->returnValue($cachedValue));
-        $this->mockCache
-            ->expects($this->once())
-            ->method('getItem')
-            ->with($this->equalTo($prefix . $cacheKey))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockFetcher
-            ->expects($this->never())
-            ->method('fetchAuthToken');
-        $this->mockFetcher
-            ->expects($this->any())
-            ->method('getCacheKey')
-            ->will($this->returnValue($cacheKey));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($prefix . $cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->willReturn($cacheKey);
 
         // Run the test
         $cachedFetcher = new FetchAuthTokenCache(
-            $this->mockFetcher,
+            $this->mockFetcher->reveal(),
             ['prefix' => $prefix],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $a = new AuthTokenSubscriber($cachedFetcher);
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'google_auth']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'google_auth']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertSame($request->getHeader('authorization'),
-            'Bearer 2/abcdef1234567890');
+        $this->assertSame(
+            $request->getHeader('authorization'),
+            'Bearer 2/abcdef1234567890'
+        );
     }
 
     public function testShouldSaveValueInCacheWithCacheOptions()
@@ -191,73 +186,72 @@ class AuthTokenSubscriberTest extends BaseTest
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
         $authResult = ['access_token' => $token];
-        $this->mockCacheItem
-            ->expects($this->any())
-            ->method('get')
-            ->will($this->returnValue(null));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('set')
-            ->with($this->equalTo($token))
-            ->will($this->returnValue(false));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('expiresAfter')
-            ->with($this->equalTo($lifetime));
-        $this->mockCache
-            ->expects($this->exactly(2))
-            ->method('getItem')
-            ->with($this->equalTo($prefix . $cacheKey))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockFetcher
-            ->expects($this->any())
-            ->method('getCacheKey')
-            ->will($this->returnValue($cacheKey));
-        $this->mockFetcher
-            ->expects($this->once())
-            ->method('fetchAuthToken')
-            ->will($this->returnValue($authResult));
+        $this->mockCacheItem->get()
+            ->willReturn(null);
+        $this->mockCacheItem->set($token)
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->isHit()
+            ->willReturn(false);
+        $this->mockCacheItem->expiresAfter($lifetime)
+            ->shouldBeCalledTimes(1);
+        $this->mockCache->getItem($prefix . $cacheKey)
+            ->shouldBeCalledTimes(2)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))
+            ->willReturn(null);
+        $this->mockFetcher->getCacheKey()
+            ->willReturn($cacheKey);
+        $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->willReturn($authResult);
 
         // Run the test
         $cachedFetcher = new FetchAuthTokenCache(
-            $this->mockFetcher,
+            $this->mockFetcher->reveal(),
             ['prefix' => $prefix, 'lifetime' => $lifetime],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $a = new AuthTokenSubscriber($cachedFetcher);
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'google_auth']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'google_auth']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
-        $this->assertSame($request->getHeader('authorization'),
-            'Bearer 1/abcdef1234567890');
+        $this->assertSame(
+            $request->getHeader('authorization'),
+            'Bearer 1/abcdef1234567890'
+        );
     }
 
-    /** @dataProvider provideShouldNotifyTokenCallback */
+    /**
+     * @dataProvider provideShouldNotifyTokenCallback
+     */
     public function testShouldNotifyTokenCallback(callable $tokenCallback)
     {
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
         $authResult = ['access_token' => $token];
-        $this->mockCacheItem
-            ->expects($this->any())
-            ->method('get')
-            ->will($this->returnValue(null));
-        $this->mockCache
-            ->expects($this->any())
-            ->method('getItem')
-            ->with($this->equalTo($prefix . $cacheKey))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockFetcher
-            ->expects($this->any())
-            ->method('getCacheKey')
-            ->will($this->returnValue($cacheKey));
-        $this->mockFetcher
-            ->expects($this->once())
-            ->method('fetchAuthToken')
-            ->will($this->returnValue($authResult));
+        $this->mockCacheItem->get()
+            ->willReturn(null);
+        $this->mockCacheItem->isHit()
+            ->willReturn(false);
+        $this->mockCacheItem->set($token)
+            ->willReturn(false);
+        $this->mockCacheItem->expiresAfter(Argument::any())
+            ->willReturn(null);
+        $this->mockCache->getItem($prefix . $cacheKey)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))
+            ->willReturn(null);
+        $this->mockFetcher->getCacheKey()
+            ->willReturn($cacheKey);
+        $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->shouldBeCalledTimes(1)
+            ->willReturn($authResult);
 
         SubscriberCallback::$expectedKey = $this->getValidKeyName($prefix . $cacheKey);
         SubscriberCallback::$expectedValue = $token;
@@ -265,9 +259,9 @@ class AuthTokenSubscriberTest extends BaseTest
 
         // Run the test
         $cachedFetcher = new FetchAuthTokenCache(
-            $this->mockFetcher,
+            $this->mockFetcher->reveal(),
             ['prefix' => $prefix],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $a = new AuthTokenSubscriber(
             $cachedFetcher,
@@ -276,8 +270,11 @@ class AuthTokenSubscriberTest extends BaseTest
         );
 
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'google_auth']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'google_auth']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $a->onBefore($before);
         $this->assertTrue(SubscriberCallback::$called);
@@ -290,9 +287,9 @@ class AuthTokenSubscriberTest extends BaseTest
             SubscriberCallback::staticInvoke($key, $value);
         };
         return [
-            ['Google\Auth\Tests\SubscriberCallbackFunction'],
-            ['Google\Auth\Tests\SubscriberCallback::staticInvoke'],
-            [['Google\Auth\Tests\SubscriberCallback', 'staticInvoke']],
+            ['Google\Auth\Tests\Subscriber\SubscriberCallbackFunction'],
+            ['Google\Auth\Tests\Subscriber\SubscriberCallback::staticInvoke'],
+            [['Google\Auth\Tests\Subscriber\SubscriberCallback', 'staticInvoke']],
             [$anonymousFunc],
             [[new SubscriberCallback, 'staticInvoke']],
             [[new SubscriberCallback, 'methodInvoke']],

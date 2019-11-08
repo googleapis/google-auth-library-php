@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\tests;
+namespace Google\Auth\Tests;
 
 use Google\Auth\Iam;
 use GuzzleHttp\Psr7;

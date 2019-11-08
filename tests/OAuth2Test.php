@@ -19,7 +19,6 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
-use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 
 class OAuth2AuthorizationUriTest extends TestCase

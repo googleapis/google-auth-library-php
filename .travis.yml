@@ -41,6 +41,15 @@ matrix:
 
     - name: "PHP 7.3"
       php: "7.3"
+    - name: "PHP 7.3 (Prefer Lowest Dependency Version)"
+      php: "7.3"
+      env: COMPOSER_ARGS="--prefer-lowest"
+
+    - name: "PHP 7.4snapshot"
+      php: "7.4snapshot"
+    - name: "PHP 7.4snapshot (Prefer Lowest Dependency Version)"
+      php: "7.4snapshot"
+      env: COMPOSER_ARGS="--prefer-lowest"
 
     - name: "Check Style"
       php: "7.3"

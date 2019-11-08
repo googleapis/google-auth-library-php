@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Subscriber;
 
 use Google\Auth\Subscriber\SimpleSubscriber;
+use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
