@@ -284,7 +284,6 @@ class AuthTokenMiddlewareTest extends BaseTest
             [new MiddlewareCallback],
         ];
     }
-
 }
 
 class MiddlewareCallback
