@@ -327,7 +327,7 @@ class SACFetchAuthTokenTest extends TestCase
             array('Bearer ' . $access_token));
     }
 
-    public function testShouldBeIdTokenWhenTargetAudienceIsSet()
+    public function testShouldBeIdTokenWhenIdTokenAudienceIsSet()
     {
         $testJson = $this->createTestJson();
         $expectedToken = ['id_token' => 'idtoken12345'];
@@ -339,12 +339,12 @@ class SACFetchAuthTokenTest extends TestCase
             list($header, $payload, $sig) = explode('.', $post['assertion']);
             $jwtParams = json_decode(base64_decode($payload), true);
             $this->assertArrayHasKey('target_audience', $jwtParams);
-            $this->assertEquals('a target audience', $jwtParams['target_audience']);
+            $this->assertEquals('an id token audience', $jwtParams['target_audience']);
 
             return new Psr7\Response(200, [], Psr7\stream_for(json_encode($expectedToken)));
 
         };
-        $sa = new ServiceAccountCredentials(null, $testJson, null, 'a target audience');
+        $sa = new ServiceAccountCredentials(null, $testJson, null, 'an id token audience');
         $this->assertEquals($expectedToken, $sa->fetchAuthToken($httpHandler));
         $this->assertEquals(1, $timesCalled);
     }

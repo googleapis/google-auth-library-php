@@ -43,14 +43,14 @@ class ADCGetTest extends TestCase
     /**
      * @expectedException InvalidArgumentException
      */
-    public function testFailsIfBothScopeAndTargetAudienceAreSupplied()
+    public function testFailsIfBothScopeAndIdTokenAudienceAreSupplied()
     {
         ApplicationDefaultCredentials::getCredentials(
             'a scope',
             null,
             null,
             null,
-            'a target audience'
+            'an id token audience'
         );
     }
 
@@ -214,7 +214,7 @@ class ADCGetMiddlewareTest extends TestCase
     }
 }
 
-class ADCGetCredentialsWithTargetAudienceTest extends TestCase
+class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
 {
     private $originalHome;
 
@@ -238,20 +238,20 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
     {
         $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'a target audience');
+        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'an id token audience');
     }
 
     public function testLoadsOKIfEnvSpecifiedIsValid()
     {
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'a target audience');
+        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'an id token audience');
     }
 
     public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
         putenv('HOME=' . __DIR__ . '/fixtures');
-        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'a target audience');
+        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'an id token audience');
     }
 
     /**
@@ -268,7 +268,7 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
             buildResponse(500)
         ]);
 
-        ApplicationDefaultCredentials::getCredentials(null, $httpHandler, null, null, 'a target audience');
+        ApplicationDefaultCredentials::getCredentials(null, $httpHandler, null, null, 'an id token audience');
     }
 
     public function testWithCacheOptions()
@@ -288,7 +288,7 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
             $httpHandler,
             $cacheOptions,
             $cachePool->reveal(),
-            'a target audience'
+            'an id token audience'
         );
 
         $this->assertInstanceOf('Google\Auth\FetchAuthTokenCache', $credentials);
@@ -315,7 +315,7 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
             $httpHandler,
             null,
             null,
-            'a target audience'
+            'an id token audience'
         );
 
         $this->assertInstanceOf(
@@ -387,7 +387,7 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
             $httpHandler,
             null,
             null,
-            'a target audience'
+            'an id token audience'
         );
         $this->assertNotInstanceOf(
             'Google\Auth\Credentials\AppIdentityCredentials',
@@ -407,7 +407,7 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
             $httpHandler,
             null,
             null,
-            'a target audience'
+            'an id token audience'
         );
         $this->assertInstanceOf(
             'Google\Auth\Credentials\GCECredentials',

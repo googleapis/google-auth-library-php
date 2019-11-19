@@ -113,18 +113,18 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * @param string|array $scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
      * @param array $jsonKey the JSON credentials.
-     * @param $targetAudience The target audience for the ID token.
+     * @param string $idTokenAudience The audience for the ID token.
      *
      * @return ServiceAccountCredentials|UserRefreshCredentials
      */
-    public static function makeCredentials($scope, array $jsonKey, $targetAudience = null)
+    public static function makeCredentials($scope, array $jsonKey, $idTokenAudience = null)
     {
         if (!array_key_exists('type', $jsonKey)) {
             throw new \InvalidArgumentException('json key is missing the type field');
         }
 
         if ($jsonKey['type'] == 'service_account') {
-            return new ServiceAccountCredentials($scope, $jsonKey, null, $targetAudience);
+            return new ServiceAccountCredentials($scope, $jsonKey, null, $idTokenAudience);
         }
 
         if ($jsonKey['type'] == 'authorized_user') {

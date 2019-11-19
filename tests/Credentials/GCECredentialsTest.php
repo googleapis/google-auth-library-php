@@ -144,7 +144,7 @@ class GCECredentialsTest extends TestCase
         $this->assertEquals(time() + 57, $g->getLastReceivedToken()['expires_at']);
     }
 
-    public function testFetchAuthTokenShouldBeIdTokenWhenTargetAudienceIsSet()
+    public function testFetchAuthTokenShouldBeIdTokenWhenIdTokenAudienceIsSet()
     {
         $expectedToken = ['id_token' => 'idtoken12345'];
         $timesCalled = 0;
@@ -158,13 +158,13 @@ class GCECredentialsTest extends TestCase
                 $request->getUri()->getPath()
             );
             $this->assertEquals(
-                'audience=a+target+audience',
+                'audience=an+id+token+audience',
                 $request->getUri()->getQuery()
             );
             return new Psr7\Response(200, [], Psr7\stream_for($expectedToken['id_token']));
 
         };
-        $g = new GCECredentials(null, null, 'a+target+audience');
+        $g = new GCECredentials(null, null, 'an+id+token+audience');
         $this->assertEquals($expectedToken, $g->fetchAuthToken($httpHandler));
         $this->assertEquals(2, $timesCalled);
     }

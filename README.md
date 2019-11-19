@@ -133,22 +133,23 @@ use GuzzleHttp\HandlerStack;
 // specify the path to your application credentials
 putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 
-// Provide the target audience. This can be a Client ID associated with an IAP application,
+// Provide the ID token audience. This can be a Client ID associated with an IAP application,
 // Or the URL associated with a CloudRun App
-//    $targetAudience = 'IAP_CLIENT_ID.apps.googleusercontent.com';
-//    $targetAudience = 'https://service-1234-uc.a.run.app';
-$targetAudience = 'YOUR_TARGET_AUDIENCE';
+//    $idTokenAudience = 'IAP_CLIENT_ID.apps.googleusercontent.com';
+//    $idTokenAudience = 'https://service-1234-uc.a.run.app';
+$idTokenAudience = 'YOUR_ID_TOKEN_AUDIENCE';
 
 // create middleware
-$middleware = ApplicationDefaultCredentials::getMiddleware(null, null, null, null, $targetAudience);
+$middleware = ApplicationDefaultCredentials::getMiddleware(null, null, null, null, $idTokenAudience);
 $stack = HandlerStack::create();
 $stack->push($middleware);
 
 // create the HTTP client
 $client = new Client([
   'handler' => $stack,
-  'base_uri' => $targetAudience,
-  'auth' => 'google_auth'
+  'auth' => 'google_auth',
+  // Cloud Run, IAP, or custom resource URL
+  'base_uri' => 'https://YOUR_PROTECTED_RESOURCE',
 ]);
 
 // make the request

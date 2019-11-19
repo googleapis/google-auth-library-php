@@ -105,6 +105,7 @@ class ApplicationDefaultCredentials
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
+     * @param string $idTokenAudience The audience for the ID token.
      *
      * @return AuthTokenMiddleware
      *
@@ -115,15 +116,15 @@ class ApplicationDefaultCredentials
         callable $httpHandler = null,
         array $cacheConfig = null,
         CacheItemPoolInterface $cache = null,
-        $targetAudience = null
+        $idTokenAudience = null
 
     ) {
-        if ($scope && $targetAudience) {
+        if ($scope && $idTokenAudience) {
             throw new InvalidArgumentException(
-                'Scope and targetAudience cannot both be supplied');
+                'Scope and idTokenAudience cannot both be supplied');
         }
 
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $targetAudience);
+        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $idTokenAudience);
 
         return new AuthTokenMiddleware($creds, $httpHandler);
     }
@@ -140,6 +141,7 @@ class ApplicationDefaultCredentials
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
+     * @param string $idTokenAudience The audience for the ID token.
      *
      * @return CredentialsLoader
      *
@@ -150,11 +152,11 @@ class ApplicationDefaultCredentials
         callable $httpHandler = null,
         array $cacheConfig = null,
         CacheItemPoolInterface $cache = null,
-        $targetAudience = null
+        $idTokenAudience = null
     ) {
-        if ($scope && $targetAudience) {
+        if ($scope && $idTokenAudience) {
             throw new InvalidArgumentException(
-                'Scope and targetAudience cannot both be supplied');
+                'Scope and idTokenAudience cannot both be supplied');
         }
 
         $creds = null;
@@ -171,11 +173,11 @@ class ApplicationDefaultCredentials
         }
 
         if (!is_null($jsonKey)) {
-            $creds = CredentialsLoader::makeCredentials($scope, $jsonKey, $targetAudience);
-        } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible() && is_null($targetAudience)) {
+            $creds = CredentialsLoader::makeCredentials($scope, $jsonKey, $idTokenAudience);
+        } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible() && is_null($idTokenAudience)) {
             $creds = new AppIdentityCredentials($scope);
         } elseif (GCECredentials::onGce($httpHandler)) {
-            $creds = new GCECredentials(null, $scope, $targetAudience);
+            $creds = new GCECredentials(null, $scope, $idTokenAudience);
         }
 
         if (is_null($creds)) {

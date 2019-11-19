@@ -75,14 +75,13 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      *   as an associative array
      * @param string $sub an email address account to impersonate, in situations when
      *   the service account has been delegated domain wide access.
-     * @param string $targetAudience [optional] the target audience for
-     *        the ID token.
+     * @param string $idTokenAudience The audience for the ID token.
      */
     public function __construct(
         $scope,
         $jsonKey,
         $sub = null,
-        $targetAudience = null
+        $idTokenAudience = null
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -102,8 +101,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
                 'json key is missing the private_key field');
         }
         $additionalClaims = [];
-        if ($targetAudience) {
-            $additionalClaims = ['target_audience' => $targetAudience];
+        if ($idTokenAudience) {
+            $additionalClaims = ['target_audience' => $idTokenAudience];
         }
         $this->auth = new OAuth2([
             'audience' => self::TOKEN_CREDENTIAL_URI,
