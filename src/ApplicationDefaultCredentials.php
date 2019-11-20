@@ -174,7 +174,11 @@ class ApplicationDefaultCredentials
 
         if (!is_null($jsonKey)) {
             $creds = CredentialsLoader::makeCredentials($scope, $jsonKey, $idTokenAudience);
-        } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible() && is_null($idTokenAudience)) {
+        } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
+            if (!empty($idTokenAudience)) {
+                throw new \InvalidArgumentException(
+                    'idTokenAudience is not valid on older versions of App Engine');
+            }
             $creds = new AppIdentityCredentials($scope);
         } elseif (GCECredentials::onGce($httpHandler)) {
             $creds = new GCECredentials(null, $scope, $idTokenAudience);
