@@ -18,6 +18,7 @@
 namespace Google\Auth\Middleware;
 
 use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\GetQuotaProjectInterface;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -101,6 +102,13 @@ class AuthTokenMiddleware
 
             $request = $request->withHeader('authorization', 'Bearer ' . $this->fetchToken());
 
+            if ($quotaProject = $this->getQuotaProject()) {
+                $request = $request->withHeader(
+                    GetQuotaProjectInterface::X_GOOG_USER_PROJECT_HEADER,
+                    $quotaProject
+                );
+            }
+
             return $handler($request, $options);
         };
     }
@@ -121,6 +129,13 @@ class AuthTokenMiddleware
             }
 
             return $auth_tokens['access_token'];
+        }
+    }
+
+    private function getQuotaProject()
+    {
+        if ($this->fetcher instanceof GetQuotaProjectInterface) {
+            return $this->fetcher->getQuotaProject();
         }
     }
 }

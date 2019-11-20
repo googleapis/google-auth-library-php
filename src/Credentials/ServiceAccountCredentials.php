@@ -18,6 +18,7 @@
 namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
+use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
 use Google\Auth\ServiceAccountSignerTrait;
 use Google\Auth\SignBlobInterface;
@@ -55,7 +56,7 @@ use Google\Auth\SignBlobInterface;
  *
  *   $res = $client->get('myproject/taskqueues/myqueue');
  */
-class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface
+class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface, GetQuotaProjectInterface
 {
     use ServiceAccountSignerTrait;
 
@@ -65,6 +66,11 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      * @var OAuth2
      */
     protected $auth;
+
+    /**
+     * The quota project associated with the JSON credentials
+     */
+    protected $quotaProject;
 
     /**
      * Create a new ServiceAccountCredentials.
@@ -97,6 +103,9 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
         if (!array_key_exists('private_key', $jsonKey)) {
             throw new \InvalidArgumentException(
                 'json key is missing the private_key field');
+        }
+        if (array_key_exists('quota_project', $jsonKey)) {
+            $this->quotaProject = (string) $jsonKey['quota_project'];
         }
         $this->auth = new OAuth2([
             'audience' => self::TOKEN_CREDENTIAL_URI,
@@ -194,5 +203,15 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
     public function getClientName(callable $httpHandler = null)
     {
         return $this->auth->getIssuer();
+    }
+
+    /**
+     * Get the quota project used for this API request
+     *
+     * @return string|null
+     */
+    public function getQuotaProject()
+    {
+        return $this->quotaProject;
     }
 }
