@@ -18,6 +18,7 @@
 namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
+use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
 use Google\Auth\ServiceAccountSignerTrait;
 use Google\Auth\SignBlobInterface;
@@ -31,7 +32,7 @@ use Google\Auth\SignBlobInterface;
  * console (via 'Generate new Json Key').  It is not part of any OAuth2
  * flow, rather it creates a JWT and sends that as a credential.
  */
-class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements SignBlobInterface
+class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements SignBlobInterface, GetQuotaProjectInterface
 {
     use ServiceAccountSignerTrait;
 
@@ -41,6 +42,11 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Si
      * @var OAuth2
      */
     protected $auth;
+
+    /**
+     * The quota project associated with the JSON credentials
+     */
+    protected $quotaProject;
 
     /**
      * Create a new ServiceAccountJwtAccessCredentials.
@@ -66,6 +72,9 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Si
         if (!array_key_exists('private_key', $jsonKey)) {
             throw new \InvalidArgumentException(
                 'json key is missing the private_key field');
+        }
+        if (array_key_exists('quota_project', $jsonKey)) {
+            $this->quotaProject = (string) $jsonKey['quota_project'];
         }
         $this->auth = new OAuth2([
             'issuer' => $jsonKey['client_email'],
@@ -146,5 +155,15 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements Si
     public function getClientName(callable $httpHandler = null)
     {
         return $this->auth->getIssuer();
+    }
+
+    /**
+     * Get the quota project used for this API request
+     *
+     * @return string|null
+     */
+    public function getQuotaProject()
+    {
+        return $this->quotaProject;
     }
 }
