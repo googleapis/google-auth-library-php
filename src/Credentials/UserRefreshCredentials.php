@@ -99,11 +99,12 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
             && getenv(self::SUPPRESS_CLOUD_SDK_CREDS_WARNING_ENV) !== 'true') {
             trigger_error(
                 'Your application has authenticated using end user credentials '
-                . 'from Google Cloud SDK. We recommend setting the '
-                . '"quota_project" field in the end user JSON credentials file '
-                . 'or using service accounts instead. Otherwise you might '
-                . 'receive a "quota exceeded" or "API not enabled" error. For '
-                . 'more information about service accounts, see '
+                . 'from Google Cloud SDK. We recommend that most server '
+                . 'applications use service accounts instead. If your '
+                . 'application continues to use end user credentials '
+                . 'from Cloud SDK, you might receive a "quota exceeded" '
+                . 'or "API not enabled" error. For more information about '
+                . 'service accounts, see '
                 . 'https://cloud.google.com/docs/authentication/. '
                 . 'To disable this warning, set '
                 . self::SUPPRESS_CLOUD_SDK_CREDS_WARNING_ENV
