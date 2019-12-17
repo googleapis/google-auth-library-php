@@ -196,6 +196,8 @@ class Guzzle5HttpHandlerTest extends BaseTest
         $this->mockPsr7Request->getBody()
             ->shouldBeCalledTimes(1)
             ->willReturn($mockBody->reveal());
+
+        $mockGuzzleRequest = $this->prophesize('GuzzleHttp\Message\RequestInterface');
         $this->mockClient->createRequest(
             'GET',
             Argument::type('Psr\Http\Message\UriInterface'),
@@ -204,7 +206,7 @@ class Guzzle5HttpHandlerTest extends BaseTest
                 'body' => $mockBody->reveal(),
             ]
         )->shouldBeCalledTimes(1)->willReturn(
-            ($this->prophesize('GuzzleHttp\Message\RequestInterface'))->reveal()
+            $mockGuzzleRequest->reveal()
         );
 
         $this->mockClient->send(Argument::type('GuzzleHttp\Message\RequestInterface'))
