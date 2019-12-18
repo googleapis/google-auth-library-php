@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Cache;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 

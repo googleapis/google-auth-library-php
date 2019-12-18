@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Middleware;
+
+use Google\Auth\Tests\BaseTest;
 
 class SimpleMiddlewareTest extends BaseTest
 {
@@ -28,11 +30,7 @@ class SimpleMiddlewareTest extends BaseTest
     {
         $this->onlyGuzzle6();
 
-        $this->mockRequest =
-            $this
-                ->getMockBuilder('GuzzleHttp\Psr7\Request')
-                ->disableOriginalConstructor()
-                ->getMock();
+        $this->mockRequest = $this->prophesize('GuzzleHttp\Psr7\Request');
     }
 
     public function testTest()

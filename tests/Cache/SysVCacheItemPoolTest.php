@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Cache;
 
 use Google\Auth\Cache\SysVCacheItemPool;
 use PHPUnit\Framework\TestCase;

@@ -315,13 +315,13 @@ class ADCGetSubscriberTest extends BaseTest
         ]);
 
         $cacheOptions = [];
-        $cachePool = $this->getMock('Psr\Cache\CacheItemPoolInterface');
+        $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
 
         $subscriber = ApplicationDefaultCredentials::getSubscriber(
             'a scope',
             $httpHandler,
             $cacheOptions,
-            $cachePool
+            $cachePool->reveal()
         );
     }
 

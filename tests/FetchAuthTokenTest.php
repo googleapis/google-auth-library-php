@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\tests;
+namespace Google\Auth\Tests;
 
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
@@ -25,30 +25,29 @@ use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\OAuth2;
+use Prophecy\Argument;
 
 class FetchAuthTokenTest extends BaseTest
 {
     private $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
 
-    /** @dataProvider provideMakeHttpClient */
+    /**
+     * @dataProvider provideMakeHttpClient
+     */
     public function testMakeHttpClient($fetcherClass)
     {
-        $mockFetcher = $this->getMockBuilder($fetcherClass)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $mockFetcher
-            ->expects($this->once())
-            ->method('fetchAuthToken')
-            ->will($this->returnCallback(function ($httpHandler) {
-                return $httpHandler();
-            }));
+        $mockFetcher = $this->prophesize($fetcherClass);
 
         $httpHandlerCalled = false;
         $httpHandler = function () use (&$httpHandlerCalled) {
             $httpHandlerCalled = true;
             return ['access_token' => 'xyz'];
         };
+
+        $mockFetcher->fetchAuthToken(Argument::any())
+            ->shouldBeCalledTimes(1)
+            ->will($httpHandler);
+        $mockFetcher->getCacheKey()->willReturn('');
 
         $tokenCallbackCalled = false;
         $tokenCallback = function ($cacheKey, $accessToken) use (&$tokenCallbackCalled) {
@@ -57,7 +56,7 @@ class FetchAuthTokenTest extends BaseTest
         };
 
         $client = CredentialsLoader::makeHttpClient(
-            $mockFetcher,
+            $mockFetcher->reveal(),
             [
                 'base_url' => 'https://www.googleapis.com/books/v1/',
                 'base_uri' => 'https://www.googleapis.com/books/v1/',
@@ -195,19 +194,16 @@ class FetchAuthTokenTest extends BaseTest
 
     private function getOAuth2Mock()
     {
-        $mock = $this->getMockBuilder('Google\Auth\OAuth2')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $mock = $this->prophesize('Google\Auth\OAuth2');
 
-        $mock
-            ->expects($this->once())
-            ->method('getLastReceivedToken')
-            ->will($this->returnValue([
+        $mock->getLastReceivedToken()
+            ->shouldBeCalledTimes(1)
+            ->willReturn([
                 'access_token' => 'xyz',
                 'expires_at' => strtotime('2001'),
-            ]));
+            ]);
 
-        return $mock;
+        return $mock->reveal();
     }
 
     private function assertGetLastReceivedToken(FetchAuthTokenInterface $fetcher)

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Cache;
 
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
@@ -23,7 +23,6 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Prophecy\Promise\ReturnPromise;
 
 /**
  * @group credentials
