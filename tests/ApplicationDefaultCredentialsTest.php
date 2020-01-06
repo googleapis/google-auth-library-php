@@ -373,7 +373,7 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage idTokenAudience is not valid on older versions of App Engine
+     * @expectedExceptionMessage targetAudience is not valid on older versions of App Engine
      */
     public function testAppEngineStandardIdToken()
     {

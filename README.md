@@ -135,12 +135,12 @@ putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 
 // Provide the ID token audience. This can be a Client ID associated with an IAP application,
 // Or the URL associated with a CloudRun App
-//    $idTokenAudience = 'IAP_CLIENT_ID.apps.googleusercontent.com';
-//    $idTokenAudience = 'https://service-1234-uc.a.run.app';
-$idTokenAudience = 'YOUR_ID_TOKEN_AUDIENCE';
+//    $targetAudience = 'IAP_CLIENT_ID.apps.googleusercontent.com';
+//    $targetAudience = 'https://service-1234-uc.a.run.app';
+$targetAudience = 'YOUR_ID_TOKEN_AUDIENCE';
 
 // create middleware
-$middleware = ApplicationDefaultCredentials::getMiddleware(null, null, null, null, $idTokenAudience);
+$middleware = ApplicationDefaultCredentials::getMiddleware(null, null, null, null, $targetAudience);
 $stack = HandlerStack::create();
 $stack->push($middleware);
 

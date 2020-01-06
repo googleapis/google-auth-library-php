@@ -139,15 +139,15 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      * @param Iam $iam [optional] An IAM instance.
      * @param string|array $scope [optional] the scope of the access request,
      *        expressed either as an array or as a space-delimited string.
-     * @param string $idTokenAudience [optional] The audience for the ID token.
+     * @param string $targetAudience [optional] The audience for the ID token.
      */
-    public function __construct(Iam $iam = null, $scope = null, $idTokenAudience = null)
+    public function __construct(Iam $iam = null, $scope = null, $targetAudience = null)
     {
         $this->iam = $iam;
 
-        if ($scope && $idTokenAudience) {
+        if ($scope && $targetAudience) {
             throw new InvalidArgumentException(
-                'Scope and idTokenAudience cannot both be supplied');
+                'Scope and targetAudience cannot both be supplied');
         }
 
         $tokenType = self::TOKEN_TYPE_ACCESS_TOKEN;
@@ -160,9 +160,9 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             $scope = implode(',', $scope);
 
             $tokenUri = $tokenUri . '?scopes='. $scope;
-        } elseif ($idTokenAudience) {
+        } elseif ($targetAudience) {
             $tokenUri = self::getIdTokenUri();
-            $tokenUri .= '?audience=' . $idTokenAudience;
+            $tokenUri .= '?audience=' . $targetAudience;
             $tokenType = self::TOKEN_TYPE_ID_TOKEN;
         }
 

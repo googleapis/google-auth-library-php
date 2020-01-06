@@ -105,7 +105,7 @@ class ApplicationDefaultCredentials
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
-     * @param string $idTokenAudience The audience for the ID token.
+     * @param string $targetAudience The audience for the ID token.
      *
      * @return AuthTokenMiddleware
      *
@@ -116,15 +116,15 @@ class ApplicationDefaultCredentials
         callable $httpHandler = null,
         array $cacheConfig = null,
         CacheItemPoolInterface $cache = null,
-        $idTokenAudience = null
+        $targetAudience = null
 
     ) {
-        if ($scope && $idTokenAudience) {
+        if ($scope && $targetAudience) {
             throw new InvalidArgumentException(
-                'Scope and idTokenAudience cannot both be supplied');
+                'Scope and targetAudience cannot both be supplied');
         }
 
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $idTokenAudience);
+        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $targetAudience);
 
         return new AuthTokenMiddleware($creds, $httpHandler);
     }
@@ -141,7 +141,7 @@ class ApplicationDefaultCredentials
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
-     * @param string $idTokenAudience The audience for the ID token.
+     * @param string $targetAudience The audience for the ID token.
      *
      * @return CredentialsLoader
      *
@@ -152,11 +152,11 @@ class ApplicationDefaultCredentials
         callable $httpHandler = null,
         array $cacheConfig = null,
         CacheItemPoolInterface $cache = null,
-        $idTokenAudience = null
+        $targetAudience = null
     ) {
-        if ($scope && $idTokenAudience) {
+        if ($scope && $targetAudience) {
             throw new InvalidArgumentException(
-                'Scope and idTokenAudience cannot both be supplied');
+                'Scope and targetAudience cannot both be supplied');
         }
 
         $creds = null;
@@ -173,15 +173,15 @@ class ApplicationDefaultCredentials
         }
 
         if (!is_null($jsonKey)) {
-            $creds = CredentialsLoader::makeCredentials($scope, $jsonKey, $idTokenAudience);
+            $creds = CredentialsLoader::makeCredentials($scope, $jsonKey, $targetAudience);
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
-            if (!empty($idTokenAudience)) {
+            if (!empty($targetAudience)) {
                 throw new \InvalidArgumentException(
-                    'idTokenAudience is not valid on older versions of App Engine');
+                    'targetAudience is not valid on older versions of App Engine');
             }
             $creds = new AppIdentityCredentials($scope);
         } elseif (GCECredentials::onGce($httpHandler)) {
-            $creds = new GCECredentials(null, $scope, $idTokenAudience);
+            $creds = new GCECredentials(null, $scope, $targetAudience);
         }
 
         if (is_null($creds)) {
