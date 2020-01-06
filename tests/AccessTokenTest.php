@@ -80,7 +80,8 @@ class AccessTokenTest extends TestCase
             ]
         ]);
 
-        $cacheKey = $certsLocation ? sha1($certsLocation) : 'federated_signon_certs_v3';
+        $cacheKey = 'google_auth_certs_cache:' .
+            ($certsLocation ? sha1($certsLocation) : 'federated_signon_certs_v3');
         $this->cache->getItem($cacheKey)
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
@@ -217,7 +218,7 @@ class AccessTokenTest extends TestCase
         $item->expiresAt(Argument::type('\DateTime'))
             ->shouldBeCalledTimes(1);
 
-        $this->cache->getItem(sha1($certsLocation))
+        $this->cache->getItem('google_auth_certs_cache:' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
@@ -254,7 +255,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn(null);
 
-        $this->cache->getItem(sha1($certsLocation))
+        $this->cache->getItem('google_auth_certs_cache:' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
@@ -279,7 +280,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn('{}');
 
-        $this->cache->getItem('federated_signon_certs_v3')
+        $this->cache->getItem('google_auth_certs_cache:federated_signon_certs_v3')
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
@@ -306,7 +307,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn(null);
 
-        $this->cache->getItem(sha1($certsLocation))
+        $this->cache->getItem('google_auth_certs_cache:' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
@@ -342,7 +343,7 @@ class AccessTokenTest extends TestCase
         $item->expiresAt(Argument::type('\DateTime'))
             ->shouldBeCalledTimes(1);
 
-        $this->cache->getItem('federated_signon_certs_v3')
+        $this->cache->getItem('google_auth_certs_cache:federated_signon_certs_v3')
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
@@ -381,7 +382,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn(null);
 
-        $this->cache->getItem('federated_signon_certs_v3')
+        $this->cache->getItem('google_auth_certs_cache:federated_signon_certs_v3')
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 

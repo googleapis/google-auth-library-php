@@ -106,7 +106,6 @@ class AccessToken
             : $this->getCacheKeyFromCertLocation($certsLocation);
 
         // Check signature against each available cert.
-        // allow the loop to complete unless a known bad result is encountered.
         $certs = $this->getCerts($certsLocation, $cacheKey, $options);
         $alg = $this->determineAlg($certs);
 
@@ -123,6 +122,14 @@ class AccessToken
         }
     }
 
+    /**
+     * Identifies the expected algorithm to verify by looking at the "alg" key
+     * of the provided certs.
+     *
+     * @param array $certs Certificate array according to the JWK spec (see
+     *                     https://tools.ietf.org/html/rfc7517).
+     * @return string The expected algorithm, such as "ES256" or "RS256".
+     */
     private function determineAlg($certs)
     {
         $keys = [];
@@ -144,6 +151,17 @@ class AccessToken
         return $alg;
     }
 
+    /**
+     * Verifies an ES256-signed JWT.
+     *
+     * @param string $token The JSON Web Token to be verified.
+     * @param array $certs Certificate array according to the JWK spec (see
+     *                     https://tools.ietf.org/html/rfc7517).
+     * @param string|null $audience If set, returns false if the provided
+     *                              audience does not match the "aud" claim on
+     *                              the JWT.
+     * @return array|bool the token payload, if successful, or false if not.
+     */
     private function verifyEs256($token, $certs, $audience = null)
     {
         $this->checkSimpleJwt();
@@ -169,6 +187,17 @@ class AccessToken
         return $jwt->getClaims();
     }
 
+    /**
+     * Verifies an RS256-signed JWT.
+     *
+     * @param string $token The JSON Web Token to be verified.
+     * @param array $certs Certificate array according to the JWK spec (see
+     *                     https://tools.ietf.org/html/rfc7517).
+     * @param string|null $audience If set, returns false if the provided
+     *                              audience does not match the "aud" claim on
+     *                              the JWT.
+     * @return array|bool the token payload, if successful, or false if not.
+     */
     private function verifyRs256($token, $certs, $audience = null)
     {
         $this->checkAndInitializePhpsec();
@@ -193,6 +222,8 @@ class AccessToken
                     $cert['e']
                 ]), 256),
             ]);
+
+            // create an array of key IDs to certs for the JWT library
             $keys[$cert['kid']] =  $rsa->getPublicKey();
         }
 
@@ -417,8 +448,10 @@ class AccessToken
      */
     private function getCacheKeyFromCertLocation($certsLocation)
     {
-        return $certsLocation === self::FEDERATED_SIGNON_CERT_URL
+        $key = $certsLocation === self::FEDERATED_SIGNON_CERT_URL
             ? 'federated_signon_certs_v3'
             : sha1($certsLocation);
+
+        return 'google_auth_certs_cache:' . $key;
     }
 }
