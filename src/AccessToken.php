@@ -343,7 +343,7 @@ class AccessToken
     private function checkAndInitializePhpsec()
     {
         // @codeCoverageIgnoreStart
-        if (!class_exists(RSA::class)) {
+        if (!class_exists('phpseclib\Crypt\RSA')) {
             throw new \RuntimeException('Please require phpseclib/phpseclib v2 to use this utility.');
         }
         // @codeCoverageIgnoreEnd
@@ -354,7 +354,7 @@ class AccessToken
     private function checkSimpleJwt()
     {
         // @codeCoverageIgnoreStart
-        if (!class_exists(SimpleJWT::class)) {
+        if (!class_exists('SimpleJWT\JWT')) {
             throw new \RuntimeException('Please require kelvinmo/simplejwtlib ^0.2 to use this utility.');
         }
         // @codeCoverageIgnoreEnd
@@ -405,7 +405,7 @@ class AccessToken
      */
     protected function callSimpleJwtDecode(array $args = [])
     {
-        return call_user_func_array([SimpleJWT::class, 'decode'], $args);
+        return call_user_func_array(['SimpleJWT\JWT', 'decode'], $args);
     }
 
     /**
