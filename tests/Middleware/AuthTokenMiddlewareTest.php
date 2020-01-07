@@ -90,20 +90,15 @@ class AuthTokenMiddlewareTest extends BaseTest
     {
         $token = 'idtoken12345';
         $authResult = ['id_token' => $token];
-        $this->mockFetcher
-            ->expects($this->once())
-            ->method('fetchAuthToken')
-            ->will($this->returnValue($authResult));
-        $this->mockRequest
-            ->expects($this->once())
-            ->method('withHeader')
-            ->with('authorization', 'Bearer ' . $token)
-            ->will($this->returnValue($this->mockRequest));
+        $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->willReturn($authResult);
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
+            ->willReturn($this->mockRequest);
 
-        $middleware = new AuthTokenMiddleware($this->mockFetcher);
+        $middleware = new AuthTokenMiddleware($this->mockFetcher->reveal());
         $mock = new MockHandler([new Response(200)]);
         $callable = $middleware($mock);
-        $callable($this->mockRequest, ['auth' => 'google_auth']);
+        $callable($this->mockRequest->reveal(), ['auth' => 'google_auth']);
     }
 
     public function testUsesCachedAuthToken()
