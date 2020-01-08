@@ -41,20 +41,6 @@ class ADCGetTest extends TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     */
-    public function testFailsIfBothScopeAndIdTokenAudienceAreSupplied()
-    {
-        ApplicationDefaultCredentials::getCredentials(
-            'a scope',
-            null,
-            null,
-            null,
-            'an id token audience'
-        );
-    }
-
-    /**
      * @expectedException DomainException
      */
     public function testIsFailsEnvSpecifiesNonExistentFile()
@@ -217,6 +203,7 @@ class ADCGetMiddlewareTest extends TestCase
 class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
 {
     private $originalHome;
+    private $targetAudience = 'an id token audience';
 
     protected function setUp()
     {
@@ -238,20 +225,20 @@ class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
     {
         $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'an id token audience');
+        ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
     }
 
     public function testLoadsOKIfEnvSpecifiedIsValid()
     {
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'an id token audience');
+        ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
     }
 
     public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
         putenv('HOME=' . __DIR__ . '/fixtures');
-        ApplicationDefaultCredentials::getCredentials(null, null, null, null, 'an id token audience');
+        ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
     }
 
     /**
@@ -260,6 +247,7 @@ class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+        putenv('SERVER_SOFTWARE');
 
         // simulate not being GCE and retry attempts by returning multiple 500s
         $httpHandler = getHandler([
@@ -268,7 +256,11 @@ class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
             buildResponse(500)
         ]);
 
-        ApplicationDefaultCredentials::getCredentials(null, $httpHandler, null, null, 'an id token audience');
+        $_SERVER['SERVER_SOFTWARE'] = '';
+        ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
+            $httpHandler
+        );
     }
 
     public function testWithCacheOptions()
@@ -283,12 +275,11 @@ class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
         $cacheOptions = [];
         $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
 
-        $credentials = ApplicationDefaultCredentials::getCredentials(
-            null,
+        $credentials = ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
             $httpHandler,
             $cacheOptions,
-            $cachePool->reveal(),
-            'an id token audience'
+            $cachePool->reveal()
         );
 
         $this->assertInstanceOf('Google\Auth\FetchAuthTokenCache', $credentials);
@@ -310,12 +301,9 @@ class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
             buildResponse(200, [], Psr7\stream_for($jsonTokens)),
         ]);
 
-        $credentials = ApplicationDefaultCredentials::getCredentials(
-            null,
-            $httpHandler,
-            null,
-            null,
-            'an id token audience'
+        $credentials = ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
+            $httpHandler
         );
 
         $this->assertInstanceOf(
@@ -329,6 +317,7 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
 {
     private $originalHome;
     private $originalServiceAccount;
+    private $targetAudience = 'an id token audience';
 
     protected function setUp()
     {
@@ -383,12 +372,9 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
             buildResponse(503),
             buildResponse(503),
         ]);
-        $credentials = ApplicationDefaultCredentials::getCredentials(
-            null,
-            $httpHandler,
-            null,
-            null,
-            'an id token audience'
+        $credentials = ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
+            $httpHandler
         );
         $this->assertNotInstanceOf(
             'Google\Auth\Credentials\AppIdentityCredentials',
@@ -403,12 +389,9 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
         $httpHandler = getHandler([
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         ]);
-        $creds = ApplicationDefaultCredentials::getCredentials(
-            null,
-            $httpHandler,
-            null,
-            null,
-            'an id token audience'
+        $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
+            $httpHandler
         );
         $this->assertInstanceOf(
             'Google\Auth\Credentials\GCECredentials',

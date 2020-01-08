@@ -187,7 +187,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      *
      * @return string
      */
-    public static function getIdTokenUri()
+    private static function getIdTokenUri()
     {
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
 

@@ -18,14 +18,15 @@
 namespace Google\Auth;
 
 use DomainException;
-use InvalidArgumentException;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
@@ -105,7 +106,6 @@ class ApplicationDefaultCredentials
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
-     * @param string $targetAudience The audience for the ID token.
      *
      * @return AuthTokenMiddleware
      *
@@ -115,16 +115,9 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null,
-        $targetAudience = null
-
+        CacheItemPoolInterface $cache = null
     ) {
-        if ($scope && $targetAudience) {
-            throw new InvalidArgumentException(
-                'Scope and targetAudience cannot both be supplied');
-        }
-
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $targetAudience);
+        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
 
         return new AuthTokenMiddleware($creds, $httpHandler);
     }
@@ -141,7 +134,6 @@ class ApplicationDefaultCredentials
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
-     * @param string $targetAudience The audience for the ID token.
      *
      * @return CredentialsLoader
      *
@@ -151,14 +143,8 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null,
-        $targetAudience = null
+        CacheItemPoolInterface $cache = null
     ) {
-        if ($scope && $targetAudience) {
-            throw new InvalidArgumentException(
-                'Scope and targetAudience cannot both be supplied');
-        }
-
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
             ?: CredentialsLoader::fromWellKnownFile();
@@ -173,15 +159,97 @@ class ApplicationDefaultCredentials
         }
 
         if (!is_null($jsonKey)) {
-            $creds = CredentialsLoader::makeCredentials($scope, $jsonKey, $targetAudience);
+            $creds = CredentialsLoader::makeCredentials($scope, $jsonKey);
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
-            if (!empty($targetAudience)) {
-                throw new \InvalidArgumentException(
-                    'targetAudience is not valid on older versions of App Engine');
-            }
             $creds = new AppIdentityCredentials($scope);
         } elseif (GCECredentials::onGce($httpHandler)) {
-            $creds = new GCECredentials(null, $scope, $targetAudience);
+            $creds = new GCECredentials(null, $scope);
+        }
+
+        if (is_null($creds)) {
+            throw new \DomainException(self::notFound());
+        }
+        if (!is_null($cache)) {
+            $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
+        }
+        return $creds;
+    }
+
+    /**
+     * Obtains an AuthTokenMiddleware that uses the default FetchAuthTokenInterface
+     * implementation to use in this environment.
+     *
+     * If supplied, $scope is used to in creating the credentials instance if
+     * this does not fallback to the compute engine defaults.
+     *
+     * @param string $targetAudience The audience for the ID token.
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @param array $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface $cache
+     *
+     * @return AuthTokenMiddleware
+     *
+     * @throws DomainException if no implementation can be obtained.
+     */
+    public static function getIdTokenMiddleware(
+        $targetAudience,
+        callable $httpHandler = null,
+        array $cacheConfig = null,
+        CacheItemPoolInterface $cache = null
+
+    ) {
+        $creds = self::getCredentials($targetAudience, $httpHandler, $cacheConfig, $cache);
+
+        return new AuthTokenMiddleware($creds, $httpHandler);
+    }
+
+    /**
+     * Obtains the default FetchAuthTokenInterface implementation to use
+     * in this environment.
+     *
+     * @param string $targetAudience The audience for the ID token.
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @param array $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface $cache
+     *
+     * @return CredentialsLoader
+     *
+     * @throws DomainException if no implementation can be obtained.
+     */
+    public static function getIdTokenCredentials(
+        $targetAudience,
+        callable $httpHandler = null,
+        array $cacheConfig = null,
+        CacheItemPoolInterface $cache = null
+    ) {
+        $creds = null;
+        $jsonKey = CredentialsLoader::fromEnv()
+            ?: CredentialsLoader::fromWellKnownFile();
+
+        if (!$httpHandler) {
+            if (!($client = HttpClientCache::getHttpClient())) {
+                $client = new Client();
+                HttpClientCache::setHttpClient($client);
+            }
+
+            $httpHandler = HttpHandlerFactory::build($client);
+        }
+
+        if (!is_null($jsonKey)) {
+            if ($jsonKey['type'] == 'authorized_user') {
+                throw new InvalidArgumentException('ID tokens are not supported for end user credentials');
+            } elseif ($jsonKey['type'] != 'service_account') {
+                throw new InvalidArgumentException('invalid value in the type field');
+            }
+            $creds = new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience);
+        } elseif (GCECredentials::onGce($httpHandler)) {
+            $creds = new GCECredentials(null, null, $targetAudience);
+        } elseif (
+            AppIdentityCredentials::onAppEngine()
+            && !GCECredentials::onAppEngineFlexible()
+        ) {
+            throw new InvalidArgumentException(
+                'targetAudience is not valid on older versions of App Engine');
         }
 
         if (is_null($creds)) {

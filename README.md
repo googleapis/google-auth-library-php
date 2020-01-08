@@ -121,8 +121,8 @@ $client = new Client([
 // create subscriber
 $subscriber = ApplicationDefaultCredentials::getSubscriber($scopes);
 $client->getEmitter()->attach($subscriber);
-
 ```
+
 #### Call using an ID Token
 
 ```php
@@ -140,7 +140,7 @@ putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 $targetAudience = 'YOUR_ID_TOKEN_AUDIENCE';
 
 // create middleware
-$middleware = ApplicationDefaultCredentials::getMiddleware(null, null, null, null, $targetAudience);
+$middleware = ApplicationDefaultCredentials::getIdTokenMiddleware($targetAudience);
 $stack = HandlerStack::create();
 $stack->push($middleware);
 
