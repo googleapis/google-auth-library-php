@@ -247,7 +247,6 @@ class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
-        putenv('SERVER_SOFTWARE');
 
         // simulate not being GCE and retry attempts by returning multiple 500s
         $httpHandler = getHandler([
@@ -256,7 +255,6 @@ class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
             buildResponse(500)
         ]);
 
-        $_SERVER['SERVER_SOFTWARE'] = '';
         ApplicationDefaultCredentials::getIdTokenCredentials(
             $this->targetAudience,
             $httpHandler
@@ -357,28 +355,6 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
         $this->assertInstanceOf(
             'Google\Auth\Credentials\GCECredentials',
             ApplicationDefaultCredentials::getCredentials(null, $httpHandler)
-        );
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage targetAudience is not valid on older versions of App Engine
-     */
-    public function testAppEngineStandardIdToken()
-    {
-        $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
-        $httpHandler = getHandler([
-            buildResponse(503),
-            buildResponse(503),
-            buildResponse(503),
-        ]);
-        $credentials = ApplicationDefaultCredentials::getIdTokenCredentials(
-            $this->targetAudience,
-            $httpHandler
-        );
-        $this->assertNotInstanceOf(
-            'Google\Auth\Credentials\AppIdentityCredentials',
-            $credentials
         );
     }
 

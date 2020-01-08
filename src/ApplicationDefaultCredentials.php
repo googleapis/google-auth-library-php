@@ -167,7 +167,7 @@ class ApplicationDefaultCredentials
         }
 
         if (is_null($creds)) {
-            throw new \DomainException(self::notFound());
+            throw new DomainException(self::notFound());
         }
         if (!is_null($cache)) {
             $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
@@ -215,6 +215,7 @@ class ApplicationDefaultCredentials
      * @return CredentialsLoader
      *
      * @throws DomainException if no implementation can be obtained.
+     * @throws InvalidArgumentException if JSON "type" key is invalid
      */
     public static function getIdTokenCredentials(
         $targetAudience,
@@ -244,16 +245,10 @@ class ApplicationDefaultCredentials
             $creds = new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience);
         } elseif (GCECredentials::onGce($httpHandler)) {
             $creds = new GCECredentials(null, null, $targetAudience);
-        } elseif (
-            AppIdentityCredentials::onAppEngine()
-            && !GCECredentials::onAppEngineFlexible()
-        ) {
-            throw new InvalidArgumentException(
-                'targetAudience is not valid on older versions of App Engine');
         }
 
         if (is_null($creds)) {
-            throw new \DomainException(self::notFound());
+            throw new DomainException(self::notFound());
         }
         if (!is_null($cache)) {
             $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
