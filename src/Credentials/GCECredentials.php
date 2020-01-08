@@ -131,9 +131,9 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     private $tokenUri;
 
     /**
-     * @var int
+     * @var string
      */
-    private $tokenType;
+    private $targetAudience;
 
     /**
      * @param Iam $iam [optional] An IAM instance.
@@ -150,7 +150,6 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
                 'Scope and targetAudience cannot both be supplied');
         }
 
-        $tokenType = self::TOKEN_TYPE_ACCESS_TOKEN;
         $tokenUri = self::getTokenUri();
         if ($scope) {
             if (is_string($scope)) {
@@ -161,13 +160,15 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
 
             $tokenUri = $tokenUri . '?scopes='. $scope;
         } elseif ($targetAudience) {
-            $tokenUri = self::getIdTokenUri();
-            $tokenUri .= '?audience=' . $targetAudience;
-            $tokenType = self::TOKEN_TYPE_ID_TOKEN;
+            $tokenUri = sprintf('http://%s/computeMetadata/%s?audience=%s',
+                self::METADATA_IP,
+                self::ID_TOKEN_URI_PATH,
+                $targetAudience
+            );
+            $this->targetAudience = $targetAudience;
         }
 
         $this->tokenUri = $tokenUri;
-        $this->tokenType = $tokenType;
     }
 
     /**
@@ -180,18 +181,6 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
 
         return $base . self::TOKEN_URI_PATH;
-    }
-
-    /**
-     * The full uri for accessing the default ID token.
-     *
-     * @return string
-     */
-    private static function getIdTokenUri()
-    {
-        $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
-
-        return $base . self::ID_TOKEN_URI_PATH;
     }
 
     /**
@@ -294,7 +283,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
 
         $response = $this->getFromMetadata($httpHandler, $this->tokenUri);
 
-        if ($this->tokenType == self::TOKEN_TYPE_ID_TOKEN) {
+        if ($this->targetAudience) {
             return ['id_token' => $response];
         }
 
