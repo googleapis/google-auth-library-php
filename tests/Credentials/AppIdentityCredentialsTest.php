@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests\Cache;
+namespace Google\Auth\Tests\Credentials;
 
 use google\appengine\api\app_identity\AppIdentityService;
 // included from tests\mocks\AppIdentityService.php
