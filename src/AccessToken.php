@@ -130,9 +130,8 @@ class AccessToken
      *                     https://tools.ietf.org/html/rfc7517).
      * @return string The expected algorithm, such as "ES256" or "RS256".
      */
-    private function determineAlg($certs)
+    private function determineAlg(array $certs)
     {
-        $keys = [];
         $alg = null;
         foreach ($certs as $cert) {
             if (empty($cert['alg'])) {
@@ -162,7 +161,7 @@ class AccessToken
      *                              the JWT.
      * @return array|bool the token payload, if successful, or false if not.
      */
-    private function verifyEs256($token, $certs, $audience = null)
+    private function verifyEs256($token, array $certs, $audience = null)
     {
         $this->checkSimpleJwt();
 
