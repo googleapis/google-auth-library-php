@@ -197,7 +197,7 @@ class AccessToken
      *                              the JWT.
      * @return array|bool the token payload, if successful, or false if not.
      */
-    private function verifyRs256($token, $certs, $audience = null)
+    private function verifyRs256($token, array $certs, $audience = null)
     {
         $this->checkAndInitializePhpsec();
         $keys = [];
