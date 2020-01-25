@@ -207,7 +207,8 @@ class ApplicationDefaultCredentials
 
     /**
      * Obtains the default FetchAuthTokenInterface implementation to use
-     * in this environment.
+     * in this environment, configured with a $targetAudience for fetching an ID
+     * token.
      *
      * @param string $targetAudience The audience for the ID token.
      * @param callable $httpHandler callback which delivers psr7 request
