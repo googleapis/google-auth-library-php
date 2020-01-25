@@ -123,8 +123,9 @@ class ApplicationDefaultCredentials
     }
 
     /**
-     * Obtains the default FetchAuthTokenInterface implementation to use
-     * in this environment.
+     * Obtains an AuthTokenMiddleware which will fetch an access token to use in
+     * the Authorization header. The middleware is configured with the default
+     * FetchAuthTokenInterface implementation to use in this environment.
      *
      * If supplied, $scope is used to in creating the credentials instance if
      * this does not fallback to the Compute Engine defaults.
@@ -176,11 +177,12 @@ class ApplicationDefaultCredentials
     }
 
     /**
-     * Obtains an AuthTokenMiddleware that uses the default FetchAuthTokenInterface
-     * implementation to use in this environment.
+     * Obtains an AuthTokenMiddleware which will fetch an ID token to use in the
+     * Authorization header. The middleware is configured with the default
+     * FetchAuthTokenInterface implementation to use in this environment.
      *
-     * If supplied, $scope is used to in creating the credentials instance if
-     * this does not fallback to the compute engine defaults.
+     * If supplied, $targetAudience is used to set the "aud" on the resulting
+     * ID token.
      *
      * @param string $targetAudience The audience for the ID token.
      * @param callable $httpHandler callback which delivers psr7 request
@@ -198,7 +200,7 @@ class ApplicationDefaultCredentials
         CacheItemPoolInterface $cache = null
 
     ) {
-        $creds = self::getCredentials($targetAudience, $httpHandler, $cacheConfig, $cache);
+        $creds = self::getIdTokenCredentials($targetAudience, $httpHandler, $cacheConfig, $cache);
 
         return new AuthTokenMiddleware($creds, $httpHandler);
     }
@@ -237,11 +239,18 @@ class ApplicationDefaultCredentials
         }
 
         if (!is_null($jsonKey)) {
+            if (!array_key_exists('type', $jsonKey)) {
+                throw new \InvalidArgumentException('json key is missing the type field');
+            }
+
             if ($jsonKey['type'] == 'authorized_user') {
                 throw new InvalidArgumentException('ID tokens are not supported for end user credentials');
-            } elseif ($jsonKey['type'] != 'service_account') {
+            }
+
+            if ($jsonKey['type'] != 'service_account') {
                 throw new InvalidArgumentException('invalid value in the type field');
             }
+
             $creds = new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience);
         } elseif (GCECredentials::onGce($httpHandler)) {
             $creds = new GCECredentials(null, null, $targetAudience);

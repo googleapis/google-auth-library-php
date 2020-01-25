@@ -21,6 +21,7 @@ use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
 use Google\Auth\ServiceAccountSignerTrait;
 use Google\Auth\SignBlobInterface;
+use InvalidArgumentException;
 
 /**
  * ServiceAccountCredentials supports authorization using a Google service
@@ -99,6 +100,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
         if (!array_key_exists('private_key', $jsonKey)) {
             throw new \InvalidArgumentException(
                 'json key is missing the private_key field');
+        }
+        if ($scope && $targetAudience) {
+            throw new InvalidArgumentException(
+                'Scope and targetAudience cannot both be supplied');
         }
         $additionalClaims = [];
         if ($targetAudience) {

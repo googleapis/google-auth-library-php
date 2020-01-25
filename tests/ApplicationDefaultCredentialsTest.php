@@ -200,10 +200,10 @@ class ADCGetMiddlewareTest extends TestCase
     }
 }
 
-class ADCGetCredentialsWithIdTokenAudienceTest extends TestCase
+class ADCGetCredentialsWithTargetAudienceTest extends TestCase
 {
     private $originalHome;
-    private $targetAudience = 'an id token audience';
+    private $targetAudience = 'a target audience';
 
     protected function setUp()
     {
@@ -315,7 +315,7 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
 {
     private $originalHome;
     private $originalServiceAccount;
-    private $targetAudience = 'an id token audience';
+    private $targetAudience = 'a target audience';
 
     protected function setUp()
     {

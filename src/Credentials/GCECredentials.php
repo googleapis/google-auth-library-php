@@ -26,6 +26,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
+use InvalidArgumentException;
 
 /**
  * GCECredentials supports authorization on Google Compute Engine.

@@ -124,6 +124,10 @@ $client->getEmitter()->attach($subscriber);
 ```
 
 #### Call using an ID Token
+If your application is running behind Cloud Run, or using Cloud Identity-Aware
+Proxy (IAP), you will need to fetch an ID token to access your application. For
+this, use the static method `getIdTokenMiddleware` on
+`ApplicationDefaultCredentials`.
 
 ```php
 use Google\Auth\ApplicationDefaultCredentials;
@@ -158,6 +162,14 @@ $response = $client->get('/');
 // show the result!
 print_r((string) $response->getBody());
 ```
+
+For invoking Cloud Run services, your service account will need the
+[`Cloud Run Invoker`](https://cloud.google.com/run/docs/authenticating/service-to-service)
+IAM permission.
+
+For invoking Cloud Identity-Aware Proxy, you will need to pass the Client ID
+used when you set up your protected resource as the target audience. See how to
+[secure your IAP app with signed headers](https://cloud.google.com/iap/docs/signed-headers-howto).
 
 ## License
 
