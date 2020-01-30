@@ -215,7 +215,7 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
         if ($this->originalHome != getenv('HOME')) {
             putenv('HOME=' . $this->originalHome);
         }
-        putenv(ServiceAccountCredentials::ENV_VAR);  // removes it from
+        putenv(ServiceAccountCredentials::ENV_VAR);  // removes environment variable
     }
 
     /**
