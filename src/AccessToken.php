@@ -429,7 +429,6 @@ class AccessToken
     /**
      * Provide a hook to mock calls to the JWT static methods.
      *
-     * @param string $method
      * @param array $args
      * @return mixed
      */
