@@ -20,11 +20,13 @@ namespace Google\Auth;
 use DomainException;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
@@ -121,8 +123,9 @@ class ApplicationDefaultCredentials
     }
 
     /**
-     * Obtains the default FetchAuthTokenInterface implementation to use
-     * in this environment.
+     * Obtains an AuthTokenMiddleware which will fetch an access token to use in
+     * the Authorization header. The middleware is configured with the default
+     * FetchAuthTokenInterface implementation to use in this environment.
      *
      * If supplied, $scope is used to in creating the credentials instance if
      * this does not fallback to the Compute Engine defaults.
@@ -165,7 +168,97 @@ class ApplicationDefaultCredentials
         }
 
         if (is_null($creds)) {
-            throw new \DomainException(self::notFound());
+            throw new DomainException(self::notFound());
+        }
+        if (!is_null($cache)) {
+            $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
+        }
+        return $creds;
+    }
+
+    /**
+     * Obtains an AuthTokenMiddleware which will fetch an ID token to use in the
+     * Authorization header. The middleware is configured with the default
+     * FetchAuthTokenInterface implementation to use in this environment.
+     *
+     * If supplied, $targetAudience is used to set the "aud" on the resulting
+     * ID token.
+     *
+     * @param string $targetAudience The audience for the ID token.
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @param array $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface $cache
+     *
+     * @return AuthTokenMiddleware
+     *
+     * @throws DomainException if no implementation can be obtained.
+     */
+    public static function getIdTokenMiddleware(
+        $targetAudience,
+        callable $httpHandler = null,
+        array $cacheConfig = null,
+        CacheItemPoolInterface $cache = null
+
+    ) {
+        $creds = self::getIdTokenCredentials($targetAudience, $httpHandler, $cacheConfig, $cache);
+
+        return new AuthTokenMiddleware($creds, $httpHandler);
+    }
+
+    /**
+     * Obtains the default FetchAuthTokenInterface implementation to use
+     * in this environment, configured with a $targetAudience for fetching an ID
+     * token.
+     *
+     * @param string $targetAudience The audience for the ID token.
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @param array $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface $cache
+     *
+     * @return CredentialsLoader
+     *
+     * @throws DomainException if no implementation can be obtained.
+     * @throws InvalidArgumentException if JSON "type" key is invalid
+     */
+    public static function getIdTokenCredentials(
+        $targetAudience,
+        callable $httpHandler = null,
+        array $cacheConfig = null,
+        CacheItemPoolInterface $cache = null
+    ) {
+        $creds = null;
+        $jsonKey = CredentialsLoader::fromEnv()
+            ?: CredentialsLoader::fromWellKnownFile();
+
+        if (!$httpHandler) {
+            if (!($client = HttpClientCache::getHttpClient())) {
+                $client = new Client();
+                HttpClientCache::setHttpClient($client);
+            }
+
+            $httpHandler = HttpHandlerFactory::build($client);
+        }
+
+        if (!is_null($jsonKey)) {
+            if (!array_key_exists('type', $jsonKey)) {
+                throw new \InvalidArgumentException('json key is missing the type field');
+            }
+
+            if ($jsonKey['type'] == 'authorized_user') {
+                throw new InvalidArgumentException('ID tokens are not supported for end user credentials');
+            }
+
+            if ($jsonKey['type'] != 'service_account') {
+                throw new InvalidArgumentException('invalid value in the type field');
+            }
+
+            $creds = new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience);
+        } elseif (GCECredentials::onGce($httpHandler)) {
+            $creds = new GCECredentials(null, null, $targetAudience);
+        }
+
+        if (is_null($creds)) {
+            throw new DomainException(self::notFound());
         }
         if (!is_null($cache)) {
             $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);

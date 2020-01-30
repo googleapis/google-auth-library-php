@@ -326,6 +326,43 @@ class SACFetchAuthTokenTest extends TestCase
             $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
             array('Bearer ' . $access_token));
     }
+
+    public function testShouldBeIdTokenWhenTargetAudienceIsSet()
+    {
+        $testJson = $this->createTestJson();
+        $expectedToken = ['id_token' => 'idtoken12345'];
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expectedToken) {
+            $timesCalled++;
+            parse_str($request->getBody(), $post);
+            $this->assertArrayHasKey('assertion', $post);
+            list($header, $payload, $sig) = explode('.', $post['assertion']);
+            $jwtParams = json_decode(base64_decode($payload), true);
+            $this->assertArrayHasKey('target_audience', $jwtParams);
+            $this->assertEquals('a target audience', $jwtParams['target_audience']);
+
+            return new Psr7\Response(200, [], Psr7\stream_for(json_encode($expectedToken)));
+
+        };
+        $sa = new ServiceAccountCredentials(null, $testJson, null, 'a target audience');
+        $this->assertEquals($expectedToken, $sa->fetchAuthToken($httpHandler));
+        $this->assertEquals(1, $timesCalled);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Scope and targetAudience cannot both be supplied
+     */
+    public function testSettingBothScopeAndTargetAudienceThrowsException()
+    {
+        $testJson = $this->createTestJson();
+        $sa = new ServiceAccountCredentials(
+            'a-scope',
+            $testJson,
+            null,
+            'a-target-audience'
+        );
+    }
 }
 
 class SACGetClientNameTest extends TestCase

@@ -21,6 +21,7 @@ use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
 use Google\Auth\ServiceAccountSignerTrait;
 use Google\Auth\SignBlobInterface;
+use InvalidArgumentException;
 
 /**
  * ServiceAccountCredentials supports authorization using a Google service
@@ -75,11 +76,13 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      *   as an associative array
      * @param string $sub an email address account to impersonate, in situations when
      *   the service account has been delegated domain wide access.
+     * @param string $targetAudience The audience for the ID token.
      */
     public function __construct(
         $scope,
         $jsonKey,
-        $sub = null
+        $sub = null,
+        $targetAudience = null
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -98,6 +101,14 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
             throw new \InvalidArgumentException(
                 'json key is missing the private_key field');
         }
+        if ($scope && $targetAudience) {
+            throw new InvalidArgumentException(
+                'Scope and targetAudience cannot both be supplied');
+        }
+        $additionalClaims = [];
+        if ($targetAudience) {
+            $additionalClaims = ['target_audience' => $targetAudience];
+        }
         $this->auth = new OAuth2([
             'audience' => self::TOKEN_CREDENTIAL_URI,
             'issuer' => $jsonKey['client_email'],
@@ -106,6 +117,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
             'signingKey' => $jsonKey['private_key'],
             'sub' => $sub,
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
+            'additionalClaims' => $additionalClaims,
         ]);
     }
 

@@ -86,6 +86,21 @@ class AuthTokenMiddlewareTest extends BaseTest
         $callable($this->mockRequest->reveal(), ['auth' => 'google_auth']);
     }
 
+    public function testUsesIdTokenWhenAccessTokenDoesNotExist()
+    {
+        $token = 'idtoken12345';
+        $authResult = ['id_token' => $token];
+        $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->willReturn($authResult);
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
+            ->willReturn($this->mockRequest);
+
+        $middleware = new AuthTokenMiddleware($this->mockFetcher->reveal());
+        $mock = new MockHandler([new Response(200)]);
+        $callable = $middleware($mock);
+        $callable($this->mockRequest->reveal(), ['auth' => 'google_auth']);
+    }
+
     public function testUsesCachedAuthToken()
     {
         $cacheKey = 'myKey';
