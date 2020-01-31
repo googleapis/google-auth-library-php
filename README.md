@@ -171,6 +171,35 @@ For invoking Cloud Identity-Aware Proxy, you will need to pass the Client ID
 used when you set up your protected resource as the target audience. See how to
 [secure your IAP app with signed headers](https://cloud.google.com/iap/docs/signed-headers-howto).
 
+#### Verifying JWTs
+
+If you are [using Google ID tokens to authenticate users][google-id-tokens], use
+the `Google\Auth\AccessToken` class to verify the ID token:
+
+```php
+use Google\Auth\AccessToken;
+
+$auth = new AccessToken();
+$auth->verify($idToken);
+```
+
+If your app is running behind [Google Identity-Aware Proxy][iap-id-tokens]
+(IAP), you can verify the ID token coming from the IAP server by pointing to the
+appropriate certificate URL for IAP. This is because IAP signs the ID
+tokens with a different key than the Google Identity service:
+
+```php
+use Google\Auth\AccessToken;
+
+$auth = new AccessToken();
+$auth->verify($idToken, [
+  'certsLocation' => AccessToken::IAP_CERT_URL
+]);
+```
+
+[google-id-tokens]: https://developers.google.com/identity/sign-in/web/backend-auth
+[iap-id-tokens]: https://cloud.google.com/iap/docs/signed-headers-howto
+
 ## License
 
 This library is licensed under Apache 2.0. Full license text is
