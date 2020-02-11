@@ -385,7 +385,7 @@ class AccessToken
     {
         // @codeCoverageIgnoreStart
         if (!class_exists('SimpleJWT\JWT')) {
-            throw new \RuntimeException('Please require kelvinmo/simplejwtlib ^0.2 to use this utility.');
+            throw new \RuntimeException('Please require kelvinmo/simplejwt ^0.2 to use this utility.');
         }
         // @codeCoverageIgnoreEnd
     }
