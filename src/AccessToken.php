@@ -450,6 +450,6 @@ class AccessToken
             ? 'federated_signon_certs_v3'
             : sha1($certsLocation);
 
-        return 'google_auth_certs_cache:' . $key;
+        return 'google_auth_certs_cache|' . $key;
     }
 }
