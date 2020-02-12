@@ -218,9 +218,8 @@ class AccessTokenTest extends TestCase
             AccessToken::IAP_CERT_URL,
             $cacheKey
         );
-
         $this->assertTrue(is_array($certs));
-        $this->assertArrayHasKey('keys', $certs);
+        $this->assertEquals(5, count($certs));
     }
 
     public function testRetrieveCertsFromLocationLocalFile()
