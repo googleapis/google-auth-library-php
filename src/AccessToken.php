@@ -32,6 +32,7 @@ use SimpleJWT\Keys\KeyFactory;
 use SimpleJWT\Keys\KeySet;
 use SimpleJWT\InvalidTokenException;
 use Psr\Cache\CacheItemPoolInterface;
+use Exception;
 
 /**
  * Wrapper around Google Access Tokens which provides convenience functions.
@@ -55,6 +56,11 @@ class AccessToken
      * @var CacheItemPoolInterface
      */
     private $cache;
+
+    /**
+     * @var Exception
+     */
+    private $verifyException;
 
     /**
      * @param callable $httpHandler [optional] An HTTP Handler to deliver PSR-7 requests.
@@ -174,6 +180,7 @@ class AccessToken
         try {
             $jwt = $this->callSimpleJwtDecode([$token, $jwkset, 'ES256']);
         } catch (InvalidTokenException $e) {
+            $this->verifyException = $e;
             return false;
         }
 
@@ -248,12 +255,17 @@ class AccessToken
 
             return (array) $payload;
         } catch (ExpiredException $e) {
+            $this->verifyException = $e;
         } catch (\ExpiredException $e) {
             // (firebase/php-jwt 2)
+            $this->verifyException = $e;
         } catch (SignatureInvalidException $e) {
+            $this->verifyException = $e;
         } catch (\SignatureInvalidException $e) {
             // (firebase/php-jwt 2)
+            $this->verifyException = $e;
         } catch (\DomainException $e) {
+            $this->verifyException = $e;
         }
 
         return false;
@@ -288,6 +300,11 @@ class AccessToken
         $response = $httpHandler($request, $options);
 
         return $response->getStatusCode() == 200;
+    }
+
+    public function getVerifyException()
+    {
+        return $this->verifyException;
     }
 
     /**

@@ -64,6 +64,8 @@ class AccessTokenTest extends TestCase
         $expected,
         $audience = null,
         callable $verifyCallback = null,
+        $verifyExceptionClass = null,
+        $verifyExceptionMessage = null,
         $certsLocation = null
     ) {
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
@@ -107,6 +109,21 @@ class AccessTokenTest extends TestCase
             'certsLocation' => $certsLocation,
         ]);
         $this->assertEquals($expected, $res);
+
+        $verifyException = $token->getVerifyException();
+        if ($verifyExceptionClass) {
+            $this->assertNotNull($verifyException);
+            $this->assertInstanceOf($verifyExceptionClass, $verifyException);
+
+            if ($verifyExceptionMessage) {
+                $this->assertEquals(
+                    $verifyExceptionMessage,
+                    $verifyException->getMessage()
+                );
+            }
+        } else {
+            $this->assertNull($verifyException);
+        }
     }
 
     public function verifyCalls()
@@ -144,9 +161,11 @@ class AccessTokenTest extends TestCase
                     if (class_exists('Firebase\JWT\ExpiredException')) {
                         throw new ExpiredException('expired!');
                     } else {
-                        throw new \ExpiredException('expired');
+                        throw new \ExpiredException('expired!');
                     }
-                }
+                },
+                ExpiredException::class,
+                'expired!'
             ], [
                 $this->payload,
                 false,
@@ -155,20 +174,26 @@ class AccessTokenTest extends TestCase
                     if (class_exists('Firebase\JWT\SignatureInvalidException')) {
                         throw new SignatureInvalidException('invalid!');
                     } else {
-                        throw new \SignatureInvalidException('invalid');
+                        throw new \SignatureInvalidException('invalid!');
                     }
-                }
+                },
+                SignatureInvalidException::class,
+                'invalid!'
             ], [
                 $this->payload,
                 false,
                 null,
                 function () {
                     throw new \DomainException('expired!');
-                }
+                },
+                'DomainException',
+                'expired!'
             ],
             [
                 $this->payload,
                 $this->payload,
+                null,
+                null,
                 null,
                 null,
                 AccessToken::IAP_CERT_URL
