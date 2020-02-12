@@ -1,3 +1,8 @@
+## 1.7.1 (02/12/2020)
+
+* [fix] Invalid character in iap cert cache key (#263)
+* [fix] Typo in exception for package name (#262)
+
 ## 1.7.0 (02/11/2020)
 
 * [feat] Add ID token to auth token methods. (#248)
