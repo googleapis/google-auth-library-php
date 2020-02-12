@@ -17,9 +17,7 @@
 
 namespace Google\Auth\Tests;
 
-use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT as FirebaseJWT;
-use Firebase\JWT\SignatureInvalidException;
 use Google\Auth\AccessToken;
 use GuzzleHttp\Psr7\Response;
 use phpseclib\Crypt\RSA;
@@ -63,9 +61,7 @@ class AccessTokenTest extends TestCase
         $payload,
         $expected,
         $audience = null,
-        callable $verifyCallback = null,
-        $verifyExceptionClass = null,
-        $verifyExceptionMessage = null,
+        $exception = null,
         $certsLocation = null
     ) {
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
@@ -93,12 +89,12 @@ class AccessTokenTest extends TestCase
             $this->cache->reveal()
         );
 
-        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) use ($payload, $verifyCallback) {
+        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) use ($payload, $exception) {
             $this->assertEquals($this->token, $token);
             $this->assertEquals($this->allowedAlgs, $allowedAlgs);
 
-            if ($verifyCallback) {
-                $verifyCallback($token, $publicKey, $allowedAlgs);
+            if ($exception) {
+                throw $exception;
             }
 
             return (object) $payload;
@@ -111,16 +107,8 @@ class AccessTokenTest extends TestCase
         $this->assertEquals($expected, $res);
 
         $verifyException = $token->getVerifyException();
-        if ($verifyExceptionClass) {
-            $this->assertNotNull($verifyException);
-            $this->assertInstanceOf($verifyExceptionClass, $verifyException);
-
-            if ($verifyExceptionMessage) {
-                $this->assertEquals(
-                    $verifyExceptionMessage,
-                    $verifyException->getMessage()
-                );
-            }
+        if ($exception) {
+            $this->assertEquals($exception, $verifyException);
         } else {
             $this->assertNull($verifyException);
         }
@@ -129,6 +117,14 @@ class AccessTokenTest extends TestCase
     public function verifyCalls()
     {
         $this->setUp();
+
+        if (class_exists('Firebase\JWT\JWT')) {
+            $expiredException = 'Firebase\JWT\ExpiredException';
+            $sigInvalidException = 'Firebase\JWT\SignatureInvalidException';
+        } else {
+            $expiredException = 'ExpiredException';
+            $sigInvalidException = 'SignatureInvalidException';
+        }
 
         return [
             [
@@ -157,43 +153,21 @@ class AccessTokenTest extends TestCase
                 $this->payload,
                 false,
                 null,
-                function () {
-                    if (class_exists('Firebase\JWT\ExpiredException')) {
-                        throw new ExpiredException('expired!');
-                    } else {
-                        throw new \ExpiredException('expired!');
-                    }
-                },
-                ExpiredException::class,
-                'expired!'
+                new $expiredException('expired!')
             ], [
                 $this->payload,
                 false,
                 null,
-                function () {
-                    if (class_exists('Firebase\JWT\SignatureInvalidException')) {
-                        throw new SignatureInvalidException('invalid!');
-                    } else {
-                        throw new \SignatureInvalidException('invalid!');
-                    }
-                },
-                SignatureInvalidException::class,
-                'invalid!'
+                new $sigInvalidException('invalid!')
             ], [
                 $this->payload,
                 false,
                 null,
-                function () {
-                    throw new \DomainException('expired!');
-                },
-                'DomainException',
-                'expired!'
+                new \DomainException('expired!')
             ],
             [
                 $this->payload,
                 $this->payload,
-                null,
-                null,
                 null,
                 null,
                 AccessToken::IAP_CERT_URL
