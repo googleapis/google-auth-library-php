@@ -24,7 +24,6 @@ use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenInterface;
-use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
 use Prophecy\Argument;
 
@@ -46,7 +45,7 @@ class FetchAuthTokenTest extends BaseTest
         };
 
         if (in_array(
-            GetQuotaProjectInterface::class,
+            'Google\Auth\GetQuotaProjectInterface',
             class_implements($fetcherClass)
         )) {
             $mockFetcher->getQuotaProject()->shouldBeCalledTimes(1);
