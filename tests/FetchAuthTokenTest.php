@@ -24,6 +24,7 @@ use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
 use Prophecy\Argument;
 
@@ -44,6 +45,12 @@ class FetchAuthTokenTest extends BaseTest
             return ['access_token' => 'xyz'];
         };
 
+        if (in_array(
+            GetQuotaProjectInterface::class,
+            class_implements($fetcherClass)
+        )) {
+            $mockFetcher->getQuotaProject()->shouldBeCalledTimes(1);
+        }
         $mockFetcher->fetchAuthToken(Argument::any())
             ->shouldBeCalledTimes(1)
             ->will($httpHandler);
