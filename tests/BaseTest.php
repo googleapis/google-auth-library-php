@@ -1,6 +1,6 @@
 <?php
 
-namespace Google\Auth\tests;
+namespace Google\Auth\Tests;
 
 use GuzzleHttp\ClientInterface;
 use PHPUnit\Framework\TestCase;

@@ -27,6 +27,10 @@ use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Request;
 use phpseclib\Crypt\RSA;
 use phpseclib\Math\BigInteger;
+use SimpleJWT\JWT as SimpleJWT;
+use SimpleJWT\Keys\KeyFactory;
+use SimpleJWT\Keys\KeySet;
+use SimpleJWT\InvalidTokenException;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
@@ -37,6 +41,7 @@ use Psr\Cache\CacheItemPoolInterface;
 class AccessToken
 {
     const FEDERATED_SIGNON_CERT_URL = 'https://www.googleapis.com/oauth2/v3/certs';
+    const IAP_CERT_URL = 'https://www.gstatic.com/iap/verify/public_key-jwk';
     const OAUTH2_ISSUER = 'accounts.google.com';
     const OAUTH2_ISSUER_HTTPS = 'https://accounts.google.com';
     const OAUTH2_REVOKE_URI = 'https://oauth2.googleapis.com/revoke';
@@ -59,19 +64,9 @@ class AccessToken
         callable $httpHandler = null,
         CacheItemPoolInterface $cache = null
     ) {
-        // @codeCoverageIgnoreStart
-        if (!class_exists('phpseclib\Crypt\RSA')) {
-            throw new \RuntimeException('Please require phpseclib/phpseclib v2 to use this utility.');
-        }
-        // @codeCoverageIgnoreEnd
-
         $this->httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         $this->cache = $cache ?: new MemoryCacheItemPool();
-        $this->configureJwtService();
-
-        // set phpseclib constants if applicable
-        $this->setPhpsecConstants();
     }
 
     /**
@@ -89,6 +84,9 @@ class AccessToken
      *        to retrieve certificates, if not cached. This value should only be
      *        provided in limited circumstances in which you are sure of the
      *        behavior.
+     *     @type string $cacheKey The cache key of the cached certs. Defaults to
+     *        the sha1 of $certsLocation if provided, otherwise is set to
+     *        "federated_signon_certs_v3".
      * }
      * @return array|bool the token payload, if successful, or false if not.
      * @throws \InvalidArgumentException If certs could not be retrieved from a local file.
@@ -103,57 +101,159 @@ class AccessToken
         $certsLocation = isset($options['certsLocation'])
             ? $options['certsLocation']
             : self::FEDERATED_SIGNON_CERT_URL;
-
-        unset($options['audience'], $options['certsLocation']);
+        $cacheKey = isset($options['cacheKey'])
+            ? $options['cacheKey']
+            : $this->getCacheKeyFromCertLocation($certsLocation);
 
         // Check signature against each available cert.
-        // allow the loop to complete unless a known bad result is encountered.
-        $certs = $this->getFederatedSignOnCerts($certsLocation, $options);
+        $certs = $this->getCerts($certsLocation, $cacheKey, $options);
+        $alg = $this->determineAlg($certs);
+
+        switch ($alg) {
+            case 'ES256':
+                return $this->verifyEs256($token, $certs, $audience);
+
+            case 'RS256':
+                return $this->verifyRs256($token, $certs, $audience);
+
+            default:
+                throw new \InvalidArgumentException(
+                    'unrecognized "alg" in certs, expected ES256 or RS256');
+        }
+    }
+
+    /**
+     * Identifies the expected algorithm to verify by looking at the "alg" key
+     * of the provided certs.
+     *
+     * @param array $certs Certificate array according to the JWK spec (see
+     *                     https://tools.ietf.org/html/rfc7517).
+     * @return string The expected algorithm, such as "ES256" or "RS256".
+     */
+    private function determineAlg(array $certs)
+    {
+        $alg = null;
         foreach ($certs as $cert) {
+            if (empty($cert['alg'])) {
+                throw new \InvalidArgumentException(
+                    'certs expects "alg" to be set'
+                );
+            }
+            $alg = $alg ?: $cert['alg'];
+
+            if ($alg != $cert['alg']) {
+                throw new \InvalidArgumentException(
+                    'More than one alg detected in certs'
+                );
+            }
+        }
+        return $alg;
+    }
+
+    /**
+     * Verifies an ES256-signed JWT.
+     *
+     * @param string $token The JSON Web Token to be verified.
+     * @param array $certs Certificate array according to the JWK spec (see
+     *                     https://tools.ietf.org/html/rfc7517).
+     * @param string|null $audience If set, returns false if the provided
+     *                              audience does not match the "aud" claim on
+     *                              the JWT.
+     * @return array|bool the token payload, if successful, or false if not.
+     */
+    private function verifyEs256($token, array $certs, $audience = null)
+    {
+        $this->checkSimpleJwt();
+
+        $jwkset = new KeySet();
+        foreach ($certs as $cert) {
+            $jwkset->add(KeyFactory::create($cert, 'php'));
+        }
+
+        // Validate the signature using the key set and ES256 algorithm.
+        try {
+            $jwt = $this->callSimpleJwtDecode([$token, $jwkset, 'ES256']);
+        } catch (InvalidTokenException $e) {
+            return false;
+        }
+
+        if ($aud = $jwt->getClaim('aud')) {
+            if ($audience && $aud != $audience) {
+                return false;
+            }
+        }
+
+        return $jwt->getClaims();
+    }
+
+    /**
+     * Verifies an RS256-signed JWT.
+     *
+     * @param string $token The JSON Web Token to be verified.
+     * @param array $certs Certificate array according to the JWK spec (see
+     *                     https://tools.ietf.org/html/rfc7517).
+     * @param string|null $audience If set, returns false if the provided
+     *                              audience does not match the "aud" claim on
+     *                              the JWT.
+     * @return array|bool the token payload, if successful, or false if not.
+     */
+    private function verifyRs256($token, array $certs, $audience = null)
+    {
+        $this->checkAndInitializePhpsec();
+        $keys = [];
+        foreach ($certs as $cert) {
+            if (empty($cert['kid'])) {
+                throw new \InvalidArgumentException(
+                    'certs expects "kid" to be set'
+                );
+            }
+            if (empty($cert['n']) || empty($cert['e'])) {
+                throw new \InvalidArgumentException(
+                    'RSA certs expects "n" and "e" to be set'
+                );
+            }
             $rsa = new RSA();
             $rsa->loadKey([
                 'n' => new BigInteger($this->callJwtStatic('urlsafeB64Decode', [
-                    $cert['n']
+                    $cert['n'],
                 ]), 256),
                 'e' => new BigInteger($this->callJwtStatic('urlsafeB64Decode', [
                     $cert['e']
-                ]), 256)
+                ]), 256),
             ]);
 
-            try {
-                $pubkey = $rsa->getPublicKey();
-                $payload = $this->callJwtStatic('decode', [
-                    $token,
-                    $pubkey,
-                    ['RS256']
-                ]);
+            // create an array of key IDs to certs for the JWT library
+            $keys[$cert['kid']] =  $rsa->getPublicKey();
+        }
 
-                if (property_exists($payload, 'aud')) {
-                    if ($audience && $payload->aud != $audience) {
-                        return false;
-                    }
-                }
+        try {
+            $payload = $this->callJwtStatic('decode', [
+                $token,
+                $keys,
+                ['RS256']
+            ]);
 
-                // support HTTP and HTTPS issuers
-                // @see https://developers.google.com/identity/sign-in/web/backend-auth
-                $issuers = [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
-                if (!isset($payload->iss) || !in_array($payload->iss, $issuers)) {
+            if (property_exists($payload, 'aud')) {
+                if ($audience && $payload->aud != $audience) {
                     return false;
                 }
-
-                return (array) $payload;
-            } catch (ExpiredException $e) {
-                return false;
-            } catch (\ExpiredException $e) {
-                // (firebase/php-jwt 2)
-                return false;
-            } catch (SignatureInvalidException $e) {
-                // continue
-            } catch (\SignatureInvalidException $e) {
-                // continue (firebase/php-jwt 2)
-            } catch (\DomainException $e) {
-                // continue
             }
+
+            // support HTTP and HTTPS issuers
+            // @see https://developers.google.com/identity/sign-in/web/backend-auth
+            $issuers = [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
+            if (!isset($payload->iss) || !in_array($payload->iss, $issuers)) {
+                return false;
+            }
+
+            return (array) $payload;
+        } catch (ExpiredException $e) {
+        } catch (\ExpiredException $e) {
+            // (firebase/php-jwt 2)
+        } catch (SignatureInvalidException $e) {
+        } catch (\SignatureInvalidException $e) {
+            // (firebase/php-jwt 2)
+        } catch (\DomainException $e) {
         }
 
         return false;
@@ -200,9 +300,9 @@ class AccessToken
      * @return array
      * @throws \InvalidArgumentException If received certs are in an invalid format.
      */
-    private function getFederatedSignOnCerts($location, array $options = [])
+    private function getCerts($location, $cacheKey, array $options = [])
     {
-        $cacheItem = $this->cache->getItem('federated_signon_certs_v3');
+        $cacheItem = $this->cache->getItem($cacheKey);
         $certs = $cacheItem ? $cacheItem->get() : null;
 
         $gotNewCerts = false;
@@ -213,8 +313,13 @@ class AccessToken
         }
 
         if (!isset($certs['keys'])) {
+            if ($location !== self::IAP_CERT_URL) {
+                throw new \InvalidArgumentException(
+                    'federated sign-on certs expects "keys" to be set'
+                );
+            }
             throw new \InvalidArgumentException(
-                'federated sign-on certs expects "keys" to be set'
+                'certs expects "keys" to be set'
             );
         }
 
@@ -234,7 +339,6 @@ class AccessToken
      *
      * @param $url string location
      * @param array $options [optional] Configuration options.
-     * @throws \RuntimeException
      * @return array certificates
      * @throws \InvalidArgumentException If certs could not be retrieved from a local file.
      * @throws \RuntimeException If certs could not be retrieved from a remote location.
@@ -266,20 +370,24 @@ class AccessToken
         ), $response->getStatusCode());
     }
 
-    /**
-     * Set required defaults for JWT.
-     */
-    private function configureJwtService()
+    private function checkAndInitializePhpsec()
     {
-        $class = class_exists('Firebase\JWT\JWT')
-            ? 'Firebase\JWT\JWT'
-            : '\JWT';
-
-        if (property_exists($class, 'leeway') && $class::$leeway < 1) {
-            // Ensures JWT leeway is at least 1
-            // @see https://github.com/google/google-api-php-client/issues/827
-            $class::$leeway = 1;
+        // @codeCoverageIgnoreStart
+        if (!class_exists('phpseclib\Crypt\RSA')) {
+            throw new \RuntimeException('Please require phpseclib/phpseclib v2 to use this utility.');
         }
+        // @codeCoverageIgnoreEnd
+
+        $this->setPhpsecConstants();
+    }
+
+    private function checkSimpleJwt()
+    {
+        // @codeCoverageIgnoreStart
+        if (!class_exists('SimpleJWT\JWT')) {
+            throw new \RuntimeException('Please require kelvinmo/simplejwt ^0.2 to use this utility.');
+        }
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -316,5 +424,32 @@ class AccessToken
             ? 'Firebase\JWT\JWT'
             : 'JWT';
         return call_user_func_array([$class, $method], $args);
+    }
+
+    /**
+     * Provide a hook to mock calls to the JWT static methods.
+     *
+     * @param array $args
+     * @return mixed
+     */
+    protected function callSimpleJwtDecode(array $args = [])
+    {
+        return call_user_func_array(['SimpleJWT\JWT', 'decode'], $args);
+    }
+
+    /**
+     * Generate a cache key based on the cert location using sha1 with the
+     * exception of using "federated_signon_certs_v3" to preserve BC.
+     *
+     * @param string $certsLocation
+     * @return string
+     */
+    private function getCacheKeyFromCertLocation($certsLocation)
+    {
+        $key = $certsLocation === self::FEDERATED_SIGNON_CERT_URL
+            ? 'federated_signon_certs_v3'
+            : sha1($certsLocation);
+
+        return 'google_auth_certs_cache|' . $key;
     }
 }

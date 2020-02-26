@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\IAMCredentials;
 use PHPUnit\Framework\TestCase;

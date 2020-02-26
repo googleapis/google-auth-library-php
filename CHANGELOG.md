@@ -1,3 +1,17 @@
+## 1.7.1 (02/12/2020)
+
+* [fix] Invalid character in iap cert cache key (#263)
+* [fix] Typo in exception for package name (#262)
+
+## 1.7.0 (02/11/2020)
+
+* [feat] Add ID token to auth token methods. (#248)
+* [feat] Add support for ES256 in `AccessToken::verify`. (#255)
+* [fix] Let namespace match the file structure. (#258)
+* [fix] Construct RuntimeException. (#257)
+* [tests] Update tests for PHP 7.4 compatibility. (#253)
+* [chore] Add a couple more things to `.gitattributes`. (#252)
+
 ## 1.6.1 (10/29/2019)
 
 * [fix] Handle DST correctly for cache item expirations. (#246)

@@ -18,7 +18,7 @@
 namespace Google\Auth\Tests;
 
 use Firebase\JWT\ExpiredException;
-use Firebase\JWT\JWT;
+use Firebase\JWT\JWT as FirebaseJWT;
 use Firebase\JWT\SignatureInvalidException;
 use Google\Auth\AccessToken;
 use GuzzleHttp\Psr7\Response;
@@ -26,6 +26,7 @@ use phpseclib\Crypt\RSA;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Http\Message\RequestInterface;
+use SimpleJWT\JWT as SimpleJWT;
 
 /**
  * @group access-token
@@ -62,7 +63,8 @@ class AccessTokenTest extends TestCase
         $payload,
         $expected,
         $audience = null,
-        callable $verifyCallback = null
+        callable $verifyCallback = null,
+        $certsLocation = null
     ) {
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
         $item->get()->willReturn([
@@ -78,14 +80,15 @@ class AccessTokenTest extends TestCase
             ]
         ]);
 
-        $this->cache->getItem('federated_signon_certs_v3')
+        $cacheKey = 'google_auth_certs_cache|' .
+            ($certsLocation ? sha1($certsLocation) : 'federated_signon_certs_v3');
+        $this->cache->getItem($cacheKey)
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
         $token = new AccessTokenStub(
             null,
-            $this->cache->reveal(),
-            $this->jwt->reveal()
+            $this->cache->reveal()
         );
 
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) use ($payload, $verifyCallback) {
@@ -100,7 +103,8 @@ class AccessTokenTest extends TestCase
         };
 
         $res = $token->verify($this->token, [
-            'audience' => $audience
+            'audience' => $audience,
+            'certsLocation' => $certsLocation,
         ]);
         $this->assertEquals($expected, $res);
     }
@@ -161,8 +165,61 @@ class AccessTokenTest extends TestCase
                 function () {
                     throw new \DomainException('expired!');
                 }
-            ]
+            ],
+            [
+                $this->payload,
+                $this->payload,
+                null,
+                null,
+                AccessToken::IAP_CERT_URL
+            ],
         ];
+    }
+
+    public function testEsVerifyEndToEnd()
+    {
+        if (!$jwt = getenv('IAP_IDENTITY_TOKEN')) {
+            $this->markTestSkipped('Set the IAP_IDENTITY_TOKEN env var');
+        }
+
+        $token = new AccessTokenStub();
+        $token->mocks['simpleJwtDecode'] = function ($token, $publicKey, $allowedAlgs) {
+            // Skip expired validation
+            return SimpleJWT::decode(
+                $token,
+                $publicKey,
+                $allowedAlgs,
+                null,
+                ['exp']
+            );
+        };
+
+        // Use Iap Cert URL
+        $payload = $token->verify($jwt, [
+            'certsLocation' => AccessToken::IAP_CERT_URL,
+        ]);
+
+        $this->assertNotFalse($payload);
+        $this->assertArrayHasKey('iss', $payload);
+        $this->assertEquals('https://cloud.google.com/iap', $payload['iss']);
+    }
+
+    public function testGetCertsForIap()
+    {
+        $token = new AccessToken();
+        $reflector = new \ReflectionObject($token);
+        $cacheKeyMethod = $reflector->getMethod('getCacheKeyFromCertLocation');
+        $cacheKeyMethod->setAccessible(true);
+        $getCertsMethod = $reflector->getMethod('getCerts');
+        $getCertsMethod->setAccessible(true);
+        $cacheKey = $cacheKeyMethod->invoke($token, AccessToken::IAP_CERT_URL);
+        $certs = $getCertsMethod->invoke(
+            $token,
+            AccessToken::IAP_CERT_URL,
+            $cacheKey
+        );
+        $this->assertTrue(is_array($certs));
+        $this->assertEquals(5, count($certs));
     }
 
     public function testRetrieveCertsFromLocationLocalFile()
@@ -179,7 +236,7 @@ class AccessTokenTest extends TestCase
         $item->expiresAt(Argument::type('\DateTime'))
             ->shouldBeCalledTimes(1);
 
-        $this->cache->getItem('federated_signon_certs_v3')
+        $this->cache->getItem('google_auth_certs_cache|' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
@@ -188,8 +245,7 @@ class AccessTokenTest extends TestCase
 
         $token = new AccessTokenStub(
             null,
-            $this->cache->reveal(),
-            $this->jwt->reveal()
+            $this->cache->reveal()
         );
 
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
@@ -217,19 +273,41 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn(null);
 
-        $this->cache->getItem('federated_signon_certs_v3')
+        $this->cache->getItem('google_auth_certs_cache|' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
         $token = new AccessTokenStub(
             null,
-            $this->cache->reveal(),
-            $this->jwt->reveal()
+            $this->cache->reveal()
         );
 
         $token->verify($this->token, [
             'certsLocation' => $certsLocation
         ]);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage federated sign-on certs expects "keys" to be set
+     */
+    public function testRetrieveCertsInvalidData()
+    {
+        $item = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $item->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn('{}');
+
+        $this->cache->getItem('google_auth_certs_cache|federated_signon_certs_v3')
+            ->shouldBeCalledTimes(1)
+            ->willReturn($item->reveal());
+
+        $token = new AccessTokenStub(
+            null,
+            $this->cache->reveal()
+        );
+
+        $token->verify($this->token);
     }
 
     /**
@@ -247,14 +325,13 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn(null);
 
-        $this->cache->getItem('federated_signon_certs_v3')
+        $this->cache->getItem('google_auth_certs_cache|' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
         $token = new AccessTokenStub(
             null,
-            $this->cache->reveal(),
-            $this->jwt->reveal()
+            $this->cache->reveal()
         );
 
         $token->verify($this->token, [
@@ -284,7 +361,7 @@ class AccessTokenTest extends TestCase
         $item->expiresAt(Argument::type('\DateTime'))
             ->shouldBeCalledTimes(1);
 
-        $this->cache->getItem('federated_signon_certs_v3')
+        $this->cache->getItem('google_auth_certs_cache|federated_signon_certs_v3')
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
@@ -293,8 +370,7 @@ class AccessTokenTest extends TestCase
 
         $token = new AccessTokenStub(
             $httpHandler,
-            $this->cache->reveal(),
-            $this->jwt->reveal()
+            $this->cache->reveal()
         );
 
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
@@ -324,7 +400,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn(null);
 
-        $this->cache->getItem('federated_signon_certs_v3')
+        $this->cache->getItem('google_auth_certs_cache|federated_signon_certs_v3')
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
@@ -396,6 +472,13 @@ class AccessTokenStub extends AccessToken
         return isset($this->mocks[$method])
             ? call_user_func_array($this->mocks[$method], $args)
             : parent::callJwtStatic($method, $args);
+    }
+
+    protected function callSimpleJwtDecode(array $args = [])
+    {
+        return isset($this->mocks['simpleJwtDecode'])
+            ? call_user_func_array($this->mocks['simpleJwtDecode'], $args)
+            : parent::callSimpleJwtDecode($args);
     }
 }
 //@codingStandardsIgnoreEnd

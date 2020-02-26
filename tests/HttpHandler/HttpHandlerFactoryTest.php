@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\HttpHandler;
 
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\Tests\BaseTest;
 
 class HttpHandlerFactoryTest extends BaseTest
 {

@@ -130,6 +130,10 @@ class AuthTokenMiddleware
 
             return $auth_tokens['access_token'];
         }
+
+        if (array_key_exists('id_token', $auth_tokens)) {
+            return $auth_tokens['id_token'];
+        }
     }
 
     private function getQuotaProject()

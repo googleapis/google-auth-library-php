@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
@@ -23,7 +23,6 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Prophecy\Promise\ReturnPromise;
 
 /**
  * @group credentials
@@ -143,6 +142,40 @@ class GCECredentialsTest extends TestCase
         $g = new GCECredentials();
         $this->assertEquals($wantedTokens, $g->fetchAuthToken($httpHandler));
         $this->assertEquals(time() + 57, $g->getLastReceivedToken()['expires_at']);
+    }
+
+    public function testFetchAuthTokenShouldBeIdTokenWhenTargetAudienceIsSet()
+    {
+        $expectedToken = ['id_token' => 'idtoken12345'];
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expectedToken) {
+            $timesCalled++;
+            if ($timesCalled == 1) {
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+            $this->assertEquals(
+                '/computeMetadata/' . GCECredentials::ID_TOKEN_URI_PATH,
+                $request->getUri()->getPath()
+            );
+            $this->assertEquals(
+                'audience=a+target+audience',
+                $request->getUri()->getQuery()
+            );
+            return new Psr7\Response(200, [], Psr7\stream_for($expectedToken['id_token']));
+
+        };
+        $g = new GCECredentials(null, null, 'a+target+audience');
+        $this->assertEquals($expectedToken, $g->fetchAuthToken($httpHandler));
+        $this->assertEquals(2, $timesCalled);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Scope and targetAudience cannot both be supplied
+     */
+    public function testSettingBothScopeAndTargetAudienceThrowsException()
+    {
+        $g = new GCECredentials(null, 'a-scope', 'a+target+audience');
     }
 
     /**

@@ -200,10 +200,122 @@ class ADCGetMiddlewareTest extends TestCase
     }
 }
 
+class ADCGetCredentialsWithTargetAudienceTest extends TestCase
+{
+    private $originalHome;
+    private $targetAudience = 'a target audience';
+
+    protected function setUp()
+    {
+        $this->originalHome = getenv('HOME');
+    }
+
+    protected function tearDown()
+    {
+        if ($this->originalHome != getenv('HOME')) {
+            putenv('HOME=' . $this->originalHome);
+        }
+        putenv(ServiceAccountCredentials::ENV_VAR);  // removes environment variable
+    }
+
+    /**
+     * @expectedException DomainException
+     */
+    public function testIsFailsEnvSpecifiesNonExistentFile()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
+    }
+
+    public function testLoadsOKIfEnvSpecifiedIsValid()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
+    }
+
+    public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures');
+        ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
+    }
+
+    /**
+     * @expectedException DomainException
+     */
+    public function testFailsIfNotOnGceAndNoDefaultFileFound()
+    {
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+
+        // simulate not being GCE and retry attempts by returning multiple 500s
+        $httpHandler = getHandler([
+            buildResponse(500),
+            buildResponse(500),
+            buildResponse(500)
+        ]);
+
+        ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
+            $httpHandler
+        );
+    }
+
+    public function testWithCacheOptions()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+
+        $httpHandler = getHandler([
+            buildResponse(200),
+        ]);
+
+        $cacheOptions = [];
+        $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+
+        $credentials = ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
+            $httpHandler,
+            $cacheOptions,
+            $cachePool->reveal()
+        );
+
+        $this->assertInstanceOf('Google\Auth\FetchAuthTokenCache', $credentials);
+    }
+
+    public function testSuccedsIfNoDefaultFilesButIsOnGCE()
+    {
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+        $wantedTokens = [
+            'access_token' => '1/abdef1234567890',
+            'expires_in' => '57',
+            'token_type' => 'Bearer',
+        ];
+        $jsonTokens = json_encode($wantedTokens);
+
+        // simulate the response from GCE.
+        $httpHandler = getHandler([
+            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+        ]);
+
+        $credentials = ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
+            $httpHandler
+        );
+
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\GCECredentials',
+            $credentials
+        );
+    }
+}
+
 class ADCGetCredentialsAppEngineTest extends BaseTest
 {
     private $originalHome;
     private $originalServiceAccount;
+    private $targetAudience = 'a target audience';
 
     protected function setUp()
     {
@@ -243,6 +355,23 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
         $this->assertInstanceOf(
             'Google\Auth\Credentials\GCECredentials',
             ApplicationDefaultCredentials::getCredentials(null, $httpHandler)
+        );
+    }
+
+    public function testAppEngineFlexibleIdToken()
+    {
+        $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
+        putenv('GAE_INSTANCE=aef-default-20180313t154438');
+        $httpHandler = getHandler([
+            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+        ]);
+        $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
+            $httpHandler
+        );
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\GCECredentials',
+            $creds
         );
     }
 }
@@ -315,13 +444,13 @@ class ADCGetSubscriberTest extends BaseTest
         ]);
 
         $cacheOptions = [];
-        $cachePool = $this->getMock('Psr\Cache\CacheItemPoolInterface');
+        $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
 
         $subscriber = ApplicationDefaultCredentials::getSubscriber(
             'a scope',
             $httpHandler,
             $cacheOptions,
-            $cachePool
+            $cachePool->reveal()
         );
     }
 
