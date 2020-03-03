@@ -58,11 +58,6 @@ class AccessToken
     private $cache;
 
     /**
-     * @var Exception
-     */
-    private $verifyException;
-
-    /**
      * @param callable $httpHandler [optional] An HTTP Handler to deliver PSR-7 requests.
      * @param CacheItemPoolInterface $cache [optional] A PSR-6 compatible cache implementation.
      */
@@ -93,6 +88,9 @@ class AccessToken
      *     @type string $cacheKey The cache key of the cached certs. Defaults to
      *        the sha1 of $certsLocation if provided, otherwise is set to
      *        "federated_signon_certs_v3".
+     *     @type bool $throwException Whether the function should throw an
+     *        exception if the verification fails. This is useful for
+     *        determining the reason verification failed.
      * }
      * @return array|bool the token payload, if successful, or false if not.
      * @throws \InvalidArgumentException If certs could not be retrieved from a local file.
@@ -110,6 +108,9 @@ class AccessToken
         $cacheKey = isset($options['cacheKey'])
             ? $options['cacheKey']
             : $this->getCacheKeyFromCertLocation($certsLocation);
+        $throwException = isset($options['throwException'])
+            ? $options['throwException']
+            : false; // for backwards compatibility
 
         // Check signature against each available cert.
         $certs = $this->getCerts($certsLocation, $cacheKey, $options);
@@ -117,10 +118,10 @@ class AccessToken
 
         switch ($alg) {
             case 'ES256':
-                return $this->verifyEs256($token, $certs, $audience);
+                return $this->verifyEs256($token, $certs, $audience, $throwException);
 
             case 'RS256':
-                return $this->verifyRs256($token, $certs, $audience);
+                return $this->verifyRs256($token, $certs, $audience, $throwException);
 
             default:
                 throw new \InvalidArgumentException(
@@ -167,8 +168,12 @@ class AccessToken
      *                              the JWT.
      * @return array|bool the token payload, if successful, or false if not.
      */
-    private function verifyEs256($token, array $certs, $audience = null)
-    {
+    private function verifyEs256(
+        $token,
+        array $certs,
+        $audience = null,
+        $throwException = false
+    ) {
         $this->checkSimpleJwt();
 
         $jwkset = new KeySet();
@@ -180,12 +185,19 @@ class AccessToken
         try {
             $jwt = $this->callSimpleJwtDecode([$token, $jwkset, 'ES256']);
         } catch (InvalidTokenException $e) {
-            $this->verifyException = $e;
+            if ($throwException) {
+                throw $e;
+            }
             return false;
         }
 
         if ($aud = $jwt->getClaim('aud')) {
             if ($audience && $aud != $audience) {
+                if ($throwException) {
+                    throw new \UnexpectedValueException(
+                        'Audience did not match'
+                    );
+                }
                 return false;
             }
         }
@@ -204,9 +216,14 @@ class AccessToken
      *                              the JWT.
      * @return array|bool the token payload, if successful, or false if not.
      */
-    private function verifyRs256($token, array $certs, $audience = null)
-    {
+    private function verifyRs256(
+        $token,
+        array $certs,
+        $audience = null,
+        $throwException = false
+    ) {
         $this->checkAndInitializePhpsec();
+        $e = null;
         $keys = [];
         foreach ($certs as $cert) {
             if (empty($cert['kid'])) {
@@ -242,6 +259,11 @@ class AccessToken
 
             if (property_exists($payload, 'aud')) {
                 if ($audience && $payload->aud != $audience) {
+                    if ($throwException) {
+                        throw new \UnexpectedValueException(
+                            'Audience did not match'
+                        );
+                    }
                     return false;
                 }
             }
@@ -255,17 +277,16 @@ class AccessToken
 
             return (array) $payload;
         } catch (ExpiredException $e) {
-            $this->verifyException = $e;
         } catch (\ExpiredException $e) {
             // (firebase/php-jwt 2)
-            $this->verifyException = $e;
         } catch (SignatureInvalidException $e) {
-            $this->verifyException = $e;
         } catch (\SignatureInvalidException $e) {
             // (firebase/php-jwt 2)
-            $this->verifyException = $e;
         } catch (\DomainException $e) {
-            $this->verifyException = $e;
+        }
+
+        if ($e && $throwException) {
+            throw $e;
         }
 
         return false;
@@ -300,11 +321,6 @@ class AccessToken
         $response = $httpHandler($request, $options);
 
         return $response->getStatusCode() == 200;
-    }
-
-    public function getVerifyException()
-    {
-        return $this->verifyException;
     }
 
     /**

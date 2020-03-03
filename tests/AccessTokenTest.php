@@ -100,18 +100,19 @@ class AccessTokenTest extends TestCase
             return (object) $payload;
         };
 
-        $res = $token->verify($this->token, [
-            'audience' => $audience,
-            'certsLocation' => $certsLocation,
-        ]);
-        $this->assertEquals($expected, $res);
-
-        $verifyException = $token->getVerifyException();
-        if ($exception) {
-            $this->assertEquals($exception, $verifyException);
-        } else {
-            $this->assertNull($verifyException);
+        $e = null;
+        $res = false;
+        try {
+            $res = $token->verify($this->token, [
+                'audience' => $audience,
+                'certsLocation' => $certsLocation,
+                'throwException' => (bool) $exception,
+            ]);
+        } catch (\Exception $e) {
         }
+
+        $this->assertEquals($expected, $res);
+        $this->assertEquals($exception, $e);
     }
 
     public function verifyCalls()
