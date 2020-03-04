@@ -14,10 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 namespace Google\Auth\Tests;
 
-use Firebase\JWT\JWT as FirebaseJWT;
 use Google\Auth\AccessToken;
 use GuzzleHttp\Psr7\Response;
 use phpseclib\Crypt\RSA;
@@ -44,7 +42,6 @@ class AccessTokenTest extends TestCase
         $this->jwt = $this->prophesize('Firebase\JWT\JWT');
         $this->token = 'foobar';
         $this->publicKey = 'barfoo';
-        $this->allowedAlgs = ['RS256'];
 
         $this->payload = [
             'iat' => time(),
@@ -71,7 +68,7 @@ class AccessTokenTest extends TestCase
                     'kid' => 'ddddffdfd',
                     'e' => 'AQAB',
                     'kty' => 'RSA',
-                    'alg' => 'RS256',
+                    'alg' => $certsLocation ? 'ES256' : 'RS256',
                     'n' => $this->publicKey,
                     'use' => 'sig'
                 ]
@@ -91,7 +88,6 @@ class AccessTokenTest extends TestCase
 
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) use ($payload, $exception) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals($this->allowedAlgs, $allowedAlgs);
 
             if ($exception) {
                 throw $exception;
@@ -165,14 +161,34 @@ class AccessTokenTest extends TestCase
                 false,
                 null,
                 new \DomainException('expired!')
-            ],
-            [
-                $this->payload,
-                $this->payload,
+            ], [
+                [
+                    'iss' => AccessToken::IAP_ISSUER
+                ] + $this->payload, [
+                    'iss' => AccessToken::IAP_ISSUER
+                ] + $this->payload,
                 null,
                 null,
                 AccessToken::IAP_CERT_URL
-            ],
+            ], [
+                [
+                    'iss' => 'invalid',
+                ] + $this->payload,
+                false,
+                null,
+                null,
+                AccessToken::IAP_CERT_URL
+            ], [
+                [
+                    'iss' => AccessToken::IAP_ISSUER,
+                ] + $this->payload + [
+                    'aud' => 'foo'
+                ],
+                false,
+                'bar',
+                null,
+                AccessToken::IAP_CERT_URL
+            ]
         ];
     }
 
@@ -183,7 +199,7 @@ class AccessTokenTest extends TestCase
         }
 
         $token = new AccessTokenStub();
-        $token->mocks['simpleJwtDecode'] = function ($token, $publicKey, $allowedAlgs) {
+        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
             // Skip expired validation
             return SimpleJWT::decode(
                 $token,
@@ -250,7 +266,7 @@ class AccessTokenTest extends TestCase
 
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals($this->allowedAlgs, $allowedAlgs);
+            $this->assertEquals(['RS256'], $allowedAlgs);
 
             return (object) $this->payload;
         };
@@ -375,7 +391,7 @@ class AccessTokenTest extends TestCase
 
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals($this->allowedAlgs, $allowedAlgs);
+            $this->assertEquals(['RS256'], $allowedAlgs);
 
             return (object) $this->payload;
         };
@@ -476,9 +492,12 @@ class AccessTokenStub extends AccessToken
 
     protected function callSimpleJwtDecode(array $args = [])
     {
-        return isset($this->mocks['simpleJwtDecode'])
-            ? call_user_func_array($this->mocks['simpleJwtDecode'], $args)
-            : parent::callSimpleJwtDecode($args);
+        if (isset($this->mocks['decode'])) {
+            $claims = call_user_func_array($this->mocks['decode'], $args);
+            return new SimpleJWT(null, (array) $claims);
+        }
+
+        return parent::callSimpleJwtDecode($args);
     }
 }
 //@codingStandardsIgnoreEnd
