@@ -17,6 +17,8 @@
 
 namespace Google\Auth;
 
+use DateTime;
+use Exception;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\SignatureInvalidException;
@@ -25,13 +27,16 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Request;
+use InvalidArgumentException;
 use phpseclib\Crypt\RSA;
 use phpseclib\Math\BigInteger;
+use Psr\Cache\CacheItemPoolInterface;
+use RuntimeException;
+use SimpleJWT\InvalidTokenException;
 use SimpleJWT\JWT as SimpleJWT;
 use SimpleJWT\Keys\KeyFactory;
 use SimpleJWT\Keys\KeySet;
-use SimpleJWT\InvalidTokenException;
-use Psr\Cache\CacheItemPoolInterface;
+use UnexpectedValueException;
 
 /**
  * Wrapper around Google Access Tokens which provides convenience functions.
@@ -42,6 +47,7 @@ class AccessToken
 {
     const FEDERATED_SIGNON_CERT_URL = 'https://www.googleapis.com/oauth2/v3/certs';
     const IAP_CERT_URL = 'https://www.gstatic.com/iap/verify/public_key-jwk';
+    const IAP_ISSUER = 'https://cloud.google.com/iap';
     const OAUTH2_ISSUER = 'accounts.google.com';
     const OAUTH2_ISSUER_HTTPS = 'https://accounts.google.com';
     const OAUTH2_REVOKE_URI = 'https://oauth2.googleapis.com/revoke';
@@ -87,11 +93,17 @@ class AccessToken
      *     @type string $cacheKey The cache key of the cached certs. Defaults to
      *        the sha1 of $certsLocation if provided, otherwise is set to
      *        "federated_signon_certs_v3".
+     *     @type bool $throwException Whether the function should throw an
+     *        exception if the verification fails. This is useful for
+     *        determining the reason verification failed.
      * }
      * @return array|bool the token payload, if successful, or false if not.
-     * @throws \InvalidArgumentException If certs could not be retrieved from a local file.
-     * @throws \InvalidArgumentException If received certs are in an invalid format.
-     * @throws \RuntimeException If certs could not be retrieved from a remote location.
+     * @throws InvalidArgumentException If certs could not be retrieved from a local file.
+     * @throws InvalidArgumentException If received certs are in an invalid format.
+     * @throws InvalidArgumentException If the cert alg is not supported.
+     * @throws RuntimeException If certs could not be retrieved from a remote location.
+     * @throws UnexpectedValueException If the token issuer does not match.
+     * @throws UnexpectedValueException If the token audience does not match.
      */
     public function verify($token, array $options = [])
     {
@@ -104,22 +116,37 @@ class AccessToken
         $cacheKey = isset($options['cacheKey'])
             ? $options['cacheKey']
             : $this->getCacheKeyFromCertLocation($certsLocation);
+        $throwException = isset($options['throwException'])
+            ? $options['throwException']
+            : false; // for backwards compatibility
 
         // Check signature against each available cert.
         $certs = $this->getCerts($certsLocation, $cacheKey, $options);
         $alg = $this->determineAlg($certs);
-
-        switch ($alg) {
-            case 'ES256':
-                return $this->verifyEs256($token, $certs, $audience);
-
-            case 'RS256':
-                return $this->verifyRs256($token, $certs, $audience);
-
-            default:
-                throw new \InvalidArgumentException(
-                    'unrecognized "alg" in certs, expected ES256 or RS256');
+        if (!in_array($alg, ['RS256', 'ES256'])) {
+            throw new InvalidArgumentException(
+                'unrecognized "alg" in certs, expected ES256 or RS256');
         }
+        try {
+            if ($alg == 'RS256') {
+                return $this->verifyRs256($token, $certs, $audience);
+            }
+            return $this->verifyEs256($token, $certs, $audience);
+        } catch (ExpiredException $e) {  // firebase/php-jwt 3+
+        } catch (\ExpiredException $e) { // firebase/php-jwt 2
+        } catch (SignatureInvalidException $e) {  // firebase/php-jwt 3+
+        } catch (\SignatureInvalidException $e) { // firebase/php-jwt 2
+        } catch (InvalidTokenException $e) { // simplejwt
+        } catch (DomainException $e) {
+        } catch (InvalidArgumentException $e) {
+        } catch (UnexpectedValueException $e) {
+        }
+
+        if ($throwException) {
+            throw $e;
+        }
+
+        return false;
     }
 
     /**
@@ -135,14 +162,14 @@ class AccessToken
         $alg = null;
         foreach ($certs as $cert) {
             if (empty($cert['alg'])) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     'certs expects "alg" to be set'
                 );
             }
             $alg = $alg ?: $cert['alg'];
 
             if ($alg != $cert['alg']) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     'More than one alg detected in certs'
                 );
             }
@@ -171,19 +198,21 @@ class AccessToken
         }
 
         // Validate the signature using the key set and ES256 algorithm.
-        try {
-            $jwt = $this->callSimpleJwtDecode([$token, $jwkset, 'ES256']);
-        } catch (InvalidTokenException $e) {
-            return false;
-        }
+        $jwt = $this->callSimpleJwtDecode([$token, $jwkset, 'ES256']);
+        $payload = $jwt->getClaims();
 
-        if ($aud = $jwt->getClaim('aud')) {
-            if ($audience && $aud != $audience) {
-                return false;
+        if (isset($payload['aud'])) {
+            if ($audience && $payload['aud'] != $audience) {
+                throw new UnexpectedValueException('Audience does not match');
             }
         }
 
-        return $jwt->getClaims();
+        // @see https://cloud.google.com/iap/docs/signed-headers-howto#verifying_the_jwt_payload
+        if (!isset($payload['iss']) || $payload['iss'] !== self::IAP_ISSUER) {
+            throw new UnexpectedValueException('Issuer does not match');
+        }
+
+        return $payload;
     }
 
     /**
@@ -203,12 +232,12 @@ class AccessToken
         $keys = [];
         foreach ($certs as $cert) {
             if (empty($cert['kid'])) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     'certs expects "kid" to be set'
                 );
             }
             if (empty($cert['n']) || empty($cert['e'])) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     'RSA certs expects "n" and "e" to be set'
                 );
             }
@@ -226,37 +255,26 @@ class AccessToken
             $keys[$cert['kid']] =  $rsa->getPublicKey();
         }
 
-        try {
-            $payload = $this->callJwtStatic('decode', [
-                $token,
-                $keys,
-                ['RS256']
-            ]);
+        $payload = $this->callJwtStatic('decode', [
+            $token,
+            $keys,
+            ['RS256']
+        ]);
 
-            if (property_exists($payload, 'aud')) {
-                if ($audience && $payload->aud != $audience) {
-                    return false;
-                }
+        if (property_exists($payload, 'aud')) {
+            if ($audience && $payload->aud != $audience) {
+                throw new UnexpectedValueException('Audience does not match');
             }
-
-            // support HTTP and HTTPS issuers
-            // @see https://developers.google.com/identity/sign-in/web/backend-auth
-            $issuers = [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
-            if (!isset($payload->iss) || !in_array($payload->iss, $issuers)) {
-                return false;
-            }
-
-            return (array) $payload;
-        } catch (ExpiredException $e) {
-        } catch (\ExpiredException $e) {
-            // (firebase/php-jwt 2)
-        } catch (SignatureInvalidException $e) {
-        } catch (\SignatureInvalidException $e) {
-            // (firebase/php-jwt 2)
-        } catch (\DomainException $e) {
         }
 
-        return false;
+        // support HTTP and HTTPS issuers
+        // @see https://developers.google.com/identity/sign-in/web/backend-auth
+        $issuers = [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
+        if (!isset($payload->iss) || !in_array($payload->iss, $issuers)) {
+            throw new UnexpectedValueException('Issuer does not match');
+        }
+
+        return (array) $payload;
     }
 
     /**
@@ -265,7 +283,7 @@ class AccessToken
      *
      * @param string|array $token The token (access token or a refresh token) that should be revoked.
      * @param array $options [optional] Configuration options.
-     * @return boolean Returns True if the revocation was successful, otherwise False.
+     * @return bool Returns True if the revocation was successful, otherwise False.
      */
     public function revoke($token, array $options = [])
     {
@@ -298,7 +316,7 @@ class AccessToken
      * @param string $location The location from which to retrieve certs.
      * @param array $options [optional] Configuration options.
      * @return array
-     * @throws \InvalidArgumentException If received certs are in an invalid format.
+     * @throws InvalidArgumentException If received certs are in an invalid format.
      */
     private function getCerts($location, $cacheKey, array $options = [])
     {
@@ -314,11 +332,11 @@ class AccessToken
 
         if (!isset($certs['keys'])) {
             if ($location !== self::IAP_CERT_URL) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     'federated sign-on certs expects "keys" to be set'
                 );
             }
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'certs expects "keys" to be set'
             );
         }
@@ -326,7 +344,7 @@ class AccessToken
         // Push caching off until after verifying certs are in a valid format.
         // Don't want to cache bad data.
         if ($gotNewCerts) {
-            $cacheItem->expiresAt(new \DateTime('+1 hour'));
+            $cacheItem->expiresAt(new DateTime('+1 hour'));
             $cacheItem->set($certs);
             $this->cache->save($cacheItem);
         }
@@ -340,15 +358,15 @@ class AccessToken
      * @param $url string location
      * @param array $options [optional] Configuration options.
      * @return array certificates
-     * @throws \InvalidArgumentException If certs could not be retrieved from a local file.
-     * @throws \RuntimeException If certs could not be retrieved from a remote location.
+     * @throws InvalidArgumentException If certs could not be retrieved from a local file.
+     * @throws RuntimeException If certs could not be retrieved from a remote location.
      */
     private function retrieveCertsFromLocation($url, array $options = [])
     {
         // If we're retrieving a local file, just grab it.
         if (strpos($url, 'http') !== 0) {
             if (!file_exists($url)) {
-                throw new \InvalidArgumentException(sprintf(
+                throw new InvalidArgumentException(sprintf(
                     'Failed to retrieve verification certificates from path: %s.',
                     $url
                 ));
@@ -364,7 +382,7 @@ class AccessToken
             return json_decode((string) $response->getBody(), true);
         }
 
-        throw new \RuntimeException(sprintf(
+        throw new RuntimeException(sprintf(
             'Failed to retrieve verification certificates: "%s".',
             $response->getBody()->getContents()
         ), $response->getStatusCode());
@@ -374,7 +392,7 @@ class AccessToken
     {
         // @codeCoverageIgnoreStart
         if (!class_exists('phpseclib\Crypt\RSA')) {
-            throw new \RuntimeException('Please require phpseclib/phpseclib v2 to use this utility.');
+            throw new RuntimeException('Please require phpseclib/phpseclib v2 to use this utility.');
         }
         // @codeCoverageIgnoreEnd
 
@@ -385,7 +403,7 @@ class AccessToken
     {
         // @codeCoverageIgnoreStart
         if (!class_exists('SimpleJWT\JWT')) {
-            throw new \RuntimeException('Please require kelvinmo/simplejwt ^0.2 to use this utility.');
+            throw new RuntimeException('Please require kelvinmo/simplejwt ^0.2 to use this utility.');
         }
         // @codeCoverageIgnoreEnd
     }

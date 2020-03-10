@@ -14,12 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 namespace Google\Auth\Tests;
 
-use Firebase\JWT\ExpiredException;
-use Firebase\JWT\JWT as FirebaseJWT;
-use Firebase\JWT\SignatureInvalidException;
 use Google\Auth\AccessToken;
 use GuzzleHttp\Psr7\Response;
 use phpseclib\Crypt\RSA;
@@ -46,7 +42,6 @@ class AccessTokenTest extends TestCase
         $this->jwt = $this->prophesize('Firebase\JWT\JWT');
         $this->token = 'foobar';
         $this->publicKey = 'barfoo';
-        $this->allowedAlgs = ['RS256'];
 
         $this->payload = [
             'iat' => time(),
@@ -63,7 +58,7 @@ class AccessTokenTest extends TestCase
         $payload,
         $expected,
         $audience = null,
-        callable $verifyCallback = null,
+        $exception = null,
         $certsLocation = null
     ) {
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
@@ -73,7 +68,7 @@ class AccessTokenTest extends TestCase
                     'kid' => 'ddddffdfd',
                     'e' => 'AQAB',
                     'kty' => 'RSA',
-                    'alg' => 'RS256',
+                    'alg' => $certsLocation ? 'ES256' : 'RS256',
                     'n' => $this->publicKey,
                     'use' => 'sig'
                 ]
@@ -91,27 +86,42 @@ class AccessTokenTest extends TestCase
             $this->cache->reveal()
         );
 
-        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) use ($payload, $verifyCallback) {
+        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) use ($payload, $exception) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals($this->allowedAlgs, $allowedAlgs);
 
-            if ($verifyCallback) {
-                $verifyCallback($token, $publicKey, $allowedAlgs);
+            if ($exception) {
+                throw $exception;
             }
 
             return (object) $payload;
         };
 
-        $res = $token->verify($this->token, [
-            'audience' => $audience,
-            'certsLocation' => $certsLocation,
-        ]);
+        $e = null;
+        $res = false;
+        try {
+            $res = $token->verify($this->token, [
+                'audience' => $audience,
+                'certsLocation' => $certsLocation,
+                'throwException' => (bool) $exception,
+            ]);
+        } catch (\Exception $e) {
+        }
+
         $this->assertEquals($expected, $res);
+        $this->assertEquals($exception, $e);
     }
 
     public function verifyCalls()
     {
         $this->setUp();
+
+        if (class_exists('Firebase\JWT\JWT')) {
+            $expiredException = 'Firebase\JWT\ExpiredException';
+            $sigInvalidException = 'Firebase\JWT\SignatureInvalidException';
+        } else {
+            $expiredException = 'ExpiredException';
+            $sigInvalidException = 'SignatureInvalidException';
+        }
 
         return [
             [
@@ -140,39 +150,45 @@ class AccessTokenTest extends TestCase
                 $this->payload,
                 false,
                 null,
-                function () {
-                    if (class_exists('Firebase\JWT\ExpiredException')) {
-                        throw new ExpiredException('expired!');
-                    } else {
-                        throw new \ExpiredException('expired');
-                    }
-                }
+                new $expiredException('expired!')
             ], [
                 $this->payload,
                 false,
                 null,
-                function () {
-                    if (class_exists('Firebase\JWT\SignatureInvalidException')) {
-                        throw new SignatureInvalidException('invalid!');
-                    } else {
-                        throw new \SignatureInvalidException('invalid');
-                    }
-                }
+                new $sigInvalidException('invalid!')
             ], [
                 $this->payload,
                 false,
                 null,
-                function () {
-                    throw new \DomainException('expired!');
-                }
-            ],
-            [
-                $this->payload,
-                $this->payload,
+                new \DomainException('expired!')
+            ], [
+                [
+                    'iss' => AccessToken::IAP_ISSUER
+                ] + $this->payload, [
+                    'iss' => AccessToken::IAP_ISSUER
+                ] + $this->payload,
                 null,
                 null,
                 AccessToken::IAP_CERT_URL
-            ],
+            ], [
+                [
+                    'iss' => 'invalid',
+                ] + $this->payload,
+                false,
+                null,
+                null,
+                AccessToken::IAP_CERT_URL
+            ], [
+                [
+                    'iss' => AccessToken::IAP_ISSUER,
+                ] + $this->payload + [
+                    'aud' => 'foo'
+                ],
+                false,
+                'bar',
+                null,
+                AccessToken::IAP_CERT_URL
+            ]
         ];
     }
 
@@ -183,7 +199,7 @@ class AccessTokenTest extends TestCase
         }
 
         $token = new AccessTokenStub();
-        $token->mocks['simpleJwtDecode'] = function ($token, $publicKey, $allowedAlgs) {
+        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
             // Skip expired validation
             return SimpleJWT::decode(
                 $token,
@@ -250,7 +266,7 @@ class AccessTokenTest extends TestCase
 
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals($this->allowedAlgs, $allowedAlgs);
+            $this->assertEquals(['RS256'], $allowedAlgs);
 
             return (object) $this->payload;
         };
@@ -375,7 +391,7 @@ class AccessTokenTest extends TestCase
 
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals($this->allowedAlgs, $allowedAlgs);
+            $this->assertEquals(['RS256'], $allowedAlgs);
 
             return (object) $this->payload;
         };
@@ -476,9 +492,12 @@ class AccessTokenStub extends AccessToken
 
     protected function callSimpleJwtDecode(array $args = [])
     {
-        return isset($this->mocks['simpleJwtDecode'])
-            ? call_user_func_array($this->mocks['simpleJwtDecode'], $args)
-            : parent::callSimpleJwtDecode($args);
+        if (isset($this->mocks['decode'])) {
+            $claims = call_user_func_array($this->mocks['decode'], $args);
+            return new SimpleJWT(null, (array) $claims);
+        }
+
+        return parent::callSimpleJwtDecode($args);
     }
 }
 //@codingStandardsIgnoreEnd
