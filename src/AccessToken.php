@@ -86,6 +86,7 @@ class AccessToken
      *     Configuration options.
      *
      *     @type string $audience The indended recipient of the token.
+     *     @type string $issuer The intended issuer of the token.
      *     @type string $certsLocation The location (remote or local) from which
      *        to retrieve certificates, if not cached. This value should only be
      *        provided in limited circumstances in which you are sure of the
@@ -110,6 +111,9 @@ class AccessToken
         $audience = isset($options['audience'])
             ? $options['audience']
             : null;
+        $issuer = isset($options['issuer'])
+            ? $options['issuer']
+            : null;
         $certsLocation = isset($options['certsLocation'])
             ? $options['certsLocation']
             : self::FEDERATED_SIGNON_CERT_URL;
@@ -129,7 +133,7 @@ class AccessToken
         }
         try {
             if ($alg == 'RS256') {
-                return $this->verifyRs256($token, $certs, $audience);
+                return $this->verifyRs256($token, $certs, $audience, $issuer);
             }
             return $this->verifyEs256($token, $certs, $audience);
         } catch (ExpiredException $e) {  // firebase/php-jwt 3+
@@ -226,7 +230,7 @@ class AccessToken
      *                              the JWT.
      * @return array|bool the token payload, if successful, or false if not.
      */
-    private function verifyRs256($token, array $certs, $audience = null)
+    private function verifyRs256($token, array $certs, $audience = null, $issuer = null)
     {
         $this->checkAndInitializePhpsec();
         $keys = [];
@@ -269,7 +273,7 @@ class AccessToken
 
         // support HTTP and HTTPS issuers
         // @see https://developers.google.com/identity/sign-in/web/backend-auth
-        $issuers = [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
+        $issuers = isset($issuer) ? array($issuer) : [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
         if (!isset($payload->iss) || !in_array($payload->iss, $issuers)) {
             throw new UnexpectedValueException('Issuer does not match');
         }
