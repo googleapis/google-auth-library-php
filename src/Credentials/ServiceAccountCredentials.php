@@ -70,6 +70,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
 
     /**
      * The quota project associated with the JSON credentials
+     *
+     * @var string
      */
     protected $quotaProject;
 
