@@ -280,7 +280,7 @@ class AccessToken
 
         // support HTTP and HTTPS issuers
         // @see https://developers.google.com/identity/sign-in/web/backend-auth
-        $issuers = isset($issuer) ? array($issuer) : [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
+        $issuers = $issuer ? [$issuer] : [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
         if (!isset($payload->iss) || !in_array($payload->iss, $issuers)) {
             throw new UnexpectedValueException('Issuer does not match');
         }
