@@ -190,6 +190,9 @@ class AccessToken
      * @param string|null $audience If set, returns false if the provided
      *                              audience does not match the "aud" claim on
      *                              the JWT.
+     * @param string|null $issuer If set, returns false if the provided
+     *                            issuer does not match the "iss" claim on
+     *                            the JWT.
      * @return array|bool the token payload, if successful, or false if not.
      */
     private function verifyEs256($token, array $certs, $audience = null, $issuer = null)
@@ -229,6 +232,9 @@ class AccessToken
      * @param string|null $audience If set, returns false if the provided
      *                              audience does not match the "aud" claim on
      *                              the JWT.
+     * @param string|null $issuer If set, returns false if the provided
+     *                            issuer does not match the "iss" claim on
+     *                            the JWT.
      * @return array|bool the token payload, if successful, or false if not.
      */
     private function verifyRs256($token, array $certs, $audience = null, $issuer = null)
