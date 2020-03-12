@@ -135,7 +135,7 @@ class AccessToken
             if ($alg == 'RS256') {
                 return $this->verifyRs256($token, $certs, $audience, $issuer);
             }
-            return $this->verifyEs256($token, $certs, $audience);
+            return $this->verifyEs256($token, $certs, $audience, $issuer);
         } catch (ExpiredException $e) {  // firebase/php-jwt 3+
         } catch (\ExpiredException $e) { // firebase/php-jwt 2
         } catch (SignatureInvalidException $e) {  // firebase/php-jwt 3+
@@ -192,7 +192,7 @@ class AccessToken
      *                              the JWT.
      * @return array|bool the token payload, if successful, or false if not.
      */
-    private function verifyEs256($token, array $certs, $audience = null)
+    private function verifyEs256($token, array $certs, $audience = null, $issuer = null)
     {
         $this->checkSimpleJwt();
 
@@ -212,7 +212,8 @@ class AccessToken
         }
 
         // @see https://cloud.google.com/iap/docs/signed-headers-howto#verifying_the_jwt_payload
-        if (!isset($payload['iss']) || $payload['iss'] !== self::IAP_ISSUER) {
+        $issuer = isset($issuer) ? $issuer : self::IAP_ISSUER;
+        if (!isset($payload['iss']) || $payload['iss'] !== $issuer) {
             throw new UnexpectedValueException('Issuer does not match');
         }
 

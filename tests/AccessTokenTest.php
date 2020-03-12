@@ -201,6 +201,24 @@ class AccessTokenTest extends TestCase
                 'bar',
                 null,
                 AccessToken::IAP_CERT_URL
+            ], [
+                [
+                    'iss' => 'baz'
+                ] + $this->payload,
+                false,
+                null,
+                null,
+                AccessToken::IAP_CERT_URL
+            ], [
+                [
+                    'iss' => 'baz'
+                ] + $this->payload, [
+                    'iss' => 'baz'
+                ] + $this->payload,
+                null,
+                null,
+                AccessToken::IAP_CERT_URL,
+                'baz'
             ]
         ];
     }
