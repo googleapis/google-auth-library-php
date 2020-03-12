@@ -23,7 +23,7 @@ use Psr\Cache\CacheItemPoolInterface;
  * A class to implement caching for any object implementing
  * FetchAuthTokenInterface
  */
-class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface
+class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface, GetQuotaProjectInterface
 {
     use CacheTrait;
 
@@ -138,5 +138,18 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface
         }
 
         return $this->fetcher->signBlob($stringToSign, $forceOpenSsl);
+    }
+
+    /**
+     * Get the quota project used for this API request from the credentials
+     * fetcher.
+     *
+     * @return string|null
+     */
+    public function getQuotaProject()
+    {
+        if ($this->fetcher instanceof GetQuotaProjectInterface) {
+            return $this->fetcher->getQuotaProject();
+        }
     }
 }

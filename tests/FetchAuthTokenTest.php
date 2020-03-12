@@ -44,6 +44,12 @@ class FetchAuthTokenTest extends BaseTest
             return ['access_token' => 'xyz'];
         };
 
+        if (in_array(
+            'Google\Auth\GetQuotaProjectInterface',
+            class_implements($fetcherClass)
+        )) {
+            $mockFetcher->getQuotaProject()->shouldBeCalledTimes(1);
+        }
         $mockFetcher->fetchAuthToken(Argument::any())
             ->shouldBeCalledTimes(1)
             ->will($httpHandler);

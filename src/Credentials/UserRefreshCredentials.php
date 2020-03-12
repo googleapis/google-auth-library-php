@@ -18,6 +18,7 @@
 namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
+use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
 
 /**
@@ -31,7 +32,7 @@ use Google\Auth\OAuth2;
  *
  * @see [Application Default Credentials](http://goo.gl/mkAHpZ)
  */
-class UserRefreshCredentials extends CredentialsLoader
+class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjectInterface
 {
     const CLOUD_SDK_CLIENT_ID =
         '764086051850-6qr4p6gpi6hn506pt8ejuq83di341hur.apps.googleusercontent.com';
@@ -44,6 +45,11 @@ class UserRefreshCredentials extends CredentialsLoader
      * @var OAuth2
      */
     protected $auth;
+
+    /**
+     * The quota project associated with the JSON credentials
+     */
+    protected $quotaProject;
 
     /**
      * Create a new UserRefreshCredentials.
@@ -85,7 +91,11 @@ class UserRefreshCredentials extends CredentialsLoader
             'scope' => $scope,
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
         ]);
+        if (array_key_exists('quota_project', $jsonKey)) {
+            $this->quotaProject = (string) $jsonKey['quota_project'];
+        }
         if ($jsonKey['client_id'] === self::CLOUD_SDK_CLIENT_ID
+            && is_null($this->quotaProject)
             && getenv(self::SUPPRESS_CLOUD_SDK_CREDS_WARNING_ENV) !== 'true') {
             trigger_error(
                 'Your application has authenticated using end user credentials '
@@ -133,5 +143,15 @@ class UserRefreshCredentials extends CredentialsLoader
     public function getLastReceivedToken()
     {
         return $this->auth->getLastReceivedToken();
+    }
+
+    /**
+     * Get the quota project used for this API request
+     *
+     * @return string|null
+     */
+    public function getQuotaProject()
+    {
+        return $this->quotaProject;
     }
 }
