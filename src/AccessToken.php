@@ -215,7 +215,7 @@ class AccessToken
         }
 
         // @see https://cloud.google.com/iap/docs/signed-headers-howto#verifying_the_jwt_payload
-        $issuer = isset($issuer) ? $issuer : self::IAP_ISSUER;
+        $issuer = $issuer ?: self::IAP_ISSUER;
         if (!isset($payload['iss']) || $payload['iss'] !== $issuer) {
             throw new UnexpectedValueException('Issuer does not match');
         }
