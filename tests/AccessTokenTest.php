@@ -59,7 +59,8 @@ class AccessTokenTest extends TestCase
         $expected,
         $audience = null,
         $exception = null,
-        $certsLocation = null
+        $certsLocation = null,
+        $issuer = null
     ) {
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
         $item->get()->willReturn([
@@ -101,6 +102,7 @@ class AccessTokenTest extends TestCase
         try {
             $res = $token->verify($this->token, [
                 'audience' => $audience,
+                'issuer' => $issuer,
                 'certsLocation' => $certsLocation,
                 'throwException' => (bool) $exception,
             ]);
@@ -147,6 +149,17 @@ class AccessTokenTest extends TestCase
                 ] + $this->payload,
                 false
             ], [
+                [
+                    'iss' => 'baz'
+                ] + $this->payload,
+                [
+                    'iss' => 'baz'
+                ] + $this->payload,
+                null,
+                null,
+                null,
+                'baz'
+            ], [
                 $this->payload,
                 false,
                 null,
@@ -188,6 +201,24 @@ class AccessTokenTest extends TestCase
                 'bar',
                 null,
                 AccessToken::IAP_CERT_URL
+            ], [
+                [
+                    'iss' => 'baz'
+                ] + $this->payload,
+                false,
+                null,
+                null,
+                AccessToken::IAP_CERT_URL
+            ], [
+                [
+                    'iss' => 'baz'
+                ] + $this->payload, [
+                    'iss' => 'baz'
+                ] + $this->payload,
+                null,
+                null,
+                AccessToken::IAP_CERT_URL,
+                'baz'
             ]
         ];
     }
