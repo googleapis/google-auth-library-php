@@ -338,4 +338,53 @@ class GCECredentialsTest extends TestCase
 
         $signature = $creds->signBlob($stringToSign);
     }
+
+    public function testGetProjectId()
+    {
+        $guzzleVersion = ClientInterface::VERSION;
+        if ($guzzleVersion[0] === '5') {
+            $this->markTestSkipped('Only compatible with guzzle 6+');
+        }
+
+        $expected = 'foobar';
+
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->willReturn(
+                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                buildResponse(200, [], Psr7\stream_for($expected)),
+                buildResponse(200, [], Psr7\stream_for('notexpected'))
+            );
+
+        HttpClientCache::setHttpClient($client->reveal());
+
+        $creds = new GCECredentials;
+        $this->assertEquals($expected, $creds->getProjectId());
+
+        // call again to test cached value
+        $this->assertEquals($expected, $creds->getProjectId());
+    }
+
+    public function testGetProjectIdShouldBeEmptyIfNotOnGCE()
+    {
+        $guzzleVersion = ClientInterface::VERSION;
+        if ($guzzleVersion[0] === '5') {
+            $this->markTestSkipped('Only compatible with guzzle 6+');
+        }
+
+        // simulate retry attempts by returning multiple 500s
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->willReturn(
+            buildResponse(500),
+            buildResponse(500),
+            buildResponse(500)
+        );
+
+        HttpClientCache::setHttpClient($client->reveal());
+
+
+        $creds = new GCECredentials;
+        $this->assertNull($creds->getProjectId());
+    }
 }

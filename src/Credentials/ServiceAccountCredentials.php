@@ -20,6 +20,7 @@ namespace Google\Auth\Credentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
+use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\ServiceAccountSignerTrait;
 use Google\Auth\SignBlobInterface;
 use InvalidArgumentException;
@@ -57,7 +58,10 @@ use InvalidArgumentException;
  *
  *   $res = $client->get('myproject/taskqueues/myqueue');
  */
-class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface, GetQuotaProjectInterface
+class ServiceAccountCredentials extends CredentialsLoader implements
+    GetQuotaProjectInterface,
+    SignBlobInterface,
+    ProjectIdProviderInterface
 {
     use ServiceAccountSignerTrait;
 
@@ -74,6 +78,11 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      * @var string
      */
     protected $quotaProject;
+
+    /*
+     * @var string|null
+     */
+    protected $projectId;
 
     /**
      * Create a new ServiceAccountCredentials.
@@ -130,6 +139,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
             'additionalClaims' => $additionalClaims,
         ]);
+
+        $this->projectId = isset($jsonKey['project_id'])
+            ? $jsonKey['project_id']
+            : null;
     }
 
     /**
@@ -165,6 +178,19 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
     public function getLastReceivedToken()
     {
         return $this->auth->getLastReceivedToken();
+    }
+
+    /**
+     * Get the project ID from the service account keyfile.
+     *
+     * Returns null if the project ID does not exist in the keyfile.
+     *
+     * @param callable $httpHandler Not used by this credentials type.
+     * @return string|null
+     */
+    public function getProjectId(callable $httpHandler = null)
+    {
+        return $this->projectId;
     }
 
     /**
