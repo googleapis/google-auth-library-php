@@ -90,7 +90,7 @@ class AppIdentityCredentials extends CredentialsLoader implements
      * SERVER_SOFTWARE environment variable (prod) or the APPENGINE_RUNTIME
      * environment variable (dev).
      *
-     * @return true if this an App Engine Instance, false otherwise
+     * @return bool true if this an App Engine Instance, false otherwise
      */
     public static function onAppEngine()
     {
