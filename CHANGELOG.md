@@ -1,4 +1,4 @@
-## 1.8.0 QUARANTINE EDITION (3/26/2020)
+## 1.8.0 (3/26/2020)
 
 * [feat] Add option to throw exception in AccessToken::verify(). (#265)
 * [feat] Add support for x-goog-user-project. (#254)
