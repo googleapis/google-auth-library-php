@@ -10,6 +10,7 @@ class AppIdentityService
         'expiration_time' => '2147483646',
     ];
     public static $serviceAccountName;
+    public static $applicationId;
 
     public static function getAccessToken($scope)
     {
@@ -28,5 +29,10 @@ class AppIdentityService
     public static function getServiceAccountName()
     {
         return self::$serviceAccountName;
+    }
+
+    public static function getApplicationId()
+    {
+        return self::$applicationId;
     }
 }

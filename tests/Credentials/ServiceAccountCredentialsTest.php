@@ -34,6 +34,7 @@ function createTestJson()
         'client_email' => 'test@example.com',
         'client_id' => 'client123',
         'type' => 'service_account',
+        'project_id' => 'example_project'
     ];
 }
 
@@ -375,6 +376,16 @@ class SACGetClientNameTest extends TestCase
     }
 }
 
+class SACGetProjectIdTest extends TestCase
+{
+    public function testGetProjectId()
+    {
+        $testJson = createTestJson();
+        $sa = new ServiceAccountCredentials('scope/1', $testJson);
+        $this->assertEquals($testJson['project_id'], $sa->getProjectId());
+    }
+}
+
 class SACJwtAccessTest extends TestCase
 {
     private $privateKey;
@@ -638,5 +649,15 @@ class SACJWTGetClientNameTest extends TestCase
         $testJson = createTestJson();
         $sa = new ServiceAccountJwtAccessCredentials($testJson);
         $this->assertEquals($testJson['client_email'], $sa->getClientName());
+    }
+}
+
+class SACJWTGetProjectIdTest extends TestCase
+{
+    public function testGetProjectId()
+    {
+        $testJson = createTestJson();
+        $sa = new ServiceAccountJwtAccessCredentials($testJson);
+        $this->assertEquals($testJson['project_id'], $sa->getProjectId());
     }
 }

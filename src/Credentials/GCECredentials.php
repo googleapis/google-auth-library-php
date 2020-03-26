@@ -21,6 +21,7 @@ use Google\Auth\CredentialsLoader;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Iam;
+use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\SignBlobInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
@@ -52,7 +53,9 @@ use InvalidArgumentException;
  *
  *   $res = $client->get('myproject/taskqueues/myqueue');
  */
-class GCECredentials extends CredentialsLoader implements SignBlobInterface
+class GCECredentials extends CredentialsLoader implements
+    SignBlobInterface,
+    ProjectIdProviderInterface
 {
     const cacheKey = 'GOOGLE_AUTH_PHP_GCE';
 
@@ -78,6 +81,11 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      * The metadata path of the client ID.
      */
     const CLIENT_ID_URI_PATH = 'v1/instance/service-accounts/default/email';
+
+    /**
+     * The metadata path of the project ID.
+     */
+    const PROJECT_ID_URI_PATH = 'v1/project/project-id';
 
     /**
      * The header whose presence indicates GCE presence.
@@ -117,9 +125,14 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     protected $lastReceivedToken;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $clientName;
+
+    /**
+     * @var string|null
+     */
+    private $projectId;
 
     /**
      * @var Iam|null
@@ -197,6 +210,18 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
     }
 
     /**
+     * The full uri for accessing the default project ID.
+     *
+     * @return string
+     */
+    private static function getProjectIdUri()
+    {
+        $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
+
+        return $base . self::PROJECT_ID_URI_PATH;
+    }
+
+    /**
      * Determines if this an App Engine Flexible instance, by accessing the
      * GAE_INSTANCE environment variable.
      *
@@ -213,8 +238,7 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
      * If $httpHandler is not specified a the default HttpHandler is used.
      *
      * @param callable $httpHandler callback which delivers psr7 request
-     *
-     * @return true if this a GCEInstance false otherwise
+     * @return bool True if this a GCEInstance, false otherwise
      */
     public static function onGce(callable $httpHandler = null)
     {
@@ -381,6 +405,36 @@ class GCECredentials extends CredentialsLoader implements SignBlobInterface
             : $this->fetchAuthToken($httpHandler)['access_token'];
 
         return $signer->signBlob($email, $accessToken, $stringToSign);
+    }
+
+    /**
+     * Fetch the default Project ID from compute engine.
+     *
+     * Returns null if called outside GCE.
+     *
+     * @param callable $httpHandler Callback which delivers psr7 request
+     * @return string|null
+     */
+    public function getProjectId(callable $httpHandler = null)
+    {
+        if ($this->projectId) {
+            return $this->projectId;
+        }
+
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+
+        if (!$this->hasCheckedOnGce) {
+            $this->isOnGce = self::onGce($httpHandler);
+            $this->hasCheckedOnGce = true;
+        }
+
+        if (!$this->isOnGce) {
+            return null;
+        }
+
+        $this->projectId = $this->getFromMetadata($httpHandler, self::getProjectIdUri());
+        return $this->projectId;
     }
 
     /**

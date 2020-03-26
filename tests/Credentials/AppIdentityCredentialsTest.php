@@ -219,6 +219,23 @@ class AppIdentityCredentialsTest extends TestCase
         ], $creds->getLastReceivedToken());
     }
 
+    /**
+     * @runInSeparateProcess
+     */
+    public function testGetProjectId()
+    {
+        $this->imitateInAppEngine();
+
+        $projectId = 'foobar';
+        AppIdentityService::$applicationId = $projectId;
+        $this->assertEquals($projectId, (new AppIdentityCredentials)->getProjectId());
+    }
+
+    public function testGetProjectOutsideAppEngine()
+    {
+        $this->assertNull((new AppIdentityCredentials)->getProjectId());
+    }
+
     private function imitateInAppEngine()
     {
         // include the mock AppIdentityService class

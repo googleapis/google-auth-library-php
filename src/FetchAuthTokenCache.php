@@ -23,7 +23,11 @@ use Psr\Cache\CacheItemPoolInterface;
  * A class to implement caching for any object implementing
  * FetchAuthTokenInterface
  */
-class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface, GetQuotaProjectInterface
+class FetchAuthTokenCache implements
+    FetchAuthTokenInterface,
+    GetQuotaProjectInterface,
+    SignBlobInterface,
+    ProjectIdProviderInterface
 {
     use CacheTrait;
 
@@ -151,5 +155,25 @@ class FetchAuthTokenCache implements FetchAuthTokenInterface, SignBlobInterface,
         if ($this->fetcher instanceof GetQuotaProjectInterface) {
             return $this->fetcher->getQuotaProject();
         }
+    }
+
+    /*
+     * Get the Project ID from the fetcher.
+     *
+     * @param callable $httpHandler Callback which delivers psr7 request
+     * @return string|null
+     * @throws \RuntimeException If the fetcher does not implement
+     *     `Google\Auth\ProvidesProjectIdInterface`.
+     */
+    public function getProjectId(callable $httpHandler = null)
+    {
+        if (!$this->fetcher instanceof ProjectIdProviderInterface) {
+            throw new \RuntimeException(
+                'Credentials fetcher does not implement ' .
+                'Google\Auth\ProvidesProjectIdInterface'
+            );
+        }
+
+        return $this->fetcher->getProjectId($httpHandler);
     }
 }
