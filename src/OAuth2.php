@@ -176,7 +176,7 @@ class OAuth2 implements FetchAuthTokenInterface
     private $signingKey;
 
     /**
-     * The signing key id when using assertion profile.
+     * The signing key id when using assertion profile. Param kid in jwt header
      *
      * @var string
      */
