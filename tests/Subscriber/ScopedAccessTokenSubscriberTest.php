@@ -68,8 +68,11 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         };
         $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array());
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'scoped']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'scoped']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertSame(

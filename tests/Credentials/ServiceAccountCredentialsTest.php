@@ -46,7 +46,8 @@ class SACGetCacheKeyTest extends TestCase
         $scope = ['scope/1', 'scope/2'];
         $sa = new ServiceAccountCredentials(
             $scope,
-            $testJson);
+            $testJson
+        );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
             $testJson['client_email'] . ':' . $o->getCacheKey(),
@@ -62,7 +63,8 @@ class SACGetCacheKeyTest extends TestCase
         $sa = new ServiceAccountCredentials(
             $scope,
             $testJson,
-            $sub);
+            $sub
+        );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
             $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
@@ -78,7 +80,8 @@ class SACGetCacheKeyTest extends TestCase
         $sa = new ServiceAccountCredentials(
             $scope,
             $testJson,
-            null);
+            null
+        );
         $sa->setSub($sub);
 
         $o = new OAuth2(['scope' => $scope]);
@@ -315,17 +318,20 @@ class SACFetchAuthTokenTest extends TestCase
         $update_metadata = $sa->getUpdateMetadataFunc();
         $this->assertInternalType('callable', $update_metadata);
 
-        $actual_metadata = call_user_func($update_metadata,
+        $actual_metadata = call_user_func(
+            $update_metadata,
             $metadata = array('foo' => 'bar'),
             $authUri = null,
-            $httpHandler);
+            $httpHandler
+        );
         $this->assertArrayHasKey(
             CredentialsLoader::AUTH_METADATA_KEY,
             $actual_metadata
         );
         $this->assertEquals(
             $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
-            array('Bearer ' . $access_token));
+            array('Bearer ' . $access_token)
+        );
     }
 
     public function testShouldBeIdTokenWhenTargetAudienceIsSet()
@@ -343,7 +349,6 @@ class SACFetchAuthTokenTest extends TestCase
             $this->assertEquals('a target audience', $jwtParams['target_audience']);
 
             return new Psr7\Response(200, [], Psr7\stream_for(json_encode($expectedToken)));
-
         };
         $sa = new ServiceAccountCredentials(null, $testJson, null, 'a target audience');
         $this->assertEquals($expectedToken, $sa->fetchAuthToken($httpHandler));
@@ -498,9 +503,11 @@ class SACJwtAccessTest extends TestCase
         $update_metadata = $sa->getUpdateMetadataFunc();
         $this->assertInternalType('callable', $update_metadata);
 
-        $actual_metadata = call_user_func($update_metadata,
+        $actual_metadata = call_user_func(
+            $update_metadata,
             $metadata = array('foo' => 'bar'),
-            $authUri = null);
+            $authUri = null
+        );
         $this->assertArrayNotHasKey(
             CredentialsLoader::AUTH_METADATA_KEY,
             $actual_metadata
@@ -518,9 +525,11 @@ class SACJwtAccessTest extends TestCase
         $update_metadata = $sa->getUpdateMetadataFunc();
         $this->assertInternalType('callable', $update_metadata);
 
-        $actual_metadata = call_user_func($update_metadata,
+        $actual_metadata = call_user_func(
+            $update_metadata,
             $metadata = array('foo' => 'bar'),
-            $authUri = 'https://example.com/service');
+            $authUri = 'https://example.com/service'
+        );
         $this->assertArrayHasKey(
             CredentialsLoader::AUTH_METADATA_KEY,
             $actual_metadata
@@ -534,9 +543,11 @@ class SACJwtAccessTest extends TestCase
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
         $this->assertGreaterThan(30, strlen($bearer_token));
 
-        $actual_metadata2 = call_user_func($update_metadata,
+        $actual_metadata2 = call_user_func(
+            $update_metadata,
             $metadata = array('foo' => 'bar'),
-            $authUri = 'https://example.com/anotherService');
+            $authUri = 'https://example.com/anotherService'
+        );
         $this->assertArrayHasKey(
             CredentialsLoader::AUTH_METADATA_KEY,
             $actual_metadata2
@@ -586,9 +597,11 @@ class SACJwtAccessComboTest extends TestCase
         $update_metadata = $sa->getUpdateMetadataFunc();
         $this->assertInternalType('callable', $update_metadata);
 
-        $actual_metadata = call_user_func($update_metadata,
+        $actual_metadata = call_user_func(
+            $update_metadata,
             $metadata = array('foo' => 'bar'),
-            $authUri = 'https://example.com/service');
+            $authUri = 'https://example.com/service'
+        );
         $this->assertArrayHasKey(
             CredentialsLoader::AUTH_METADATA_KEY,
             $actual_metadata
@@ -618,9 +631,11 @@ class SACJwtAccessComboTest extends TestCase
         $update_metadata = $sa->getUpdateMetadataFunc();
         $this->assertInternalType('callable', $update_metadata);
 
-        $actual_metadata = call_user_func($update_metadata,
+        $actual_metadata = call_user_func(
+            $update_metadata,
             $metadata = array('foo' => 'bar'),
-            $authUri = null);
+            $authUri = null
+        );
         // no access_token is added to the metadata hash
         // but also, no error should be thrown
         $this->assertInternalType('array', $actual_metadata);

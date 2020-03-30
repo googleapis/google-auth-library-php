@@ -74,13 +74,11 @@ class ApplicationDefaultCredentials
      * this does not fallback to the compute engine defaults.
      *
      * @param string|array scope the scope of the access request, expressed
-     *   either as an Array or as a space-delimited String.
+     *        either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache an implementation of CacheItemPoolInterface
-     *
      * @return AuthTokenSubscriber
-     *
      * @throws DomainException if no implementation can be obtained.
      */
     public static function getSubscriber(
@@ -102,13 +100,11 @@ class ApplicationDefaultCredentials
      * this does not fallback to the compute engine defaults.
      *
      * @param string|array scope the scope of the access request, expressed
-     *   either as an Array or as a space-delimited String.
+     *        either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
-     *
      * @return AuthTokenMiddleware
-     *
      * @throws DomainException if no implementation can be obtained.
      */
     public static function getMiddleware(
@@ -131,13 +127,11 @@ class ApplicationDefaultCredentials
      * this does not fallback to the Compute Engine defaults.
      *
      * @param string|array scope the scope of the access request, expressed
-     *   either as an Array or as a space-delimited String.
+     *        either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
-     *
      * @return CredentialsLoader
-     *
      * @throws DomainException if no implementation can be obtained.
      */
     public static function getCredentials(
@@ -188,9 +182,7 @@ class ApplicationDefaultCredentials
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
-     *
      * @return AuthTokenMiddleware
-     *
      * @throws DomainException if no implementation can be obtained.
      */
     public static function getIdTokenMiddleware(
@@ -198,7 +190,6 @@ class ApplicationDefaultCredentials
         callable $httpHandler = null,
         array $cacheConfig = null,
         CacheItemPoolInterface $cache = null
-
     ) {
         $creds = self::getIdTokenCredentials($targetAudience, $httpHandler, $cacheConfig, $cache);
 
@@ -214,9 +205,7 @@ class ApplicationDefaultCredentials
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
-     *
      * @return CredentialsLoader
-     *
      * @throws DomainException if no implementation can be obtained.
      * @throws InvalidArgumentException if JSON "type" key is invalid
      */

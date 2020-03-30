@@ -1,0 +1,10 @@
+name: Generate Documentation
+on:
+    push:
+        branches:
+            - master
+        tags:
+            - *
+
+# jobs:
+#     docs:

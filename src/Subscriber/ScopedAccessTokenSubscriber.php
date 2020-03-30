@@ -78,7 +78,8 @@ class ScopedAccessTokenSubscriber implements SubscriberInterface
         $this->tokenFunc = $tokenFunc;
         if (!(is_string($scopes) || is_array($scopes))) {
             throw new \InvalidArgumentException(
-                'wants scope should be string or array');
+                'wants scope should be string or array'
+            );
         }
         $this->scopes = $scopes;
 
