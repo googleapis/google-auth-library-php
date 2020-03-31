@@ -4,7 +4,23 @@ on:
         branches:
             - master
         tags:
-            - *
+            - "*"
 
-# jobs:
-#     docs:
+jobs:
+    docs:
+        name: "Generate Project Documentation"
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout
+          uses: actions/checkout@master
+        - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+        - name: Mount gh-pages branch
+          uses: srt32/git-actions@v0.0.3
+          with:
+            args: git submodule add -q -f -b gh-pages https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY} .docs
+        - name: Generate and Push Documentation
+          uses: docker://php:7.3-cli
+          env:
+            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          with:
+            entrypoint: ./.github/actions/docs/entrypoint.sh
