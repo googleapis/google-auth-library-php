@@ -1,5 +1,8 @@
 #!/bin/sh -l
 
+composer config repositories.sami vcs https://github.com/jdpedrie/sami.git
+composer require sami/sami:dev-master
+
 apt-get update
 apt-get install -y git
 
@@ -8,7 +11,7 @@ curl -O http://get.sensiolabs.org/sami.phar
 git reset HEAD .docs
 git reset HEAD .gitmodules
 
-php sami.phar update .github/actions/docs/sami.php
+php vendor/bin/sami.php update .github/actions/docs/sami.php
 
 cd ./.docs
 
