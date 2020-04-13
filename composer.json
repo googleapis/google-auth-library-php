@@ -11,8 +11,7 @@
     "guzzlehttp/guzzle": "~5.3.1|~6.0",
     "guzzlehttp/psr7": "^1.2",
     "psr/http-message": "^1.0",
-    "psr/cache": "^1.0",
-    "sami/sami": "dev-master"
+    "psr/cache": "^1.0"
   },
   "require-dev": {
     "guzzlehttp/promises": "0.1.1|^1.3",
