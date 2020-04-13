@@ -15,7 +15,7 @@ jobs:
           uses: actions/checkout@master
         - name: API Documentation Generation
           uses: varunsridharan/action-apigen@master
-          inputs:
+          with:
             source_folder: src
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
