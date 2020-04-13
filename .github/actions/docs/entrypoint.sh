@@ -7,7 +7,7 @@ curl -O http://get.sensiolabs.org/sami.phar
 
 git reset HEAD .docs
 git reset HEAD .gitmodules
-git reset --hard HEAD composer.json
+git reset --hard HEAD
 
 php vendor/bin/sami.php update .github/actions/docs/sami.php
 
