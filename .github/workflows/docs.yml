@@ -13,9 +13,20 @@ jobs:
         steps:
         - name: Checkout
           uses: actions/checkout@master
-        - name: API Documentation Generation
-          uses: varunsridharan/action-apigen@master
+        - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+        - name: Mount gh-pages branch
+          uses: srt32/git-actions@v0.0.3
           with:
-            source_folder: src
+            args: git submodule add -q -f -b gh-pages https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY} .docs
+        - name: Install Dependencies
+          uses: nick-invision/retry@v1
+          with:
+            timeout_minutes: 10
+            max_attempts: 3
+            command: composer config repositories.sami vcs https://${{ secrets.GITHUB_TOKEN }}@github.com/jdpedrie/sami.git && composer require sami/sami:dev-master && composer update
+        - name: Generate and Push Documentation
+          uses: docker://php:7.3-cli
           env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          with:
+            entrypoint: ./.github/actions/docs/entrypoint.sh

@@ -66,31 +66,31 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 class ApplicationDefaultCredentials
 {
-    /**
-     * Obtains an AuthTokenSubscriber that uses the default FetchAuthTokenInterface
-     * implementation to use in this environment.
-     *
-     * If supplied, $scope is used to in creating the credentials instance if
-     * this does not fallback to the compute engine defaults.
-     *
-     * @param string|array scope the scope of the access request, expressed
-     *        either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache an implementation of CacheItemPoolInterface
-     * @return AuthTokenSubscriber
-     * @throws DomainException if no implementation can be obtained.
-     */
-    public static function getSubscriber(
-        $scope = null,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
-    ) {
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
+    // /**
+    //  * Obtains an AuthTokenSubscriber that uses the default FetchAuthTokenInterface
+    //  * implementation to use in this environment.
+    //  *
+    //  * If supplied, $scope is used to in creating the credentials instance if
+    //  * this does not fallback to the compute engine defaults.
+    //  *
+    //  * @param string|array scope the scope of the access request, expressed
+    //  *        either as an Array or as a space-delimited String.
+    //  * @param callable $httpHandler callback which delivers psr7 request
+    //  * @param array $cacheConfig configuration for the cache when it's present
+    //  * @param CacheItemPoolInterface $cache an implementation of CacheItemPoolInterface
+    //  * @return AuthTokenSubscriber
+    //  * @throws DomainException if no implementation can be obtained.
+    //  */
+    // public static function getSubscriber(
+    //     $scope = null,
+    //     callable $httpHandler = null,
+    //     array $cacheConfig = null,
+    //     CacheItemPoolInterface $cache = null
+    // ) {
+    //     $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
 
-        return new AuthTokenSubscriber($creds, $httpHandler);
-    }
+    //     return new AuthTokenSubscriber($creds, $httpHandler);
+    // }
 
     /**
      * Obtains an AuthTokenMiddleware that uses the default FetchAuthTokenInterface
