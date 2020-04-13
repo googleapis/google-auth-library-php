@@ -11,7 +11,8 @@
     "guzzlehttp/guzzle": "~5.3.1|~6.0",
     "guzzlehttp/psr7": "^1.2",
     "psr/http-message": "^1.0",
-    "psr/cache": "^1.0"
+    "psr/cache": "^1.0",
+    "sami/sami": "dev-master"
   },
   "require-dev": {
     "guzzlehttp/promises": "0.1.1|^1.3",
@@ -32,6 +33,12 @@
   "autoload-dev": {
     "psr-4": {
       "Google\\Auth\\Tests\\": "tests"
+    }
+  },
+  "repositories": {
+    "sami": {
+      "type": "vcs",
+      "url": "https://github.com/jdpedrie/sami.git"
     }
   }
 }
