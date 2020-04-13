@@ -46,23 +46,25 @@ use Psr\Cache\CacheItemPoolInterface;
  *
  * This allows it to be used as follows with GuzzleHttp\Client:
  *
- *   use Google\Auth\ApplicationDefaultCredentials;
- *   use GuzzleHttp\Client;
- *   use GuzzleHttp\HandlerStack;
+ * ```
+ * use Google\Auth\ApplicationDefaultCredentials;
+ * use GuzzleHttp\Client;
+ * use GuzzleHttp\HandlerStack;
  *
- *   $middleware = ApplicationDefaultCredentials::getMiddleware(
- *       'https://www.googleapis.com/auth/taskqueue'
- *   );
- *   $stack = HandlerStack::create();
- *   $stack->push($middleware);
+ * $middleware = ApplicationDefaultCredentials::getMiddleware(
+ *     'https://www.googleapis.com/auth/taskqueue'
+ * );
+ * $stack = HandlerStack::create();
+ * $stack->push($middleware);
  *
- *   $client = new Client([
- *       'handler' => $stack,
- *       'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
- *       'auth' => 'google_auth' // authorize all requests
- *   ]);
+ * $client = new Client([
+ *     'handler' => $stack,
+ *     'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
+ *     'auth' => 'google_auth' // authorize all requests
+ * ]);
  *
- *   $res = $client->get('myproject/taskqueues/myqueue');
+ * $res = $client->get('myproject/taskqueues/myqueue');
+ * ```
  */
 class ApplicationDefaultCredentials
 {
