@@ -128,7 +128,7 @@ class FetchAuthTokenCache implements
      * Sign a blob using the fetcher.
      *
      * @param string $stringToSign The string to sign.
-     * @param bool $forceOpenssl Require use of OpenSSL for local signing. Does
+     * @param bool $forceOpenSsl Require use of OpenSSL for local signing. Does
      *        not apply to signing done using external services. **Defaults to**
      *        `false`.
      * @return string The resulting signature.

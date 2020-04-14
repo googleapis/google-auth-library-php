@@ -319,6 +319,7 @@ class AccessToken
      * are PEM encoded certificates.
      *
      * @param string $location The location from which to retrieve certs.
+     * @param string $cacheKey The key under which to cache the retrieved certs.
      * @param array $options [optional] Configuration options.
      * @return array
      * @throws InvalidArgumentException If received certs are in an invalid format.

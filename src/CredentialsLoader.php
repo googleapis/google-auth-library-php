@@ -61,7 +61,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * variable GOOGLE_APPLICATION_CREDENTIALS. Return null if
      * GOOGLE_APPLICATION_CREDENTIALS is not specified.
      *
-     * @return array JSON key | null
+     * @return array|null JSON key | null
      */
     public static function fromEnv()
     {
@@ -85,9 +85,9 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * * windows: %APPDATA%/gcloud/application_default_credentials.json
      * * others: $HOME/.config/gcloud/application_default_credentials.json
      *
-     * If the file does not exists, this returns null.
+     * If the file does not exist, this returns null.
      *
-     * @return array JSON key | null
+     * @return array|null JSON key | null
      */
     public static function fromWellKnownFile()
     {
@@ -134,7 +134,7 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * Create an authorized HTTP Client from an instance of FetchAuthTokenInterface.
      *
      * @param FetchAuthTokenInterface $fetcher is used to fetch the auth token
-     * @param array $httpClientOptoins (optional) Array of request options to apply.
+     * @param array $httpClientOptions (optional) Array of request options to apply.
      * @param callable $httpHandler (optional) http client to fetch the token.
      * @param callable $tokenCallback (optional) function to be called when a new token is fetched.
      * @return \GuzzleHttp\Client
