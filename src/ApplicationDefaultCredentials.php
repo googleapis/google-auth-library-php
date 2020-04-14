@@ -79,7 +79,8 @@ class ApplicationDefaultCredentials
      *        either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache an implementation of CacheItemPoolInterface
+     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     *        provided if you have one already available for use.
      * @return AuthTokenSubscriber
      * @throws DomainException if no implementation can be obtained.
      */
@@ -105,7 +106,8 @@ class ApplicationDefaultCredentials
      *        either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache
+     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     *        provided if you have one already available for use.
      * @return AuthTokenMiddleware
      * @throws DomainException if no implementation can be obtained.
      */
@@ -132,7 +134,8 @@ class ApplicationDefaultCredentials
      *        either as an Array or as a space-delimited String.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache
+     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     *        provided if you have one already available for use.
      * @return CredentialsLoader
      * @throws DomainException if no implementation can be obtained.
      */
@@ -183,7 +186,8 @@ class ApplicationDefaultCredentials
      * @param string $targetAudience The audience for the ID token.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache
+     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     *        provided if you have one already available for use.
      * @return AuthTokenMiddleware
      * @throws DomainException if no implementation can be obtained.
      */
@@ -206,7 +210,8 @@ class ApplicationDefaultCredentials
      * @param string $targetAudience The audience for the ID token.
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache
+     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     *        provided if you have one already available for use.
      * @return CredentialsLoader
      * @throws DomainException if no implementation can be obtained.
      * @throws InvalidArgumentException if JSON "type" key is invalid

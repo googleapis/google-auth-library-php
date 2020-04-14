@@ -90,9 +90,6 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->sysvKey = ftok(__FILE__, $this->options['proj']);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getItem($key)
     {
         $this->loadItems();

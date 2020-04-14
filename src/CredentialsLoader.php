@@ -81,8 +81,9 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * Load a JSON key from a well known path.
      *
      * The well known path is OS dependent:
-     * - windows: %APPDATA%/gcloud/application_default_credentials.json
-     * - others: $HOME/.config/gcloud/application_default_credentials.json
+     *
+     * * windows: %APPDATA%/gcloud/application_default_credentials.json
+     * * others: $HOME/.config/gcloud/application_default_credentials.json
      *
      * If the file does not exists, this returns null.
      *

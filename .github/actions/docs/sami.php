@@ -10,7 +10,9 @@ $projectRoot = __DIR__ . '/../../..';
 $iterator = Finder::create()
     ->files()
     ->name('*.php')
-    ->in($projectRoot . '/src');
+    ->exclude('vendor')
+    ->exclude('tests')
+    ->in($projectRoot);
 
 $versions = GitVersionCollection::create($projectRoot)
     ->addFromTags('v1.*')
