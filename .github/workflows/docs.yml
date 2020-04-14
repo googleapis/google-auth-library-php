@@ -9,7 +9,7 @@ on:
 jobs:
     docs:
         name: "Generate Project Documentation"
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-16.04
         steps:
         - name: Checkout
           uses: actions/checkout@master
@@ -19,7 +19,7 @@ jobs:
           with:
             timeout_minutes: 10
             max_attempts: 3
-            command: composer config repositories.sami vcs https://${{ secrets.GITHUB_TOKEN }}@github.com/jdpedrie/sami.git && composer require sami/sami:v4.2
+            command: composer config repositories.sami vcs https://${{ secrets.GITHUB_TOKEN }}@github.com/jdpedrie/sami.git && composer require sami/sami:v4.2 && git reset --hard HEAD
         - name: Generate and Push Documentation
           uses: docker://php:7.3-cli
           env:
