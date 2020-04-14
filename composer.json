@@ -33,11 +33,5 @@
     "psr-4": {
       "Google\\Auth\\Tests\\": "tests"
     }
-  },
-  "repositories": {
-    "sami": {
-      "type": "vcs",
-      "url": "https://github.com/jdpedrie/sami.git"
-    }
   }
 }
