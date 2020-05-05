@@ -455,6 +455,7 @@ class OAuth2JwtTest extends TestCase
         $testConfig['signingKey'] = $keys['example_key_id2'];
         $o = new OAuth2($testConfig);
         $payload = $o->toJwt();
+
         try {
             $this->jwtDecode($payload, $keys, array('HS256'));
         } catch (\Exception $e) {
