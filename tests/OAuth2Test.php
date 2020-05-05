@@ -448,23 +448,6 @@ class OAuth2JwtTest extends TestCase
     /**
      * @expectedException UnexpectedValueException
      */
-    public function testFailDecodeWithUnknownSigningKeyId()
-    {
-        $testConfig = $this->signingMinimal;
-        $keys = array(
-            'example_key_id1' => 'example_key1',
-            'example_key_id2' => 'example_key2'
-        );
-        $testConfig['signingKey'] = $keys['example_key_id2'];
-        $testConfig['signingKeyId'] = 'unknown_signing_key';
-        $o = new OAuth2($testConfig);
-        $payload = $o->toJwt();
-        $this->jwtDecode($payload, $keys, array('HS256'));
-    }
-
-    /**
-     * @expectedException UnexpectedValueException
-     */
     public function testFailDecodeWithoutSigningKeyId()
     {
         $testConfig = $this->signingMinimal;
