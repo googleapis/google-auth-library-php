@@ -192,6 +192,7 @@ class GCECredentials extends CredentialsLoader implements
         }
 
         $this->tokenUri = $tokenUri;
+        $this->quotaProject = $quotaProject;
     }
 
     /**
