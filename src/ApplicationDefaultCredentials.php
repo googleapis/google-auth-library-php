@@ -135,6 +135,8 @@ class ApplicationDefaultCredentials
      * @param callable $httpHandler callback which delivers psr7 request
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache
+     * @param string $quotaProject specifies a project to bill for access
+     *   charges associated with the request.
      *
      * @return CredentialsLoader
      *
@@ -144,7 +146,8 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        CacheItemPoolInterface $cache = null,
+        $quotaProject = null
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -160,11 +163,12 @@ class ApplicationDefaultCredentials
         }
 
         if (!is_null($jsonKey)) {
+            $jsonKey['quota_project'] = $quotaProject;
             $creds = CredentialsLoader::makeCredentials($scope, $jsonKey);
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($scope);
         } elseif (GCECredentials::onGce($httpHandler)) {
-            $creds = new GCECredentials(null, $scope);
+            $creds = new GCECredentials(null, $scope, null, $quotaProject);
         }
 
         if (is_null($creds)) {
