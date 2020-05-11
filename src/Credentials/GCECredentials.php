@@ -161,7 +161,7 @@ class GCECredentials extends CredentialsLoader implements
      * @param string|array $scope [optional] the scope of the access request,
      *        expressed either as an array or as a space-delimited string.
      * @param string $targetAudience [optional] The audience for the ID token.
-     * @param string $quotaProject specifies a project to bill for access
+     * @param string $quotaProject [optional] Specifies a project to bill for access
      *   charges associated with the request.
      */
     public function __construct(Iam $iam = null, $scope = null, $targetAudience = null, $quotaProject = null)
