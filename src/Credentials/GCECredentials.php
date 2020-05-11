@@ -152,7 +152,7 @@ class GCECredentials extends CredentialsLoader implements
     private $targetAudience;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $quotaProject;
 
