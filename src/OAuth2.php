@@ -359,11 +359,21 @@ class OAuth2 implements FetchAuthTokenInterface
      * - if present, but invalid, raises DomainException.
      * - otherwise returns the payload in the idtoken as a PHP object.
      *
-     * if $publicKey is null, the key is decoded without being verified.
+     * The behavior of this method varies depending on the version of
+     * `firebase/php-jwt` you are using. In versions lower than 3.0.0, if
+     * `$publicKey` is null, the key is decoded without being verified. In
+     * newer versions, if a public key is not given, this method will throw an
+     * `\InvalidArgumentException`.
      *
      * @param string $publicKey The public key to use to authenticate the token
      * @param array $allowed_algs List of supported verification algorithms
-     *
+     * @throws \DomainException if the token is missing an audience.
+     * @throws \DomainException if the audience does not match the one set in
+     *         the OAuth2 class instance.
+     * @throws \UnexpectedValueException If the token is invalid
+     * @throws SignatureInvalidException If the signature is invalid.
+     * @throws BeforeValidException If the token is not yet valid.
+     * @throws ExpiredException If the token has expired.
      * @return null|object
      */
     public function verifyIdToken($publicKey = null, $allowed_algs = array())
