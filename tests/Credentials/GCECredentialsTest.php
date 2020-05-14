@@ -162,7 +162,6 @@ class GCECredentialsTest extends TestCase
                 $request->getUri()->getQuery()
             );
             return new Psr7\Response(200, [], Psr7\stream_for($expectedToken['id_token']));
-
         };
         $g = new GCECredentials(null, null, 'a+target+audience');
         $this->assertEquals($expectedToken, $g->fetchAuthToken($httpHandler));
@@ -191,7 +190,7 @@ class GCECredentialsTest extends TestCase
         $uri = null;
         $client = $this->prophesize('GuzzleHttp\ClientInterface');
         $client->send(Argument::any(), Argument::any())
-            ->will(function() use (&$uri) {
+            ->will(function () use (&$uri) {
                 $this->send(Argument::any(), Argument::any())->will(function ($args) use (&$uri) {
                     $uri = $args[0]->getUri();
 
@@ -376,10 +375,10 @@ class GCECredentialsTest extends TestCase
         $client = $this->prophesize('GuzzleHttp\ClientInterface');
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
-            buildResponse(500),
-            buildResponse(500),
-            buildResponse(500)
-        );
+                buildResponse(500),
+                buildResponse(500),
+                buildResponse(500)
+            );
 
         HttpClientCache::setHttpClient($client->reveal());
 

@@ -42,7 +42,8 @@ class URCGetCacheKeyTest extends TestCase
         $scope = ['scope/1', 'scope/2'];
         $sa = new UserRefreshCredentials(
             $scope,
-            $testJson);
+            $testJson
+        );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
             $testJson['client_id'] . ':' . $o->getCacheKey(),

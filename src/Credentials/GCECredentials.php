@@ -59,7 +59,9 @@ class GCECredentials extends CredentialsLoader implements
     ProjectIdProviderInterface,
     GetQuotaProjectInterface
 {
+    // phpcs:disable
     const cacheKey = 'GOOGLE_AUTH_PHP_GCE';
+    // phpcs:enable
 
     /**
      * The metadata IP address on appengine instances.
@@ -170,7 +172,8 @@ class GCECredentials extends CredentialsLoader implements
 
         if ($scope && $targetAudience) {
             throw new InvalidArgumentException(
-                'Scope and targetAudience cannot both be supplied');
+                'Scope and targetAudience cannot both be supplied'
+            );
         }
 
         $tokenUri = self::getTokenUri();
@@ -183,7 +186,8 @@ class GCECredentials extends CredentialsLoader implements
 
             $tokenUri = $tokenUri . '?scopes='. $scope;
         } elseif ($targetAudience) {
-            $tokenUri = sprintf('http://%s/computeMetadata/%s?audience=%s',
+            $tokenUri = sprintf(
+                'http://%s/computeMetadata/%s?audience=%s',
                 self::METADATA_IP,
                 self::ID_TOKEN_URI_PATH,
                 $targetAudience

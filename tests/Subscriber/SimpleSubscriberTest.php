@@ -48,8 +48,11 @@ class SimpleSubscriberTest extends BaseTest
     {
         $s = new SimpleSubscriber(['key' => 'test_key']);
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'simple']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'simple']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertCount(1, $request->getQuery());
@@ -61,8 +64,11 @@ class SimpleSubscriberTest extends BaseTest
     {
         $s = new SimpleSubscriber(['key' => 'test_key']);
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'notsimple']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'notsimple']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertCount(0, $request->getQuery());

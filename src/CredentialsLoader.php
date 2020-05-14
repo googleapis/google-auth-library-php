@@ -81,8 +81,9 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * Load a JSON key from a well known path.
      *
      * The well known path is OS dependent:
-     * - windows: %APPDATA%/gcloud/application_default_credentials.json
-     * - others: $HOME/.config/gcloud/application_default_credentials.json
+     *
+     * * windows: %APPDATA%/gcloud/application_default_credentials.json
+     * * others: $HOME/.config/gcloud/application_default_credentials.json
      *
      * If the file does not exist, this returns null.
      *
@@ -108,9 +109,8 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * Create a new Credentials instance.
      *
      * @param string|array $scope the scope of the access request, expressed
-     *   either as an Array or as a space-delimited String.
+     *        either as an Array or as a space-delimited String.
      * @param array $jsonKey the JSON credentials.
-     *
      * @return ServiceAccountCredentials|UserRefreshCredentials
      */
     public static function makeCredentials($scope, array $jsonKey)
@@ -137,7 +137,6 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * @param array $httpClientOptions (optional) Array of request options to apply.
      * @param callable $httpHandler (optional) http client to fetch the token.
      * @param callable $tokenCallback (optional) function to be called when a new token is fetched.
-     *
      * @return \GuzzleHttp\Client
      */
     public static function makeHttpClient(
@@ -203,7 +202,6 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
      * @param array $metadata metadata hashmap
      * @param string $authUri optional auth uri
      * @param callable $httpHandler callback which delivers psr7 request
-     *
      * @return array updated metadata hashmap
      */
     public function updateMetadata(

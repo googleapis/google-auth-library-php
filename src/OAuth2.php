@@ -120,7 +120,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * The scope of the access request, expressed either as an Array or as a
      * space-delimited string.
      *
-     * @var string
+     * @var array
      */
     private $scope;
 
@@ -398,7 +398,6 @@ class OAuth2 implements FetchAuthTokenInterface
      * Obtains the encoded jwt from the instance data.
      *
      * @param array $config array optional configuration parameters
-     *
      * @return string
      */
     public function toJwt(array $config = [])
@@ -434,8 +433,11 @@ class OAuth2 implements FetchAuthTokenInterface
         }
         $assertion += $this->getAdditionalClaims();
 
-        return $this->jwtEncode($assertion, $this->getSigningKey(),
-            $this->getSigningAlgorithm());
+        return $this->jwtEncode(
+            $assertion,
+            $this->getSigningKey(),
+            $this->getSigningAlgorithm()
+        );
     }
 
     /**
@@ -500,7 +502,6 @@ class OAuth2 implements FetchAuthTokenInterface
      * Fetches the auth tokens based on the current state.
      *
      * @param callable $httpHandler callback which delivers psr7 request
-     *
      * @return array the response
      */
     public function fetchAuthToken(callable $httpHandler = null)
@@ -525,10 +526,6 @@ class OAuth2 implements FetchAuthTokenInterface
      */
     public function getCacheKey()
     {
-        if (is_string($this->scope)) {
-            return $this->scope;
-        }
-
         if (is_array($this->scope)) {
             return implode(':', $this->scope);
         }
@@ -541,9 +538,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * Parses the fetched tokens.
      *
      * @param ResponseInterface $resp the response.
-     *
      * @return array the tokens parsed from the response body.
-     *
      * @throws \Exception
      */
     public function parseTokenResponse(ResponseInterface $resp)
@@ -569,12 +564,14 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Updates an OAuth 2.0 client.
      *
-     * @example
-     *   client.updateToken([
+     * Example:
+     * ```
+     * $oauth->updateToken([
      *     'refresh_token' => 'n4E9O119d',
      *     'access_token' => 'FJQbwq9',
      *     'expires_in' => 3600
-     *   ])
+     * ]);
+     * ```
      *
      * @param array $config
      *  The configuration parameters related to the token.
@@ -631,16 +628,15 @@ class OAuth2 implements FetchAuthTokenInterface
      * Builds the authorization Uri that the user should be redirected to.
      *
      * @param array $config configuration options that customize the return url
-     *
      * @return UriInterface the authorization Url.
-     *
      * @throws InvalidArgumentException
      */
     public function buildFullAuthorizationUri(array $config = [])
     {
         if (is_null($this->getAuthorizationUri())) {
             throw new InvalidArgumentException(
-                'requires an authorizationUri to have been set');
+                'requires an authorizationUri to have been set'
+            );
         }
 
         $params = array_merge([
@@ -655,14 +651,16 @@ class OAuth2 implements FetchAuthTokenInterface
         // Validate the auth_params
         if (is_null($params['client_id'])) {
             throw new InvalidArgumentException(
-                'missing the required client identifier');
+                'missing the required client identifier'
+            );
         }
         if (is_null($params['redirect_uri'])) {
             throw new InvalidArgumentException('missing the required redirect URI');
         }
         if (!empty($params['prompt']) && !empty($params['approval_prompt'])) {
             throw new InvalidArgumentException(
-                'prompt and approval_prompt are mutually exclusive');
+                'prompt and approval_prompt are mutually exclusive'
+            );
         }
 
         // Construct the uri object; return it if it is valid.
@@ -675,7 +673,8 @@ class OAuth2 implements FetchAuthTokenInterface
 
         if ($result->getScheme() != 'https') {
             throw new InvalidArgumentException(
-                'Authorization endpoint must be protected by TLS');
+                'Authorization endpoint must be protected by TLS'
+            );
         }
 
         return $result;
@@ -753,7 +752,8 @@ class OAuth2 implements FetchAuthTokenInterface
             // @see https://developers.google.com/identity/sign-in/web/server-side-flow
             if ('postmessage' !== (string)$uri) {
                 throw new InvalidArgumentException(
-                    'Redirect URI must be absolute');
+                    'Redirect URI must be absolute'
+                );
             }
         }
         $this->redirectUri = (string)$uri;
@@ -778,7 +778,6 @@ class OAuth2 implements FetchAuthTokenInterface
      * a space-delimited String.
      *
      * @param string|array $scope
-     *
      * @throws InvalidArgumentException
      */
     public function setScope($scope)
@@ -792,13 +791,15 @@ class OAuth2 implements FetchAuthTokenInterface
                 $pos = strpos($s, ' ');
                 if ($pos !== false) {
                     throw new InvalidArgumentException(
-                        'array scope values should not contain spaces');
+                        'array scope values should not contain spaces'
+                    );
                 }
             }
             $this->scope = $scope;
         } else {
             throw new InvalidArgumentException(
-                'scopes should be a string or array of strings');
+                'scopes should be a string or array of strings'
+            );
         }
     }
 
@@ -838,7 +839,6 @@ class OAuth2 implements FetchAuthTokenInterface
      * Sets the current grant type.
      *
      * @param $grantType
-     *
      * @throws InvalidArgumentException
      */
     public function setGrantType($grantType)
@@ -849,7 +849,8 @@ class OAuth2 implements FetchAuthTokenInterface
             // validate URI
             if (!$this->isAbsoluteUri($grantType)) {
                 throw new InvalidArgumentException(
-                    'invalid grant type');
+                    'invalid grant type'
+                );
             }
             $this->grantType = (string)$grantType;
         }
@@ -1297,7 +1298,6 @@ class OAuth2 implements FetchAuthTokenInterface
      * @todo handle uri as array
      *
      * @param string $uri
-     *
      * @return null|UriInterface
      */
     private function coerceUri($uri)
@@ -1313,7 +1313,6 @@ class OAuth2 implements FetchAuthTokenInterface
      * @param string $idToken
      * @param string|array|null $publicKey
      * @param array $allowedAlgs
-     *
      * @return object
      */
     private function jwtDecode($idToken, $publicKey, $allowedAlgs)
@@ -1328,8 +1327,11 @@ class OAuth2 implements FetchAuthTokenInterface
     private function jwtEncode($assertion, $signingKey, $signingAlgorithm)
     {
         if (class_exists('Firebase\JWT\JWT')) {
-            return \Firebase\JWT\JWT::encode($assertion, $signingKey,
-                $signingAlgorithm);
+            return \Firebase\JWT\JWT::encode(
+                $assertion,
+                $signingKey,
+                $signingAlgorithm
+            );
         }
 
         return \JWT::encode($assertion, $signingKey, $signingAlgorithm);
@@ -1340,7 +1342,6 @@ class OAuth2 implements FetchAuthTokenInterface
      * (RFC 3986).
      *
      * @param string $uri
-     *
      * @return bool
      */
     private function isAbsoluteUri($uri)
@@ -1352,7 +1353,6 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * @param array $params
-     *
      * @return array
      */
     private function addClientCredentials(&$params)

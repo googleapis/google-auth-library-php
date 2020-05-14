@@ -50,8 +50,11 @@ class AuthTokenSubscriberTest extends BaseTest
     {
         $s = new AuthTokenSubscriber($this->mockFetcher->reveal());
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'not_google_auth']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'not_google_auth']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertSame($request->getHeader('authorization'), '');
