@@ -2,9 +2,6 @@
 
 apt-get update
 apt-get install -y git
-
-curl -O http://get.sensiolabs.org/sami.phar
-
 git reset --hard HEAD
 
 php vendor/bin/sami.php update .github/actions/docs/sami.php

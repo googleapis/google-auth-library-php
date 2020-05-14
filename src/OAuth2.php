@@ -120,7 +120,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * The scope of the access request, expressed either as an Array or as a
      * space-delimited string.
      *
-     * @var string
+     * @var array
      */
     private $scope;
 
@@ -770,7 +770,7 @@ class OAuth2 implements FetchAuthTokenInterface
      */
     public function getScope()
     {
-        if (is_null($this->scope) || is_string($this->scope)) {
+        if (is_null($this->scope)) {
             return $this->scope;
         }
 
