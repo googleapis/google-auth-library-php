@@ -311,6 +311,112 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
     }
 }
 
+class ADCGetCredentialsWithQuotaProjectTest extends TestCase
+{
+    private $originalHome;
+    private $quotaProject = 'a-quota-project';
+
+    protected function setUp()
+    {
+        $this->originalHome = getenv('HOME');
+    }
+
+    protected function tearDown()
+    {
+        if ($this->originalHome != getenv('HOME')) {
+            putenv('HOME=' . $this->originalHome);
+        }
+        putenv(ServiceAccountCredentials::ENV_VAR);  // removes environment variable
+    }
+
+    public function testWithServiceAccountCredentials()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+
+        $credentials = ApplicationDefaultCredentials::getCredentials(
+            null,
+            null,
+            null,
+            null,
+            $this->quotaProject
+        );
+
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\ServiceAccountCredentials',
+            $credentials
+        );
+
+        $this->assertEquals(
+            $this->quotaProject,
+            $credentials->getQuotaProject()
+        );
+    }
+
+    public function testWithFetchAuthTokenCache()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+
+        $httpHandler = getHandler([
+            buildResponse(200),
+        ]);
+
+        $cacheOptions = [];
+        $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+
+        $credentials = ApplicationDefaultCredentials::getCredentials(
+            null,
+            $httpHandler,
+            $cacheOptions,
+            $cachePool->reveal(),
+            $this->quotaProject
+        );
+
+        $this->assertInstanceOf('Google\Auth\FetchAuthTokenCache', $credentials);
+
+        $this->assertEquals(
+            $this->quotaProject,
+            $credentials->getQuotaProject()
+        );
+    }
+
+    public function testWithGCECredentials()
+    {
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+        $wantedTokens = [
+            'access_token' => '1/abdef1234567890',
+            'expires_in' => '57',
+            'token_type' => 'Bearer',
+        ];
+        $jsonTokens = json_encode($wantedTokens);
+
+        // simulate the response from GCE.
+        $httpHandler = getHandler([
+            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+        ]);
+
+        $credentials = ApplicationDefaultCredentials::getCredentials(
+            null,
+            $httpHandler,
+            null,
+            null,
+            $this->quotaProject
+        );
+
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\GCECredentials',
+            $credentials
+        );
+
+        $this->assertEquals(
+            $this->quotaProject,
+            $credentials->getQuotaProject()
+        );
+    }
+}
+
 class ADCGetCredentialsAppEngineTest extends BaseTest
 {
     private $originalHome;
