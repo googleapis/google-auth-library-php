@@ -20,6 +20,7 @@ namespace Google\Auth\Credentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
+use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\ServiceAccountSignerTrait;
 use Google\Auth\SignBlobInterface;
 use InvalidArgumentException;
@@ -57,7 +58,10 @@ use InvalidArgumentException;
  *
  *   $res = $client->get('myproject/taskqueues/myqueue');
  */
-class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface, GetQuotaProjectInterface
+class ServiceAccountCredentials extends CredentialsLoader implements
+    GetQuotaProjectInterface,
+    SignBlobInterface,
+    ProjectIdProviderInterface
 {
     use ServiceAccountSignerTrait;
 
@@ -74,6 +78,11 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      * @var string
      */
     protected $quotaProject;
+
+    /*
+     * @var string|null
+     */
+    protected $projectId;
 
     /**
      * Create a new ServiceAccountCredentials.
@@ -103,18 +112,21 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
         }
         if (!array_key_exists('client_email', $jsonKey)) {
             throw new \InvalidArgumentException(
-                'json key is missing the client_email field');
+                'json key is missing the client_email field'
+            );
         }
         if (!array_key_exists('private_key', $jsonKey)) {
             throw new \InvalidArgumentException(
-                'json key is missing the private_key field');
+                'json key is missing the private_key field'
+            );
         }
         if (array_key_exists('quota_project', $jsonKey)) {
             $this->quotaProject = (string) $jsonKey['quota_project'];
         }
         if ($scope && $targetAudience) {
             throw new InvalidArgumentException(
-                'Scope and targetAudience cannot both be supplied');
+                'Scope and targetAudience cannot both be supplied'
+            );
         }
         $additionalClaims = [];
         if ($targetAudience) {
@@ -130,6 +142,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
             'additionalClaims' => $additionalClaims,
         ]);
+
+        $this->projectId = isset($jsonKey['project_id'])
+            ? $jsonKey['project_id']
+            : null;
     }
 
     /**
@@ -168,12 +184,24 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
     }
 
     /**
+     * Get the project ID from the service account keyfile.
+     *
+     * Returns null if the project ID does not exist in the keyfile.
+     *
+     * @param callable $httpHandler Not used by this credentials type.
+     * @return string|null
+     */
+    public function getProjectId(callable $httpHandler = null)
+    {
+        return $this->projectId;
+    }
+
+    /**
      * Updates metadata with the authorization token.
      *
      * @param array $metadata metadata hashmap
      * @param string $authUri optional auth uri
      * @param callable $httpHandler callback which delivers psr7 request
-     *
      * @return array updated metadata hashmap
      */
     public function updateMetadata(

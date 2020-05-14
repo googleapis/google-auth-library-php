@@ -211,8 +211,10 @@ class OAuth2GrantTypeTest extends TestCase
         $o = new OAuth2($this->minimal);
         $o->setIssuer('an issuer');
         $o->setSigningKey('a key');
-        $this->assertEquals('urn:ietf:params:oauth:grant-type:jwt-bearer',
-            $o->getGrantType());
+        $this->assertEquals(
+            'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            $o->getGrantType()
+        );
     }
 
     public function testSetsKnownTypes()

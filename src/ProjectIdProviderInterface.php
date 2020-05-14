@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2014 Google Inc.
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,18 @@
  * limitations under the License.
  */
 
-function oauth2client_php_autoload($className)
-{
-    $classPath = explode('_', $className);
-    if ($classPath[0] != 'Google') {
-        return;
-    }
-    if (count($classPath) > 3) {
-        // Maximum class file path depth in this project is 3.
-        $classPath = array_slice($classPath, 0, 3);
-    }
-    $filePath = dirname(__FILE__) . '/src/' . implode('/', $classPath) . '.php';
-    if (file_exists($filePath)) {
-        require_once $filePath;
-    }
-}
+namespace Google\Auth;
 
-spl_autoload_register('oauth2client_php_autoload');
+/**
+ * Describes a Credentials object which supports fetching the project ID.
+ */
+interface ProjectIdProviderInterface
+{
+    /**
+     * Get the project ID.
+     *
+     * @param callable $httpHandler Callback which delivers psr7 request
+     * @return string|null
+     */
+    public function getProjectId(callable $httpHandler = null);
+}

@@ -106,12 +106,12 @@ class Guzzle5HttpHandlerTest extends BaseTest
         $this->mockClient->send(Argument::type('GuzzleHttp\Message\RequestInterface'))
             ->willReturn(new FutureResponse($this->mockFuture->reveal()));
         $this->mockClient->createRequest('GET', Argument::type('Psr\Http\Message\UriInterface'), Argument::allOf(
-                Argument::withEntry('headers', []),
-                Argument::withEntry('future', true),
-                Argument::that(function ($arg) {
+            Argument::withEntry('headers', []),
+            Argument::withEntry('future', true),
+            Argument::that(function ($arg) {
                     return $arg['body'] instanceof StreamInterface;
-                })
-            ))->willReturn($this->mockRequest->reveal());
+            })
+        ))->willReturn($this->mockRequest->reveal());
 
         $handler = new Guzzle5HttpHandler($this->mockClient->reveal());
         $errorThrown = false;
@@ -144,12 +144,12 @@ class Guzzle5HttpHandlerTest extends BaseTest
                 new CompletedFutureValue($response)
             ));
         $this->mockClient->createRequest('GET', Argument::type('Psr\Http\Message\UriInterface'), Argument::allOf(
-                Argument::withEntry('headers', []),
-                Argument::withEntry('future', true),
-                Argument::that(function ($arg) {
+            Argument::withEntry('headers', []),
+            Argument::withEntry('future', true),
+            Argument::that(function ($arg) {
                     return $arg['body'] instanceof StreamInterface;
-                })
-            ))->willReturn($this->mockRequest->reveal());
+            })
+        ))->willReturn($this->mockRequest->reveal());
 
         $handler = new Guzzle5HttpHandler($this->mockClient->reveal());
         $promise = $handler->async($this->mockPsr7Request->reveal());
