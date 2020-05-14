@@ -526,10 +526,6 @@ class OAuth2 implements FetchAuthTokenInterface
      */
     public function getCacheKey()
     {
-        if (is_string($this->scope)) {
-            return $this->scope;
-        }
-
         if (is_array($this->scope)) {
             return implode(':', $this->scope);
         }
