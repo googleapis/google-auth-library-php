@@ -430,6 +430,47 @@ class OAuth2JwtTest extends TestCase
         $o->toJwt();
     }
 
+    public function testCanHS256EncodeAValidPayloadWithSigningKeyId()
+    {
+        $testConfig = $this->signingMinimal;
+        $keys = array(
+            'example_key_id1' => 'example_key1',
+            'example_key_id2' => 'example_key2'
+        );
+        $testConfig['signingKey'] = $keys['example_key_id2'];
+        $testConfig['signingKeyId'] = 'example_key_id2';
+        $o = new OAuth2($testConfig);
+        $payload = $o->toJwt();
+        $roundTrip = $this->jwtDecode($payload, $keys, array('HS256'));
+        $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
+        $this->assertEquals($roundTrip->aud, $testConfig['audience']);
+        $this->assertEquals($roundTrip->scope, $testConfig['scope']);
+    }
+
+    public function testFailDecodeWithoutSigningKeyId()
+    {
+        $testConfig = $this->signingMinimal;
+        $keys = array(
+            'example_key_id1' => 'example_key1',
+            'example_key_id2' => 'example_key2'
+        );
+        $testConfig['signingKey'] = $keys['example_key_id2'];
+        $o = new OAuth2($testConfig);
+        $payload = $o->toJwt();
+
+        try {
+            $this->jwtDecode($payload, $keys, array('HS256'));
+        } catch (\Exception $e) {
+            if (($e instanceof \DomainException || $e instanceof \UnexpectedValueException) &&
+                $e->getMessage() === '"kid" empty, unable to lookup correct key') {
+                // Workaround: In old JWT versions throws DomainException
+                return;
+            }
+            throw $e;
+        }
+        $this->fail("Expected exception about problem with decode");
+    }
+
     public function testCanHS256EncodeAValidPayload()
     {
         $testConfig = $this->signingMinimal;

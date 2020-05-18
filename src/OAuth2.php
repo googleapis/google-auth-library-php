@@ -176,6 +176,13 @@ class OAuth2 implements FetchAuthTokenInterface
     private $signingKey;
 
     /**
+     * The signing key id when using assertion profile. Param kid in jwt header
+     *
+     * @var string
+     */
+    private $signingKeyId;
+
+    /**
      * The signing algorithm when using an assertion profile.
      *
      * @var string
@@ -294,6 +301,9 @@ class OAuth2 implements FetchAuthTokenInterface
      * - signingKey
      *   Signing key when using assertion profile
      *
+     * - signingKeyId
+     *   Signing key id when using assertion profile
+     *
      * - refreshToken
      *   The refresh token associated with the access token
      *   to be refreshed.
@@ -327,6 +337,7 @@ class OAuth2 implements FetchAuthTokenInterface
             'sub' => null,
             'audience' => null,
             'signingKey' => null,
+            'signingKeyId' => null,
             'signingAlgorithm' => null,
             'scope' => null,
             'additionalClaims' => [],
@@ -345,6 +356,7 @@ class OAuth2 implements FetchAuthTokenInterface
         $this->setExpiry($opts['expiry']);
         $this->setAudience($opts['audience']);
         $this->setSigningKey($opts['signingKey']);
+        $this->setSigningKeyId($opts['signingKeyId']);
         $this->setSigningAlgorithm($opts['signingAlgorithm']);
         $this->setScope($opts['scope']);
         $this->setExtensionParams($opts['extensionParams']);
@@ -436,7 +448,8 @@ class OAuth2 implements FetchAuthTokenInterface
         return $this->jwtEncode(
             $assertion,
             $this->getSigningKey(),
-            $this->getSigningAlgorithm()
+            $this->getSigningAlgorithm(),
+            $this->getSigningKeyId()
         );
     }
 
@@ -1043,6 +1056,26 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
+     * Gets the signing key id when using an assertion profile.
+     *
+     * @return string
+     */
+    public function getSigningKeyId()
+    {
+        return $this->signingKeyId;
+    }
+
+    /**
+     * Sets the signing key id when using an assertion profile.
+     *
+     * @param string $signingKeyId
+     */
+    public function setSigningKeyId($signingKeyId)
+    {
+        $this->signingKeyId = $signingKeyId;
+    }
+
+    /**
      * Gets the signing algorithm when using an assertion profile.
      *
      * @return string
@@ -1324,17 +1357,18 @@ class OAuth2 implements FetchAuthTokenInterface
         return \JWT::decode($idToken, $publicKey, $allowedAlgs);
     }
 
-    private function jwtEncode($assertion, $signingKey, $signingAlgorithm)
+    private function jwtEncode($assertion, $signingKey, $signingAlgorithm, $signingKeyId = null)
     {
         if (class_exists('Firebase\JWT\JWT')) {
             return \Firebase\JWT\JWT::encode(
                 $assertion,
                 $signingKey,
-                $signingAlgorithm
+                $signingAlgorithm,
+                $signingKeyId
             );
         }
 
-        return \JWT::encode($assertion, $signingKey, $signingAlgorithm);
+        return \JWT::encode($assertion, $signingKey, $signingAlgorithm, $signingKeyId);
     }
 
     /**
