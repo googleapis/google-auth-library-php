@@ -7,20 +7,45 @@ use PHPUnit\Framework\TestCase;
 
 abstract class BaseTest extends TestCase
 {
-    public function onlyGuzzle6()
+    protected function onlyGuzzle5()
     {
-        $version = ClientInterface::VERSION;
-        if ('6' !== $version[0]) {
+        if ($this->getGuzzleMajorVersion() !== 5) {
+            $this->markTestSkipped('Guzzle 5 only');
+        }
+    }
+
+    protected function onlyGuzzle6()
+    {
+        if ($this->getGuzzleMajorVersion() !== 6) {
             $this->markTestSkipped('Guzzle 6 only');
         }
     }
 
-    public function onlyGuzzle5()
+    protected function onlyGuzzle6And7()
     {
-        $version = ClientInterface::VERSION;
-        if ('5' !== $version[0]) {
-            $this->markTestSkipped('Guzzle 5 only');
+        if (!in_array($this->getGuzzleMajorVersion(), [6, 7])) {
+            $this->markTestSkipped('Guzzle 6 and 7 only');
         }
+    }
+
+    protected function onlyGuzzle7()
+    {
+        if ($this->getGuzzleMajorVersion() !== 7) {
+            $this->markTestSkipped('Guzzle 7 only');
+        }
+    }
+
+    protected function getGuzzleMajorVersion()
+    {
+        if (defined('GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
+            return ClientInterface::MAJOR_VERSION;
+        }
+
+        if (defined('GuzzleHttp\ClientInterface::VERSION')) {
+            return (int) substr(ClientInterface::VERSION, 0, 1);
+        }
+
+        $this->fail('Unable to determine the currently used Guzzle Version');
     }
 
     /**

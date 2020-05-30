@@ -61,14 +61,21 @@ class FetchAuthTokenTest extends BaseTest
             $this->assertEquals('xyz', $accessToken);
         };
 
+        if ($this->getGuzzleMajorVersion() === 5) {
+            $clientOptions = [
+                'base_url' => 'https://www.googleapis.com/books/v1/',
+                'defaults' => ['exceptions' => false],
+            ];
+        } else {
+            $clientOptions = [
+                'base_uri' => 'https://www.googleapis.com/books/v1/',
+                'http_errors' => false,
+            ];
+        }
+
         $client = CredentialsLoader::makeHttpClient(
             $mockFetcher->reveal(),
-            [
-                'base_url' => 'https://www.googleapis.com/books/v1/',
-                'base_uri' => 'https://www.googleapis.com/books/v1/',
-                'exceptions' => false,
-                'defaults' => ['exceptions' => false]
-            ],
+            $clientOptions,
             $httpHandler,
             $tokenCallback
         );

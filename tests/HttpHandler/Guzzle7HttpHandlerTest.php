@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2010 Google Inc.
+ * Copyright 2020 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,20 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests\Middleware;
+namespace Google\Auth\Tests\HttpHandler;
 
-use Google\Auth\Tests\BaseTest;
+use Google\Auth\HttpHandler\Guzzle7HttpHandler;
 
-class SimpleMiddlewareTest extends BaseTest
+/**
+ * @group http-handler
+ */
+class Guzzle7HttpHandlerTest extends Guzzle6HttpHandlerTest
 {
-    private $mockRequest;
-
-    /**
-     * @todo finish
-     */
-    protected function setUp()
+    public function setUp()
     {
-        $this->onlyGuzzle6And7();
+        $this->onlyGuzzle7();
 
-        $this->mockRequest = $this->prophesize('GuzzleHttp\Psr7\Request');
-    }
-
-    public function testTest()
-    {
+        $this->client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $this->handler = new Guzzle7HttpHandler($this->client->reveal());
     }
 }

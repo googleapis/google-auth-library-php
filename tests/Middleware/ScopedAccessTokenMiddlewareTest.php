@@ -33,7 +33,7 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
 
     protected function setUp()
     {
-        $this->onlyGuzzle6();
+        $this->onlyGuzzle6And7();
 
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
         $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
