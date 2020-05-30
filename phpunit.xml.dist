@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="tests/bootstrap.php" colors="true">
-  <php>
-    <env name="SUPPRESS_GCLOUD_CREDS_WARNING" value="true" force="true"/>
-  </php>
   <testsuites>
     <testsuite name="google-auth-tests">
       <directory suffix="Test.php">tests</directory>
