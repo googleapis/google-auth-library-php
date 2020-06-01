@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="index, follow, all" />
+    <title>Google\Auth\Cache\Item | Google Auth Library for PHP API Reference</title>
+
+            <link rel="stylesheet" type="text/css" href="../../../css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="../../../css/sami.css">
+        <script src="../../../js/jquery-1.11.1.min.js"></script>
+        <script src="../../../js/bootstrap.min.js"></script>
+        <script src="../../../js/typeahead.min.js"></script>
+        <script src="../../../sami.js"></script>
+        <meta name="MobileOptimized" content="width">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    
+    
+    </head>
+
+    <body id="class" data-name="class:Google_Auth_Cache_Item" data-root-path="../../../">
+            <div id="content">
+        <div id="left-column">
+                <div id="control-panel">
+                    <form action="#" method="GET">
+                <select id="version-switcher" name="version">
+                                            <option value="../../../../v1.0/index.html" data-version="v1.0">v1.0</option>
+                                            <option value="../../../../v1.0.1/index.html" data-version="v1.0.1">v1.0.1</option>
+                                            <option value="../../../../v1.1.0/index.html" data-version="v1.1.0">v1.1.0</option>
+                                            <option value="../../../../v1.2.0/index.html" data-version="v1.2.0">v1.2.0</option>
+                                            <option value="../../../../v1.2.1/index.html" data-version="v1.2.1">v1.2.1</option>
+                                            <option value="../../../../v1.3.0/index.html" data-version="v1.3.0">v1.3.0</option>
+                                            <option value="../../../../v1.3.1/index.html" data-version="v1.3.1">v1.3.1</option>
+                                            <option value="../../../../v1.3.2/index.html" data-version="v1.3.2">v1.3.2</option>
+                                            <option value="../../../../v1.3.3/index.html" data-version="v1.3.3">v1.3.3</option>
+                                            <option value="../../../../v1.4.0/index.html" data-version="v1.4.0">v1.4.0</option>
+                                            <option value="../../../../v1.5.0/index.html" data-version="v1.5.0">v1.5.0</option>
+                                            <option value="../../../../v1.5.1/index.html" data-version="v1.5.1">v1.5.1</option>
+                                            <option value="../../../../v1.5.2/index.html" data-version="v1.5.2">v1.5.2</option>
+                                            <option value="../../../../v1.6.0/index.html" data-version="v1.6.0">v1.6.0</option>
+                                            <option value="../../../../v1.6.1/index.html" data-version="v1.6.1">v1.6.1</option>
+                                            <option value="../../../../v1.7.0/index.html" data-version="v1.7.0">v1.7.0</option>
+                                            <option value="../../../../v1.7.1/index.html" data-version="v1.7.1">v1.7.1</option>
+                                            <option value="../../../../v1.8.0/index.html" data-version="v1.8.0">v1.8.0</option>
+                                            <option value="../../../../v1.9.0/index.html" data-version="v1.9.0">v1.9.0</option>
+                                            <option value="../../../../master/index.html" data-version="master">master branch</option>
+                                    </select>
+            </form>
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../../search.html" method="GET">
+            <span class="glyphicon glyphicon-search"></span>
+            <input name="search"
+                   class="typeahead form-control"
+                   type="search"
+                   placeholder="Search">
+        </form>
+    </div>
+
+                <div id="api-tree"></div>
+
+        </div>
+        <div id="right-column">
+                <nav id="site-nav" class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-elements">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="../../../index.html">Google Auth Library for PHP API Reference</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-elements">
+                <ul class="nav navbar-nav">
+                    <li><a href="../../../classes.html">Classes</a></li>
+                                            <li><a href="../../../namespaces.html">Namespaces</a></li>
+                                        <li><a href="../../../interfaces.html">Interfaces</a></li>
+                    <li><a href="../../../traits.html">Traits</a></li>
+                    <li><a href="../../../doc-index.html">Index</a></li>
+                    <li><a href="../../../search.html">Search</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+                        <div class="namespace-breadcrumbs">
+            <ol class="breadcrumb">
+                <li><span class="label label-default">class</span></li>
+                        <li><a href="../../../Google.html">Google</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth.html">Auth</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth/Cache.html">Cache</a></li><li class="backslash">\</li><li>Item</li>
+            </ol>
+        </div>
+                <div id="page-content">
+                
+    <div class="page-header">
+        <h1>
+            Item
+                
+        </h1>
+    </div>
+
+    <p>    class
+    <strong>Item</strong>        implements
+        <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.7.0/src/Cache/Item.php">View source</a>)
+</p>
+
+        
+    
+
+            <div class="description">
+            <p>A cache item.</p>                                </div>
+    
+    
+    
+    
+            <h2>Methods</h2>
+
+            <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___construct">__construct</a>(string $key)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getKey">getKey</a>()
+        
+                                            <p>Returns the key for the current cache item.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    mixed
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_get">get</a>()
+        
+                                            <p>Retrieves the value of the item from the cache associated with this object's key.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    bool
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_isHit">isHit</a>()
+        
+                                            <p>Confirms if the cache item lookup resulted in a cache hit.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_set">set</a>(mixed $value)
+        
+                                            <p>Sets the value represented by this cache item.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_expiresAt">expiresAt</a>(<a target="_blank" href="http://php.net/DateTimeInterface">DateTimeInterface</a>|null $expiration)
+        
+                                            <p>Sets the expiration time for this cache item.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_expiresAfter">expiresAfter</a>(int|<a target="_blank" href="http://php.net/DateInterval">DateInterval</a>|null $time)
+        
+                                            <p>Sets the expiration time for this cache item.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_currentTime">currentTime</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+            </div>
+
+
+        <h2>Details</h2>
+
+            <div id="method-details">
+                    <div class="method-item">
+                    <h3 id="method___construct">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.7.0/src/Cache/Item.php#L50">line 50</a></div>
+        <code>                    
+    <strong>__construct</strong>(string $key)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string</td>
+                <td>$key</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getKey">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.7.0/src/Cache/Item.php#L58">line 58</a></div>
+        <code>                    string
+    <strong>getKey</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Returns the key for the current cache item.</p>                    <p>The key is loaded by the Implementing Library, but should be available to
+the higher level callers when needed.</p>                            </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td>The key string for this cache item.</td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_get">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.7.0/src/Cache/Item.php#L66">line 66</a></div>
+        <code>                    mixed
+    <strong>get</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Retrieves the value of the item from the cache associated with this object's key.</p>                    <p>The value returned must be identical to the value originally stored by set().</p>
+
+<p>If isHit() returns false, this method MUST return null. Note that null
+is a legitimate cached value, so the isHit() method SHOULD be used to
+differentiate between "null value was found" and "no value was found."</p>                            </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>mixed</td>
+            <td>The value corresponding to this cache item's key, or null if not found.</td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_isHit">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.7.0/src/Cache/Item.php#L74">line 74</a></div>
+        <code>                    bool
+    <strong>isHit</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Confirms if the cache item lookup resulted in a cache hit.</p>                    <p>Note: This method MUST NOT have a race condition between calling isHit()
+and calling get().</p>                            </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>bool</td>
+            <td>True if the request resulted in a cache hit. False otherwise.</td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_set">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.7.0/src/Cache/Item.php#L90">line 90</a></div>
+        <code>                    <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>
+    <strong>set</strong>(mixed $value)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Sets the value represented by this cache item.</p>                    <p>The $value argument may be any item that can be serialized by PHP,
+although the method of serialization is left up to the Implementing
+Library.</p>                            </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>mixed</td>
+                <td>$value</td>
+                <td>The serializable value to be stored.</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr></td>
+            <td>The invoked object.</td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_expiresAt">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.7.0/src/Cache/Item.php#L101">line 101</a></div>
+        <code>                    <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>
+    <strong>expiresAt</strong>(<a target="_blank" href="http://php.net/DateTimeInterface">DateTimeInterface</a>|null $expiration)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Sets the expiration time for this cache item.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td><a target="_blank" href="http://php.net/DateTimeInterface">DateTimeInterface</a>|null</td>
+                <td>$expiration</td>
+                <td>The point in time after which the item MUST be considered expired.
+  If null is passed explicitly, a default value MAY be used. If none is set,
+  the value should be stored permanently or for as long as the
+  implementation allows.</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr></td>
+            <td>The called object.</td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_expiresAfter">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.7.0/src/Cache/Item.php#L126">line 126</a></div>
+        <code>                    <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>
+    <strong>expiresAfter</strong>(int|<a target="_blank" href="http://php.net/DateInterval">DateInterval</a>|null $time)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Sets the expiration time for this cache item.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>int|<a target="_blank" href="http://php.net/DateInterval">DateInterval</a>|null</td>
+                <td>$time</td>
+                <td>The period of time from the present after which the item MUST be considered
+  expired. An integer parameter is understood to be the time in seconds until
+  expiration. If null is passed explicitly, a default value MAY be used.
+  If none is set, the value should be stored permanently or for as long as the
+  implementation allows.</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr></td>
+            <td>The called object.</td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_currentTime">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.7.0/src/Cache/Item.php#L186">line 186</a></div>
+        <code>            protected        
+    <strong>currentTime</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+            </div>
+
+    
+            </div>
+                <div id="footer">
+        Generated by <a href="http://sami.sensiolabs.org/">Sami, the API Documentation Generator</a>.
+    </div>
+
+        </div>
+    </div>
+    </body>
+
+</html>

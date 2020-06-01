@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="index, follow, all" />
+    <title>Google\Auth\FetchAuthTokenCache | Google Auth Library for PHP API Reference</title>
+
+            <link rel="stylesheet" type="text/css" href="../../css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="../../css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="../../css/sami.css">
+        <script src="../../js/jquery-1.11.1.min.js"></script>
+        <script src="../../js/bootstrap.min.js"></script>
+        <script src="../../js/typeahead.min.js"></script>
+        <script src="../../sami.js"></script>
+        <meta name="MobileOptimized" content="width">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    
+    
+    </head>
+
+    <body id="class" data-name="class:Google_Auth_FetchAuthTokenCache" data-root-path="../../">
+            <div id="content">
+        <div id="left-column">
+                <div id="control-panel">
+                    <form action="#" method="GET">
+                <select id="version-switcher" name="version">
+                                            <option value="../../../v1.0/index.html" data-version="v1.0">v1.0</option>
+                                            <option value="../../../v1.0.1/index.html" data-version="v1.0.1">v1.0.1</option>
+                                            <option value="../../../v1.1.0/index.html" data-version="v1.1.0">v1.1.0</option>
+                                            <option value="../../../v1.2.0/index.html" data-version="v1.2.0">v1.2.0</option>
+                                            <option value="../../../v1.2.1/index.html" data-version="v1.2.1">v1.2.1</option>
+                                            <option value="../../../v1.3.0/index.html" data-version="v1.3.0">v1.3.0</option>
+                                            <option value="../../../v1.3.1/index.html" data-version="v1.3.1">v1.3.1</option>
+                                            <option value="../../../v1.3.2/index.html" data-version="v1.3.2">v1.3.2</option>
+                                            <option value="../../../v1.3.3/index.html" data-version="v1.3.3">v1.3.3</option>
+                                            <option value="../../../v1.4.0/index.html" data-version="v1.4.0">v1.4.0</option>
+                                            <option value="../../../v1.5.0/index.html" data-version="v1.5.0">v1.5.0</option>
+                                            <option value="../../../v1.5.1/index.html" data-version="v1.5.1">v1.5.1</option>
+                                            <option value="../../../v1.5.2/index.html" data-version="v1.5.2">v1.5.2</option>
+                                            <option value="../../../v1.6.0/index.html" data-version="v1.6.0">v1.6.0</option>
+                                            <option value="../../../v1.6.1/index.html" data-version="v1.6.1">v1.6.1</option>
+                                            <option value="../../../v1.7.0/index.html" data-version="v1.7.0">v1.7.0</option>
+                                            <option value="../../../v1.7.1/index.html" data-version="v1.7.1">v1.7.1</option>
+                                            <option value="../../../v1.8.0/index.html" data-version="v1.8.0">v1.8.0</option>
+                                            <option value="../../../v1.9.0/index.html" data-version="v1.9.0">v1.9.0</option>
+                                            <option value="../../../master/index.html" data-version="master">master branch</option>
+                                    </select>
+            </form>
+                <script>
+            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
+        </script>
+        <form id="search-form" action="../../search.html" method="GET">
+            <span class="glyphicon glyphicon-search"></span>
+            <input name="search"
+                   class="typeahead form-control"
+                   type="search"
+                   placeholder="Search">
+        </form>
+    </div>
+
+                <div id="api-tree"></div>
+
+        </div>
+        <div id="right-column">
+                <nav id="site-nav" class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-elements">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="../../index.html">Google Auth Library for PHP API Reference</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-elements">
+                <ul class="nav navbar-nav">
+                    <li><a href="../../classes.html">Classes</a></li>
+                                            <li><a href="../../namespaces.html">Namespaces</a></li>
+                                        <li><a href="../../interfaces.html">Interfaces</a></li>
+                    <li><a href="../../traits.html">Traits</a></li>
+                    <li><a href="../../doc-index.html">Index</a></li>
+                    <li><a href="../../search.html">Search</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+                        <div class="namespace-breadcrumbs">
+            <ol class="breadcrumb">
+                <li><span class="label label-default">class</span></li>
+                        <li><a href="../../Google.html">Google</a></li><li class="backslash">\</li><li><a href="../../Google/Auth.html">Auth</a></li><li class="backslash">\</li><li>FetchAuthTokenCache</li>
+            </ol>
+        </div>
+                <div id="page-content">
+                
+    <div class="page-header">
+        <h1>
+            FetchAuthTokenCache
+                
+        </h1>
+    </div>
+
+    <p>    class
+    <strong>FetchAuthTokenCache</strong>        implements
+        <a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.2.1/src/FetchAuthTokenCache.php">View source</a>)
+</p>
+
+        
+    
+
+            <div class="description">
+            <p>A class to implement caching for any object implementing
+FetchAuthTokenInterface</p>                                </div>
+    
+            <h2>Traits</h2>
+
+        
+    <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-6">
+                                            <a href="../../Google/Auth/CacheTrait.html"><abbr title="Google\Auth\CacheTrait">CacheTrait</abbr></a>
+                                            
+                </div>
+                <div class="col-md-6">
+                    
+                </div>
+            </div>
+            </div>
+    
+    
+    
+            <h2>Methods</h2>
+
+            <div class="container-fluid underlined">
+                    <div class="row">
+                <div class="col-md-2 type">
+                    
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___construct">__construct</a>(<a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a> $fetcher, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache)
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    array
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_fetchAuthToken">fetchAuthToken</a>(callable $httpHandler = null)
+        
+                                            <p>Implements FetchAuthTokenInterface#fetchAuthToken.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getCacheKey">getCacheKey</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    null|array
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getLastReceivedToken">getLastReceivedToken</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+            </div>
+
+
+        <h2>Details</h2>
+
+            <div id="method-details">
+                    <div class="method-item">
+                    <h3 id="method___construct">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.2.1/src/FetchAuthTokenCache.php#L45">line 45</a></div>
+        <code>                    
+    <strong>__construct</strong>(<a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a> $fetcher, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td><a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a></td>
+                <td>$fetcher</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td>array</td>
+                <td>$cacheConfig</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td><abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr></td>
+                <td>$cache</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_fetchAuthToken">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.2.1/src/FetchAuthTokenCache.php#L70">line 70</a></div>
+        <code>                    array
+    <strong>fetchAuthToken</strong>(callable $httpHandler = null)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Implements FetchAuthTokenInterface#fetchAuthToken.</p>                    <p>Checks the cache for a valid auth token and fetches the auth tokens
+from the supplied fetcher.</p>                            </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>callable</td>
+                <td>$httpHandler</td>
+                <td>callback which delivers psr7 request</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>array</td>
+            <td>a hash of auth tokens</td>
+        </tr>
+    </table>
+
+            
+                            <h4>Exceptions</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td><a target="_blank" href="http://php.net/Exception">Exception</a></td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getCacheKey">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.2.1/src/FetchAuthTokenCache.php#L96">line 96</a></div>
+        <code>                    string
+    <strong>getCacheKey</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td>a key that may be used to cache the auth token.</td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_getLastReceivedToken">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.2.1/src/FetchAuthTokenCache.php#L104">line 104</a></div>
+        <code>                    null|array
+    <strong>getLastReceivedToken</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>null|array</td>
+            <td>{
+     The last received access token.</td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+            </div>
+
+    
+            </div>
+                <div id="footer">
+        Generated by <a href="http://sami.sensiolabs.org/">Sami, the API Documentation Generator</a>.
+    </div>
+
+        </div>
+    </div>
+    </body>
+
+</html>
