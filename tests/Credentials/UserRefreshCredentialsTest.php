@@ -144,21 +144,8 @@ class URCConstructorTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException PHPUnit_Framework_Error_Warning
-     */
-    public function testGcloudWarning()
-    {
-        putenv('SUPPRESS_GCLOUD_CREDS_WARNING=false');
-        $keyFile = __DIR__ . '/../fixtures2/gcloud.json';
-        $this->assertNotNull(
-            new UserRefreshCredentials('scope/1', $keyFile)
-        );
-    }
-
     public function testValid3LOauthCreds()
     {
-        putenv('SUPPRESS_GCLOUD_CREDS_WARNING=false');
         $keyFile = __DIR__ . '/../fixtures2/valid_oauth_creds.json';
         $this->assertNotNull(
             new UserRefreshCredentials('scope/1', $keyFile)
