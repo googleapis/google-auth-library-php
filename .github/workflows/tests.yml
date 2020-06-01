@@ -16,7 +16,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Setup PHP
-              uses: jdpedrie/setup-php@master
+              uses: nanasess/setup-php@v3.0.4
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
@@ -37,7 +37,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Setup PHP
-              uses: jdpedrie/setup-php@master
+              uses: nanasess/setup-php@v3.0.4
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
@@ -99,7 +99,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Setup PHP
-              uses: jdpedrie/setup-php@master
+              uses: nanasess/setup-php@v3.0.4
               with:
                 php-version: "7.4"
             - name: Install Dependencies
