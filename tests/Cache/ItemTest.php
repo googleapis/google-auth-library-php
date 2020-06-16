@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests\Cache;
+namespace Google\Auth\Cache\Tests;
 
-use Google\Auth\Cache\Item;
+use Google\Cache\Item;
 use PHPUnit\Framework\TestCase;
 
 class ItemTest extends TestCase

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests\Cache;
+namespace Google\Auth\Cache\Tests;
 
-use Google\Auth\Cache\MemoryCacheItemPool;
+use Google\Cache\MemoryCacheItemPool;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\InvalidArgumentException;
 
@@ -25,7 +25,7 @@ class MemoryCacheItemPoolTest extends TestCase
 {
     private $pool;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->pool = new MemoryCacheItemPool();
     }
@@ -43,7 +43,7 @@ class MemoryCacheItemPoolTest extends TestCase
     {
         $item = $this->pool->getItem('item');
 
-        $this->assertInstanceOf('Google\Auth\Cache\Item', $item);
+        $this->assertInstanceOf('Google\Cache\Item', $item);
         $this->assertNull($item->get());
         $this->assertFalse($item->isHit());
     }
@@ -55,7 +55,7 @@ class MemoryCacheItemPoolTest extends TestCase
         $this->saveItem($key, $value);
         $item = $this->pool->getItem($key);
 
-        $this->assertInstanceOf('Google\Auth\Cache\Item', $item);
+        $this->assertInstanceOf('Google\Cache\Item', $item);
         $this->assertEquals($value, $item->get());
         $this->assertTrue($item->isHit());
     }
@@ -66,7 +66,7 @@ class MemoryCacheItemPoolTest extends TestCase
         $items = $this->pool->getItems($keys);
 
         $this->assertEquals($keys, array_keys($items));
-        $this->assertContainsOnlyInstancesOf('Google\Auth\Cache\Item', $items);
+        $this->assertContainsOnlyInstancesOf('Google\Cache\Item', $items);
     }
 
     public function testHasItem()
@@ -157,47 +157,47 @@ class MemoryCacheItemPoolTest extends TestCase
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnGetItem($key)
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->pool->getItem($key);
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnGetItems($key)
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->pool->getItems([$key]);
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnHasItem($key)
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->pool->hasItem($key);
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnDeleteItem($key)
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->pool->deleteItem($key);
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnDeleteItems($key)
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->pool->deleteItems([$key]);
     }
 

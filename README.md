@@ -4,10 +4,9 @@
   <dt>Homepage</dt><dd><a href="http://www.github.com/google/google-auth-library-php">http://www.github.com/google/google-auth-library-php</a></dd>
   <dt>Reference Docs</dt><dd><a href="https://googleapis.github.io/google-auth-library-php/main/">https://googleapis.github.io/google-auth-library-php/main/</a></dd>
   <dt>Authors</dt>
-    <dd><a href="mailto:temiola@google.com">Tim Emiola</a></dd>
-    <dd><a href="mailto:stanleycheung@google.com">Stanley Cheung</a></dd>
     <dd><a href="mailto:betterbrent@google.com">Brent Shaffer</a></dd>
-  <dt>Copyright</dt><dd>Copyright © 2015 Google, Inc.</dd>
+    <dd><a href="mailto:dsuppleee@google.com">David Supplee</a></dd>
+  <dt>Copyright</dt><dd>Copyright © 2020 Google LLC</dd>
   <dt>License</dt><dd>Apache 2.0</dd>
 </dl>
 
@@ -19,17 +18,10 @@ authorization and authentication with Google APIs.
 ### Installing via Composer
 
 The recommended way to install the google auth library is through
-[Composer](http://getcomposer.org).
+[Composer](http://getcomposer.org). Run the Composer command to install the latest stable version:
 
 ```bash
-# Install Composer
-curl -sS https://getcomposer.org/installer | php
-```
-
-Next, run the Composer command to install the latest stable version:
-
-```bash
-composer.phar require google/auth
+composer require google/auth
 ```
 
 ## Application Default Credentials
@@ -78,9 +70,8 @@ As long as you update the environment variable below to point to *your* JSON
 credentials file, the following code should output a list of your Drive files.
 
 ```php
-use Google\Auth\ApplicationDefaultCredentials;
-use GuzzleHttp\Client;
-use GuzzleHttp\HandlerStack;
+use Google\Auth\GoogleAuth;
+use GuzzleHttp\Psr7\Request;
 
 // specify the path to your application credentials
 putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
@@ -88,52 +79,29 @@ putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 // define the scopes for your API call
 $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
 
-// create middleware
-$middleware = ApplicationDefaultCredentials::getMiddleware($scopes);
-$stack = HandlerStack::create();
-$stack->push($middleware);
+// create the auth client
+$auth = new GoogleAuth();
 
-// create the HTTP client
-$client = new Client([
-  'handler' => $stack,
-  'base_uri' => 'https://www.googleapis.com',
-  'auth' => 'google_auth'  // authorize all requests
-]);
+// authorize an http client
+$client = $auth->makeHttpClient(['scope' => $scope]);
 
 // make the request
-$response = $client->get('drive/v2/files');
+$request = new Request('GET', 'https://www.googleapis.com/drive/v2/files');
+$response = $client->send($request);
 
 // show the result!
 print_r((string) $response->getBody());
-```
-
-##### Guzzle 5 Compatibility
-
-If you are using [Guzzle 5][Guzzle 5], replace the `create middleware` and
-`create the HTTP Client` steps with the following:
-
-```php
-// create the HTTP client
-$client = new Client([
-  'base_url' => 'https://www.googleapis.com',
-  'auth' => 'google_auth'  // authorize all requests
-]);
-
-// create subscriber
-$subscriber = ApplicationDefaultCredentials::getSubscriber($scopes);
-$client->getEmitter()->attach($subscriber);
 ```
 
 #### Call using an ID Token
 If your application is running behind Cloud Run, or using Cloud Identity-Aware
 Proxy (IAP), you will need to fetch an ID token to access your application. For
 this, use the static method `getIdTokenMiddleware` on
-`ApplicationDefaultCredentials`.
+`GoogleAuth`.
 
 ```php
-use Google\Auth\ApplicationDefaultCredentials;
-use GuzzleHttp\Client;
-use GuzzleHttp\HandlerStack;
+use Google\Auth\GoogleAuth;
+use GuzzleHttp\Psr7\Request;
 
 // specify the path to your application credentials
 putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
@@ -144,21 +112,15 @@ putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 //    $targetAudience = 'https://service-1234-uc.a.run.app';
 $targetAudience = 'YOUR_ID_TOKEN_AUDIENCE';
 
-// create middleware
-$middleware = ApplicationDefaultCredentials::getIdTokenMiddleware($targetAudience);
-$stack = HandlerStack::create();
-$stack->push($middleware);
+// create the auth client
+$auth = new GoogleAuth();
 
-// create the HTTP client
-$client = new Client([
-  'handler' => $stack,
-  'auth' => 'google_auth',
-  // Cloud Run, IAP, or custom resource URL
-  'base_uri' => 'https://YOUR_PROTECTED_RESOURCE',
-]);
+// authorize an http client
+$client = $auth->makeHttpClient(['targetAudience' => $targetAudience]);
 
 // make the request
-$response = $client->get('/');
+$request = new Request('GET', 'https://YOUR_PROTECTED_RESOURCE');
+$response = $client->send($request);
 
 // show the result!
 print_r((string) $response->getBody());
@@ -263,9 +225,9 @@ If you are [using Google ID tokens to authenticate users][google-id-tokens], use
 the `Google\Auth\AccessToken` class to verify the ID token:
 
 ```php
-use Google\Auth\AccessToken;
+use Google\Auth\GoogleAuth;
 
-$auth = new AccessToken();
+$auth = new GoogleAuth();
 $auth->verify($idToken);
 ```
 
@@ -275,11 +237,11 @@ appropriate certificate URL for IAP. This is because IAP signs the ID
 tokens with a different key than the Google Identity service:
 
 ```php
-use Google\Auth\AccessToken;
+use Google\Auth\GoogleAuth;
 
-$auth = new AccessToken();
+$auth = new GoogleAuth();
 $auth->verify($idToken, [
-  'certsLocation' => AccessToken::IAP_CERT_URL
+  'certsLocation' => GoogleAuth::IAP_CERT_URL
 ]);
 ```
 

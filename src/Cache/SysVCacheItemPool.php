@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace Google\Auth\Cache;
+
+declare(strict_types=1);
+
+namespace Google\Cache;
 
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -28,13 +31,13 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 class SysVCacheItemPool implements CacheItemPoolInterface
 {
-    const VAR_KEY = 1;
+    private const VAR_KEY = 1;
 
-    const DEFAULT_PROJ = 'A';
+    private const DEFAULT_PROJ = 'A';
 
-    const DEFAULT_MEMSIZE = 10000;
+    private const DEFAULT_MEMSIZE = 10000;
 
-    const DEFAULT_PERM = 0600;
+    private const DEFAULT_PERM = 0600;
 
     /** @var int */
     private $sysvKey;

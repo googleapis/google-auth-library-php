@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests\Cache;
+namespace Google\Auth\Cache\Tests;
 
-use Google\Auth\Cache\SysVCacheItemPool;
+use Google\Cache\SysVCacheItemPool;
 use PHPUnit\Framework\TestCase;
 
 class SysVCacheItemPoolTest extends TestCase
 {
     private $pool;
 
-    public function setUp()
+    public function setUp(): void
     {
         if (! extension_loaded('sysvshm')) {
             $this->markTestSkipped(
@@ -48,7 +48,7 @@ class SysVCacheItemPoolTest extends TestCase
     {
         $item = $this->pool->getItem('item');
 
-        $this->assertInstanceOf('Google\Auth\Cache\Item', $item);
+        $this->assertInstanceOf('Google\Cache\Item', $item);
         $this->assertNull($item->get());
         $this->assertFalse($item->isHit());
     }
@@ -70,7 +70,7 @@ class SysVCacheItemPoolTest extends TestCase
         $this->saveItem($key, $value);
         $item = $this->pool->getItem($key);
 
-        $this->assertInstanceOf('Google\Auth\Cache\Item', $item);
+        $this->assertInstanceOf('Google\Cache\Item', $item);
         $this->assertEquals($value, $item->get());
         $this->assertTrue($item->isHit());
     }
@@ -81,7 +81,7 @@ class SysVCacheItemPoolTest extends TestCase
         $items = $this->pool->getItems($keys);
 
         $this->assertEquals($keys, array_keys($items));
-        $this->assertContainsOnlyInstancesOf('Google\Auth\Cache\Item', $items);
+        $this->assertContainsOnlyInstancesOf('Google\Cache\Item', $items);
     }
 
     public function testHasItem()
