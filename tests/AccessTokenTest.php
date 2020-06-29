@@ -244,6 +244,8 @@ class AccessTokenTest extends TestCase
         // Use Iap Cert URL
         $payload = $token->verify($jwt, [
             'certsLocation' => AccessToken::IAP_CERT_URL,
+            'throwException' => true,
+            'issuer' => 'https://cloud.google.com/iap',
         ]);
 
         $this->assertNotFalse($payload);
@@ -525,7 +527,7 @@ class AccessTokenStub extends AccessToken
     {
         if (isset($this->mocks['decode'])) {
             $claims = call_user_func_array($this->mocks['decode'], $args);
-            return new SimpleJWT(null, (array) $claims);
+            return new SimpleJWT(null, $claims->getClaims());
         }
 
         return parent::callSimpleJwtDecode($args);
