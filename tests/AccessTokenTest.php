@@ -232,18 +232,21 @@ class AccessTokenTest extends TestCase
         $token = new AccessTokenStub();
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
             // Skip expired validation
-            return SimpleJWT::decode(
+            $jwt = SimpleJWT::decode(
                 $token,
                 $publicKey,
                 $allowedAlgs,
                 null,
                 ['exp']
             );
+            return $jwt->getClaims();
         };
 
         // Use Iap Cert URL
         $payload = $token->verify($jwt, [
             'certsLocation' => AccessToken::IAP_CERT_URL,
+            'throwException' => true,
+            'issuer' => 'https://cloud.google.com/iap',
         ]);
 
         $this->assertNotFalse($payload);
