@@ -232,13 +232,14 @@ class AccessTokenTest extends TestCase
         $token = new AccessTokenStub();
         $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
             // Skip expired validation
-            return SimpleJWT::decode(
+            $jwt = SimpleJWT::decode(
                 $token,
                 $publicKey,
                 $allowedAlgs,
                 null,
                 ['exp']
             );
+            return $jwt->getClaims();
         };
 
         // Use Iap Cert URL
@@ -526,8 +527,8 @@ class AccessTokenStub extends AccessToken
     protected function callSimpleJwtDecode(array $args = [])
     {
         if (isset($this->mocks['decode'])) {
-            $jwt = call_user_func_array($this->mocks['decode'], $args);
-            return new SimpleJWT(null, $jwt->getClaims());
+            $claims = call_user_func_array($this->mocks['decode'], $args);
+            return new SimpleJWT(null, (array) $claims);
         }
 
         return parent::callSimpleJwtDecode($args);
