@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="robots" content="index, follow, all" />
-    <title>Google\Auth\HttpHandler\HttpHandlerFactory | Google Auth Library for PHP API Reference</title>
+    <title>Google\Auth\HttpHandler\Guzzle7HttpHandler | Google Auth Library for PHP API Reference</title>
 
             <link rel="stylesheet" type="text/css" href="../../../css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="../../../css/bootstrap-theme.min.css">
@@ -19,7 +19,7 @@
     
     </head>
 
-    <body id="class" data-name="class:Google_Auth_HttpHandler_HttpHandlerFactory" data-root-path="../../../">
+    <body id="class" data-name="class:Google_Auth_HttpHandler_Guzzle7HttpHandler" data-root-path="../../../">
             <div id="content">
         <div id="left-column">
                 <div id="control-panel">
@@ -90,20 +90,20 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                        <li><a href="../../../Google.html">Google</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth.html">Auth</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth/HttpHandler.html">HttpHandler</a></li><li class="backslash">\</li><li>HttpHandlerFactory</li>
+                        <li><a href="../../../Google.html">Google</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth.html">Auth</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth/HttpHandler.html">HttpHandler</a></li><li class="backslash">\</li><li>Guzzle7HttpHandler</li>
             </ol>
         </div>
                 <div id="page-content">
                 
     <div class="page-header">
         <h1>
-            HttpHandlerFactory
+            Guzzle7HttpHandler
                 
         </h1>
     </div>
 
     <p>    class
-    <strong>HttpHandlerFactory</strong>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/master/src/HttpHandler/HttpHandlerFactory.php">View source</a>)
+    <strong>Guzzle7HttpHandler</strong>        extends <a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/master/src/HttpHandler/Guzzle7HttpHandler.php">View source</a>)
 </p>
 
         
@@ -118,13 +118,34 @@
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    static&nbsp;<a href="../../../Google/Auth/HttpHandler/Guzzle5HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle5HttpHandler">Guzzle5HttpHandler</abbr></a>|<a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a>|<a href="../../../Google/Auth/HttpHandler/Guzzle7HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle7HttpHandler">Guzzle7HttpHandler</abbr></a>
+                    
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method_build">build</a>(<abbr title="GuzzleHttp\ClientInterface">ClientInterface</abbr> $client = null)
+                    <a href="#method___construct">__construct</a>(<abbr title="GuzzleHttp\ClientInterface">ClientInterface</abbr> $client)
         
-                                            <p>Builds out a default http handler for the installed version of guzzle.</p>                </div>
-                <div class="col-md-2"></div>
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html#method___construct"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method___invoke">__invoke</a>(<abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr> $request, array $options = [])
+        
+                                            <p>Accepts a PSR-7 request and an array of options and returns a PSR-7 response.</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html#method___invoke"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a></small></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    <abbr title="GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_async">async</a>(<abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr> $request, array $options = [])
+        
+                                            <p>Accepts a PSR-7 request and an array of options and returns a PromiseInterface</p>                </div>
+                <div class="col-md-2"><small>from&nbsp;<a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html#method_async"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a></small></div>
             </div>
             </div>
 
@@ -133,18 +154,16 @@
 
             <div id="method-details">
                     <div class="method-item">
-                    <h3 id="method_build">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/master/src/HttpHandler/HttpHandlerFactory.php#L31">line 31</a></div>
-        <code>        static            <a href="../../../Google/Auth/HttpHandler/Guzzle5HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle5HttpHandler">Guzzle5HttpHandler</abbr></a>|<a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a>|<a href="../../../Google/Auth/HttpHandler/Guzzle7HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle7HttpHandler">Guzzle7HttpHandler</abbr></a>
-    <strong>build</strong>(<abbr title="GuzzleHttp\ClientInterface">ClientInterface</abbr> $client = null)
+                    <h3 id="method___construct">
+        <div class="location">in <a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html#method___construct"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a> at         <a href="https://github.com/googleapis/google-auth-library-php/blob/master/src/HttpHandler/Guzzle6HttpHandler.php#L33">line 33</a></div>
+        <code>                    
+    <strong>__construct</strong>(<abbr title="GuzzleHttp\ClientInterface">ClientInterface</abbr> $client)
         </code>
     </h3>
     <div class="details">
             
     
 
-                    <div class="method-description">
-                                    <p>Builds out a default http handler for the installed version of guzzle.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
@@ -157,25 +176,97 @@
             </table>
 
             
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method___invoke">
+        <div class="location">in <a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html#method___invoke"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a> at         <a href="https://github.com/googleapis/google-auth-library-php/blob/master/src/HttpHandler/Guzzle6HttpHandler.php#L45">line 45</a></div>
+        <code>                    <abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr>
+    <strong>__invoke</strong>(<abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr> $request, array $options = [])
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Accepts a PSR-7 request and an array of options and returns a PSR-7 response.</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td><abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr></td>
+                <td>$request</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td>array</td>
+                <td>$options</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
         <tr>
-            <td><a href="../../../Google/Auth/HttpHandler/Guzzle5HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle5HttpHandler">Guzzle5HttpHandler</abbr></a>|<a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a>|<a href="../../../Google/Auth/HttpHandler/Guzzle7HttpHandler.html"><abbr title="Google\Auth\HttpHandler\Guzzle7HttpHandler">Guzzle7HttpHandler</abbr></a></td>
+            <td><abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr></td>
             <td></td>
         </tr>
     </table>
 
             
-                            <h4>Exceptions</h4>
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_async">
+        <div class="location">in <a href="../../../Google/Auth/HttpHandler/Guzzle6HttpHandler.html#method_async"><abbr title="Google\Auth\HttpHandler\Guzzle6HttpHandler">Guzzle6HttpHandler</abbr></a> at         <a href="https://github.com/googleapis/google-auth-library-php/blob/master/src/HttpHandler/Guzzle6HttpHandler.php#L58">line 58</a></div>
+        <code>                    <abbr title="GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr>
+    <strong>async</strong>(<abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr> $request, array $options = [])
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Accepts a PSR-7 request and an array of options and returns a PromiseInterface</p>                                                </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
-                <td><a target="_blank" href="http://php.net/Exception">Exception</a></td>
+                <td><abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr></td>
+                <td>$request</td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td>array</td>
+                <td>$options</td>
                 <td></td>
             </tr>
             </table>
 
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><abbr title="GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr></td>
+            <td></td>
+        </tr>
+    </table>
+
+            
             
                     </div>
     </div>
