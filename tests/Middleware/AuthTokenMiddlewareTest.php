@@ -33,7 +33,7 @@ class AuthTokenMiddlewareTest extends BaseTest
 
     protected function setUp()
     {
-        $this->onlyGuzzle6();
+        $this->onlyGuzzle6And7();
 
         $this->mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');

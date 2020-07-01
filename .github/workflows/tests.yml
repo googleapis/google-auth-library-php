@@ -48,6 +48,27 @@ jobs:
                 command: composer update --prefer-lowest
             - name: Run Script
               run: vendor/bin/phpunit
+    guzzle6:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                operating-system: [ ubuntu-latest ]
+                php: [ "5.6", "7.2" ]
+        name: PHP ${{ matrix.php }} Unit Test Guzzle 6
+        steps:
+            - uses: actions/checkout@v2
+            - name: Setup PHP
+              uses: nanasess/setup-php@v3.0.4
+              with:
+                php-version: ${{ matrix.php }}
+            - name: Install Dependencies
+              uses: nick-invision/retry@v1
+              with:
+                timeout_minutes: 10
+                max_attempts: 3
+                command: composer require guzzlehttp/guzzle:^6 && composer update
+            - name: Run Script
+              run: vendor/bin/phpunit
     # use dockerfiles for oooooolllllldddd versions of php, setup-php times out for those.
     test_php55:
         name: "PHP 5.5 Unit Test"

@@ -19,16 +19,15 @@ namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
-use GuzzleHttp\ClientInterface;
+use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
-use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 
 /**
  * @group credentials
  * @group credentials-gce
  */
-class GCECredentialsTest extends TestCase
+class GCECredentialsTest extends BaseTest
 {
     public function testOnGceMetadataFlavorHeader()
     {
@@ -182,10 +181,7 @@ class GCECredentialsTest extends TestCase
      */
     public function testFetchAuthTokenCustomScope($scope, $expected)
     {
-        $guzzleVersion = ClientInterface::VERSION;
-        if ($guzzleVersion[0] === '5') {
-            $this->markTestSkipped('Only compatible with guzzle 6+');
-        }
+        $this->onlyGuzzle6And7();
 
         $uri = null;
         $client = $this->prophesize('GuzzleHttp\ClientInterface');
@@ -258,10 +254,7 @@ class GCECredentialsTest extends TestCase
 
     public function testSignBlob()
     {
-        $guzzleVersion = ClientInterface::VERSION;
-        if ($guzzleVersion[0] === '5') {
-            $this->markTestSkipped('Only compatible with guzzle 6+');
-        }
+        $this->onlyGuzzle6And7();
 
         $expectedEmail = 'test@test.com';
         $expectedAccessToken = 'token';
@@ -294,10 +287,7 @@ class GCECredentialsTest extends TestCase
 
     public function testSignBlobWithLastReceivedAccessToken()
     {
-        $guzzleVersion = ClientInterface::VERSION;
-        if ($guzzleVersion[0] === '5') {
-            $this->markTestSkipped('Only compatible with guzzle 6+');
-        }
+        $this->onlyGuzzle6And7();
 
         $expectedEmail = 'test@test.com';
         $expectedAccessToken = 'token';
@@ -340,10 +330,7 @@ class GCECredentialsTest extends TestCase
 
     public function testGetProjectId()
     {
-        $guzzleVersion = ClientInterface::VERSION;
-        if ($guzzleVersion[0] === '5') {
-            $this->markTestSkipped('Only compatible with guzzle 6+');
-        }
+        $this->onlyGuzzle6And7();
 
         $expected = 'foobar';
 
@@ -366,10 +353,7 @@ class GCECredentialsTest extends TestCase
 
     public function testGetProjectIdShouldBeEmptyIfNotOnGCE()
     {
-        $guzzleVersion = ClientInterface::VERSION;
-        if ($guzzleVersion[0] === '5') {
-            $this->markTestSkipped('Only compatible with guzzle 6+');
-        }
+        $this->onlyGuzzle6And7();
 
         // simulate retry attempts by returning multiple 500s
         $client = $this->prophesize('GuzzleHttp\ClientInterface');
