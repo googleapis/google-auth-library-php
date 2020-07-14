@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
@@ -57,11 +58,7 @@ class FetchAuthTokenCache implements
         CacheItemPoolInterface $cache
     ) {
         $this->fetcher = $fetcher;
-        $this->cache = $cache;
-        $this->cacheConfig = array_merge([
-            'lifetime' => 1500,
-            'prefix' => '',
-        ], (array) $cacheConfig);
+        $this->initCacheTrait($cache, $cacheConfig ?? []);
     }
 
     /**
@@ -76,25 +73,17 @@ class FetchAuthTokenCache implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        // Use the cached value if its available.
-        //
-        // TODO: correct caching; update the call to setCachedValue to set the expiry
-        // to the value returned with the auth token.
-        //
-        // TODO: correct caching; enable the cache to be cleared.
-        $cacheKey = $this->fetcher->getCacheKey();
-        $cached = $this->getCachedValue($cacheKey);
-        if (!empty($cached)) {
-            return ['access_token' => $cached];
-        }
+        return $this->getCachedValue(
+            $this->fetcher->getCacheKey(),
+            function(CacheItemInterface $item) use ($httpHandler) {
+                $authToken = $this->fetcher->fetchAuthToken($httpHandler);
 
-        $auth_token = $this->fetcher->fetchAuthToken($httpHandler);
+                $item->set($authToken);
+                $item->expiresAfter($authToken['expires_in']);
 
-        if (isset($auth_token['access_token'])) {
-            $this->setCachedValue($cacheKey, $auth_token['access_token']);
-        }
-
-        return $auth_token;
+                return $authToken;
+            }
+        );
     }
 
     /**
