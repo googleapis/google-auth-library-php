@@ -17,49 +17,62 @@
 
 namespace Google\Auth;
 
+use Google\Auth\Cache\MemoryCacheItemPool;
+use Psr\Cache\CacheItemInterface;
+use Psr\Cache\CacheItemPoolInterface;
+
 trait CacheTrait
 {
+
     private $maxKeyLength = 64;
 
-    /**
-     * Gets the cached value if it is present in the cache when that is
-     * available.
-     */
-    private function getCachedValue($k)
-    {
-        if (is_null($this->cache)) {
-            return;
-        }
+    /** @var ?CacheItemPoolInterface */
+    private $cache;
 
-        $key = $this->getFullCacheKey($k);
-        if (is_null($key)) {
-            return;
-        }
+    /** @var array */
+    private $cacheConfig;
 
-        $cacheItem = $this->cache->getItem($key);
-        if ($cacheItem->isHit()) {
-            return $cacheItem->get();
-        }
+    private function initCacheTrait(
+        ?CacheItemPoolInterface $cache,
+        array $cacheConfig = []
+    ) {
+        $this->cache = $cache ?? new MemoryCacheItemPool;
+
+        $this->cacheConfig = $cacheConfig + [
+            'lifetime' => 1500,
+            'prefix'   => '',
+        ];
     }
 
     /**
-     * Saves the value in the cache when that is available.
+     * Looks up the key in the cache and, on cache miss, calls the $fetcher
+     * callback in order to fetch the real value.
+     *
+     * @param string $key the cache key to lookup
+     * @param callable $fetcher a callback of the form
+     *        function(CacheItemInterface $item): mixed, to be called on cache
+     *        miss
+     * @return mixed the cached value
      */
-    private function setCachedValue($k, $v)
+    private function getCachedValue(string $key, callable $fetcher)
     {
-        if (is_null($this->cache)) {
-            return;
+        $normalizedKey = $this->getFullCacheKey($key);
+
+        $cacheItem = $this->cache->getItem($normalizedKey);
+
+        if ($cacheItem->isHit())
+        {
+            return $cacheItem->get();
         }
 
-        $key = $this->getFullCacheKey($k);
-        if (is_null($key)) {
-            return;
-        }
-
-        $cacheItem = $this->cache->getItem($key);
-        $cacheItem->set($v);
+        // set the default expiry, the callable can override this
         $cacheItem->expiresAfter($this->cacheConfig['lifetime']);
-        return $this->cache->save($cacheItem);
+
+        $result = $fetcher($cacheItem);
+
+        $this->cache->save($cacheItem);
+
+        return $result;
     }
 
     private function getFullCacheKey($key)
