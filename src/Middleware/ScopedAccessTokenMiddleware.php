@@ -18,6 +18,7 @@
 namespace Google\Auth\Middleware;
 
 use Google\Auth\CacheTrait;
+use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\RequestInterface;
 
@@ -74,20 +75,16 @@ class ScopedAccessTokenMiddleware
         CacheItemPoolInterface $cache = null
     ) {
         $this->tokenFunc = $tokenFunc;
+
         if (!(is_string($scopes) || is_array($scopes))) {
             throw new \InvalidArgumentException(
                 'wants scope should be string or array'
             );
         }
+
         $this->scopes = $scopes;
 
-        if (!is_null($cache)) {
-            $this->cache = $cache;
-            $this->cacheConfig = array_merge([
-                'lifetime' => self::DEFAULT_CACHE_LIFETIME,
-                'prefix' => '',
-            ], $cacheConfig);
-        }
+        $this->initCacheTrait($cache, $cacheConfig ?? []);
     }
 
     /**
@@ -161,15 +158,13 @@ class ScopedAccessTokenMiddleware
     private function fetchToken()
     {
         $cacheKey = $this->getCacheKey();
-        $cached = $this->getCachedValue($cacheKey);
 
-        if (!empty($cached)) {
-            return $cached;
-        }
+        return $this->getCachedValue($cacheKey, function(CacheItemInterface $item) {
+            $token = call_user_func($this->tokenFunc, $this->scopes);
 
-        $token = call_user_func($this->tokenFunc, $this->scopes);
-        $this->setCachedValue($cacheKey, $token);
+            $item->set($token);
 
-        return $token;
+            return $token;
+        });
     }
 }
