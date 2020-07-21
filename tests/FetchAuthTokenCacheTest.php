@@ -39,7 +39,7 @@ class FetchAuthTokenCacheTest extends BaseTest
     {
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
-        $cachedValue = json_encode(['access_token' => $token]);
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -69,7 +69,7 @@ class FetchAuthTokenCacheTest extends BaseTest
     {
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
-        $cachedValue = json_encode(['id_token' => $token]);
+        $cachedValue = ['id_token' => $token];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -100,10 +100,10 @@ class FetchAuthTokenCacheTest extends BaseTest
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
         $expiresAt = time() + 10;
-        $cachedValue = json_encode([
+        $cachedValue = [
             'access_token' => $token,
             'expires_at' => $expiresAt,
-        ]);
+        ];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -137,10 +137,10 @@ class FetchAuthTokenCacheTest extends BaseTest
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
         $expiresAt = time() - 10;
-        $cachedValue = json_encode([
+        $cachedValue = [
             'access_token' => $token,
             'expires_at' => $expiresAt,
-        ]);
+        ];
         $newToken = ['access_token' => '3/abcdef1234567890'];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
@@ -148,7 +148,7 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->mockCacheItem->get()
             ->shouldBeCalledTimes(1)
             ->willReturn($cachedValue);
-        $this->mockCacheItem->set(json_encode($newToken))
+        $this->mockCacheItem->set($newToken)
             ->shouldBeCalledTimes(1);
         $this->mockCacheItem->expiresAfter(1500)
             ->shouldBeCalledTimes(1);
@@ -179,7 +179,7 @@ class FetchAuthTokenCacheTest extends BaseTest
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
-        $cachedValue = json_encode(['access_token' => $token]);
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -211,8 +211,7 @@ class FetchAuthTokenCacheTest extends BaseTest
         $lifetime = '70707';
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
-        $authResult = ['access_token' => $token];
-        $cachedValue = json_encode($authResult);
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->get(Argument::any())
             ->willReturn(null);
         $this->mockCacheItem->isHit()
@@ -231,7 +230,7 @@ class FetchAuthTokenCacheTest extends BaseTest
             ->willReturn($cacheKey);
         $this->mockFetcher->fetchAuthToken(Argument::any())
             ->shouldBeCalledTimes(1)
-            ->willReturn($authResult);
+            ->willReturn($cachedValue);
 
         // Run the test
         $cachedFetcher = new FetchAuthTokenCache(

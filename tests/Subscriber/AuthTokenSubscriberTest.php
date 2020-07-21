@@ -107,7 +107,7 @@ class AuthTokenSubscriberTest extends BaseTest
     {
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
-        $cachedValue = json_encode(['access_token' => $token]);
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -148,7 +148,7 @@ class AuthTokenSubscriberTest extends BaseTest
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
-        $cachedValue = json_encode(['access_token' => $token]);
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -190,8 +190,7 @@ class AuthTokenSubscriberTest extends BaseTest
         $lifetime = '70707';
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
-        $cachedValue = json_encode(['access_token' => $token]);
-        $authResult = ['access_token' => $token];
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->get()
             ->willReturn(null);
         $this->mockCacheItem->set($cachedValue)
@@ -209,7 +208,7 @@ class AuthTokenSubscriberTest extends BaseTest
         $this->mockFetcher->getCacheKey()
             ->willReturn($cacheKey);
         $this->mockFetcher->fetchAuthToken(Argument::any())
-            ->willReturn($authResult);
+            ->willReturn($cachedValue);
 
         // Run the test
         $cachedFetcher = new FetchAuthTokenCache(
@@ -240,8 +239,7 @@ class AuthTokenSubscriberTest extends BaseTest
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
-        $authResult = ['access_token' => $token];
-        $cachedValue = json_encode($authResult);
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->get()
             ->willReturn(null);
         $this->mockCacheItem->isHit()
@@ -258,7 +256,7 @@ class AuthTokenSubscriberTest extends BaseTest
             ->willReturn($cacheKey);
         $this->mockFetcher->fetchAuthToken(Argument::any())
             ->shouldBeCalledTimes(1)
-            ->willReturn($authResult);
+            ->willReturn($cachedValue);
 
         SubscriberCallback::$expectedKey = $this->getValidKeyName($prefix . $cacheKey);
         SubscriberCallback::$expectedValue = $token;
