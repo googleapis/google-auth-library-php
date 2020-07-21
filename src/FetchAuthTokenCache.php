@@ -98,10 +98,8 @@ class FetchAuthTokenCache implements
 
         $auth_token = $this->fetcher->fetchAuthToken($httpHandler);
 
-        if (
-            isset($auth_token['access_token'])
-            || isset($auth_token['id_token'])
-        ) {
+        if (isset($auth_token['access_token']) ||
+            isset($auth_token['id_token'])) {
             $this->setCachedValue($cacheKey, $auth_token);
         }
 
