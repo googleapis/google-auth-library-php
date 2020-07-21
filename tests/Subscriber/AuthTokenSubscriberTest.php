@@ -106,7 +106,8 @@ class AuthTokenSubscriberTest extends BaseTest
     public function testUsesCachedAuthToken()
     {
         $cacheKey = 'myKey';
-        $cachedValue = '2/abcdef1234567890';
+        $token = '2/abcdef1234567890';
+        $cachedValue = json_encode(['access_token' => $token]);
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -138,7 +139,7 @@ class AuthTokenSubscriberTest extends BaseTest
         $a->onBefore($before);
         $this->assertSame(
             $request->getHeader('authorization'),
-            'Bearer 2/abcdef1234567890'
+            'Bearer ' . $token
         );
     }
 
@@ -146,7 +147,8 @@ class AuthTokenSubscriberTest extends BaseTest
     {
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
-        $cachedValue = '2/abcdef1234567890';
+        $token = '2/abcdef1234567890';
+        $cachedValue = json_encode(['access_token' => $token]);
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -178,7 +180,7 @@ class AuthTokenSubscriberTest extends BaseTest
         $a->onBefore($before);
         $this->assertSame(
             $request->getHeader('authorization'),
-            'Bearer 2/abcdef1234567890'
+            'Bearer ' . $token
         );
     }
 
@@ -187,11 +189,12 @@ class AuthTokenSubscriberTest extends BaseTest
         $prefix = 'test_prefix_';
         $lifetime = '70707';
         $cacheKey = 'myKey';
-        $token = '1/abcdef1234567890';
+        $token = '2/abcdef1234567890';
+        $cachedValue = json_encode(['access_token' => $token]);
         $authResult = ['access_token' => $token];
         $this->mockCacheItem->get()
             ->willReturn(null);
-        $this->mockCacheItem->set($token)
+        $this->mockCacheItem->set($cachedValue)
             ->shouldBeCalledTimes(1)
             ->willReturn(false);
         $this->mockCacheItem->isHit()
@@ -225,7 +228,7 @@ class AuthTokenSubscriberTest extends BaseTest
         $a->onBefore($before);
         $this->assertSame(
             $request->getHeader('authorization'),
-            'Bearer 1/abcdef1234567890'
+            'Bearer ' . $token
         );
     }
 
@@ -238,11 +241,12 @@ class AuthTokenSubscriberTest extends BaseTest
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
         $authResult = ['access_token' => $token];
+        $cachedValue = json_encode($authResult);
         $this->mockCacheItem->get()
             ->willReturn(null);
         $this->mockCacheItem->isHit()
             ->willReturn(false);
-        $this->mockCacheItem->set($token)
+        $this->mockCacheItem->set($cachedValue)
             ->willReturn(false);
         $this->mockCacheItem->expiresAfter(Argument::any())
             ->willReturn(null);
