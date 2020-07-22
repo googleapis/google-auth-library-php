@@ -35,10 +35,11 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->mockSigner = $this->prophesize('Google\Auth\SignBlobInterface');
     }
 
-    public function testUsesCachedAuthToken()
+    public function testUsesCachedAccessToken()
     {
         $cacheKey = 'myKey';
-        $cachedValue = '2/abcdef1234567890';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -61,14 +62,124 @@ class FetchAuthTokenCacheTest extends BaseTest
             $this->mockCache->reveal()
         );
         $accessToken = $cachedFetcher->fetchAuthToken();
-        $this->assertEquals($accessToken, ['access_token' => $cachedValue]);
+        $this->assertEquals($accessToken, ['access_token' => $token]);
+    }
+
+    public function testUsesCachedIdToken()
+    {
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['id_token' => $token];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $idToken = $cachedFetcher->fetchAuthToken();
+        $this->assertEquals($idToken, ['id_token' => $token]);
+    }
+
+    public function testShouldReturnValueWhenNotExpired()
+    {
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $expiresAt = time() + 10;
+        $cachedValue = [
+            'access_token' => $token,
+            'expires_at' => $expiresAt,
+        ];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $accessToken = $cachedFetcher->fetchAuthToken();
+        $this->assertEquals($accessToken, [
+            'access_token' => $token,
+            'expires_at' => $expiresAt
+        ]);
+    }
+
+    public function testShouldNotReturnValueWhenExpired()
+    {
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $expiresAt = time() - 10;
+        $cachedValue = [
+            'access_token' => $token,
+            'expires_at' => $expiresAt,
+        ];
+        $newToken = ['access_token' => '3/abcdef1234567890'];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCacheItem->set($newToken)
+            ->shouldBeCalledTimes(1);
+        $this->mockCacheItem->expiresAfter(1500)
+            ->shouldBeCalledTimes(1);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(2)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken(null)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($newToken);
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+        $this->mockCache->save($this->mockCacheItem)
+            ->shouldBeCalledTimes(1);
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $accessToken = $cachedFetcher->fetchAuthToken();
+        $this->assertEquals($newToken, $accessToken);
     }
 
     public function testGetsCachedAuthTokenUsingCachePrefix()
     {
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
-        $cachedValue = '2/abcdef1234567890';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -91,7 +202,7 @@ class FetchAuthTokenCacheTest extends BaseTest
             $this->mockCache->reveal()
         );
         $accessToken = $cachedFetcher->fetchAuthToken();
-        $this->assertEquals($accessToken, ['access_token' => $cachedValue]);
+        $this->assertEquals($accessToken, ['access_token' => $token]);
     }
 
     public function testShouldSaveValueInCacheWithCacheOptions()
@@ -100,12 +211,12 @@ class FetchAuthTokenCacheTest extends BaseTest
         $lifetime = '70707';
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
-        $authResult = ['access_token' => $token];
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->get(Argument::any())
             ->willReturn(null);
         $this->mockCacheItem->isHit()
             ->willReturn(false);
-        $this->mockCacheItem->set($token)
+        $this->mockCacheItem->set($cachedValue)
             ->shouldBeCalledTimes(1)
             ->willReturn(false);
         $this->mockCacheItem->expiresAfter($lifetime)
@@ -119,7 +230,7 @@ class FetchAuthTokenCacheTest extends BaseTest
             ->willReturn($cacheKey);
         $this->mockFetcher->fetchAuthToken(Argument::any())
             ->shouldBeCalledTimes(1)
-            ->willReturn($authResult);
+            ->willReturn($cachedValue);
 
         // Run the test
         $cachedFetcher = new FetchAuthTokenCache(

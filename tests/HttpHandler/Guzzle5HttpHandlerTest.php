@@ -109,7 +109,7 @@ class Guzzle5HttpHandlerTest extends BaseTest
             Argument::withEntry('headers', []),
             Argument::withEntry('future', true),
             Argument::that(function ($arg) {
-                    return $arg['body'] instanceof StreamInterface;
+                return $arg['body'] instanceof StreamInterface;
             })
         ))->willReturn($this->mockRequest->reveal());
 
@@ -147,7 +147,7 @@ class Guzzle5HttpHandlerTest extends BaseTest
             Argument::withEntry('headers', []),
             Argument::withEntry('future', true),
             Argument::that(function ($arg) {
-                    return $arg['body'] instanceof StreamInterface;
+                return $arg['body'] instanceof StreamInterface;
             })
         ))->willReturn($this->mockRequest->reveal());
 

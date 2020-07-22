@@ -240,7 +240,7 @@ class OAuth2GetCacheKeyTest extends TestCase
         'clientID' => 'aClientID',
     ];
 
-    public function testIsNullWithNoScopes()
+    public function testIsNullWithNoScopesOrAudience()
     {
         $o = new OAuth2($this->minimal);
         $this->assertNull($o->getCacheKey());
@@ -258,6 +258,14 @@ class OAuth2GetCacheKeyTest extends TestCase
         $o = new OAuth2($this->minimal);
         $o->setScope(['test/scope/1', 'test/scope/2']);
         $this->assertEquals('test/scope/1:test/scope/2', $o->getCacheKey());
+    }
+
+    public function testIsAudienceWhenScopeIsNull()
+    {
+        $aud = 'https://drive.googleapis.com';
+        $o = new OAuth2($this->minimal);
+        $o->setAudience($aud);
+        $this->assertEquals($aud, $o->getCacheKey());
     }
 }
 

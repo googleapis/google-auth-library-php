@@ -101,10 +101,11 @@ class AuthTokenMiddlewareTest extends BaseTest
         $callable($this->mockRequest->reveal(), ['auth' => 'google_auth']);
     }
 
-    public function testUsesCachedAuthToken()
+    public function testUsesCachedAccessToken()
     {
         $cacheKey = 'myKey';
-        $cachedValue = '2/abcdef1234567890';
+        $accessToken = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $accessToken];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -119,7 +120,42 @@ class AuthTokenMiddlewareTest extends BaseTest
         $this->mockFetcher->getCacheKey()
             ->shouldBeCalled()
             ->willReturn($cacheKey);
-        $this->mockRequest->withHeader('authorization', 'Bearer ' . $cachedValue)
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $accessToken)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $middleware = new AuthTokenMiddleware($cachedFetcher);
+        $mock = new MockHandler([new Response(200)]);
+        $callable = $middleware($mock);
+        $callable($this->mockRequest->reveal(), ['auth' => 'google_auth']);
+    }
+
+    public function testUsesCachedIdToken()
+    {
+        $cacheKey = 'myKey';
+        $idToken = '2/abcdef1234567890';
+        $cachedValue = ['id_token' => $idToken];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $idToken)
             ->shouldBeCalledTimes(1)
             ->willReturn($this->mockRequest->reveal());
 
@@ -139,7 +175,8 @@ class AuthTokenMiddlewareTest extends BaseTest
     {
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
-        $cachedValue = '2/abcdef1234567890';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
             ->willReturn(true);
@@ -154,7 +191,7 @@ class AuthTokenMiddlewareTest extends BaseTest
         $this->mockFetcher->getCacheKey()
             ->shouldBeCalled()
             ->willReturn($cacheKey);
-        $this->mockRequest->withHeader('authorization', 'Bearer ' . $cachedValue)
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
             ->shouldBeCalledTimes(1)
             ->willReturn($this->mockRequest->reveal());
 
@@ -176,12 +213,12 @@ class AuthTokenMiddlewareTest extends BaseTest
         $lifetime = '70707';
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
-        $authResult = ['access_token' => $token];
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->get()
             ->willReturn(null);
         $this->mockCacheItem->isHit()
             ->willReturn(false);
-        $this->mockCacheItem->set($token)
+        $this->mockCacheItem->set($cachedValue)
             ->shouldBeCalledTimes(1)
             ->willReturn(false);
         $this->mockCacheItem->expiresAfter($lifetime)
@@ -196,7 +233,7 @@ class AuthTokenMiddlewareTest extends BaseTest
             ->willReturn($cacheKey);
         $this->mockFetcher->fetchAuthToken(Argument::any())
             ->shouldBeCalledTimes(1)
-            ->willReturn($authResult);
+            ->willReturn($cachedValue);
         $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
             ->shouldBeCalledTimes(1)
             ->willReturn($this->mockRequest->reveal());
@@ -221,12 +258,12 @@ class AuthTokenMiddlewareTest extends BaseTest
         $prefix = 'test_prefix_';
         $cacheKey = 'myKey';
         $token = '1/abcdef1234567890';
-        $authResult = ['access_token' => $token];
+        $cachedValue = ['access_token' => $token];
         $this->mockCacheItem->get()
             ->willReturn(null);
         $this->mockCacheItem->isHit()
             ->willReturn(false);
-        $this->mockCacheItem->set($token)
+        $this->mockCacheItem->set($cachedValue)
             ->shouldBeCalled();
         $this->mockCacheItem->expiresAfter(Argument::any())
             ->shouldBeCalled();
@@ -238,7 +275,7 @@ class AuthTokenMiddlewareTest extends BaseTest
             ->willReturn($cacheKey);
         $this->mockFetcher->fetchAuthToken(Argument::any())
             ->shouldBeCalledTimes(1)
-            ->willReturn($authResult);
+            ->willReturn($cachedValue);
         $this->mockRequest->withHeader(Argument::any(), Argument::any())
             ->willReturn($this->mockRequest->reveal());
 
