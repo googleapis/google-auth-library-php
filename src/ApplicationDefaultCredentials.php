@@ -108,6 +108,8 @@ class ApplicationDefaultCredentials
      * @param array $cacheConfig configuration for the cache when it's present
      * @param CacheItemPoolInterface $cache A cache implementation, may be
      *        provided if you have one already available for use.
+     * @param string $quotaProject specifies a project to bill for access
+     *   charges associated with the request.
      * @return AuthTokenMiddleware
      * @throws DomainException if no implementation can be obtained.
      */
@@ -115,9 +117,10 @@ class ApplicationDefaultCredentials
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        CacheItemPoolInterface $cache = null,
+        $quotaProject = null
     ) {
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
+        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $quotaProject);
 
         return new AuthTokenMiddleware($creds, $httpHandler);
     }
