@@ -95,6 +95,40 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals($idToken, ['id_token' => $token]);
     }
 
+    public function testUpdateMetadata()
+    {
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $token];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $headers = $cachedFetcher->updateMetadata(['foo' => 'bar']);
+        $this->assertArrayHasKey('authorization', $headers);
+        $this->assertEquals(["Bearer $token"], $headers['authorization']);
+        $this->assertArrayHasKey('foo', $headers);
+        $this->assertEquals('bar', $headers['foo']);
+    }
+
+
     public function testShouldReturnValueWhenNotExpired()
     {
         $cacheKey = 'myKey';
