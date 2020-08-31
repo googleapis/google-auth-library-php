@@ -329,7 +329,7 @@ class ADCGetCredentialsWithQuotaProjectTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR);  // removes environment variable
     }
 
-    public function testWithServiceAccountCredentials()
+    public function testWithServiceAccountCredentialsAndExplicitQuotaProject()
     {
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
@@ -353,7 +353,20 @@ class ADCGetCredentialsWithQuotaProjectTest extends TestCase
         );
     }
 
-    public function testWithFetchAuthTokenCache()
+    public function testGetCredentialsUtilizesQuotaProjectInKeyFile()
+    {
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+
+        $credentials = ApplicationDefaultCredentials::getCredentials();
+
+        $this->assertEquals(
+            'test_quota_project',
+            $credentials->getQuotaProject()
+        );
+    }
+
+    public function testWithFetchAuthTokenCacheAndExplicitQuotaProject()
     {
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
