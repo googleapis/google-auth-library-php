@@ -268,3 +268,13 @@ class URCFetchAuthTokenTest extends TestCase
         $this->assertEquals($testJson, $tokens);
     }
 }
+
+class URCGetQuotaProjectTest extends TestCase
+{
+    public function testGetQuotaProject()
+    {
+        $keyFile = __DIR__ . '/../fixtures2' . '/private.json';
+        $sa = new UserRefreshCredentials('a-scope', $keyFile);
+        $this->assertEquals('test_quota_project', $sa->getQuotaProject());
+    }
+}
