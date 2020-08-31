@@ -24,6 +24,7 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Iam;
 use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\SignBlobInterface;
+use Google\Auth\UpdateMetadataInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -58,7 +59,8 @@ use InvalidArgumentException;
 class GCECredentials extends CredentialsLoader implements
     SignBlobInterface,
     ProjectIdProviderInterface,
-    GetQuotaProjectInterface
+    GetQuotaProjectInterface,
+    UpdateMetadataInterface
 {
     // phpcs:disable
     const cacheKey = 'GOOGLE_AUTH_PHP_GCE';
