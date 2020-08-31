@@ -166,7 +166,9 @@ class ApplicationDefaultCredentials
         }
 
         if (!is_null($jsonKey)) {
-            $jsonKey['quota_project'] = $quotaProject;
+            if ($quotaProject) {
+                $jsonKey['quota_project_id'] = $quotaProject;
+            }
             $creds = CredentialsLoader::makeCredentials($scope, $jsonKey);
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($scope);
