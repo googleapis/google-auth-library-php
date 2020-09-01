@@ -52,7 +52,6 @@ class GCECache
         $this->cacheConfig = array_merge([
             'lifetime' => 1500,
             'prefix' => '',
-            'key' => self::GCE_CACHE_KEY,
         ], (array) $cacheConfig);
     }
 
@@ -69,7 +68,7 @@ class GCECache
             return GCECredentials::onGce($httpHandler);
         }
 
-        $cacheKey = $this->cacheConfig['key'];
+        $cacheKey = self::GCE_CACHE_KEY;
         $onGce = $this->getCachedValue($cacheKey);
 
         if (is_null($onGce)) {

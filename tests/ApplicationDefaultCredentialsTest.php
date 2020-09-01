@@ -260,6 +260,43 @@ class ADCGetMiddlewareTest extends TestCase
 
         $this->assertTrue($gceIsCalled);
     }
+
+    public function testOnGceCacheWithOptions()
+    {
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+
+        $prefix = 'test_prefix_';
+        $lifetime = '70707';
+
+        $gceIsCalled = false;
+        $dummyHandler = function ($request) use (&$gceIsCalled) {
+            $gceIsCalled = true;
+            return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+        };
+        $mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $mockCacheItem->isHit()
+            ->willReturn(false);
+        $mockCacheItem->set(true)
+            ->shouldBeCalledTimes(1);
+        $mockCacheItem->expiresAfter($lifetime)
+            ->shouldBeCalledTimes(1);
+
+        $mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $mockCache->getItem($prefix . GCECache::GCE_CACHE_KEY)
+            ->shouldBeCalledTimes(2)
+            ->willReturn($mockCacheItem->reveal());
+        $mockCache->save($mockCacheItem->reveal())
+            ->shouldBeCalled();
+
+        $creds = ApplicationDefaultCredentials::getMiddleware(
+            'a scope',
+            $dummyHandler,
+            ['gce_prefix' => $prefix, 'gce_lifetime' => $lifetime],
+            $mockCache->reveal()
+        );
+
+        $this->assertTrue($gceIsCalled);
+    }
 }
 
 class ADCGetCredentialsWithTargetAudienceTest extends TestCase
