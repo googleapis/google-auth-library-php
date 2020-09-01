@@ -20,6 +20,7 @@ namespace Google\Auth\Tests;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use PHPUnit\Framework\TestCase;
 
@@ -197,6 +198,67 @@ class ADCGetMiddlewareTest extends TestCase
         ]);
 
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler));
+    }
+
+    /**
+     * @expectedException DomainException
+     */
+    public function testOnGceCacheWithHit()
+    {
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+
+        $mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $mockCacheItem->isHit()
+            ->willReturn(true);
+        $mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+
+        $mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $mockCache->getItem(GCECache::GCE_CACHE_KEY)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($mockCacheItem->reveal());
+
+        ApplicationDefaultCredentials::getMiddleware(
+            'a scope',
+            null,
+            null,
+            $mockCache->reveal()
+        );
+    }
+
+    public function testOnGceCacheWithoutHit()
+    {
+        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
+
+        $gceIsCalled = false;
+        $dummyHandler = function ($request) use (&$gceIsCalled) {
+            $gceIsCalled = true;
+            return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+        };
+        $mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $mockCacheItem->isHit()
+            ->willReturn(false);
+        $mockCacheItem->set(true)
+            ->shouldBeCalledTimes(1);
+        $mockCacheItem->expiresAfter(1500)
+            ->shouldBeCalledTimes(1);
+
+        $mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $mockCache->getItem(GCECache::GCE_CACHE_KEY)
+            ->shouldBeCalledTimes(2)
+            ->willReturn($mockCacheItem->reveal());
+        $mockCache->save($mockCacheItem->reveal())
+            ->shouldBeCalled();
+
+        $creds = ApplicationDefaultCredentials::getMiddleware(
+            'a scope',
+            $dummyHandler,
+            null,
+            $mockCache->reveal()
+        );
+
+        $this->assertTrue($gceIsCalled);
     }
 }
 

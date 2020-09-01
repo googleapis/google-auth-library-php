@@ -172,7 +172,7 @@ class ApplicationDefaultCredentials
             $creds = CredentialsLoader::makeCredentials($scope, $jsonKey);
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($scope);
-        } elseif (GCECredentials::onGce($httpHandler)) {
+        } elseif ((new GCECache($cacheConfig, $cache))->onGce($httpHandler)) {
             $creds = new GCECredentials(null, $scope, null, $quotaProject);
         }
 
@@ -259,7 +259,7 @@ class ApplicationDefaultCredentials
             }
 
             $creds = new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience);
-        } elseif (GCECredentials::onGce($httpHandler)) {
+        } elseif ((new GCECache($cache, $cacheConfig))->onGce($httpHandler)) {
             $creds = new GCECredentials(null, null, $targetAudience);
         }
 
