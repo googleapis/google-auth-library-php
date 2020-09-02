@@ -21,8 +21,19 @@ use Google\Auth\Credentials\GCECredentials;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
- * A class to implement caching for any object implementing
- * FetchAuthTokenInterface
+ * A class to implement caching for calls to GCECredentials::onGce. This class
+ * is used automatically when you pass a `Psr\Cache\CacheItemPoolInterface`
+ * cache object to `ApplicationDefaultCredentials::getCredentials`.
+ *
+ * ```
+ * $sysvCache = new Google\Auth\SysvCacheItemPool();
+ * $creds = Google\Auth\ApplicationDefaultCredentials::getCredentials(
+ *     $scope,
+ *     null,
+ *     null,
+ *     $sysvCache
+ * );
+ * ```
  */
 class GCECache
 {
