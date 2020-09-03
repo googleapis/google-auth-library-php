@@ -1,7 +1,8 @@
 ## 1.12.0 (8/31/2020)
 
-* [feat]: Adds QuotaProject option to getMiddleware (#296)
-* [fix]: use quota_project_id instead of quota_project (#299)
+* [feat]: Add QuotaProject option to getMiddleware (#296)
+* [feat]: Add caching for calls to GCECredentials::onGce (#301)
+* [fix]: Use quota_project_id instead of quota_project (#299)
 
 ## 1.11.1 (7/27/2020)
 
