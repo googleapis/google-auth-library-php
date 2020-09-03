@@ -172,7 +172,7 @@ class ApplicationDefaultCredentials
             $creds = CredentialsLoader::makeCredentials($scope, $jsonKey);
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($scope);
-        } elseif (GCECredentials::onGce($httpHandler)) {
+        } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
             $creds = new GCECredentials(null, $scope, null, $quotaProject);
         }
 
@@ -259,7 +259,7 @@ class ApplicationDefaultCredentials
             }
 
             $creds = new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience);
-        } elseif (GCECredentials::onGce($httpHandler)) {
+        } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
             $creds = new GCECredentials(null, null, $targetAudience);
         }
 
@@ -280,5 +280,20 @@ class ApplicationDefaultCredentials
         $msg .= ' for more information';
 
         return $msg;
+    }
+
+    private static function onGce(
+        callable $httpHandler = null,
+        array $cacheConfig = null,
+        CacheItemPoolInterface $cache = null
+    ) {
+        $gceCacheConfig = [];
+        foreach (['lifetime', 'prefix'] as $key) {
+            if (isset($cacheConfig['gce_' . $key])) {
+                $gceCacheConfig[$key] = $cacheConfig['gce_' . $key];
+            }
+        }
+
+        return (new GCECache($gceCacheConfig, $cache))->onGce($httpHandler);
     }
 }
