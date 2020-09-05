@@ -29,7 +29,9 @@ class FetchAuthTokenCacheTest extends BaseTest
 
     protected function setUp()
     {
-        $this->mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+        $this->mockFetcher = $this->prophesize();
+        $this->mockFetcher->willImplement('Google\Auth\FetchAuthTokenInterface');
+        $this->mockFetcher->willImplement('Google\Auth\UpdateMetadataInterface');
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
         $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
         $this->mockSigner = $this->prophesize('Google\Auth\SignBlobInterface');
@@ -94,6 +96,104 @@ class FetchAuthTokenCacheTest extends BaseTest
         $idToken = $cachedFetcher->fetchAuthToken();
         $this->assertEquals($idToken, ['id_token' => $token]);
     }
+
+    public function testUpdateMetadataWithCache()
+    {
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $token];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+        $this->mockFetcher->updateMetadata(Argument::type('array'), null, null)
+            ->shouldBeCalled()
+            ->will(function ($args, $fetcher) {
+                return $args[0];
+            });
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $headers = $cachedFetcher->updateMetadata(['foo' => 'bar']);
+        $this->assertArrayHasKey('authorization', $headers);
+        $this->assertEquals(["Bearer $token"], $headers['authorization']);
+        $this->assertArrayHasKey('foo', $headers);
+        $this->assertEquals('bar', $headers['foo']);
+    }
+
+    public function testUpdateMetadataWithoutCache()
+    {
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $value = ['access_token' => $token];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(2)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+        $this->mockFetcher->fetchAuthToken(null)
+            ->shouldBeCalled()
+            ->willReturn($value);
+        $this->mockCacheItem->set($value)
+            ->shouldBeCalledTimes(1);
+        $this->mockCacheItem->expiresAfter(1500)
+            ->shouldBeCalledTimes(1);
+        $this->mockCache->save($this->mockCacheItem)
+            ->shouldBeCalledTimes(1);
+        $this->mockFetcher->updateMetadata(Argument::type('array'), null, null)
+            ->shouldBeCalled()
+            ->will(function ($args, $fetcher) {
+                return $args[0];
+            });
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $headers = $cachedFetcher->updateMetadata(['foo' => 'bar']);
+        $this->assertArrayHasKey('authorization', $headers);
+        $this->assertEquals(["Bearer $token"], $headers['authorization']);
+        $this->assertArrayHasKey('foo', $headers);
+        $this->assertEquals('bar', $headers['foo']);
+    }
+
+    /**
+     * @expectedException RuntimeException
+     * @expectedExceptionMessage Credentials fetcher does not implement Google\Auth\UpdateMetadataInterface
+     */
+    public function testUpdateMetadataWithInvalidFetcher()
+    {
+        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $cachedFetcher->updateMetadata(['foo' => 'bar']);
+    }
+
 
     public function testShouldReturnValueWhenNotExpired()
     {
