@@ -1,3 +1,10 @@
+## 1.12.0 (8/31/2020)
+
+* [feat]: Add QuotaProject option to getMiddleware (#296)
+* [feat]: Add caching for calls to GCECredentials::onGce (#301)
+* [feat]: Add updateMetadata function to token cache
+* [fix]: Use quota_project_id instead of quota_project (#299)
+
 ## 1.11.1 (7/27/2020)
 
 * [fix]: catch ConnectException in GCE check (#294)
