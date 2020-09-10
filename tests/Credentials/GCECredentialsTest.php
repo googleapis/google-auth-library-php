@@ -19,7 +19,6 @@ namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
-use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
 use Prophecy\Argument;
