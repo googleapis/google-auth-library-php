@@ -216,7 +216,7 @@ class GCECredentials extends CredentialsLoader implements
      *   account identity name to use instead of "default".
      * @return string
      */
-    public static function getTokenUri(string $serviceAccountIdentity = null)
+    public static function getTokenUri($serviceAccountIdentity = null)
     {
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
         $base .= self::TOKEN_URI_PATH;
@@ -238,7 +238,7 @@ class GCECredentials extends CredentialsLoader implements
      *   account identity name to use instead of "default".
      * @return string
      */
-    public static function getClientNameUri(string $serviceAccountIdentity = null)
+    public static function getClientNameUri($serviceAccountIdentity = null)
     {
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
         $base .= self::CLIENT_ID_URI_PATH;
@@ -261,7 +261,7 @@ class GCECredentials extends CredentialsLoader implements
      *   account identity name to use instead of "default".
      * @return string
      */
-    private static function getIdTokenUri(string $serviceAccountIdentity = null)
+    private static function getIdTokenUri($serviceAccountIdentity = null)
     {
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
         $base .= self::ID_TOKEN_URI_PATH;

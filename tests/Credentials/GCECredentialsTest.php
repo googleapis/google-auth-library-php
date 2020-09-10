@@ -403,7 +403,7 @@ class GCECredentialsTest extends BaseTest
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google'])
             );
         $client->send($request, Argument::any())
-            ->shouldBeCalledOnce()
+            ->shouldBeCalled()
             ->willReturn(
                 buildResponse(200, [], Psr7\stream_for(json_encode($expected)))
             );
@@ -435,7 +435,7 @@ class GCECredentialsTest extends BaseTest
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google'])
             );
         $client->send($request, Argument::any())
-            ->shouldBeCalledOnce()
+            ->shouldBeCalled()
             ->willReturn(buildResponse(200, [], Psr7\stream_for($expected)));
 
         $g = new GCECredentials(null, null, 'a+target+audience', null, 'foo');
@@ -472,7 +472,7 @@ class GCECredentialsTest extends BaseTest
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google'])
             );
         $client->send($request, Argument::any())
-            ->shouldBeCalledOnce()
+            ->shouldBeCalled()
             ->willReturn(buildResponse(200, [], Psr7\stream_for($expected)));
 
         $creds = new GCECredentials(null, null, null, null, 'foo');
