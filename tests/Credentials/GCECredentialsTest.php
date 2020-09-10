@@ -19,6 +19,7 @@ namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
 use Prophecy\Argument;
@@ -369,5 +370,113 @@ class GCECredentialsTest extends BaseTest
 
         $creds = new GCECredentials;
         $this->assertNull($creds->getProjectId());
+    }
+
+    public function testGetTokenUriWithServiceAccountIdentity()
+    {
+        $tokenUri = GCECredentials::getTokenUri('foo');
+        $this->assertEquals(
+            'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/foo/token',
+            $tokenUri
+        );
+    }
+
+    public function testGetAccessTokenWithServiceAccountIdentity()
+    {
+        $expected = [
+            'access_token' => 'token12345',
+            'expires_in' => 123,
+        ];
+        $uri = 'http://169.254.169.254/computeMetadata/v1/instance'
+         . '/service-accounts/foo/token';
+
+        $request = new \GuzzleHttp\Psr7\Request(
+            'GET',
+            $uri,
+            [GCECredentials::FLAVOR_HEADER => 'Google']
+        );
+
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->shouldBeCalled()
+            ->willReturn(
+                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google'])
+            );
+        $client->send($request, Argument::any())
+            ->shouldBeCalledOnce()
+            ->willReturn(
+                buildResponse(200, [], Psr7\stream_for(json_encode($expected)))
+            );
+
+        $g = new GCECredentials(null, null, null, null, 'foo');
+        $httpHandler = HttpHandlerFactory::build($client->reveal());
+        $this->assertEquals(
+            $expected['access_token'],
+            $g->fetchAuthToken($httpHandler)['access_token']
+        );
+    }
+
+    public function testGetIdTokenWithServiceAccountIdentity()
+    {
+        $expected = 'idtoken12345';
+        $uri = 'http://169.254.169.254/computeMetadata/v1/instance'
+         . '/service-accounts/foo/identity?audience=a+target+audience';
+
+        $request = new \GuzzleHttp\Psr7\Request(
+            'GET',
+            $uri,
+            [GCECredentials::FLAVOR_HEADER => 'Google']
+        );
+
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->shouldBeCalled()
+            ->willReturn(
+                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google'])
+            );
+        $client->send($request, Argument::any())
+            ->shouldBeCalledOnce()
+            ->willReturn(buildResponse(200, [], Psr7\stream_for($expected)));
+
+        $g = new GCECredentials(null, null, 'a+target+audience', null, 'foo');
+        $httpHandler = HttpHandlerFactory::build($client->reveal());
+        $this->assertEquals(
+            ['id_token' => $expected],
+            $g->fetchAuthToken($httpHandler)
+        );
+    }
+
+    public function testGetClientNameUriWithServiceAccountIdentity()
+    {
+        $clientNameUri = GCECredentials::getClientNameUri('foo');
+        $this->assertEquals(
+            'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/foo/email',
+            $clientNameUri
+        );
+    }
+
+    public function testGetClientNameWithServiceAccountIdentity()
+    {
+        $expected = 'expected';
+        $uri = 'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/foo/email';
+        $request = new \GuzzleHttp\Psr7\Request(
+            'GET',
+            $uri,
+            [GCECredentials::FLAVOR_HEADER => 'Google']
+        );
+
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->shouldBeCalled()
+            ->willReturn(
+                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google'])
+            );
+        $client->send($request, Argument::any())
+            ->shouldBeCalledOnce()
+            ->willReturn(buildResponse(200, [], Psr7\stream_for($expected)));
+
+        $creds = new GCECredentials(null, null, null, null, 'foo');
+        $httpHandler = HttpHandlerFactory::build($client->reveal());
+        $this->assertEquals($expected, $creds->getClientName($httpHandler));
     }
 }
