@@ -367,7 +367,6 @@ class GCECredentialsTest extends BaseTest
 
         HttpClientCache::setHttpClient($client->reveal());
 
-
         $creds = new GCECredentials;
         $this->assertNull($creds->getProjectId());
     }
@@ -387,29 +386,21 @@ class GCECredentialsTest extends BaseTest
             'access_token' => 'token12345',
             'expires_in' => 123,
         ];
-        $uri = 'http://169.254.169.254/computeMetadata/v1/instance'
-         . '/service-accounts/foo/token';
-
-        $request = new \GuzzleHttp\Psr7\Request(
-            'GET',
-            $uri,
-            [GCECredentials::FLAVOR_HEADER => 'Google']
-        );
-
-        $client = $this->prophesize('GuzzleHttp\ClientInterface');
-        $client->send(Argument::any(), Argument::any())
-            ->shouldBeCalled()
-            ->willReturn(
-                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google'])
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expected) {
+            $timesCalled++;
+            if ($timesCalled == 1) {
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+            $this->assertEquals(
+                '/computeMetadata/v1/instance/service-accounts/foo/token',
+                $request->getUri()->getPath()
             );
-        $client->send($request, Argument::any())
-            ->shouldBeCalled()
-            ->willReturn(
-                buildResponse(200, [], Psr7\stream_for(json_encode($expected)))
-            );
+            $this->assertEquals('', $request->getUri()->getQuery());
+            return new Psr7\Response(200, [], Psr7\stream_for(json_encode($expected)));
+        };
 
         $g = new GCECredentials(null, null, null, null, 'foo');
-        $httpHandler = HttpHandlerFactory::build($client->reveal());
         $this->assertEquals(
             $expected['access_token'],
             $g->fetchAuthToken($httpHandler)['access_token']
@@ -419,27 +410,23 @@ class GCECredentialsTest extends BaseTest
     public function testGetIdTokenWithServiceAccountIdentity()
     {
         $expected = 'idtoken12345';
-        $uri = 'http://169.254.169.254/computeMetadata/v1/instance'
-         . '/service-accounts/foo/identity?audience=a+target+audience';
-
-        $request = new \GuzzleHttp\Psr7\Request(
-            'GET',
-            $uri,
-            [GCECredentials::FLAVOR_HEADER => 'Google']
-        );
-
-        $client = $this->prophesize('GuzzleHttp\ClientInterface');
-        $client->send(Argument::any(), Argument::any())
-            ->shouldBeCalled()
-            ->willReturn(
-                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google'])
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expected) {
+            $timesCalled++;
+            if ($timesCalled == 1) {
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+            $this->assertEquals(
+                '/computeMetadata/v1/instance/service-accounts/foo/identity',
+                $request->getUri()->getPath()
             );
-        $client->send($request, Argument::any())
-            ->shouldBeCalled()
-            ->willReturn(buildResponse(200, [], Psr7\stream_for($expected)));
-
+            $this->assertEquals(
+                'audience=a+target+audience',
+                $request->getUri()->getQuery()
+            );
+            return new Psr7\Response(200, [], Psr7\stream_for($expected));
+        };
         $g = new GCECredentials(null, null, 'a+target+audience', null, 'foo');
-        $httpHandler = HttpHandlerFactory::build($client->reveal());
         $this->assertEquals(
             ['id_token' => $expected],
             $g->fetchAuthToken($httpHandler)
@@ -458,25 +445,21 @@ class GCECredentialsTest extends BaseTest
     public function testGetClientNameWithServiceAccountIdentity()
     {
         $expected = 'expected';
-        $uri = 'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/foo/email';
-        $request = new \GuzzleHttp\Psr7\Request(
-            'GET',
-            $uri,
-            [GCECredentials::FLAVOR_HEADER => 'Google']
-        );
-
-        $client = $this->prophesize('GuzzleHttp\ClientInterface');
-        $client->send(Argument::any(), Argument::any())
-            ->shouldBeCalled()
-            ->willReturn(
-                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google'])
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expected) {
+            $timesCalled++;
+            if ($timesCalled == 1) {
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+            $this->assertEquals(
+                '/computeMetadata/v1/instance/service-accounts/foo/email',
+                $request->getUri()->getPath()
             );
-        $client->send($request, Argument::any())
-            ->shouldBeCalled()
-            ->willReturn(buildResponse(200, [], Psr7\stream_for($expected)));
+            $this->assertEquals('', $request->getUri()->getQuery());
+            return new Psr7\Response(200, [], Psr7\stream_for($expected));
+        };
 
         $creds = new GCECredentials(null, null, null, null, 'foo');
-        $httpHandler = HttpHandlerFactory::build($client->reveal());
         $this->assertEquals($expected, $creds->getClientName($httpHandler));
     }
 }
