@@ -133,18 +133,23 @@ abstract class CredentialsLoader implements
      * @param array $jsonKey the JSON credentials.
      * @return ServiceAccountCredentials|UserRefreshCredentials
      */
-    public static function makeCredentials($scope, array $jsonKey)
-    {
+    public static function makeCredentials(
+        $scope,
+        array $jsonKey,
+        $defaultScope = null
+    ) {
         if (!array_key_exists('type', $jsonKey)) {
             throw new \InvalidArgumentException('json key is missing the type field');
         }
 
         if ($jsonKey['type'] == 'service_account') {
+            // Do not pass $defaultScope to ServiceAccountCredentials
             return new ServiceAccountCredentials($scope, $jsonKey);
         }
 
         if ($jsonKey['type'] == 'authorized_user') {
-            return new UserRefreshCredentials($scope, $jsonKey);
+            $anyScope = $scope ?: $defaultScope;
+            return new UserRefreshCredentials($anyScope, $jsonKey);
         }
 
         throw new \InvalidArgumentException('invalid value in the type field');
