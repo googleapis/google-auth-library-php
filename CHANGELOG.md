@@ -1,3 +1,7 @@
+## 1.13.0 (9/18/2020)
+
+* [feat]: Add service account identity support to GCECredentials (#304)
+
 ## 1.12.0 (8/31/2020)
 
 * [feat]: Add QuotaProject option to getMiddleware (#296)
