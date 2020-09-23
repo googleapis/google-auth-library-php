@@ -626,6 +626,37 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertGreaterThan(30, strlen($bearer_token));
     }
 
+    /** @runInSeparateProcess */
+    public function testJwtAccessFromApplicationDefault()
+    {
+        $keyFile = __DIR__ . '/../fixtures3/service_account_credentials.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            null, // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            'a default scope' // $defaultScope
+        );
+        $authUri = 'https://example.com/service';
+
+        $metadata = $creds->updateMetadata(['foo' => 'bar'], $authUri);
+
+        $this->assertArrayHasKey('authorization', $metadata);
+        $token = str_replace('Bearer ', '', $metadata['authorization'][0]);
+        $key = file_get_contents(__DIR__ . '/../fixtures3/key.pub');
+
+        $class = 'JWT';
+        if (class_exists('Firebase\JWT\JWT')) {
+            $class = 'Firebase\JWT\JWT';
+        }
+        $jwt = new $class();
+        $result = $jwt::decode($token, $key, ['RS256']);
+
+        $this->assertEquals($authUri, $result->aud);
+    }
+
     public function testNoScopeAndNoAuthUri()
     {
         $testJson = $this->createTestJson();
