@@ -131,6 +131,10 @@ abstract class CredentialsLoader implements
      * @param string|array $scope the scope of the access request, expressed
      *        either as an Array or as a space-delimited String.
      * @param array $jsonKey the JSON credentials.
+     * @param string|array $defaultScope The default scope to use if no
+     *   user-defined scopes exist, expressed either as an Array or as a
+     *   space-delimited string.
+     *
      * @return ServiceAccountCredentials|UserRefreshCredentials
      */
     public static function makeCredentials(
