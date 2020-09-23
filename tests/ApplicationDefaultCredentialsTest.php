@@ -197,7 +197,6 @@ class ADCDefaultScopeTest extends TestCase
         // did not use default scope
         $auth = $authProperty->getValue($creds);
         $this->assertEquals('a user scope', $auth->getScope());
-
     }
 
     /** @runInSeparateProcess */
@@ -238,8 +237,30 @@ class ADCDefaultScopeTest extends TestCase
         // used user scope
         $auth = $authProperty->getValue($creds);
         $this->assertEquals('a user scope', $auth->getScope());
-
     }
+
+    /** @runInSeparateProcess */
+    public function testDefaultScopeArray()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures2');
+
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            null, // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            ['onescope', 'twoscope'] // $defaultScope
+        );
+
+        $authProperty = (new ReflectionClass($creds))->getProperty('auth');
+        $authProperty->setAccessible(true);
+
+        // used default scope
+        $auth = $authProperty->getValue($creds);
+        $this->assertEquals('onescope twoscope', $auth->getScope());
+    }
+
 }
 
 class ADCGetMiddlewareTest extends TestCase
