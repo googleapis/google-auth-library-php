@@ -23,6 +23,7 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class ADCGetTest extends TestCase
 {
@@ -86,6 +87,8 @@ class ADCGetTest extends TestCase
 
     public function testSuccedsIfNoDefaultFilesButIsOnGCE()
     {
+        putenv('HOME');
+
         $wantedTokens = [
             'access_token' => '1/abdef1234567890',
             'expires_in' => '57',
@@ -99,9 +102,143 @@ class ADCGetTest extends TestCase
             buildResponse(200, [], Psr7\stream_for($jsonTokens)),
         ]);
 
-        $this->assertNotNull(
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\GCECredentials',
             ApplicationDefaultCredentials::getCredentials('a scope', $httpHandler)
         );
+    }
+}
+
+class ADCDefaultScopeTest extends TestCase
+{
+    /** @runInSeparateProcess */
+    public function testGceCredentials()
+    {
+        putenv('HOME');
+
+        $jsonTokens = json_encode(['access_token' => 'abc']);
+
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            $httpHandler = getHandler([
+                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+            ]), // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            'a+default+scope' // $defaultScope
+        );
+
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\GCECredentials',
+            $creds
+        );
+
+        $uriProperty = (new ReflectionClass($creds))->getProperty('tokenUri');
+        $uriProperty->setAccessible(true);
+
+        // used default scope
+        $tokenUri = $uriProperty->getValue($creds);
+        $this->assertContains('a+default+scope', $tokenUri);
+
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            'a+user+scope', // $scope
+            getHandler([
+                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+            ]), // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            'a+default+scope' // $defaultScope
+        );
+
+        // did not use default scope
+        $tokenUri = $uriProperty->getValue($creds);
+        $this->assertContains('a+user+scope', $tokenUri);
+    }
+
+    /** @runInSeparateProcess */
+    public function testUserRefreshCredentials()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures2');
+
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            null, // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            'a default scope' // $defaultScope
+        );
+
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\UserRefreshCredentials',
+            $creds
+        );
+
+        $authProperty = (new ReflectionClass($creds))->getProperty('auth');
+        $authProperty->setAccessible(true);
+
+        // used default scope
+        $auth = $authProperty->getValue($creds);
+        $this->assertEquals('a default scope', $auth->getScope());
+
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            'a user scope', // $scope
+            null, // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            'a default scope' // $defaultScope
+        );
+
+        // did not use default scope
+        $auth = $authProperty->getValue($creds);
+        $this->assertEquals('a user scope', $auth->getScope());
+
+    }
+
+    /** @runInSeparateProcess */
+    public function testServiceAccountCredentials()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures');
+
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            null, // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            'a default scope' // $defaultScope
+        );
+
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\ServiceAccountCredentials',
+            $creds
+        );
+
+        $authProperty = (new ReflectionClass($creds))->getProperty('auth');
+        $authProperty->setAccessible(true);
+
+        // did not use default scope
+        $auth = $authProperty->getValue($creds);
+        $this->assertEquals('', $auth->getScope());
+
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            'a user scope', // $scope
+            null, // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            'a default scope' // $defaultScope
+        );
+
+        // used user scope
+        $auth = $authProperty->getValue($creds);
+        $this->assertEquals('a user scope', $auth->getScope());
+
     }
 }
 
