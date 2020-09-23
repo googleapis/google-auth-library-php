@@ -260,7 +260,6 @@ class ADCDefaultScopeTest extends TestCase
         $auth = $authProperty->getValue($creds);
         $this->assertEquals('onescope twoscope', $auth->getScope());
     }
-
 }
 
 class ADCGetMiddlewareTest extends TestCase
