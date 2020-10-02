@@ -1,3 +1,7 @@
+## 1.14.0 (10/02/2020)
+
+* [feat]: Add support for default scopes (#306)
+
 ## 1.13.0 (9/18/2020)
 
 * [feat]: Add service account identity support to GCECredentials (#304)
