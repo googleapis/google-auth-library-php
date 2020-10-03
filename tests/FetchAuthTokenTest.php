@@ -149,8 +149,12 @@ class FetchAuthTokenTest extends BaseTest
         $property = $class->getProperty('auth');
         $property->setAccessible(true);
 
+        $oauth2Mock = $this->getOAuth2Mock();
+        $oauth2Mock->getScope()
+            ->willReturn($this->scopes);
+
         $credentials = new ServiceAccountCredentials($this->scopes, $jsonPath);
-        $property->setValue($credentials, $this->getOAuth2Mock());
+        $property->setValue($credentials, $oauth2Mock->reveal());
 
         $this->assertGetLastReceivedToken($credentials);
     }
@@ -170,7 +174,7 @@ class FetchAuthTokenTest extends BaseTest
         $property->setAccessible(true);
 
         $credentials = new ServiceAccountJwtAccessCredentials($jsonPath);
-        $property->setValue($credentials, $this->getOAuth2Mock());
+        $property->setValue($credentials, $this->getOAuth2Mock()->reveal());
 
         $this->assertGetLastReceivedToken($credentials);
     }
@@ -190,7 +194,7 @@ class FetchAuthTokenTest extends BaseTest
         $property->setAccessible(true);
 
         $credentials = new UserRefreshCredentials($this->scopes, $jsonPath);
-        $property->setValue($credentials, $this->getOAuth2Mock());
+        $property->setValue($credentials, $this->getOAuth2Mock()->reveal());
 
         $this->assertGetLastReceivedToken($credentials);
     }
@@ -216,7 +220,7 @@ class FetchAuthTokenTest extends BaseTest
                 'expires_at' => strtotime('2001'),
             ]);
 
-        return $mock->reveal();
+        return $mock;
     }
 
     private function assertGetLastReceivedToken(FetchAuthTokenInterface $fetcher)

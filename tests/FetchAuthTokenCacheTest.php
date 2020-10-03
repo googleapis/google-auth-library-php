@@ -149,7 +149,7 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->mockFetcher->getCacheKey()
             ->shouldBeCalled()
             ->willReturn($cacheKey);
-        $this->mockFetcher->fetchAuthToken(null)
+        $this->mockFetcher->getLastReceivedToken()
             ->shouldBeCalled()
             ->willReturn($value);
         $this->mockCacheItem->set($value)
@@ -160,7 +160,8 @@ class FetchAuthTokenCacheTest extends BaseTest
             ->shouldBeCalledTimes(1);
         $this->mockFetcher->updateMetadata(Argument::type('array'), null, null)
             ->shouldBeCalled()
-            ->will(function ($args, $fetcher) {
+            ->will(function ($args, $fetcher) use ($token) {
+                $args[0]['authorization'] = ["Bearer $token"];
                 return $args[0];
             });
 
