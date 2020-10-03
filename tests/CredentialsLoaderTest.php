@@ -19,7 +19,6 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\CredentialsLoader;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
 
 class CredentialsLoaderTest extends TestCase
 {
