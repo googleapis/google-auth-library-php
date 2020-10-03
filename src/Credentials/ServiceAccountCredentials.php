@@ -185,7 +185,11 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getLastReceivedToken()
     {
-        return $this->lastReceivedToken ?: $this->auth->getLastReceivedToken();
+        // If self-signed JWTs are being used, fetch the last received token
+        // from memory. Else, fetch it from OAuth2
+        return is_null($this->auth->getScope())
+            ? $this->lastReceivedToken
+            : $this->auth->getLastReceivedToken();
     }
 
     /**
@@ -217,7 +221,6 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         // scope exists. use oauth implementation
         $scope = $this->auth->getScope();
         if (!is_null($scope)) {
-            $this->lastReceivedToken = null;
             return parent::updateMetadata($metadata, $authUri, $httpHandler);
         }
 
@@ -231,6 +234,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         $updatedMetadata = $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
 
         if ($lastReceivedToken = $jwtCreds->getLastReceivedToken()) {
+            // Keep self-signed JWTs in memory as the last received token
             $this->lastReceivedToken = $lastReceivedToken;
         }
 
