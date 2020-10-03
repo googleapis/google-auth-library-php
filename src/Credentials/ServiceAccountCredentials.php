@@ -84,6 +84,11 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     protected $projectId;
 
+    /*
+     * @var array|null
+     */
+    private $lastReceivedToken;
+
     /**
      * Create a new ServiceAccountCredentials.
      *
@@ -180,7 +185,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getLastReceivedToken()
     {
-        return $this->auth->getLastReceivedToken();
+        return $this->lastReceivedToken ?: $this->auth->getLastReceivedToken();
     }
 
     /**
@@ -212,6 +217,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         // scope exists. use oauth implementation
         $scope = $this->auth->getScope();
         if (!is_null($scope)) {
+            $this->lastReceivedToken = null;
             return parent::updateMetadata($metadata, $authUri, $httpHandler);
         }
 
@@ -222,7 +228,13 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         );
         $jwtCreds = new ServiceAccountJwtAccessCredentials($credJson);
 
-        return $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
+        $updatedMetadata = $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
+
+        if ($lastReceivedToken = $jwtCreds->getLastReceivedToken()) {
+            $this->lastReceivedToken = $lastReceivedToken;
+        }
+
+        return $updatedMetadata;
     }
 
     /**

@@ -133,6 +133,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
         }
 
         $access_token = $this->auth->toJwt();
+        $this->auth->setAccessToken($access_token);
 
         return array('access_token' => $access_token);
     }
