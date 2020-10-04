@@ -218,7 +218,7 @@ class FetchAuthTokenCache implements
         return $newMetadata;
     }
 
-    private function fetchAuthTokenFromCache()
+    private function fetchAuthTokenFromCache($authUri = null)
     {
         // Use the cached value if its available.
         //

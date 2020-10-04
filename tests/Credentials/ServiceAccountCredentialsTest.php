@@ -524,6 +524,14 @@ class SACJwtAccessTest extends TestCase
         );
     }
 
+    public function testGetLastReceivedToken()
+    {
+        $testJson = $this->createTestJson();
+        $sa = new ServiceAccountJwtAccessCredentials($testJson);
+        $token = $sa->fetchAuthToken();
+        $this->assertEquals($token, $sa->getLastReceivedToken());
+    }
+
     public function testUpdateMetadataFunc()
     {
         $testJson = $this->createTestJson();
@@ -684,6 +692,39 @@ class SACJwtAccessComboTest extends TestCase
             CredentialsLoader::AUTH_METADATA_KEY,
             $actual_metadata
         );
+    }
+
+    public function testUpdateMetadataJwtAccess()
+    {
+        $testJson = $this->createTestJson();
+        // no scope, jwt access should be used, no outbound
+        // call should be made
+        $scope = null;
+        $sa = new ServiceAccountCredentials(
+            $scope,
+            $testJson
+        );
+        $this->assertNotNull($sa);
+        $metadata = $sa->updateMetadata(
+            array('foo' => 'bar'),
+            'https://example.com/service'
+        );
+        $this->assertArrayHasKey(
+            CredentialsLoader::AUTH_METADATA_KEY,
+            $metadata
+        );
+
+        $authorization = $metadata[CredentialsLoader::AUTH_METADATA_KEY];
+        $this->assertInternalType('array', $authorization);
+
+        $bearerToken = current($authorization);
+        $this->assertInternalType('string', $bearerToken);
+        $this->assertEquals(0, strpos($bearerToken, 'Bearer '));
+        $token = str_replace('Bearer ', '', $bearerToken);
+
+        $lastReceivedToken = $sa->getLastReceivedToken();
+        $this->assertArrayHasKey('access_token', $lastReceivedToken);
+        $this->assertEquals($token, $lastReceivedToken['access_token']);
     }
 }
 

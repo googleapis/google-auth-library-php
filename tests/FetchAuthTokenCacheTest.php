@@ -17,7 +17,10 @@
 
 namespace Google\Auth\Tests;
 
+use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenCache;
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\Cache\MemoryCacheItemPool;
 use Prophecy\Argument;
 
 class FetchAuthTokenCacheTest extends BaseTest
@@ -176,6 +179,54 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals(["Bearer $token"], $headers['authorization']);
         $this->assertArrayHasKey('foo', $headers);
         $this->assertEquals('bar', $headers['foo']);
+    }
+
+    public function testUpdateMetadataWithJwtAccess()
+    {
+        $privateKey =  file_get_contents(__DIR__ . '/fixtures/private.pem');
+        $testJson = [
+            'private_key' => $privateKey,
+            'private_key_id' => 'key123',
+            'client_email' => 'test@example.com',
+            'client_id' => 'client123',
+            'type' => 'service_account',
+            'project_id' => 'example_project',
+        ];
+
+        $fetcher = new ServiceAccountCredentials(null, $testJson);
+        $cache = new MemoryCacheItemPool();
+
+        $cachedFetcher = new FetchAuthTokenCache(
+            $fetcher,
+            null,
+            $cache
+        );
+        $metadata = $cachedFetcher->updateMetadata([], 'http://test-auth-uri');
+        $this->assertArrayHasKey(
+            CredentialsLoader::AUTH_METADATA_KEY,
+            $metadata
+        );
+
+        $authorization = $metadata[CredentialsLoader::AUTH_METADATA_KEY];
+        $this->assertInternalType('array', $authorization);
+
+        $bearerToken = current($authorization);
+        $this->assertInternalType('string', $bearerToken);
+        $this->assertEquals(0, strpos($bearerToken, 'Bearer '));
+        $token = str_replace('Bearer ', '', $bearerToken);
+
+        $lastReceivedToken = $cachedFetcher->getLastReceivedToken();
+        $this->assertArrayHasKey('access_token', $lastReceivedToken);
+        $this->assertEquals($token, $lastReceivedToken['access_token']);
+
+        // Ensure token is cached
+        $metadata2 = $cachedFetcher->updateMetadata([], 'http://test-auth-uri');
+        $this->assertEquals($metadata, $metadata2);
+
+        // TODO: Make this work
+        // Ensure token for different URI is NOT cached
+        // $metadata3 = $cachedFetcher->updateMetadata([], 'http://test-auth-uri-2');
+        // $this->assertNotEquals($metadata, $metadata3);
     }
 
     /**
