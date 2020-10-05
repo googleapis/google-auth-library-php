@@ -236,7 +236,7 @@ abstract class CredentialsLoader implements
     ) {
         if (isset($metadata[self::AUTH_METADATA_KEY])) {
             // Auth metadata has already been set
-            return $metdadata;
+            return $metadata;
         }
         $result = $this->fetchAuthToken($httpHandler);
         if (!isset($result['access_token'])) {
