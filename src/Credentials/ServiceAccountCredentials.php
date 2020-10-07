@@ -87,7 +87,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     /*
      * @var array|null
      */
-    private $lastReceivedToken;
+    private $lastReceivedJwtAccessToken;
 
     /**
      * Create a new ServiceAccountCredentials.
@@ -187,8 +187,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     {
         // If self-signed JWTs are being used, fetch the last received token
         // from memory. Else, fetch it from OAuth2
-        return is_null($this->auth->getScope())
-            ? $this->lastReceivedToken
+        return $this->useSelfSignedJwt()
+            ? $this->lastReceivedJwtAccessToken
             : $this->auth->getLastReceivedToken();
     }
 
@@ -219,8 +219,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         callable $httpHandler = null
     ) {
         // scope exists. use oauth implementation
-        $scope = $this->auth->getScope();
-        if (!is_null($scope)) {
+        if (!$this->useSelfSignedJwt()) {
             return parent::updateMetadata($metadata, $authUri, $httpHandler);
         }
 
@@ -235,7 +234,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
         if ($lastReceivedToken = $jwtCreds->getLastReceivedToken()) {
             // Keep self-signed JWTs in memory as the last received token
-            $this->lastReceivedToken = $lastReceivedToken;
+            $this->lastReceivedJwtAccessToken = $lastReceivedToken;
         }
 
         return $updatedMetadata;
@@ -271,5 +270,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     public function getQuotaProject()
     {
         return $this->quotaProject;
+    }
+
+    private function useSelfSignedJwt()
+    {
+        return is_null($this->auth->getScope());
     }
 }

@@ -946,9 +946,9 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $o->verifyIdToken($this->publicKey, ['RS256']);
     }
 
-    *
+    /**
      * @expectedException DomainException
-
+     */
     public function testFailsIfAudienceIsWrong()
     {
         $now = time();
