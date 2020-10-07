@@ -1,3 +1,7 @@
+## 1.14.1 (10/05/2020)
+
+* [fix]: variable typo (#310)
+
 ## 1.14.0 (10/02/2020)
 
 * [feat]: Add support for default scopes (#306)
