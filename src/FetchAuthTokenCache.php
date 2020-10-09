@@ -193,7 +193,7 @@ class FetchAuthTokenCache implements
             );
         }
 
-        $cached = $this->fetchAuthTokenFromCache($httpHandler);
+        $cached = $this->fetchAuthTokenFromCache();
         if ($cached) {
             // Set the access token in the `Authentication` metadata header so
             // the downstream call to updateMetadata know they don't need to
@@ -218,7 +218,7 @@ class FetchAuthTokenCache implements
         return $newMetadata;
     }
 
-    private function fetchAuthTokenFromCache($authUri = null)
+    private function fetchAuthTokenFromCache()
     {
         // Use the cached value if its available.
         //
