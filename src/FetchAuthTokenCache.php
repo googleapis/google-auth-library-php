@@ -195,7 +195,7 @@ class FetchAuthTokenCache implements
 
         $cached = $this->fetchAuthTokenFromCache();
         if ($cached) {
-            // Set the access token in the `Authentication` metadata header so
+            // Set the access token in the `Authorization` metadata header so
             // the downstream call to updateMetadata know they don't need to
             // fetch another token.
             if (isset($cached['access_token'])) {
