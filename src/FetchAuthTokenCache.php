@@ -193,7 +193,7 @@ class FetchAuthTokenCache implements
             );
         }
 
-        $cached = $this->fetchAuthTokenFromCache();
+        $cached = $this->fetchAuthTokenFromCache($authUri);
         if ($cached) {
             // Set the access token in the `Authorization` metadata header so
             // the downstream call to updateMetadata know they don't need to
@@ -218,7 +218,7 @@ class FetchAuthTokenCache implements
         return $newMetadata;
     }
 
-    private function fetchAuthTokenFromCache()
+    private function fetchAuthTokenFromCache($authUri = null)
     {
         // Use the cached value if its available.
         //
@@ -226,7 +226,11 @@ class FetchAuthTokenCache implements
         // to the value returned with the auth token.
         //
         // TODO: correct caching; enable the cache to be cleared.
-        $cacheKey = $this->fetcher->getCacheKey();
+
+        $cacheKey = $authUri
+            ? $this->getFullCacheKey($authUri)
+            : $this->fetcher->getCacheKey();
+
         $cached = $this->getCachedValue($cacheKey);
         if (is_array($cached)) {
             if (empty($cached['expires_at'])) {
@@ -243,11 +247,15 @@ class FetchAuthTokenCache implements
         return null;
     }
 
-    private function saveAuthTokenInCache($authToken)
+    private function saveAuthTokenInCache($authToken, $authUri = null)
     {
         if (isset($authToken['access_token']) ||
             isset($authToken['id_token'])) {
-            $cacheKey = $this->fetcher->getCacheKey();
+
+            $cacheKey = $authUri
+                ? $this->getFullCacheKey($authUri)
+                : $this->fetcher->getCacheKey();
+
             $this->setCachedValue($cacheKey, $authToken);
         }
     }
