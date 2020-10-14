@@ -1,3 +1,7 @@
+## 1.14.2 (10/14/2020)
+
+* [fix]: Better FetchAuthTokenCache and getLastReceivedToken (#311)
+
 ## 1.14.1 (10/05/2020)
 
 * [fix]: variable typo (#310)
