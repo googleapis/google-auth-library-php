@@ -212,7 +212,7 @@ class FetchAuthTokenCache implements
         );
 
         if (!$cached && $token = $this->fetcher->getLastReceivedToken()) {
-            $this->saveAuthTokenInCache($token);
+            $this->saveAuthTokenInCache($token, $authUri);
         }
 
         return $newMetadata;
@@ -227,6 +227,7 @@ class FetchAuthTokenCache implements
         //
         // TODO: correct caching; enable the cache to be cleared.
 
+        // if $authUri is set, use it as the cache key
         $cacheKey = $authUri
             ? $this->getFullCacheKey($authUri)
             : $this->fetcher->getCacheKey();
@@ -251,7 +252,7 @@ class FetchAuthTokenCache implements
     {
         if (isset($authToken['access_token']) ||
             isset($authToken['id_token'])) {
-
+            // if $authUri is set, use it as the cache key
             $cacheKey = $authUri
                 ? $this->getFullCacheKey($authUri)
                 : $this->fetcher->getCacheKey();
