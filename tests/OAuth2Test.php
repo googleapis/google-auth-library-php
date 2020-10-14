@@ -823,6 +823,78 @@ class OAuth2FetchAuthTokenTest extends TestCase
         $this->assertEquals('an_id_token', $o->getIdToken());
         $this->assertEquals('a_refresh_token', $o->getRefreshToken());
     }
+
+    /**
+     * @dataProvider provideGetLastReceivedToken
+     */
+    public function testGetLastReceivedToken(
+        $updateToken,
+        $expectedToken = null
+    ) {
+        $testConfig = $this->fetchAuthTokenMinimal;
+        $o = new OAuth2($testConfig);
+        $o->updateToken($updateToken);
+        $this->assertEquals(
+            $expectedToken ?: $updateToken,
+            $o->getLastReceivedToken()
+        );
+    }
+
+    public function provideGetLastReceivedToken()
+    {
+        $time = time();
+        return [
+            [
+                ['access_token' => 'abc'],
+                ['access_token' => 'abc', 'expires_at' => null],
+            ],
+            [
+                ['access_token' => 'abc', 'invalid-field' => 'foo'],
+                ['access_token' => 'abc', 'expires_at' => null],
+            ],
+            [
+                ['access_token' => 'abc', 'expires_at' => 1234567890],
+                ['access_token' => 'abc', 'expires_at' => 1234567890],
+            ],
+            [
+                ['id_token' => 'def'],
+                ['id_token' => 'def', 'expires_at' => null],
+            ],
+            [
+                ['id_token' => 'def', 'expires_at' => 1234567890],
+                ['id_token' => 'def', 'expires_at' => 1234567890],
+            ],
+            [
+                [
+                    'access_token' => 'abc',
+                    'expires_in' => 3600,
+                    'issued_at' => $time
+                ],
+                [
+                    'access_token' => 'abc',
+                    'expires_at' => $time + 3600,
+                    'expires_in' => 3600,
+                    'issued_at' => $time
+                ],
+            ],
+            [
+                ['access_token' => 'abc', 'issued_at' => 1234567890],
+                [
+                    'access_token' => 'abc',
+                    'expires_at' => null,
+                    'issued_at' => 1234567890
+                ],
+            ],
+            [
+                ['access_token' => 'abc', 'refresh_token' => 'xyz'],
+                [
+                    'access_token' => 'abc',
+                    'expires_at' => null,
+                    'refresh_token' => 'xyz'
+                ],
+            ],
+        ];
+    }
 }
 
 class OAuth2VerifyIdTokenTest extends TestCase
