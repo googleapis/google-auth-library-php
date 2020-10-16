@@ -1,3 +1,7 @@
+## 1.14.3 (10/16/2020)
+
+ * [fix]: add expires_at to GCECredentials (#314)
+
 ## 1.14.2 (10/14/2020)
 
 * [fix]: Better FetchAuthTokenCache and getLastReceivedToken (#311)
