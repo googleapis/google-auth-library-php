@@ -385,9 +385,10 @@ class GCECredentials extends CredentialsLoader implements
             throw new \Exception('Invalid JSON response');
         }
 
+        $json['expires_at'] = time() + $json['expires_in'];
+
         // store this so we can retrieve it later
         $this->lastReceivedToken = $json;
-        $this->lastReceivedToken['expires_at'] = time() + $json['expires_in'];
 
         return $json;
     }
