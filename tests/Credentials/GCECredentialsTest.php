@@ -139,7 +139,12 @@ class GCECredentialsTest extends BaseTest
             buildResponse(200, [], Psr7\stream_for($jsonTokens)),
         ]);
         $g = new GCECredentials();
-        $this->assertEquals($wantedTokens, $g->fetchAuthToken($httpHandler));
+        $receivedToken = $g->fetchAuthToken($httpHandler);
+        $this->assertEquals(
+            $wantedTokens['access_token'],
+            $receivedToken['access_token']
+        );
+        $this->assertEquals(time() + 57, $receivedToken['expires_at']);
         $this->assertEquals(time() + 57, $g->getLastReceivedToken()['expires_at']);
     }
 
