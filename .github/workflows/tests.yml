@@ -15,6 +15,9 @@ jobs:
         name: PHP ${{matrix.php }} Unit Test
         steps:
             - uses: actions/checkout@v2
+            - if: ${{ matrix.php == '8.0.1' }}
+              name: Install Ubuntu deps
+              run: apt install libonig-dev -y
             - name: Setup PHP
               uses: nanasess/setup-php@v3.0.4
               with:
