@@ -16,7 +16,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Setup PHP
-              uses: nanasess/setup-php@v3.0.6
+              uses: shivammathur/setup-php@v2
               with:
                 php-version: ${{ matrix.php }}
             - if: ${{ matrix.php != '8.0' }}
@@ -47,7 +47,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Setup PHP
-              uses: nanasess/setup-php@v3.0.4
+              uses: shivammathur/setup-php@v2
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
@@ -68,7 +68,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Setup PHP
-              uses: nanasess/setup-php@v3.0.4
+              uses: shivammathur/setup-php@v2
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
@@ -130,7 +130,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Setup PHP
-              uses: nanasess/setup-php@v3.0.4
+              uses: shivammathur/setup-php@v2
               with:
                 php-version: "7.4"
             - name: Install Dependencies
