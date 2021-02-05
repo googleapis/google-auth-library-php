@@ -25,6 +25,11 @@ jobs:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer install
+            - if: ${{ matrix.php == '8.0' }}
+              name: Add PHPUnit shim
+              run: |
+                composer remove --dev phpunit/phpunit
+                composer require --dev irstea/phpunit-shim
             - name: Run Script
               run: vendor/bin/phpunit
     test_lowest:
