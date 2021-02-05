@@ -711,6 +711,9 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
         putenv('GAE_INSTANCE');
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testAppEngineStandard()
     {
         $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
@@ -720,6 +723,9 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
         );
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testAppEngineFlexible()
     {
         $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
@@ -733,6 +739,9 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
         );
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testAppEngineFlexibleIdToken()
     {
         $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
