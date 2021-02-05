@@ -11,7 +11,7 @@ jobs:
         strategy:
             matrix:
                 operating-system: [ ubuntu-latest ]
-                php: [ "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0.1" ]
+                php: [ "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
             - uses: actions/checkout@v2
@@ -19,7 +19,7 @@ jobs:
               name: Install Ubuntu deps
               run: sudo apt-get install libonig-dev
             - name: Setup PHP
-              uses: nanasess/setup-php@v3.0.4
+              uses: nanasess/setup-php@v3.0.6
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
