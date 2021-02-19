@@ -5,7 +5,7 @@
   <dt>Reference Docs</dt><dd><a href="https://googleapis.github.io/google-auth-library-php/main/">https://googleapis.github.io/google-auth-library-php/main/</a></dd>
   <dt>Authors</dt>
     <dd><a href="mailto:betterbrent@google.com">Brent Shaffer</a></dd>
-    <dd><a href="mailto:dsuppleee@google.com">David Supplee</a></dd>
+    <dd><a href="mailto:dsupplee@google.com">David Supplee</a></dd>
   <dt>Copyright</dt><dd>Copyright © 2020 Google LLC</dd>
   <dt>License</dt><dd>Apache 2.0</dd>
 </dl>
@@ -71,6 +71,7 @@ credentials file, the following code should output a list of your Drive files.
 
 ```php
 use Google\Auth\GoogleAuth;
+use Google\Auth\Http\CredentialsClient;
 use GuzzleHttp\Psr7\Request;
 
 // specify the path to your application credentials
@@ -80,10 +81,11 @@ putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
 
 // create the auth client
-$auth = new GoogleAuth();
+$googleAuth = new GoogleAuth();
 
 // authorize an http client
-$client = $auth->makeHttpClient(['scope' => $scope]);
+$credentials = $googleAuth->makeCredentials(['scope' => $scopes]);
+$client = new CredentialsClient($credentials);
 
 // make the request
 $request = new Request('GET', 'https://www.googleapis.com/drive/v2/files');
@@ -113,10 +115,13 @@ putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
 $targetAudience = 'YOUR_ID_TOKEN_AUDIENCE';
 
 // create the auth client
-$auth = new GoogleAuth();
+$googleAuth = new GoogleAuth();
 
 // authorize an http client
-$client = $auth->makeHttpClient(['targetAudience' => $targetAudience]);
+$credentials = $googleAuth->makeCredentials([
+    'targetAudience' => $targetAudience
+]);
+$client = new CredentialsClient($credentials);
 
 // make the request
 $request = new Request('GET', 'https://YOUR_PROTECTED_RESOURCE');
@@ -227,8 +232,8 @@ the `Google\Auth\AccessToken` class to verify the ID token:
 ```php
 use Google\Auth\GoogleAuth;
 
-$auth = new GoogleAuth();
-$auth->verify($idToken);
+$googleAuth = new GoogleAuth();
+$googleAuth->verify($idToken);
 ```
 
 If your app is running behind [Google Identity-Aware Proxy][iap-id-tokens]
@@ -241,7 +246,7 @@ use Google\Auth\GoogleAuth;
 
 $auth = new GoogleAuth();
 $auth->verify($idToken, [
-  'certsLocation' => GoogleAuth::IAP_CERT_URL
+  'certsLocation' => GoogleAuth::IAP_JWK_URL
 ]);
 ```
 

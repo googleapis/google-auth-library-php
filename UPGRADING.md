@@ -9,16 +9,14 @@ support for PHP 7.0 and below. The minimum supported PHP version is now PHP 7.1.
 Type hints and return types for functions and methods have been added wherever
 possible.
 
-### Improvements!
-
-#### PHP Language Features (7.1)
+### PHP Language Features (7.1)
 
 *   [Return types](https://wiki.php.net/rfc/return_types) for all functions
 *   [Scalar types](https://www.tutorialspoint.com/php7/php7_scalartype_declarations.htm) for scalar function arguments
 *   [Strict typing](https://www.php.net/manual/en/functions.arguments.php#functions.arguments.type-declaration.strict) via `declare(strict_types=1)`
 *   private constants
 
-#### Improved Caching
+### Improved Caching
 
 *   Implements caching in credentials in `CacheTrait` instead of using the
     `CredentialsCache` wrapper:
@@ -44,7 +42,7 @@ $credentials = $auth->makeCredentials([
         *   Automatic retry for token expiration API exception
 
 
-#### Improved HTTP handling
+### Improved HTTP handling
 
 *   Provides an abstraction from Guzzle HTTP Client
     *   Using the composer "[replace](https://stackoverflow.com/questions/18882201/how-does-the-replace-property-work-with-composer)" keyword, users can ignore sub-dependencies such as Guzzle in favor of a separate HTTP library
@@ -87,7 +85,7 @@ $googleAuth = new GoogleAuth(['httpClient' => $httpClient]);
 $googleAuth->verify($someJwt);
 ```
 
-#### Improved JWT handling
+### Improved JWT handling
 
 *   Provides an abstraction from `firebase/jwt` via `JwtClientInterface`
 *   Removed dependencies on `phpseclib/phpseclib`, and `kelvinmo/simplejwt`
@@ -129,7 +127,7 @@ $googleAuth = new GoogleAuth(['jwtClient' => $jwt]);
 $googleAuth->verify($someJwt);
 ```
 
-#### New `GoogleAuth` class
+### New `GoogleAuth` class
 
 `GoogleAuth` replaces `ApplicationDefaultCredentials`, and provides a
 centralized, single entrypoint to the auth library. It has the following
@@ -200,7 +198,7 @@ if ($auth->onCompute()) {
 // GCECredentials::onGce($httpHandler = null);
 ```
 
-#### New `CredentialsInterface` and `CredentialsTrait` to replace `CredentialsLoader`
+### New `CredentialsInterface` and `CredentialsTrait` to replace `CredentialsLoader`
 
 *   Uses options array instead of list of arguments in method signature
 *   Renames `updateMetadata` to `getRequestMetadata`
@@ -230,7 +228,7 @@ interface CredentialsInterface
 }
 ```
 
-#### Improved ID Token auth
+### Improved ID Token auth
 
 *   The `AccessToken` class has been combined with `OAuth2` and `GoogleAuth`
     *   `verify` and cert fetching functions are in `GoogleAuth`
@@ -250,23 +248,21 @@ $googleAuth->verify($idToken);
 
 ```php
 use Google\Auth\GoogleAuth;
+use Google\Auth\Http\CredentialsClient;
 use Psr\Http\Message\Request;
 
 // create auth client
 $cloudRunUrl = 'https://cloud-run-url';
-$googleAuth = new GoogleAuth([
-    'targetAudience' => $cloudRunUrl,
-]);
+$googleAuth = new GoogleAuth();
 
 // create an authorized HTTP client and send a request
 // @throws InvalidArgumentException if credentials do not support ID Token auth
-$authHttp = new Google\Auth\Http\CredentialsClient(
-  $googleAuth->makeCredentials()
-);
-$response = $authHttp->send(new Psr\Http\Message\Request('GET', $cloudRunUrl));
+$credentials = $googleAuth->makeCredentials(['targetAudience' => $cloudRunUrl]);
+$client = new CredentialsClient($credentials);
+$response = $client->send(new Psr\Http\Message\Request('GET', $cloudRunUrl));
 ```
 
-#### SignBlob Implementation
+### SignBlob Implementation
 
 *   New `SignBlobInterface`
 *   Falls back to calling [Service Account Credentials](https://cloud.google.com/iam/docs/reference/credentials/rest) API if `openssl` isn't installed.
@@ -274,7 +270,7 @@ $response = $authHttp->send(new Psr\Http\Message\Request('GET', $cloudRunUrl));
 *   `IAM` class has been moved into a trait and renamed `ServiceAccountApiSignBlobTrait`
 *   `PrivateKeySignBlobTrait` and `ServiceAccountApiSignBlobTrait` are marked `@internal`
 
-#### Improved 3LO Support
+### Improved 3LO Support
 
 *   Ensures refresh token is used when access token is expired
 *   Adds `OAuth2Credentials` class for wrapping the OAuth2 service
@@ -348,7 +344,7 @@ Consistent with <a href="https://github.com/googleapis/google-auth-library-nodej
   <tr>
    <td><code>IAM</code>
 <p>
-   => <code>SignBlob\IamCredentialsSignBlobTrait</code>
+   => <code>SignBlob\ServiceAccountApiSignBlobTrait</code>
    </td>
    <td>More explicit name, "<code>IAM</code>" is too generic.
 <p>
@@ -405,8 +401,6 @@ Organized into subdirectory.
    => <code>SignBlob\SignBlobInterface</code>
    </td>
    <td>Organized into subdirectory.
-<p>
-Consistency with SignBlob traits.
    </td>
   </tr>
 </table>
@@ -437,7 +431,7 @@ into <code>Credentials\CredentialsTrait</code>
    </td>
    <td><strong>refactored</strong>
 <p>
-into <code>GoogleAuth</code> (<code>makeCredentials</code> method) and <code>Credentials\CredentialsTrait</code> (<code>getRequestMetadata</code> method). <code>fromEnv</code> and <code>fromWellKnownFile</code> have been removed.
+into <code>GoogleAuth</code> (<code>makeCredentials</code> method) and <code>Credentials\CredentialsTrait</code> (<code>getRequestMetadata</code> method). <code>fromEnv</code> and <code>fromWellKnownFile</code> have been made private.
 <p>
 See <a href="#method-removals">Method Removals</a>
    </td>
@@ -481,7 +475,7 @@ The <strong>php55</strong> runtime is no longer supported
    </td>
    <td><strong>not needed</strong>
 <p>
-This class does not seem useful
+This class was never used.
 <p>
    </td>
   </tr>
@@ -508,7 +502,7 @@ See <a href="https://docs.google.com/document/d/1In1uKSqvrHe5M-KX-sgmuGRC9oWLrqe
    </td>
    <td><strong>not needed</strong>
 <p>
-This class does not seem useful
+This class is no longer necessary.
 <p>
    </td>
   </tr>
@@ -525,7 +519,7 @@ See <code>Http\CredentialsClient</code>
    </td>
    <td><strong>not needed</strong>
 <p>
-This class does not seem useful
+This class does not seem useful, and has replaced by <code>OAuth2Credentials</code>
 <p>
    </td>
   </tr>
@@ -565,7 +559,7 @@ Guzzle 5 is no longer supported
 
 
 
-#### Method Removals
+#### Method Removals and Renames
 
 
 <table>
@@ -634,9 +628,10 @@ A wrapper method to just create the class is not very useful.
 <p>
 <code>:: fromEnv</code>
    </td>
-   <td><strong>renamed/refactored</strong>
+   <td><strong>made private</strong>
 <p>
-This happens implicitly when calling <code>GoogleAuth::makeCredentials</code>
+This is called internally by <code>GoogleAuth::makeCredentials</code>, and can
+be made public again if requested.
    </td>
   </tr>
   <tr>
@@ -644,9 +639,10 @@ This happens implicitly when calling <code>GoogleAuth::makeCredentials</code>
 <p>
 <code>:: fromWellKnownFile</code>
    </td>
-   <td><strong>renamed/refactored</strong>
+   <td><strong>made private</strong>
 <p>
-This happens implicitly when calling <code>GoogleAuth::makeCredentials</code>
+This is called internally by <code>GoogleAuth::makeCredentials</code>, and can
+be made public again if requested.
    </td>
   </tr>
   <tr>
