@@ -36,11 +36,39 @@ class OAuth2Credentials implements CredentialsInterface
      */
     private $oauth2;
 
+    /**
+     * @param OAuth2 $oauth2
+     * @param array  $options
+     */
     public function __construct(OAuth2 $oauth2, array $options = [])
     {
         $this->setCacheFromOptions($options);
 
         $this->oauth2 = $oauth2;
+    }
+
+    /**
+     * Get the project ID.
+     *
+     * @return null|string
+     */
+    public function getProjectId(): ?string
+    {
+        throw new LogicException(
+            'getProjectId is not implemented for OAuth2 credentials'
+        );
+    }
+
+    /**
+     * Get the quota project used for this API request.
+     *
+     * @return null|string
+     */
+    public function getQuotaProject(): ?string
+    {
+        throw new LogicException(
+            'getQuotaProject is not implemented for OAuth2 credentials'
+        );
     }
 
     /**
@@ -54,35 +82,11 @@ class OAuth2Credentials implements CredentialsInterface
     }
 
     /**
-     * Get the project ID.
-     *
-     * @return string|null
-     */
-    public function getProjectId(): ?string
-    {
-        throw new LogicException(
-            'getProjectId is not implemented for OAuth2 credentials'
-        );
-    }
-
-    /**
-     * Get the quota project used for this API request
-     *
-     * @return string|null
-     */
-    public function getQuotaProject(): ?string
-    {
-        throw new LogicException(
-            'getQuotaProject is not implemented for OAuth2 credentials'
-        );
-    }
-
-    /**
      * Obtains a key that can used to cache the results of #fetchAuthToken.
      *
      * The key is derived from the scopes.
      *
-     * @return string a key that may be used to cache the auth token.
+     * @return string a key that may be used to cache the auth token
      */
     private function getCacheKey(): string
     {

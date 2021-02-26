@@ -17,10 +17,18 @@
 
 declare(strict_types=1);
 
-namespace Google\Auth\Jwt;
+namespace Google\Jwt;
 
-interface JwtClientInterface
+interface ClientInterface
 {
+    /**
+     * @param array       $payload
+     * @param string      $signingKey
+     * @param string      $signingAlg
+     * @param null|string $keyId
+     *
+     * @return array
+     */
     public function encode(
         array $payload,
         string $signingKey,
@@ -28,7 +36,29 @@ interface JwtClientInterface
         ?string $keyId
     ): string;
 
+    /**
+     * @param string $jwt
+     * @param array  $keys
+     * @param array  $allowedAlgs
+     *
+     * @return array
+     */
     public function decode(string $jwt, array $keys, array $allowedAlgs): array;
 
+    /**
+     * @param array $keySey
+     *
+     * @return array
+     */
     public function parseKeySet(array $keySey): array;
+
+    /**
+     * Get the expiration in the JWT payload without verification. This should
+     * only be used if the source of the JWT is trusted.
+     *
+     * @param string $jwt
+     *
+     * @return null|string
+     */
+    public function getExpirationWithoutVerification(string $jwt): ?int;
 }

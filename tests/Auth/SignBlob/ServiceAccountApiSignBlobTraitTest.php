@@ -25,6 +25,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @group iam
+ *
+ * @internal
+ * @coversNothing
  */
 class ServiceAccountApiSignBlobTraitTest extends TestCase
 {
@@ -59,10 +62,8 @@ class ServiceAccountApiSignBlobTraitTest extends TestCase
         }
 
         $httpClient = httpClientFromCallable(function (Psr7\Request $request) use (
-            $expectedEmail,
             $expectedAccessToken,
             $expectedString,
-            $expectedServiceAccount,
             $expectedUri,
             $expectedResponse,
             $expectedDelegates
@@ -71,7 +72,7 @@ class ServiceAccountApiSignBlobTraitTest extends TestCase
             $this->assertEquals('Bearer ' . $expectedAccessToken, $request->getHeaderLine('Authorization'));
             $this->assertEquals([
                 'delegates' => $expectedDelegates,
-                'payload' => base64_encode($expectedString)
+                'payload' => base64_encode($expectedString),
             ], json_decode((string) $request->getBody(), true));
 
             return new Psr7\Response(200, [], Utils::streamFor(json_encode([
@@ -98,8 +99,8 @@ class ServiceAccountApiSignBlobTraitTest extends TestCase
             [
                 [
                     'foo@bar.com',
-                    'bar@bar.com'
-                ]
+                    'bar@bar.com',
+                ],
             ],
         ];
     }

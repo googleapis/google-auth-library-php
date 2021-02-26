@@ -32,7 +32,7 @@ class AnonymousCredentials implements CredentialsInterface
      * @var array
      */
     private $token = [
-        'access_token' => ''
+        'access_token' => '',
     ];
 
     /**
@@ -44,10 +44,11 @@ class AnonymousCredentials implements CredentialsInterface
     {
         return $this->token;
     }
+
     /**
      * Get the project ID.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getProjectId(): ?string
     {
@@ -55,9 +56,9 @@ class AnonymousCredentials implements CredentialsInterface
     }
 
     /**
-     * Get the quota project used for this API request
+     * Get the quota project used for this API request.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getQuotaProject(): ?string
     {

@@ -19,8 +19,6 @@ declare(strict_types=1);
 
 namespace Google\Auth\SignBlob;
 
-use Google\Auth\OAuth2;
-
 /**
  * Sign a string using a Service Account private key.
  *
@@ -33,8 +31,10 @@ trait PrivateKeySignBlobTrait
      *
      * @param string $stringToSign
      * @param string $privateKey
-     * @return string
+     *
      * @throws \RuntimeException
+     *
+     * @return string
      */
     private function signBlobWithPrivateKey(
         string $stringToSign,

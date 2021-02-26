@@ -17,12 +17,13 @@
 
 declare(strict_types=1);
 
-namespace Google\Auth\Jwt;
+namespace Google\Jwt\Client;
 
-use Firebase\JWT\JWT;
 use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
+use Google\Jwt\ClientInterface;
 
-class FirebaseJwtClient implements JwtClientInterface
+class FirebaseClient implements ClientInterface
 {
     private $jwt;
     private $jwk;
@@ -50,5 +51,29 @@ class FirebaseJwtClient implements JwtClientInterface
     public function parseKeySet(array $keySet): array
     {
         return $this->jwk->parseKeySet($keySet);
+    }
+
+    public function getExpirationWithoutVerification(string $jwt): ?int
+    {
+        $parts = \explode('.', $jwt);
+        if (3 != \count($parts)) {
+            throw new \InvalidArgumentException('Wrong number of segments');
+        }
+
+        list($headerB64, $payload, $signature) = $parts;
+
+        $header = $this->jwt->jsonDecode(
+            $this->jwt->urlsafeB64Decode($headerB64)
+        );
+
+        if (empty($header['exp'])) {
+            return null;
+        }
+
+        if (!is_numeric($header['exp'])) {
+            throw new \UnexpectedValueException('Expiration is not numeric');
+        }
+
+        return intval($header['exp']);
     }
 }

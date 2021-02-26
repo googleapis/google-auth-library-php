@@ -5,6 +5,7 @@ composer.lock
 .docs
 .gitmodules
 .phpunit.result.cache
+.php_cs.cache
 
 # IntelliJ
 .idea

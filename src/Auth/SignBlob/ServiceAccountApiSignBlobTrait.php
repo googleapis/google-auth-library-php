@@ -27,6 +27,7 @@ use GuzzleHttp\Psr7\Utils;
  * Tools for using the IAM API.
  *
  * @see https://cloud.google.com/iam/docs IAM Documentation
+ *
  * @internal
  */
 trait ServiceAccountApiSignBlobTrait
@@ -38,13 +39,14 @@ trait ServiceAccountApiSignBlobTrait
      * `iam.serviceAccounts.signBlob` permission, part of the "Service Account
      * Token Creator" IAM role.
      *
-     * @param string $stringToSign The string to be signed.
-     * @param string $email The service account email.
-     * @param string $accessToken An access token from the service account.
-     * @param array $delegates [optional] A list of service account emails to
-     *        add to the delegate chain. If omitted, the value of `$email` will
-     *        be used.
-     * @return string The signed string, base64-encoded.
+     * @param string $stringToSign the string to be signed
+     * @param string $email        the service account email
+     * @param string $accessToken  an access token from the service account
+     * @param array  $delegates    [optional] A list of service account emails to
+     *                             add to the delegate chain. If omitted, the value of `$email` will
+     *                             be used.
+     *
+     * @return string the signed string, base64-encoded
      */
     private function signBlobWithServiceAccountApi(
         string $stringToSign,
@@ -73,7 +75,7 @@ trait ServiceAccountApiSignBlobTrait
         ];
 
         $headers = [
-            'Authorization' => 'Bearer ' . $accessToken
+            'Authorization' => 'Bearer ' . $accessToken,
         ];
 
         $request = new Psr7\Request(

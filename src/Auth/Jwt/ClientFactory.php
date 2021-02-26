@@ -17,31 +17,22 @@
 
 declare(strict_types=1);
 
-namespace Google\Auth\Http;
+namespace Google\Auth\Jwt;
 
-use Google\Http\Client\GuzzleClient;
-use Google\Http\ClientInterface;
-use GuzzleHttp\Client;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
+use Google\Jwt\Client\FirebaseClient;
+use Google\Jwt\ClientInterface;
 
 class ClientFactory
 {
     /**
      * Builds out a default http client.
      *
-     * @param mixed $httpClient
-     *
      * @return ClientInterface
      */
-    public static function build($httpClient = null): ClientInterface
+    public static function build(): ClientInterface
     {
-        if ($httpClient) {
-            if (!$httpClient instanceof Client) {
-                throw new \Exception('Unrecognized httpClient argument');
-            }
-        } else {
-            $httpClient = new Client();
-        }
-
-        return new GuzzleClient($httpClient);
+        return new FirebaseClient(new JWT(), new JWK());
     }
 }

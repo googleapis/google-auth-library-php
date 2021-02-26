@@ -40,8 +40,8 @@ class GuzzlePromise implements PromiseInterface
      * Appends fulfillment and rejection handlers to the promise, and returns
      * a new promise resolving to the return value of the called handler.
      *
-     * @param callable $onFulfilled Invoked when the promise fulfills.
-     * @param callable $onRejected  Invoked when the promise is rejected.
+     * @param callable $onFulfilled invoked when the promise fulfills
+     * @param callable $onRejected  invoked when the promise is rejected
      *
      * @return PromiseInterface
      */
@@ -58,7 +58,7 @@ class GuzzlePromise implements PromiseInterface
      * or to its original fulfillment value if the promise is instead
      * fulfilled.
      *
-     * @param callable $onRejected Invoked when the promise is rejected.
+     * @param callable $onRejected invoked when the promise is rejected
      *
      * @return PromiseInterface
      */
@@ -84,7 +84,8 @@ class GuzzlePromise implements PromiseInterface
      * Resolve the promise with the given value.
      *
      * @param mixed $value
-     * @throws \RuntimeException if the promise is already resolved.
+     *
+     * @throws \RuntimeException if the promise is already resolved
      */
     public function resolve($value)
     {
@@ -95,7 +96,8 @@ class GuzzlePromise implements PromiseInterface
      * Reject the promise with the given reason.
      *
      * @param mixed $reason
-     * @throws \RuntimeException if the promise is already resolved.
+     *
+     * @throws \RuntimeException if the promise is already resolved
      */
     public function reject($reason)
     {
@@ -105,7 +107,7 @@ class GuzzlePromise implements PromiseInterface
     /**
      * Cancels the promise if possible.
      *
-     * @link https://github.com/promises-aplus/cancellation-spec/issues/7
+     * @see https://github.com/promises-aplus/cancellation-spec/issues/7
      */
     public function cancel()
     {
@@ -122,9 +124,10 @@ class GuzzlePromise implements PromiseInterface
      *
      * @param bool $unwrap
      *
-     * @return mixed
      * @throws \LogicException if the promise has no wait function or if the
-     *                         promise does not settle after waiting.
+     *                         promise does not settle after waiting
+     *
+     * @return mixed
      */
     public function wait(bool $unwrap = true)
     {

@@ -54,7 +54,7 @@ trait CredentialsTrait
     private $cachePrefix = '';
 
     /**
-     * Returns request headers containing the authorization token
+     * Returns request headers containing the authorization token.
      *
      * @param string $authUri The optional uri being authorized
      *
@@ -76,6 +76,8 @@ trait CredentialsTrait
      * Fetches the auth tokens and caches it based on the default cache
      * configuration.
      *
+     * @throws \Exception
+     *
      * @return array The auth token
      *
      * Access tokens have the following keys:
@@ -84,8 +86,6 @@ trait CredentialsTrait
      *   - token_type (string)
      * ID tokens have the following keys:
      *   - id_token (string)
-     *
-     * @throws \Exception
      */
     public function fetchAuthToken(): array
     {
@@ -244,6 +244,8 @@ trait CredentialsTrait
 
     /**
      * Parses the JSON key file and sets the quota project if applicable.
+     *
+     * @param mixed $jsonKey
      */
     private function parseJsonKey($jsonKey): array
     {

@@ -18,98 +18,19 @@
 namespace Google\Auth\Credentials\Tests;
 
 use Google\Auth\Credentials\ComputeCredentials;
-use Google\Auth\HttpHandler\HttpClientCache;
+use Google\Jwt\ClientInterface;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
 
 /**
  * @group credentials
  * @group credentials-compute
+ *
+ * @internal
+ * @coversNothing
  */
 class ComputeCredentialsTest extends TestCase
 {
-    public function testOnComputeMetadataFlavorHeader()
-    {
-        $hasHeader = false;
-        $httpClient = httpClientFromCallable(
-            function ($request) use (&$hasHeader) {
-                $hasHeader = $request->getHeaderLine('Metadata-Flavor') === 'Google';
-
-                return new Response(200, ['Metadata-Flavor' => 'Google']);
-            }
-        );
-
-        $onCompute = ComputeCredentials::onCompute($httpClient);
-        $this->assertTrue($hasHeader);
-        $this->assertTrue($onCompute);
-    }
-
-    public function testOnComputeIsFalseOnClientErrorStatus()
-    {
-        // simulate retry attempts by returning multiple 400s
-        $httpClient = httpClientWithResponses([
-            new Response(400),
-            new Response(400),
-            new Response(400)
-        ]);
-        $this->assertFalse(ComputeCredentials::onCompute($httpClient));
-    }
-
-    public function testOnComputeIsFalseOnServerErrorStatus()
-    {
-        // simulate retry attempts by returning multiple 500s
-        $httpClient = httpClientWithResponses([
-            new Response(500),
-            new Response(500),
-            new Response(500)
-        ]);
-        $this->assertFalse(ComputeCredentials::onCompute($httpClient));
-    }
-
-    public function testOnComputeIsFalseOnOkStatusWithoutExpectedHeader()
-    {
-        $httpClient = httpClientWithResponses([
-            new Response(200),
-        ]);
-        $this->assertFalse(ComputeCredentials::onCompute($httpClient));
-    }
-
-    public function testOnComputeIsOkIfGoogleIsTheFlavor()
-    {
-        $httpClient = httpClientWithResponses([
-            new Response(200, ['Metadata-Flavor' => 'Google']),
-        ]);
-        $this->assertTrue(ComputeCredentials::onCompute($httpClient));
-    }
-
-    /**
-     * @runInSeparateProcess
-     */
-    public function testOnAppEngineFlexIsFalseWhenGaeInstanceIsEmpty()
-    {
-        putenv('GAE_INSTANCE=');
-        $this->assertFalse(ComputeCredentials::onAppEngineFlexible());
-    }
-
-    /**
-     * @runInSeparateProcess
-     */
-    public function testOnAppEngineFlexIsFalseWhenGaeInstanceIsNotAef()
-    {
-        putenv('GAE_INSTANCE=not-aef-20180313t154438');
-        $this->assertFalse(ComputeCredentials::onAppEngineFlexible());
-    }
-
-    /**
-     * @runInSeparateProcess
-     */
-    public function testOnAppEngineFlexIsTrueWhenGaeInstanceHasAefPrefix()
-    {
-        putenv('GAE_INSTANCE=aef-default-20180313t154438');
-        $this->assertTrue(ComputeCredentials::onAppEngineFlexible());
-    }
-
     public function testFetchAuthTokenThrowsExceptionIfNotOnCompute()
     {
         $this->expectException('GuzzleHttp\Exception\ServerException');
@@ -117,7 +38,7 @@ class ComputeCredentialsTest extends TestCase
         // simulate retry attempts by returning multiple 500s
         $httpClient = httpClientWithResponses([new Response(500)]);
         $compute = new ComputeCredentials(['httpClient' => $httpClient]);
-        $this->assertEquals(array(), $compute->fetchAuthToken());
+        $this->assertEquals([], $compute->fetchAuthToken());
     }
 
     public function testFetchAuthTokenShouldFailIfResponseIsNotJson()
@@ -152,9 +73,9 @@ class ComputeCredentialsTest extends TestCase
 
     public function testFetchAuthTokenShouldBeIdTokenWhenTargetAudienceIsSet()
     {
-        $expectedToken = ['id_token' => 'idtoken12345'];
+        $expected = 'idtoken12345';
         $httpClient = httpClientFromCallable(
-            function ($request) use ($expectedToken) {
+            function ($request) use ($expected) {
                 $this->assertEquals(
                     '/computeMetadata/v1/instance/service-accounts/default/identity',
                     $request->getUri()->getPath()
@@ -163,14 +84,25 @@ class ComputeCredentialsTest extends TestCase
                     'audience=a-target-audience',
                     $request->getUri()->getQuery()
                 );
-                return new Response(200, [], $expectedToken['id_token']);
+
+                return new Response(200, [], $expected);
             }
         );
+
+        $jwtClient = $this->prophesize(ClientInterface::class);
+        $jwtClient->getExpirationWithoutVerification($expected)
+            ->willReturn(12345)
+        ;
+
         $compute = new ComputeCredentials([
             'httpClient' => $httpClient,
-            'targetAudience' => 'a-target-audience'
+            'jwtClient' => $jwtClient->reveal(),
+            'targetAudience' => 'a-target-audience',
         ]);
-        $this->assertEquals($expectedToken, $compute->fetchAuthToken());
+        $this->assertEquals([
+            'id_token' => $expected,
+            'expires_at' => 12345,
+        ], $compute->fetchAuthToken());
     }
 
     public function testSettingBothScopeAndTargetAudienceThrowsException()
@@ -185,6 +117,9 @@ class ComputeCredentialsTest extends TestCase
 
     /**
      * @dataProvider scopes
+     *
+     * @param mixed $scope
+     * @param mixed $expected
      */
     public function testFetchAuthTokenCustomScope($scope, $expected)
     {
@@ -213,7 +148,7 @@ class ComputeCredentialsTest extends TestCase
             ['foobar', 'foobar'],
             [['foobar'], 'foobar'],
             ['hello world', 'hello,world'],
-            [['hello', 'world'], 'hello,world']
+            [['hello', 'world'], 'hello,world'],
         ];
     }
 
@@ -223,7 +158,7 @@ class ComputeCredentialsTest extends TestCase
 
         $httpClient = httpClientWithResponses([
             new Response(200, [], $expected),
-            new Response(200, [], 'notexpected')
+            new Response(200, [], 'notexpected'),
         ]);
 
         $compute = new ComputeCredentials(['httpClient' => $httpClient]);
@@ -258,7 +193,7 @@ class ComputeCredentialsTest extends TestCase
         $httpClient = httpClientWithResponses([
             new Response(200, [], json_encode($token)),
             new Response(200, [], $expectedEmail),
-            new Response(200, [], json_encode(['signedBlob' => $expectedSignature]))
+            new Response(200, [], json_encode(['signedBlob' => $expectedSignature])),
         ]);
 
         $compute = new ComputeCredentials([
@@ -283,7 +218,7 @@ class ComputeCredentialsTest extends TestCase
         $httpClient = httpClientWithResponses([
             new Response(200, [], json_encode($token1)),
             new Response(200, [], $expectedEmail),
-            new Response(200, [], json_encode(['signedBlob' => $expectedSignature]))
+            new Response(200, [], json_encode(['signedBlob' => $expectedSignature])),
         ]);
 
         $compute = new ComputeCredentials([
@@ -302,7 +237,7 @@ class ComputeCredentialsTest extends TestCase
 
         $httpClient = httpClientWithResponses([
             new Response(200, [], $expected),
-            new Response(200, [], 'notexpected')
+            new Response(200, [], 'notexpected'),
         ]);
 
         $compute = new ComputeCredentials([
@@ -339,6 +274,7 @@ class ComputeCredentialsTest extends TestCase
                     '/computeMetadata/v1/instance/service-accounts/foo/token',
                     $request->getUri()->getPath()
                 );
+
                 return new Response(200, [], json_encode($expectedToken));
             }
         );
@@ -362,6 +298,7 @@ class ComputeCredentialsTest extends TestCase
                 $request->getUri()->getPath()
             );
             $this->assertEquals('', $request->getUri()->getQuery());
+
             return new Response(200, [], json_encode($expected));
         });
 
@@ -387,15 +324,26 @@ class ComputeCredentialsTest extends TestCase
                 'audience=a-target-audience',
                 $request->getUri()->getQuery()
             );
+
             return new Response(200, [], $expected);
         });
+
+        $jwtClient = $this->prophesize(ClientInterface::class);
+        $jwtClient->getExpirationWithoutVerification($expected)
+            ->willReturn(12345)
+        ;
+
         $compute = new ComputeCredentials([
             'httpClient' => $httpClient,
             'targetAudience' => 'a-target-audience',
             'serviceAccountIdentity' => 'foo',
+            'jwtClient' => $jwtClient->reveal(),
         ]);
         $this->assertEquals(
-            ['id_token' => $expected],
+            [
+                'id_token' => $expected,
+                'expires_at' => 12345,
+            ],
             $compute->fetchAuthToken()
         );
     }
@@ -408,6 +356,7 @@ class ComputeCredentialsTest extends TestCase
                 '/computeMetadata/v1/instance/service-accounts/foo/email',
                 $request->getUri()->getPath()
             );
+
             return new Response(200, [], $expected);
         });
         $compute = new ComputeCredentials([

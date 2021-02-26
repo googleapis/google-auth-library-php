@@ -27,9 +27,20 @@ use Psr\Http\Message\ResponseInterface;
 
 class ApiKeyClient implements ClientInterface
 {
-    private $httpClient;
+    /**
+     * @var string
+     */
     private $apiKey;
 
+    /**
+     * @var \Google\Http\ClientInterface
+     */
+    private $httpClient;
+
+    /**
+     * @param string          $apiKey
+     * @param ClientInterface $httpClient
+     */
     public function __construct(
         string $apiKey,
         ClientInterface $httpClient = null
@@ -38,6 +49,15 @@ class ApiKeyClient implements ClientInterface
         $this->httpClient = $httpClient ?: ClientFactory::build();
     }
 
+    /**
+     * Accepts a PSR-7 request and an array of options and returns a PSR-7
+     * response.
+     *
+     * @param \Psr\Http\Message\RequestInterface $request
+     * @param array                              $options [optional]
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
     public function send(
         RequestInterface $request,
         array $options = []
@@ -48,6 +68,15 @@ class ApiKeyClient implements ClientInterface
         );
     }
 
+    /**
+     * Accepts a PSR-7 request and an array of options and returns a
+     * PromiseInterface.
+     *
+     * @param \Psr\Http\Message\RequestInterface $request
+     * @param array                              $options [optional]
+     *
+     * @return \Google\Http\Promise\PromiseInterface
+     */
     public function sendAsync(
         RequestInterface $request,
         array $options = []
@@ -63,6 +92,7 @@ class ApiKeyClient implements ClientInterface
         $query = Psr7\parse_query($request->getUri()->getQuery());
         $query['key'] = $this->apiKey;
         $uri = $request->getUri()->withQuery(Psr7\build_query($query));
+
         return $request->withUri($uri);
     }
 }

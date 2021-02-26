@@ -20,6 +20,10 @@ namespace Google\Auth\SignBlob\Tests;
 use Google\Auth\SignBlob\PrivateKeySignBlobTrait;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class PrivateKeySignBlobTraitTest extends TestCase
 {
     private const STRING_TO_SIGN = 'hello world';
@@ -27,7 +31,7 @@ class PrivateKeySignBlobTraitTest extends TestCase
     private $signedString = [
         'ZPeNGA9xcqwMQ7OEfNdLuwgxO+rJ59mhetIZrqWncY0uv+IZN0',
         'T4F3mg2sJVRD3awswFFdfMK20Xrnqo0dr8XdlgOkS5NIG38yrDagXsBf1ypAfji1sm22',
-        'UCyxkaPdB6eRczMXwJReu6q4LCJmx/Xr46kU/ZDNhrBkj6vjoD8yo='
+        'UCyxkaPdB6eRczMXwJReu6q4LCJmx/Xr46kU/ZDNhrBkj6vjoD8yo=',
     ];
 
     public function testSignBlob()

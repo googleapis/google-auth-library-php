@@ -140,14 +140,16 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      * Determines if the provided key is valid.
      *
      * @param string $key
-     * @return bool
+     *
      * @throws InvalidArgumentException
+     *
+     * @return bool
      */
     private function isValidKey($key)
     {
         $invalidCharacters = '{}()/\\\\@:';
 
-        if (!is_string($key) || preg_match("#[$invalidCharacters]#", $key)) {
+        if (!is_string($key) || preg_match("#[{$invalidCharacters}]#", $key)) {
             throw new InvalidArgumentException('The provided key is not valid: ' . var_export($key, true));
         }
 

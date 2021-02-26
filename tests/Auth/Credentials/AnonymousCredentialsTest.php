@@ -22,6 +22,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @group credentials
+ *
+ * @internal
+ * @coversNothing
  */
 class AnonymousCredentialsTest extends TestCase
 {

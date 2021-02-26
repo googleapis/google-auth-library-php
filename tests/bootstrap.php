@@ -16,11 +16,12 @@
  */
 
 error_reporting(E_ALL | E_STRICT);
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 date_default_timezone_set('UTC');
 
-use Google\Http\PromiseInterface;
 use Google\Http\ClientInterface;
+use Google\Http\PromiseInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -47,17 +48,16 @@ function httpClientFromCallable(callable $httpHandler): ClientInterface
         public function send(
             RequestInterface $request,
             array $options = []
-        ) : ResponseInterface
-        {
+        ): ResponseInterface {
             $httpHandler = $this->httpHandler;
+
             return $httpHandler($request);
         }
 
         public function sendAsync(
             RequestInterface $request,
             array $options = []
-        ) : PromiseInterface
-        {
+        ): PromiseInterface {
             // no op
         }
     };

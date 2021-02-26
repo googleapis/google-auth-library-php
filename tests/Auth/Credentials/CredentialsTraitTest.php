@@ -18,12 +18,16 @@
 namespace Google\Auth\Credentials\Tests;
 
 use Google\Auth\Credentials\CredentialsTrait;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use LogicException;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class CredentialsTraitTest extends TestCase
 {
     private $mockCacheItem;
@@ -40,13 +44,16 @@ class CredentialsTraitTest extends TestCase
         $expectedValue = ['1234'];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $this->mockCacheItem->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn($expectedValue);
+            ->willReturn($expectedValue)
+        ;
         $this->mockCache->getItem(Argument::type('string'))
             ->shouldBeCalledTimes(1)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
 
         $implementation = new CredentialsTraitImplementation([
             'cache' => $this->mockCache->reveal(),
@@ -63,13 +70,16 @@ class CredentialsTraitTest extends TestCase
         $expectedValue = ['1234'];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $this->mockCacheItem->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn($expectedValue);
+            ->willReturn($expectedValue)
+        ;
         $this->mockCache->getItem($expectedKey)
             ->shouldBeCalledTimes(1)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
 
         $implementation = new CredentialsTraitImplementation([
             'cache' => $this->mockCache->reveal(),
@@ -89,17 +99,20 @@ class CredentialsTraitTest extends TestCase
         $expectedValue = ['1234'];
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $this->mockCacheItem->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn($expectedValue);
+            ->willReturn($expectedValue)
+        ;
         $this->mockCache->getItem($expectedKey)
             ->shouldBeCalledTimes(1)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
 
         $implementation = new CredentialsTraitImplementation([
             'cache' => $this->mockCache->reveal(),
-            'key' => $key
+            'key' => $key,
         ]);
 
         $cachedValue = $implementation->gCachedToken();
@@ -120,14 +133,18 @@ class CredentialsTraitTest extends TestCase
     {
         $value = ['1234'];
         $this->mockCacheItem->set($value)
-            ->shouldBeCalled();
+            ->shouldBeCalled()
+        ;
         $this->mockCacheItem->expiresAfter(Argument::any())
-            ->shouldBeCalled();
+            ->shouldBeCalled()
+        ;
         $this->mockCache->getItem('key')
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
         $this->mockCache->save(Argument::type(CacheItemInterface::class))
             ->shouldBeCalled()
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $implementation = new CredentialsTraitImplementation([
             'cache' => $this->mockCache->reveal(),
@@ -147,20 +164,25 @@ class CredentialsTraitTest extends TestCase
 
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn(false)
+        ;
         $this->mockCacheItem->set($nextToken)
             ->shouldBeCalledTimes(1)
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $this->mockCacheItem->expiresAt(
             \DateTime::createFromFormat('U', (string) $expiresAt)
         )
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
         $this->mockCache->getItem(Argument::type('string'))
             ->shouldBeCalledTimes(2)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
         $this->mockCache->save(Argument::type(CacheItemInterface::class))
             ->shouldBeCalled()
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $implementation = new CredentialsTraitImplementation([
             'cache' => $this->mockCache->reveal(),
@@ -183,18 +205,23 @@ class CredentialsTraitTest extends TestCase
 
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn(false)
+        ;
         $this->mockCacheItem->set($nextToken)
             ->shouldBeCalledTimes(1)
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $this->mockCacheItem->expiresAfter(123)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
         $this->mockCache->getItem(Argument::type('string'))
             ->shouldBeCalledTimes(2)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
         $this->mockCache->save(Argument::type(CacheItemInterface::class))
             ->shouldBeCalled()
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $implementation = new CredentialsTraitImplementation([
             'cache' => $this->mockCache->reveal(),
@@ -224,11 +251,12 @@ class CredentialsTraitTest extends TestCase
         $this->expectExceptionMessage('Cache key cannot be empty');
 
         $this->mockCache->getItem(Argument::any())
-            ->shouldNotBeCalled();
+            ->shouldNotBeCalled()
+        ;
 
         $implementation = new CredentialsTraitImplementation([
             'cache' => $this->mockCache->reveal(),
-            'key'   => '',
+            'key' => '',
         ]);
 
         $cachedValue = $implementation->sCachedToken(['1234']);
@@ -245,18 +273,23 @@ class CredentialsTraitTest extends TestCase
 
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn(false)
+        ;
         $this->mockCacheItem->set($nextToken)
             ->shouldBeCalledTimes(1)
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $this->mockCacheItem->expiresAfter(123)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
         $this->mockCache->getItem(Argument::type('string'))
             ->shouldBeCalledTimes(2)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
         $this->mockCache->save(Argument::type(CacheItemInterface::class))
             ->shouldBeCalled()
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $implementation = new CredentialsTraitImplementation([
             'cache' => $this->mockCache->reveal(),
@@ -295,6 +328,7 @@ class CredentialsTraitImplementation
     public function sCachedToken($v)
     {
         $this->setCachedToken($this->key, $v);
+
         return true;
     }
 

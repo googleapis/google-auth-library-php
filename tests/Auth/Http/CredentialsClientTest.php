@@ -27,6 +27,10 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Http\Message\RequestInterface;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class CredentialsClientTest extends TestCase
 {
     public function testSend()
@@ -35,7 +39,8 @@ class CredentialsClientTest extends TestCase
         $credentials = $this->prophesize(CredentialsInterface::class);
         $credentials->getRequestMetadata()
             ->shouldBeCalledTimes(1)
-            ->willReturn(['Authorization' => 'Bearer 123']);
+            ->willReturn(['Authorization' => 'Bearer 123'])
+        ;
 
         $client = $this->prophesize(ClientInterface::class);
         $client->send(Argument::type(RequestInterface::class), [])
@@ -45,8 +50,10 @@ class CredentialsClientTest extends TestCase
                     'Bearer 123',
                     $request->getHeaderLine('Authorization')
                 );
+
                 return new Response(200);
-            });
+            })
+        ;
 
         $credentialsClient = new CredentialsClient(
             $credentials->reveal(),
@@ -61,7 +68,8 @@ class CredentialsClientTest extends TestCase
         $credentials = $this->prophesize(CredentialsInterface::class);
         $credentials->getRequestMetadata()
             ->shouldBeCalledTimes(1)
-            ->willReturn(['Authorization' => 'Bearer 123']);
+            ->willReturn(['Authorization' => 'Bearer 123'])
+        ;
         $promise = $this->prophesize(PromiseInterface::class);
 
         $client = $this->prophesize(ClientInterface::class);
@@ -72,8 +80,10 @@ class CredentialsClientTest extends TestCase
                     'Bearer 123',
                     $request->getHeaderLine('Authorization')
                 );
+
                 return $promise;
-            });
+            })
+        ;
 
         $credentialsClient = new CredentialsClient(
             $credentials->reveal(),

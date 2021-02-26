@@ -44,16 +44,16 @@ class UserRefreshCredentials implements CredentialsInterface
     private $oauth2;
 
     /**
-     * The quota project associated with the JSON credentials
+     * The quota project associated with the JSON credentials.
      */
     private $quotaProject;
 
     /**
      * Create a new UserRefreshCredentials.
      *
-     * @param array $jsonKey JSON credential as an associative array
-     * @param string|array $scope the scope of the access request, expressed
-     *   either as an Array or as a space-delimited String.
+     * @param array        $jsonKey JSON credential as an associative array
+     * @param array|string $scope   the scope of the access request, expressed
+     *                              either as an Array or as a space-delimited String
      */
     public function __construct($jsonKey, array $options = [])
     {
@@ -94,23 +94,9 @@ class UserRefreshCredentials implements CredentialsInterface
     }
 
     /**
-     * @return array A set of auth related metadata, containing the following
-     * keys:
-     *   - access_token (string)
-     *   - expires_in (int)
-     *   - scope (string)
-     *   - token_type (string)
-     *   - id_token (string)
-     */
-    private function fetchAuthTokenNoCache(): array
-    {
-        return $this->oauth2->fetchAuthToken();
-    }
-
-    /**
-     * Get the quota project used for this API request
+     * Get the quota project used for this API request.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getQuotaProject(): ?string
     {
@@ -120,13 +106,27 @@ class UserRefreshCredentials implements CredentialsInterface
     /**
      * Get the project ID.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getProjectId(): ?string
     {
         throw new \RuntimeException(
             'getProjectId is not implemented for user refresh credentials'
         );
+    }
+
+    /**
+     * @return array A set of auth related metadata, containing the following
+     *               keys:
+     *               - access_token (string)
+     *               - expires_in (int)
+     *               - scope (string)
+     *               - token_type (string)
+     *               - id_token (string)
+     */
+    private function fetchAuthTokenNoCache(): array
+    {
+        return $this->oauth2->fetchAuthToken();
     }
 
     /**

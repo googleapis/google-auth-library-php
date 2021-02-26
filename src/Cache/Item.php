@@ -37,7 +37,7 @@ final class Item implements CacheItemInterface
     private $value;
 
     /**
-     * @var \DateTime|null
+     * @var null|\DateTime
      */
     private $expiration;
 
@@ -79,7 +79,7 @@ final class Item implements CacheItemInterface
             return false;
         }
 
-        if ($this->expiration === null) {
+        if (null === $this->expiration) {
             return true;
         }
 
@@ -131,7 +131,7 @@ final class Item implements CacheItemInterface
             $this->expiration = $this->currentTime()->add(new \DateInterval("PT{$time}S"));
         } elseif ($time instanceof \DateInterval) {
             $this->expiration = $this->currentTime()->add($time);
-        } elseif ($time === null) {
+        } elseif (null === $time) {
             $this->expiration = $time;
         } else {
             $message = 'Argument 1 passed to %s::expiresAfter() must be an ' .
@@ -148,6 +148,7 @@ final class Item implements CacheItemInterface
      * Handles an error.
      *
      * @param string $error
+     *
      * @throws \TypeError
      */
     private function handleError($error)
@@ -163,11 +164,12 @@ final class Item implements CacheItemInterface
      * Determines if an expiration is valid based on the rules defined by PSR6.
      *
      * @param mixed $expiration
+     *
      * @return bool
      */
     private function isValidExpiration($expiration)
     {
-        if ($expiration === null) {
+        if (null === $expiration) {
             return true;
         }
 
@@ -185,7 +187,7 @@ final class Item implements CacheItemInterface
         return false;
     }
 
-    protected function currentTime()
+    private function currentTime()
     {
         return new \DateTime('now', new \DateTimeZone('UTC'));
     }

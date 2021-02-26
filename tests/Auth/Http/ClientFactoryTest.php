@@ -21,6 +21,10 @@ use Google\Auth\Http\ClientFactory;
 use Google\Http\Client\GuzzleClient;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class ClientFactoryTest extends TestCase
 {
     public function testBuildsGuzzleClient()

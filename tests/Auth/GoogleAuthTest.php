@@ -18,22 +18,25 @@
 namespace Google\Auth\Tests;
 
 use Firebase\JWT\JWT;
-use Google\Auth\GoogleAuth;
 use Google\Auth\Credentials\ComputeCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
-use Google\Auth\Jwt\JwtClientInterface;
+use Google\Auth\GoogleAuth;
+use Google\Jwt\ClientInterface;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use ReflectionClass;
-use Prophecy\Argument;
 use UnexpectedValueException;
 
 /**
  * @runTestsInSeparateProcesses
+ *
+ * @internal
+ * @coversNothing
  */
 class GoogleAuthTest extends TestCase
 {
@@ -58,13 +61,16 @@ class GoogleAuthTest extends TestCase
         $cachedValue = true;
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $this->mockCacheItem->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn($cachedValue);
+            ->willReturn($cachedValue)
+        ;
         $this->mockCache->getItem('google_auth_on_gce_cache')
             ->shouldBeCalledTimes(1)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
 
         // Run the test.
         $googleAuth = new GoogleAuth(['cache' => $this->mockCache->reveal()]);
@@ -76,13 +82,16 @@ class GoogleAuthTest extends TestCase
         $cachedValue = false;
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $this->mockCacheItem->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn($cachedValue);
+            ->willReturn($cachedValue)
+        ;
         $this->mockCache->getItem('google_auth_on_gce_cache')
             ->shouldBeCalledTimes(1)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
 
         // Run the test.
         $googleAuth = new GoogleAuth(['cache' => $this->mockCache->reveal()]);
@@ -94,21 +103,27 @@ class GoogleAuthTest extends TestCase
         $gceIsCalled = false;
         $httpClient = httpClientFromCallable(function ($request) use (&$gceIsCalled) {
             $gceIsCalled = true;
+
             return new Response(200, ['Metadata-Flavor' => 'Google']);
         });
 
         $this->mockCacheItem->isHit()
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn(false)
+        ;
         $this->mockCacheItem->set(true)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
         $this->mockCacheItem->expiresAfter(1500)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
         $this->mockCache->getItem('google_auth_on_gce_cache')
             ->shouldBeCalledTimes(1)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
         $this->mockCache->save($this->mockCacheItem->reveal())
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
 
         // Run the test.
         $googleAuth = new GoogleAuth([
@@ -127,12 +142,15 @@ class GoogleAuthTest extends TestCase
         $cachedValue = true;
 
         $this->mockCacheItem->isHit()
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $this->mockCacheItem->get()
-            ->willReturn($cachedValue);
+            ->willReturn($cachedValue)
+        ;
         $this->mockCache->getItem($prefix . 'google_auth_on_gce_cache')
             ->shouldBeCalledTimes(1)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
 
         // Run the test
         $googleAuth = new GoogleAuth([
@@ -150,19 +168,25 @@ class GoogleAuthTest extends TestCase
         $gceIsCalled = false;
         $httpClient = httpClientFromCallable(function ($request) use (&$gceIsCalled) {
             $gceIsCalled = true;
+
             return new Response(200, ['Metadata-Flavor' => 'Google']);
         });
         $this->mockCacheItem->isHit()
-            ->willReturn(false);
+            ->willReturn(false)
+        ;
         $this->mockCacheItem->set(true)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
         $this->mockCacheItem->expiresAfter($lifetime)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
         $this->mockCache->getItem($prefix . 'google_auth_on_gce_cache')
             ->shouldBeCalledTimes(1)
-            ->willReturn($this->mockCacheItem->reveal());
+            ->willReturn($this->mockCacheItem->reveal())
+        ;
         $this->mockCache->save($this->mockCacheItem->reveal())
-            ->shouldBeCalled();
+            ->shouldBeCalled()
+        ;
 
         // Run the test
         $googleAuth = new GoogleAuth([
@@ -211,7 +235,7 @@ class GoogleAuthTest extends TestCase
         $httpClient = httpClientWithResponses([
             new Response(500),
             new Response(500),
-            new Response(500)
+            new Response(500),
         ]);
         $googleAuth = new GoogleAuth([
             'httpClient' => $httpClient,
@@ -252,12 +276,12 @@ class GoogleAuthTest extends TestCase
             'httpClient' => $httpClient,
         ]);
         $credentials = $googleAuth->makeCredentials([
-            'defaultScope' => 'a-default-scope'
+            'defaultScope' => 'a-default-scope',
         ]);
 
         $this->assertInstanceOf(ComputeCredentials::class, $credentials);
 
-        $uriMethod = (new ReflectionClass($credentials))->getMethod('getTokenUri');
+        $uriMethod = (new ReflectionClass($credentials))->getMethod('getAuthTokenUriPath');
         $uriMethod->setAccessible(true);
 
         // used default scope
@@ -266,7 +290,7 @@ class GoogleAuthTest extends TestCase
 
         $credentials = $googleAuth->makeCredentials([
             'scope' => 'a-user-scope',
-            'defaultScope' => 'a-default-scope'
+            'defaultScope' => 'a-default-scope',
         ]);
 
         // did not use default scope
@@ -320,10 +344,10 @@ class GoogleAuthTest extends TestCase
 
         $googleAuth = new GoogleAuth(['httpClient' => $httpClient]);
         $credentials = $googleAuth->makeCredentials([
-            'defaultScope' => ['default-scope-one', 'default-scope-two']
+            'defaultScope' => ['default-scope-one', 'default-scope-two'],
         ]);
         $this->assertInstanceOf(ComputeCredentials::class, $credentials);
-        $uriMethod = (new ReflectionClass($credentials))->getMethod('getTokenUri');
+        $uriMethod = (new ReflectionClass($credentials))->getMethod('getAuthTokenUriPath');
         $uriMethod->setAccessible(true);
         $tokenUri = $uriMethod->invoke($credentials);
 
@@ -333,7 +357,6 @@ class GoogleAuthTest extends TestCase
             $tokenUri
         );
     }
-
 
     // TODO: Refactor Middleware Tests
 
@@ -488,7 +511,7 @@ class GoogleAuthTest extends TestCase
         putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $keyFile);
 
         $credentials = (new GoogleAuth())->makeCredentials([
-            'quotaProject' => self::TEST_QUOTA_PROJECT
+            'quotaProject' => self::TEST_QUOTA_PROJECT,
         ]);
         $this->assertInstanceOf(ServiceAccountCredentials::class, $credentials);
 
@@ -528,7 +551,7 @@ class GoogleAuthTest extends TestCase
         ]);
 
         $credentials = $googleAuth->makeCredentials([
-            'quotaProject' => self::TEST_QUOTA_PROJECT
+            'quotaProject' => self::TEST_QUOTA_PROJECT,
         ]);
 
         $this->assertInstanceOf(ServiceAccountCredentials::class, $credentials);
@@ -556,7 +579,7 @@ class GoogleAuthTest extends TestCase
         ]);
 
         $googleAuth = new GoogleAuth([
-            'httpClient' => $httpClient
+            'httpClient' => $httpClient,
         ]);
         $credentials = $googleAuth->makeCredentials([
             'quotaProject' => self::TEST_QUOTA_PROJECT,
@@ -580,7 +603,7 @@ class GoogleAuthTest extends TestCase
             new Response(200, ['Metadata-Flavor' => 'Google']),
         ]);
         $googleAuth = new GoogleAuth([
-            'httpClient' => $httpClient
+            'httpClient' => $httpClient,
         ]);
         $this->assertInstanceOf(
             ComputeCredentials::class,
@@ -600,7 +623,7 @@ class GoogleAuthTest extends TestCase
             'targetAudience' => self::TEST_TARGET_AUDIENCE,
         ]);
         $this->assertInstanceOf(ComputeCredentials::class, $credentials);
-        $uriMethod = (new ReflectionClass($credentials))->getMethod('getTokenUri');
+        $uriMethod = (new ReflectionClass($credentials))->getMethod('getAuthTokenUriPath');
         $uriMethod->setAccessible(true);
         $tokenUri = $uriMethod->invoke($credentials);
         $this->assertStringContainsString('/identity', $tokenUri);
@@ -637,26 +660,33 @@ class GoogleAuthTest extends TestCase
         $item = $this->prophesize(CacheItemInterface::class);
         $item->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn(null);
+            ->willReturn(null)
+        ;
         $item->set($certsData)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
         $item->expiresAfter(Argument::type('int'))
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
 
         $this->mockCache->getItem('google_auth_certs_cache|' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
-            ->willReturn($item->reveal());
+            ->willReturn($item->reveal())
+        ;
 
         $this->mockCache->save(Argument::type(CacheItemInterface::class))
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
 
-        $jwt = $this->prophesize(JwtClientInterface::class);
+        $jwt = $this->prophesize(ClientInterface::class);
         $jwt->parseKeySet($certsData)
             ->shouldBeCalledTimes(1)
-            ->willReturn($parsedCertsData);
+            ->willReturn($parsedCertsData)
+        ;
         $jwt->decode(self::TEST_TOKEN, $parsedCertsData, ['RS256'])
             ->shouldBeCalledTimes(1)
-            ->willReturn($validToken);
+            ->willReturn($validToken)
+        ;
 
         $googleAuth = new GoogleAuth([
             'cache' => $this->mockCache->reveal(),
@@ -664,7 +694,7 @@ class GoogleAuthTest extends TestCase
         ]);
 
         $this->assertEquals($validToken, $googleAuth->verify(self::TEST_TOKEN, [
-            'certsLocation' => $certsLocation
+            'certsLocation' => $certsLocation,
         ]));
     }
 
@@ -678,16 +708,18 @@ class GoogleAuthTest extends TestCase
         $item = $this->prophesize(CacheItemInterface::class);
         $item->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn(null);
+            ->willReturn(null)
+        ;
 
         $this->mockCache->getItem('google_auth_certs_cache|' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
-            ->willReturn($item->reveal());
+            ->willReturn($item->reveal())
+        ;
 
         $googleAuth = new GoogleAuth(['cache' => $this->mockCache->reveal()]);
 
         $googleAuth->verify(self::TEST_TOKEN, [
-            'certsLocation' => $certsLocation
+            'certsLocation' => $certsLocation,
         ]);
     }
 
@@ -699,11 +731,13 @@ class GoogleAuthTest extends TestCase
         $item = $this->prophesize(CacheItemInterface::class);
         $item->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn('{}');
+            ->willReturn('{}')
+        ;
 
         $this->mockCache->getItem('google_auth_certs_cache|' . self::OIDC_CERTS_HASH)
             ->shouldBeCalledTimes(1)
-            ->willReturn($item->reveal());
+            ->willReturn($item->reveal())
+        ;
 
         $googleAuth = new GoogleAuth(['cache' => $this->mockCache->reveal()]);
 
@@ -722,16 +756,18 @@ class GoogleAuthTest extends TestCase
         $item = $this->prophesize(CacheItemInterface::class);
         $item->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn(null);
+            ->willReturn(null)
+        ;
 
         $this->mockCache->getItem('google_auth_certs_cache|' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
-            ->willReturn($item->reveal());
+            ->willReturn($item->reveal())
+        ;
 
         $googleAuth = new GoogleAuth(['cache' => $this->mockCache->reveal()]);
 
         $googleAuth->verify(self::TEST_TOKEN, [
-            'certsLocation' => $certsLocation
+            'certsLocation' => $certsLocation,
         ]);
     }
 
@@ -758,26 +794,33 @@ class GoogleAuthTest extends TestCase
         $item = $this->prophesize(CacheItemInterface::class);
         $item->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn(null);
+            ->willReturn(null)
+        ;
         $item->set($certsData)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
         $item->expiresAfter(1500)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
 
         $this->mockCache->getItem('google_auth_certs_cache|' . self::OIDC_CERTS_HASH)
             ->shouldBeCalledTimes(1)
-            ->willReturn($item->reveal());
+            ->willReturn($item->reveal())
+        ;
 
         $this->mockCache->save(Argument::type(CacheItemInterface::class))
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+        ;
 
-        $jwt = $this->prophesize(JwtClientInterface::class);
+        $jwt = $this->prophesize(ClientInterface::class);
         $jwt->parseKeySet($certsData)
             ->shouldBeCalledTimes(1)
-            ->willReturn($parsedCertsData);
+            ->willReturn($parsedCertsData)
+        ;
         $jwt->decode(self::TEST_TOKEN, $parsedCertsData, ['RS256'])
             ->shouldBeCalledTimes(1)
-            ->willReturn($validToken);
+            ->willReturn($validToken)
+        ;
 
         $googleAuth = new GoogleAuth([
             'cache' => $this->mockCache->reveal(),
@@ -802,15 +845,17 @@ class GoogleAuthTest extends TestCase
         $item = $this->prophesize(CacheItemInterface::class);
         $item->get()
             ->shouldBeCalledTimes(1)
-            ->willReturn(null);
+            ->willReturn(null)
+        ;
 
         $this->mockCache->getItem('google_auth_certs_cache|' . self::OIDC_CERTS_HASH)
             ->shouldBeCalledTimes(1)
-            ->willReturn($item->reveal());
+            ->willReturn($item->reveal())
+        ;
 
         $googleAuth = new GoogleAuth([
             'httpClient' => $httpClient,
-            'cache' => $this->mockCache->reveal()
+            'cache' => $this->mockCache->reveal(),
         ]);
 
         $googleAuth->verify(self::TEST_TOKEN);
@@ -826,13 +871,15 @@ class GoogleAuthTest extends TestCase
         string $expectedAlg = 'RS256'
     ) {
         $parsedCertsData = [];
-        $jwtClient = $this->prophesize(JwtClientInterface::class);
+        $jwtClient = $this->prophesize(ClientInterface::class);
         $jwtClient->parseKeySet(Argument::any())
             ->shouldBeCalledTimes(1)
-            ->willReturn($parsedCertsData);
+            ->willReturn($parsedCertsData)
+        ;
         $jwtClient->decode(self::TEST_TOKEN, $parsedCertsData, [$expectedAlg])
             ->shouldBeCalledTimes(1)
-            ->willReturn($payload);
+            ->willReturn($payload)
+        ;
 
         $googleAuth = new GoogleAuth([
             'jwtClient' => $jwtClient->reveal(),
@@ -853,50 +900,50 @@ class GoogleAuthTest extends TestCase
     {
         $audienceDoesNotMatchException = [
             'class' => UnexpectedValueException::class,
-            'message' => 'Audience does not match'
+            'message' => 'Audience does not match',
         ];
         $issuerDoesNotMatchException = [
             'class' => UnexpectedValueException::class,
-            'message' => 'Issuer does not match'
+            'message' => 'Issuer does not match',
         ];
+
         return [
             [
                 'payload' => [
                     'iss' => GoogleAuth::OIDC_ISSUERS[1],
-                ]
-            ],
-            [
-                'payload' => [
-                    'iss' => GoogleAuth::OIDC_ISSUERS[1],
-                    'aud' => 'foo'
                 ],
-                'options' => ['audience' => 'foo']
             ],
             [
                 'payload' => [
                     'iss' => GoogleAuth::OIDC_ISSUERS[1],
-                    'aud' => 'foo'
+                    'aud' => 'foo',
+                ],
+                'options' => ['audience' => 'foo'],
+            ],
+            [
+                'payload' => [
+                    'iss' => GoogleAuth::OIDC_ISSUERS[1],
+                    'aud' => 'foo',
                 ],
                 'options' => ['audience' => 'bar'],
                 'expectedException' => $audienceDoesNotMatchException,
-
             ],
             [
                 'payload' => [
-                    'iss' => 'invalid'
+                    'iss' => 'invalid',
                 ],
                 'options' => [],
                 'expectedException' => $issuerDoesNotMatchException,
             ],
             [
                 'payload' => [
-                    'iss' => 'baz'
+                    'iss' => 'baz',
                 ],
-                'options' => ['issuer' => 'baz']
+                'options' => ['issuer' => 'baz'],
             ],
             [
                 'payload' => [
-                    'iss' => GoogleAuth::IAP_ISSUERS[0]
+                    'iss' => GoogleAuth::IAP_ISSUERS[0],
                 ],
                 'options' => ['certsLocation' => GoogleAuth::IAP_JWK_URI],
                 'expectedException' => null,
@@ -912,7 +959,7 @@ class GoogleAuthTest extends TestCase
             ],
             [
                 'payload' => [
-                    'iss' => 'baz'
+                    'iss' => 'baz',
                 ],
                 'options' => [
                     'issuer' => 'baz',
@@ -924,24 +971,24 @@ class GoogleAuthTest extends TestCase
             [
                 'payload' => [
                     'iss' => GoogleAuth::IAP_ISSUERS[0],
-                    'aud' => 'foo'
+                    'aud' => 'foo',
                 ],
                 'options' => [
                     'audience' => 'bar',
-                    'certsLocation' => GoogleAuth::IAP_JWK_URI
+                    'certsLocation' => GoogleAuth::IAP_JWK_URI,
                 ],
                 'expectedException' => $audienceDoesNotMatchException,
                 'expectedAlg' => 'ES256',
             ], [
                 'payload' => [
-                    'iss' => 'baz'
+                    'iss' => 'baz',
                 ],
                 'options' => [
-                    'certsLocation' => GoogleAuth::IAP_JWK_URI
+                    'certsLocation' => GoogleAuth::IAP_JWK_URI,
                 ],
                 'expectedException' => $issuerDoesNotMatchException,
                 'expectedAlg' => 'ES256',
-            ]
+            ],
         ];
     }
 
@@ -954,10 +1001,11 @@ class GoogleAuthTest extends TestCase
         $googleAuth = new GoogleAuth();
 
         $parsedCertsData = [];
-        $jwtClient = $this->prophesize(JwtClientInterface::class);
+        $jwtClient = $this->prophesize(ClientInterface::class);
         $jwtClient->parseKeySet(Argument::any())
             ->shouldBeCalledTimes(1)
-            ->willReturn($parsedCertsData);
+            ->willReturn($parsedCertsData)
+        ;
 
         $jwtClient->decode($idToken, $parsedCertsData, ['ES256'])
             ->shouldBeCalledTimes(1)
@@ -965,8 +1013,10 @@ class GoogleAuthTest extends TestCase
                 // Skip validation
                 $tks = \explode('.', $args[0]);
                 list($headb64, $bodyb64, $cryptob64) = $tks;
+
                 return (array) JWT::jsonDecode(JWT::urlsafeB64Decode($bodyb64));
-            });
+            })
+        ;
 
         $googleAuth = new GoogleAuth([
             'jwtClient' => $jwtClient->reveal(),

@@ -19,11 +19,14 @@ namespace Google\Auth\Credentials\Tests;
 
 use Google\Auth\Credentials\OAuth2Credentials;
 use Google\Auth\OAuth2;
-use PHPUnit\Framework\TestCase;
 use LogicException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group credentials
+ *
+ * @internal
+ * @coversNothing
  */
 class OAuth2CredentialsTest extends TestCase
 {
@@ -32,10 +35,12 @@ class OAuth2CredentialsTest extends TestCase
         $oauth2 = $this->prophesize(OAuth2::class);
         $oauth2->fetchAuthToken()
             ->shouldBeCalledTimes(1)
-            ->willReturn(['access_token' => '123']);
+            ->willReturn(['access_token' => '123'])
+        ;
         $oauth2->getCacheKey()
             ->shouldBeCalledTimes(1)
-            ->wilLReturn('abc');
+            ->wilLReturn('abc')
+        ;
 
         $credentials = new OAuth2Credentials($oauth2->reveal());
         $this->assertEquals(
@@ -49,10 +54,12 @@ class OAuth2CredentialsTest extends TestCase
         $oauth2 = $this->prophesize(OAuth2::class);
         $oauth2->fetchAuthToken()
             ->shouldBeCalledTimes(1)
-            ->willReturn(['access_token' => '123']);
+            ->willReturn(['access_token' => '123'])
+        ;
         $oauth2->getCacheKey()
             ->shouldBeCalledTimes(1)
-            ->wilLReturn('abc');
+            ->wilLReturn('abc')
+        ;
 
         $credentials = new OAuth2Credentials($oauth2->reveal());
         $this->assertEquals(

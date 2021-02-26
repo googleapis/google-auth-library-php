@@ -21,6 +21,10 @@ use Google\Cache\MemoryCacheItemPool;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\InvalidArgumentException;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class MemoryCacheItemPoolTest extends TestCase
 {
     private $pool;
@@ -158,6 +162,8 @@ class MemoryCacheItemPoolTest extends TestCase
 
     /**
      * @dataProvider invalidKeys
+     *
+     * @param mixed $key
      */
     public function testCheckInvalidKeysOnGetItem($key)
     {
@@ -167,6 +173,8 @@ class MemoryCacheItemPoolTest extends TestCase
 
     /**
      * @dataProvider invalidKeys
+     *
+     * @param mixed $key
      */
     public function testCheckInvalidKeysOnGetItems($key)
     {
@@ -176,6 +184,8 @@ class MemoryCacheItemPoolTest extends TestCase
 
     /**
      * @dataProvider invalidKeys
+     *
+     * @param mixed $key
      */
     public function testCheckInvalidKeysOnHasItem($key)
     {
@@ -185,6 +195,8 @@ class MemoryCacheItemPoolTest extends TestCase
 
     /**
      * @dataProvider invalidKeys
+     *
+     * @param mixed $key
      */
     public function testCheckInvalidKeysOnDeleteItem($key)
     {
@@ -194,6 +206,8 @@ class MemoryCacheItemPoolTest extends TestCase
 
     /**
      * @dataProvider invalidKeys
+     *
+     * @param mixed $key
      */
     public function testCheckInvalidKeysOnDeleteItems($key)
     {
@@ -216,7 +230,7 @@ class MemoryCacheItemPoolTest extends TestCase
             ['\\'],
             ['@'],
             [':'],
-            [[]]
+            [[]],
         ];
     }
 }

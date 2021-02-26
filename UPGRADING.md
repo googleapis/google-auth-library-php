@@ -87,7 +87,7 @@ $googleAuth->verify($someJwt);
 
 ### Improved JWT handling
 
-*   Provides an abstraction from `firebase/jwt` via `JwtClientInterface`
+*   Provides an abstraction from `firebase/jwt` via `Google\Jwt\ClientInterface`
 *   Removed dependencies on `phpseclib/phpseclib`, and `kelvinmo/simplejwt`
     *   Using the composer "[replace](https://stackoverflow.com/questions/18882201/how-does-the-replace-property-work-with-composer)" keyword, users can ignore sub-dependencies such as Firebase JWT in favor of a separate JWT library
 *   **TODO**: Consider wrapping Exceptions
@@ -96,14 +96,14 @@ $googleAuth->verify($someJwt);
 
 
 ```php
-// by default, "firebase/php-jwt` is ued via `FirebaseJwtClient`
+// by default, "firebase/php-jwt` is used via `Google\Jwt\Client\FirebaseClient`
 $googleAuth = new GoogleAuth();
 $googleAuth->verify($someJwt);
 ```
 
 ```php
 // To use a different library or create your own:
-$jwt = new class implements Google\Auth\Jwt\JwtClientInterface {
+$jwt = new class implements Google\Jwt\ClientInterface {
     public function encode(
         array $payload,
         string $signingKey,
@@ -749,7 +749,7 @@ More clearly identifies that no network calls are made
    <td><strong>refactored</strong>
 <p>
 This functionality is now in <code>GoogleAuth::verify</code> and
-<code>JwtClientInterface::decode</code>.
+<code>Google\Jwt\ClientInterface::decode</code>.
    </td>
   </tr>
 </table>

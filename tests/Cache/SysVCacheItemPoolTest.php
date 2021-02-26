@@ -20,13 +20,17 @@ namespace Google\Auth\Cache\Tests;
 use Google\Cache\SysVCacheItemPool;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class SysVCacheItemPoolTest extends TestCase
 {
     private $pool;
 
     public function setUp(): void
     {
-        if (! extension_loaded('sysvshm')) {
+        if (!extension_loaded('sysvshm')) {
             $this->markTestSkipped(
                 'sysvshm extension is required for running the test'
             );

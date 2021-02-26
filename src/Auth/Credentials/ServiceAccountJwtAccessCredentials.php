@@ -19,10 +19,10 @@ declare(strict_types=1);
 
 namespace Google\Auth\Credentials;
 
-use Google\Auth\SignBlob\ServiceAccountApiSignBlobTrait;
-use Google\Auth\SignBlob\PrivateKeySignBlobTrait;
-use Google\Auth\SignBlob\SignBlobInterface;
 use Google\Auth\OAuth2;
+use Google\Auth\SignBlob\PrivateKeySignBlobTrait;
+use Google\Auth\SignBlob\ServiceAccountApiSignBlobTrait;
+use Google\Auth\SignBlob\SignBlobInterface;
 
 /**
  * Authenticates requests using Google's Service Account credentials via
@@ -51,17 +51,16 @@ class ServiceAccountJwtAccessCredentials implements
     private $oauth2;
 
     /**
-     * The quota project associated with the JSON credentials
+     * The quota project associated with the JSON credentials.
      */
     private $quotaProject;
 
     /**
      * Create a new ServiceAccountJwtAccessCredentials.
      *
-     * @param string|array $jsonKey JSON credential file path or JSON credentials
-     *   as an associative array
-     * @param string|array $scope the scope of the access request, expressed
-     *   either as an Array or as a space-delimited String.
+     * @param array|string $jsonKey JSON credential file path or JSON credentials
+     *                              as an associative array
+     * @param array $options
      */
     public function __construct($jsonKey, array $options = [])
     {
@@ -103,23 +102,11 @@ class ServiceAccountJwtAccessCredentials implements
     }
 
     /**
-     * Implements FetchAuthTokenInterface#fetchAuthToken.
-     *
-     * @return array A set of auth related metadata, containing the
-     * following keys:
-     *   - access_token (string)
-     */
-    private function fetchAuthTokenNoCache(): array
-    {
-        return ['access_token' => $this->oauth2->toJwt()];
-    }
-
-    /**
      * Get the project ID from the service account keyfile.
      *
      * Returns null if the project ID does not exist in the keyfile.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getProjectId(): ?string
     {
@@ -127,9 +114,9 @@ class ServiceAccountJwtAccessCredentials implements
     }
 
     /**
-     * Get the quota project used for this API request
+     * Get the quota project used for this API request.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getQuotaProject(): ?string
     {
@@ -140,7 +127,8 @@ class ServiceAccountJwtAccessCredentials implements
      * Sign a string using the method which is best for a given credentials type.
      * If OpenSSL is not installed, uses the Service Account Credentials API.
      *
-     * @param string $stringToSign The string to sign.
+     * @param string $stringToSign the string to sign
+     *
      * @return string The resulting signature. Value should be base64-encoded.
      */
     public function signBlob(string $stringToSign): string
@@ -154,6 +142,7 @@ class ServiceAccountJwtAccessCredentials implements
         }
 
         $accessToken = $this->fetchAuthToken()['access_token'];
+
         return $this->signBlobWithServiceAccountApi(
             $this->httpClient,
             $this->getClientEmail(),
@@ -172,7 +161,7 @@ class ServiceAccountJwtAccessCredentials implements
     public function getRequestMetadata(string $authUri = null): array
     {
         // no-op when audience is null if scope is also null
-        if (empty($authUri) && empty($this->auth->getScope()) {
+        if (empty($authUri) && empty($this->auth->getScope())) {
             return [];
         }
 
@@ -191,6 +180,22 @@ class ServiceAccountJwtAccessCredentials implements
     public function getClientEmail(): string
     {
         return $this->oauth2->getIssuer();
+    }
+
+    /**
+     * Implements FetchAuthTokenInterface#fetchAuthToken.
+     *
+     * @return array A set of auth related metadata, containing the
+     *               following keys:
+     *               - access_token (string)
+     *               - expires_in (int)
+     */
+    private function fetchAuthTokenNoCache(): array
+    {
+        return [
+            'access_token' => $this->oauth2->toJwt(),
+            'expires_in' => $this->oauth2->getExpiry(),
+        ];
     }
 
     /**

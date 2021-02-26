@@ -25,7 +25,8 @@ interface SignBlobInterface
     /**
      * Sign a string using the method which is best for a given credentials type.
      *
-     * @param string $stringToSign The string to sign.
+     * @param string $stringToSign the string to sign
+     *
      * @return string The resulting signature. Value should be base64-encoded.
      */
     public function signBlob(string $stringToSign): string;

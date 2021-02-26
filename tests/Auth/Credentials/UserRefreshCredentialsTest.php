@@ -17,16 +17,19 @@
 
 namespace Google\Auth\Credentials\Tests;
 
-use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Response;
-use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 use LogicException;
+use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class UserRefreshCredentialsTest extends TestCase
 {
     private $testJson = [
@@ -61,7 +64,7 @@ class UserRefreshCredentialsTest extends TestCase
 
         $notAnArrayOrString = new \stdClass();
         $credentials = new UserRefreshCredentials($this->testJson, [
-            'scope' => $notAnArrayOrString
+            'scope' => $notAnArrayOrString,
         ]);
     }
 
@@ -183,7 +186,7 @@ class UserRefreshCredentialsTest extends TestCase
     {
         $keyFile = __DIR__ . '/../fixtures/client_credentials.json';
         $credentials = new UserRefreshCredentials($keyFile, [
-            'scope' => 'a-scope'
+            'scope' => 'a-scope',
         ]);
         $this->assertEquals(
             'test_quota_project',

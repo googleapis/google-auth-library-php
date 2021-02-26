@@ -18,7 +18,7 @@
 function oauth2client_php_autoload($className)
 {
     $classPath = explode('_', $className);
-    if ($classPath[0] != 'Google') {
+    if ('Google' != $classPath[0]) {
         return;
     }
     if (count($classPath) > 3) {

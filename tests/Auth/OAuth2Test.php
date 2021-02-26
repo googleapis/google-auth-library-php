@@ -17,23 +17,28 @@
 
 namespace Google\Auth\Tests;
 
-use Firebase\JWT\JWT;
 use Firebase\JWT\JWK;
-use Google\Auth\Jwt\FirebaseJwtClient;
+use Firebase\JWT\JWT;
 use Google\Auth\Credentials\CredentialsInterface;
-use Google\Auth\GoogleAuth;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
+use Google\Jwt\Client\FirebaseClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
-use Psr\Http\Message\RequestInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 use UnexpectedValueException;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class OAuth2Test extends TestCase
 {
     private $privateKey;
@@ -223,7 +228,7 @@ class OAuth2Test extends TestCase
         ]);
         $this->assertEquals('postmessage', $o->getRedirectUri());
         $url = $o->buildFullAuthorizationUri();
-        $parts = parse_url((string)$url);
+        $parts = parse_url((string) $url);
         parse_str($parts['query'], $query);
         $this->assertArrayHasKey('redirect_uri', $query);
         $this->assertEquals('postmessage', $query['redirect_uri']);
@@ -425,8 +430,6 @@ class OAuth2Test extends TestCase
         $o->toJwt();
     }
 
-    /**
-     */
     public function testCanHaveNoScope()
     {
         $testConfig = $this->signingMinimal;
@@ -458,7 +461,7 @@ class OAuth2Test extends TestCase
         $testConfig = $this->signingMinimal;
         $keys = [
             'example_key_id1' => 'example_key1',
-            'example_key_id2' => 'example_key2'
+            'example_key_id2' => 'example_key2',
         ];
         $testConfig['signingKey'] = $keys['example_key_id2'];
         $testConfig['signingKeyId'] = 'example_key_id2';
@@ -480,7 +483,7 @@ class OAuth2Test extends TestCase
         $testConfig = $this->signingMinimal;
         $keys = [
             'example_key_id1' => 'example_key1',
-            'example_key_id2' => 'example_key2'
+            'example_key_id2' => 'example_key2',
         ];
 
         $testConfig['signingKey'] = $keys['example_key_id2'];
@@ -502,7 +505,7 @@ class OAuth2Test extends TestCase
 
         $keys = [
             'example_key_id1' => 'example_key1',
-            'example_key_id2' => 'example_key2'
+            'example_key_id2' => 'example_key2',
         ];
         $testConfig['signingKey'] = $keys['example_key_id2'];
         $o = new OAuth2($testConfig);
@@ -634,7 +637,7 @@ class OAuth2Test extends TestCase
         $testConfig['redirectUri'] = 'https://has/redirect/uri';
         $o = new OAuth2($testConfig);
         $o->setCode('an_auth_code');
-        $request = $o->generateCredentialsRequest();
+        $request = $o->generateCredentialsRequest();HEAD
         $fields = Query::parse((string)$request->getBody());
         $this->assertEquals('a_client_secret', $fields['client_secret']);
     }
@@ -884,7 +887,7 @@ class OAuth2Test extends TestCase
 
     private function jwtDecode(string $jwt, array $keys, array $algs): array
     {
-        $jwtClient = new FirebaseJwtClient(new JWT, new JWK);
+        $jwtClient = new FirebaseClient(new JWT(), new JWK());
 
         return $jwtClient->decode($jwt, $keys, $algs);
     }

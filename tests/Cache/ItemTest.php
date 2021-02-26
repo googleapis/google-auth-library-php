@@ -20,6 +20,10 @@ namespace Google\Auth\Cache\Tests;
 use Google\Cache\Item;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class ItemTest extends TestCase
 {
     public function getItem($key)
@@ -53,6 +57,8 @@ class ItemTest extends TestCase
 
     /**
      * @dataProvider values
+     *
+     * @param mixed $value
      */
     public function testSetsValue($value)
     {
@@ -71,7 +77,7 @@ class ItemTest extends TestCase
             [null],
             [new \DateTime()],
             [['test']],
-            ['value']
+            ['value'],
         ];
     }
 

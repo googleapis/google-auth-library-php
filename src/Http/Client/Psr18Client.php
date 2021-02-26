@@ -43,7 +43,7 @@ class Psr18Client implements ClientInterface
      * Accepts a PSR-7 request and an array of options and returns a PSR-7 response.
      *
      * @param \Psr\Http\Message\RequestInterface $request
-     * @param array $options
+     * @param array                              $options
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
@@ -54,11 +54,12 @@ class Psr18Client implements ClientInterface
         if (!empty($options)) {
             // Ignore per-request options
         }
+
         return $this->client->sendRequest($request);
     }
 
     /**
-     * Not implemented for PSR-18 clients
+     * Not implemented for PSR-18 clients.
      *
      * @param \Psr\Http\Message\RequestInterface $request
      *

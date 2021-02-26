@@ -17,15 +17,15 @@
 
 namespace Google\Auth\Credentials\Tests;
 
-use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
-use Google\Auth\CredentialsLoader;
-use Google\Auth\OAuth2;
-use GuzzleHttp\Psr7\Response;
-use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 use LogicException;
+use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class ServiceAccountJwtAccessCredentialsTest extends TestCase
 {
     private const AUDIENCE = 'http://aud/';
@@ -36,7 +36,7 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
         'client_email' => 'test@example.com',
         'client_id' => 'client123',
         'type' => 'service_account',
-        'project_id' => 'example_project'
+        'project_id' => 'example_project',
     ];
 
     private static $privateKey;

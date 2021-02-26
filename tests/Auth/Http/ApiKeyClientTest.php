@@ -26,6 +26,10 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Http\Message\RequestInterface;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class ApiKeyClientTest extends TestCase
 {
     public function testSend()
@@ -39,8 +43,10 @@ class ApiKeyClientTest extends TestCase
                 $request = $args[0];
                 $uri = $request->getUri();
                 $phpunit->assertEquals('key=apikey123', $uri->getQuery());
+
                 return new Response(200);
-            });
+            })
+        ;
 
         $apiKeyClient = new ApiKeyClient($apiKey, $client->reveal());
         $apiKeyClient->send(new Request('GET', 'http://foo/'));
@@ -58,8 +64,10 @@ class ApiKeyClientTest extends TestCase
                 $request = $args[0];
                 $uri = $request->getUri();
                 $phpunit->assertEquals('key=apikey123', $uri->getQuery());
+
                 return $promise;
-            });
+            })
+        ;
 
         $apiKeyClient = new ApiKeyClient($apiKey, $client->reveal());
         $apiKeyClient->sendAsync(new Request('GET', 'http://foo/'));

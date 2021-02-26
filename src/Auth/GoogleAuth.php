@@ -20,17 +20,15 @@ declare(strict_types=1);
 namespace Google\Auth;
 
 use DomainException;
-use Firebase\JWT\JWT;
-use Firebase\JWT\JWK;
 use Google\Auth\Credentials\ComputeCredentials;
-use Google\Auth\Credentials\ServiceAccountCredentials;
-use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\Credentials\CredentialsInterface;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
-use Google\Auth\Http\ClientFactory;
-use Google\Auth\Jwt\FirebaseJwtClient;
-use Google\Auth\Jwt\JwtClientInterface;
+use Google\Auth\Http\ClientFactory as HttpClientFactory;
+use Google\Auth\Jwt\ClientFactory as JwtClientFactory;
 use Google\Cache\MemoryCacheItemPool;
+use Google\Http\ClientInterface as HttpClientInterface;
+use Google\Jwt\ClientInterface as JwtClientInterface;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
@@ -99,14 +97,14 @@ class GoogleAuth
      * If supplied, $scope is used to in creating the credentials instance if
      * this does not fallback to the Compute Engine defaults.
      *
-     * @param array $options {
-     *      @type ClientInterface $httpClient client which delivers psr7 request
-     *      @type JwtClientInterface $jwtClient
-     *      @type CacheItemPoolInterface $cache A cache implementation, may be
-     *             provided if you have one already available for use.
-     *      @type int $cacheLifetime
-     *      @type string $cachePrefix
-     * }
+     * @param array                  $options
+     * @param HttpClientInterface    $options.httpClient    client which delivers psr7 request
+     * @param JwtClientInterface     $options.jwtClient
+     * @param CacheItemPoolInterface $options.cache         A cache implementation, may be
+     *                                                      provided if you have one already available for use.
+     * @param int                    $options.cacheLifetime
+     * @param string                 $options.cachePrefix
+     *                                                      }
      */
     public function __construct(array $options = [])
     {
@@ -120,9 +118,8 @@ class GoogleAuth
         $this->cache = $options['cache'] ?: new MemoryCacheItemPool();
         $this->cacheLifetime = $options['cacheLifetime'];
         $this->cachePrefix = $options['cachePrefix'];
-        $this->httpClient = $options['httpClient'] ?: ClientFactory::build();
-        $this->jwtClient = $options['jwtClient']
-            ?: new FirebaseJwtClient(new JWT(), new JWK());
+        $this->httpClient = $options['httpClient'] ?: HttpClientFactory::build();
+        $this->jwtClient = $options['jwtClient'] ?: JwtClientFactory::build();
     }
 
     /**
@@ -133,20 +130,21 @@ class GoogleAuth
      * If supplied, $scope is used to in creating the credentials instance if
      * this does not fallback to the Compute Engine defaults.
      *
-     * @param array $options {
-     *      @type string|array scope the scope of the access request, expressed
-     *             either as an Array or as a space-delimited String.
-     *      @type string $targetAudience The audience for the ID token.
-     *      @type string $audience
-     *      @type string $quotaProject specifies a project to bill for access
-     *             charges associated with the request.
-     *      @type string $subject
-     *      @type string|array $defaultScope The default scope to use if no
-     *             user-defined scopes exist, expressed either as an Array or as
-     *             a space-delimited string.
-     * }
+     * @param array        $options
+     * @param array|string $opions.scope          the scope of the access request, expressed
+     *                                            either as an Array or as a space-delimited String.
+     * @param string       $opions.targetAudience The audience for the ID token.
+     * @param string       $opions.audience
+     * @param string       $opions.quotaProject   specifies a project to bill for access
+     *                                            charges associated with the request.
+     * @param string       $opions.subject
+     * @param array|string $opions.defaultScope   The default scope to use if no
+     *                                            user-defined scopes exist, expressed either as an Array or as
+     *                                            a space-delimited string.
+     *
+     * @throws DomainException if no implementation can be obtained
+     *
      * @return CredentialsInterface
-     * @throws DomainException if no implementation can be obtained.
      */
     public function makeCredentials(array $options = []): CredentialsInterface
     {
@@ -192,7 +190,9 @@ class GoogleAuth
                         'httpClient' => $this->httpClient,
                         'subject' => $options['subject'],
                     ]);
+
                     break;
+
                 case 'authorized_user':
                     if (isset($options['targetAudience'])) {
                         throw new InvalidArgumentException(
@@ -203,7 +203,9 @@ class GoogleAuth
                         'scope' => $anyScope,
                         'httpClient' => $this->httpClient,
                     ]);
+
                     break;
+
                 default:
                     throw new \InvalidArgumentException(
                         'invalid value in the type field'
@@ -244,7 +246,7 @@ class GoogleAuth
             return $cacheItem->get();
         }
 
-        $onCompute = ComputeCredentials::onCompute($this->httpClient);
+        $onCompute = Compute::onCompute($this->httpClient);
         $cacheItem->set($onCompute);
         $cacheItem->expiresAfter($this->cacheLifetime);
         $this->cache->save($cacheItem);
@@ -253,13 +255,13 @@ class GoogleAuth
     }
 
     /**
-     * @param string $token The JSON Web Token to be verified.
-     * @param array $options [optional] Configuration options.
-     * @param string $options.audience The indended recipient of the token.
-     * @param string $options.cacheKey cache key used for caching certs
+     * @param string $token                 the JSON Web Token to be verified
+     * @param array  $options               [optional] Configuration options
+     * @param string $options.audience      The indended recipient of the token.
+     * @param string $options.cacheKey      cache key used for caching certs
      * @param string $options.certsLocation URI for JSON certificate array conforming to
-     *        the JWK spec (see https://tools.ietf.org/html/rfc7517).
-     * @param string  $options.issuer The intended issuer of the token.
+     *                                      the JWK spec (see https://tools.ietf.org/html/rfc7517).
+     * @param string $options.issuer        The intended issuer of the token.
      *
      * @return array the verified ID token payload
      */
@@ -301,10 +303,12 @@ class GoogleAuth
      * Returns certs as array structure, where keys are key ids, and values
      * are PEM encoded certificates.
      *
-     * @param string $location The location from which to retrieve certs.
-     * @param string $cacheKey The key under which to cache the retrieved certs.
+     * @param string $location the location from which to retrieve certs
+     * @param string $cacheKey the key under which to cache the retrieved certs
+     *
+     * @throws InvalidArgumentException if received certs are in an invalid format
+     *
      * @return array
-     * @throws InvalidArgumentException If received certs are in an invalid format.
      */
     private function getCerts(string $location, string $cacheKey): array
     {
@@ -341,7 +345,8 @@ class GoogleAuth
      *
      * @param array $certs Certificate array according to the JWK spec (see
      *                     https://tools.ietf.org/html/rfc7517).
-     * @return string The expected algorithm, such as "ES256" or "RS256".
+     *
+     * @return string the expected algorithm, such as "ES256" or "RS256"
      */
     private function determineAlg(array $certs): string
     {
@@ -365,6 +370,7 @@ class GoogleAuth
                 'unrecognized "alg" in certs, expected ES256 or RS256'
             );
         }
+
         return $alg;
     }
 
@@ -372,14 +378,16 @@ class GoogleAuth
      * Retrieve and cache a certificates file.
      *
      * @param $url string location
+     *
+     * @throws InvalidArgumentException if certs could not be retrieved from a local file
+     * @throws RuntimeException         if certs could not be retrieved from a remote location
+     *
      * @return array certificates
-     * @throws InvalidArgumentException If certs could not be retrieved from a local file.
-     * @throws RuntimeException If certs could not be retrieved from a remote location.
      */
     private function retrieveCertsFromLocation(string $url): array
     {
         // If we're retrieving a local file, just grab it.
-        if (strpos($url, 'http') !== 0) {
+        if (0 !== strpos($url, 'http')) {
             if (!file_exists($url)) {
                 throw new InvalidArgumentException(sprintf(
                     'Failed to retrieve verification certificates from path: %s.',
@@ -392,7 +400,7 @@ class GoogleAuth
 
         $response = $this->httpClient->send(new Request('GET', $url));
 
-        if ($response->getStatusCode() == 200) {
+        if (200 == $response->getStatusCode()) {
             return json_decode((string) $response->getBody(), true);
         }
 
@@ -409,7 +417,7 @@ class GoogleAuth
      * variable GOOGLE_APPLICATION_CREDENTIALS. Return null if
      * GOOGLE_APPLICATION_CREDENTIALS is not specified.
      *
-     * @return array|null
+     * @return null|array
      */
     private function fromEnv(): ?array
     {
@@ -419,9 +427,11 @@ class GoogleAuth
         }
         if (!file_exists($path)) {
             $cause = 'file ' . $path . ' does not exist';
+
             throw new \DomainException(self::unableToReadEnv($cause));
         }
         $jsonKey = file_get_contents($path);
+
         return json_decode($jsonKey, true);
     }
 
@@ -435,7 +445,7 @@ class GoogleAuth
      *
      * If the file does not exist, this returns null.
      *
-     * @return array|null
+     * @return null|array
      */
     private function fromWellKnownFile(): ?array
     {
@@ -450,6 +460,7 @@ class GoogleAuth
             return null;
         }
         $jsonKey = file_get_contents($path);
+
         return json_decode($jsonKey, true);
     }
 
@@ -472,6 +483,6 @@ class GoogleAuth
      */
     private static function isOnWindows(): bool
     {
-        return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+        return 'WIN' === strtoupper(substr(PHP_OS, 0, 3));
     }
 }
