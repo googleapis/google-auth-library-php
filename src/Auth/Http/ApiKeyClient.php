@@ -21,7 +21,7 @@ namespace Google\Auth\Http;
 
 use Google\Http\ClientInterface;
 use Google\Http\PromiseInterface;
-use GuzzleHttp\Psr7;
+use GuzzleHttp\Query;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -89,9 +89,9 @@ class ApiKeyClient implements ClientInterface
 
     private function applyApiKey(RequestInterface $request): RequestInterface
     {
-        $query = Psr7\parse_query($request->getUri()->getQuery());
+        $query = Query::parse($request->getUri()->getQuery());
         $query['key'] = $this->apiKey;
-        $uri = $request->getUri()->withQuery(Psr7\build_query($query));
+        $uri = $request->getUri()->withQuery(Query::build($query));
 
         return $request->withUri($uri);
     }

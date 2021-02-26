@@ -23,7 +23,7 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\GoogleAuth;
 use Google\Jwt\ClientInterface;
-use GuzzleHttp\Psr7;
+use GuzzleHttp\Utils;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -255,7 +255,7 @@ class GoogleAuthTest extends TestCase
         // simulate the response from GCE.
         $httpClient = httpClientWithResponses([
             new Response(200, ['Metadata-Flavor' => 'Google']),
-            new Response(200, [], Psr7\stream_for($jsonTokens)),
+            new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
         $googleAuth = new GoogleAuth([
             'httpClient' => $httpClient,
@@ -270,7 +270,7 @@ class GoogleAuthTest extends TestCase
         $jsonTokens = json_encode(['access_token' => 'abc']);
         $httpClient = httpClientWithResponses([
             new Response(200, ['Metadata-Flavor' => 'Google']),
-            new Response(200, [], Psr7\stream_for($jsonTokens)),
+            new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
         $googleAuth = new GoogleAuth([
             'httpClient' => $httpClient,
@@ -339,7 +339,7 @@ class GoogleAuthTest extends TestCase
         $jsonTokens = json_encode(['access_token' => 'abc']);
         $httpClient = httpClientWithResponses([
             new Response(200, ['Metadata-Flavor' => 'Google']),
-            new Response(200, [], Psr7\stream_for($jsonTokens)),
+            new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $googleAuth = new GoogleAuth(['httpClient' => $httpClient]);
@@ -491,7 +491,7 @@ class GoogleAuthTest extends TestCase
     //     // simulate the response from GCE.
     //     $httpClient = httpClientWithResponses([
     //         new Response(200, ['Metadata-Flavor' => 'Google']),
-    //         new Response(200, [], Psr7\stream_for($jsonTokens)),
+    //         new Response(200, [], Utils::streamFor($jsonTokens)),
     //     ]);
 
     //     $credentials = GoogleAuth::getIdTokenCredentials(
@@ -575,7 +575,7 @@ class GoogleAuthTest extends TestCase
         // simulate the response from GCE.
         $httpClient = httpClientWithResponses([
             new Response(200, ['Metadata-Flavor' => 'Google']),
-            new Response(200, [], Psr7\stream_for($jsonTokens)),
+            new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $googleAuth = new GoogleAuth([

@@ -649,7 +649,7 @@ class OAuth2
             );
         }
 
-        $body = Psr7\stream_for(http_build_query(['token' => $token]));
+        $body = Utils::streamFor(http_build_query(['token' => $token]));
         $request = new Request('POST', $this->tokenRevokeUri, [
             'Cache-Control' => 'no-store',
             'Content-Type' => 'application/x-www-form-urlencoded',
