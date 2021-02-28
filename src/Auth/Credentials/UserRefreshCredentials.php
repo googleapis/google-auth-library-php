@@ -116,13 +116,13 @@ class UserRefreshCredentials implements CredentialsInterface
     }
 
     /**
-     * @return array A set of auth related metadata, containing the following
-     *               keys:
-     *               - access_token (string)
-     *               - expires_in (int)
-     *               - scope (string)
-     *               - token_type (string)
-     *               - id_token (string)
+     * Returns an auth token with the following keys:
+     *   - access_token (string)
+     *   - expires_in   (int)
+     *   - scope        (string)
+     *   - token_type   (string)
+     *
+     * @return array auth token
      */
     private function fetchAuthTokenNoCache(): array
     {

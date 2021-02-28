@@ -60,20 +60,20 @@ class FirebaseClient implements ClientInterface
             throw new \InvalidArgumentException('Wrong number of segments');
         }
 
-        list($headerB64, $payload, $signature) = $parts;
+        list($headerB64, $payloadB64, $signatureB64) = $parts;
 
-        $header = $this->jwt->jsonDecode(
-            $this->jwt->urlsafeB64Decode($headerB64)
+        $payload = $this->jwt->jsonDecode(
+            $this->jwt->urlsafeB64Decode($payloadB64)
         );
 
-        if (empty($header['exp'])) {
+        if (empty($payload->exp)) {
             return null;
         }
 
-        if (!is_numeric($header['exp'])) {
+        if (!is_numeric($payload->exp)) {
             throw new \UnexpectedValueException('Expiration is not numeric');
         }
 
-        return intval($header['exp']);
+        return intval($payload->exp);
     }
 }

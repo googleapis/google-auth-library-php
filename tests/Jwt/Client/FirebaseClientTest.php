@@ -147,4 +147,51 @@ class FirebaseClientTest extends TestCase
         $decoded = $jwtClient->decode($jwt, ['kid' => $publicKey], ['RS256']);
         $this->assertEquals($jwtPayload['aud'], $decoded['aud']);
     }
+
+    public function testGetExpirationWithoutVerification()
+    {
+        $jwtClient = new FirebaseClient(new JWT(), new JWK());
+        $expectedExp = 12345;
+        $jwt = implode('.', [
+            'fake-header',
+            base64_encode(json_encode(['exp' => $expectedExp])),
+            'fake-sig'
+        ]);
+        $exp = $jwtClient->getExpirationWithoutVerification($jwt);
+        $this->assertEquals($expectedExp, $exp);
+
+        $expectedExpString = '12345';
+        $jwt = implode('.', [
+            'fake-header',
+            base64_encode(json_encode(['exp' => $expectedExpString])),
+            'fake-sig'
+        ]);
+        $exp = $jwtClient->getExpirationWithoutVerification($jwt);
+        $this->assertEquals($expectedExpString, $exp);
+    }
+
+    public function testGetExpirationWithoutVerificationWithInvalidExp()
+    {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('Expiration is not numeric');
+
+        $jwtClient = new FirebaseClient(new JWT(), new JWK());
+        $expectedExp = 'thisisnotanint';
+        $jwt = implode('.', [
+            'fake-header',
+            base64_encode(json_encode(['exp' => $expectedExp])),
+            'fake-sig'
+        ]);
+
+        $jwtClient->getExpirationWithoutVerification($jwt);
+    }
+
+    public function testGetExpirationWithoutVerificationWithWrongNumberOfSegments()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Wrong number of segments');
+
+        $jwtClient = new FirebaseClient(new JWT(), new JWK());
+        $jwtClient->getExpirationWithoutVerification('thisisnota.jwt');
+    }
 }

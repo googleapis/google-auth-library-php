@@ -183,12 +183,12 @@ class ServiceAccountJwtAccessCredentials implements
     }
 
     /**
-     * Implements FetchAuthTokenInterface#fetchAuthToken.
+     * Implements FetchAuthTokenInterface#fetchAuthToken. Returns an array
+     * containing the following keys:
+     *   - access_token (string)
+     *   - expires_in (int)
      *
-     * @return array A set of auth related metadata, containing the
-     *               following keys:
-     *               - access_token (string)
-     *               - expires_in (int)
+     * @return array A set of auth related metadata
      */
     private function fetchAuthTokenNoCache(): array
     {

@@ -1370,7 +1370,7 @@ class OAuth2
      *
      * @return array the tokens parsed from the response body
      */
-    private function parseTokenResponse(ResponseInterface $resp)
+    private function parseTokenResponse(ResponseInterface $resp): array
     {
         $body = (string) $resp->getBody();
         if ($resp->hasHeader('Content-Type')

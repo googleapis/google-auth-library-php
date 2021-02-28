@@ -82,7 +82,9 @@ class ServiceAccountCredentials implements
      */
     private $quotaProject;
 
-    // @var string|null
+    /**
+     * @var string|null
+     */
     private $projectId;
 
     /*

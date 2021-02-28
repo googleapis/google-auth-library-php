@@ -233,18 +233,21 @@ class ComputeCredentials implements
      * Fetches the auth tokens from the compute metadata host if it is available.
      * If $httpClient is not specified a the default HTTP Client is used.
      *
+     * Access tokens have the following keys:
+     *   - access_token (string)
+     *   - expires_in   (int)
+     *   - expires_at   (int)
+     *   - token_type   (string)
+     *
+     * ID tokens have the following keys:
+     *   - id_token   (string)
+     *   - expires_at (int)
+     *
      * @param ClientInterface $httpClient callback which delivers psr7 request
      *
      * @throws \Exception
      *
      * @return array A set of auth related metadata, based on the token type.
-     *
-     * Access tokens have the following keys:
-     *   - access_token (string)
-     *   - expires_in (int)
-     *   - token_type (string)
-     * ID tokens have the following keys:
-     *   - id_token (string)
      */
     private function fetchAuthTokenNoCache(): array
     {
