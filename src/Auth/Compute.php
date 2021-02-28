@@ -24,17 +24,19 @@ use GuzzleHttp\Psr7\Request;
 use Psr\Http\Client\ClientExceptionInterface;
 
 /**
+ * @internal
+ *
  * Compute supports calling the metadata server on Compute Engine.
  *
- *   use Google\Auth\Credentials\ComputeCredentials;
- *   use Google\Auth\Http\CredentialsClient;
- *   use Psr\Http\Message\Request;
+ *   use Google\Auth\Compute;
+ *   use Google\Auth\Http\ClientFactory;
  *
- *   $gce = new Compute();
- *   $http = new CredentialsClient($gce);
+ *   $httpClient = ClientFactory::build();
  *
- *   $url = 'https://www.googleapis.com/taskqueue/v1beta2/projects';
- *   $res = $http->send(new Request('GET', $url));
+ *   if (Compute::onCompute($httpClient)) {
+ *       $projectIdPath = '/computeMetadata/v1/project/project-id';
+ *       $projectId = Compute::getFromMetadata($projectIdPath, $httpClient);
+ *   }
  */
 final class Compute
 {
@@ -119,7 +121,7 @@ final class Compute
     /**
      * Fetch the value of a GCE metadata server URI.
      *
-     * @param string          $uriPath    the metadata URI path
+     * @param string          $uriPath    the metadata URI path with leading slash
      * @param ClientInterface $httpClient
      *
      * @return string
