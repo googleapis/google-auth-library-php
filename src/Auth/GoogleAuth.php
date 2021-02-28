@@ -36,8 +36,8 @@ use RuntimeException;
 use UnexpectedValueException;
 
 /**
- * GoogleAuth obtains the default credentials for
- * authorizing a request to a Google service.
+ * GoogleAuth obtains the default credentials for authorizing a request to a
+ * Google service.
  *
  * Application Default Credentials are described here:
  * https://developers.google.com/accounts/docs/application-default-credentials
@@ -45,37 +45,29 @@ use UnexpectedValueException;
  * This class implements the search for the application default credentials as
  * described in the link.
  *
- * It provides three factory methods:
- * - #get returns the computed credentials object
- * - #getMiddleware returns an AuthTokenMiddleware built from the credentials object
- *
- * This allows it to be used as follows with GuzzleHttp\Client:
+ * This allows it to be used as follows (by default with GuzzleHttp\Client):
  *
  * ```
  * use Google\Auth\GoogleAuth;
- * use GuzzleHttp\Client;
- * use GuzzleHttp\HandlerStack;
+ * use Google\Auth\Http\CredentialsClient;
+ * use GuzzleHttp\Psr7\Request;
  *
  * $auth = new GoogleAuth();
- * $middleware = $auth->getMiddleware(
- *     'https://www.googleapis.com/auth/taskqueue'
+ * $credentials = $auth->makeCredentials(
+ *     'https://www.googleapis.com/auth/taskqueue' // task queue scope
  * );
- * $stack = HandlerStack::create();
- * $stack->push($middleware);
  *
- * $client = new Client([
- *     'handler' => $stack,
- *     'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
- *     'auth' => 'google_auth' // authorize all requests
- * ]);
+ * $client = new CredentialsClient($credentials);
  *
- * $res = $client->get('myproject/taskqueues/myqueue');
+ * $baseUri = 'https://www.googleapis.com/taskqueue/v1beta2/projects/';
+ $ $request = new Request('GET', $baseUri . 'myproject/taskqueues/myqueue');
+ * $response = $client->send($request);
  * ```
  */
 class GoogleAuth
 {
     const OIDC_CERT_URI = 'https://www.googleapis.com/oauth2/v3/certs';
-    const OIDC_ISSUERS = ['http://accounts.google.com', 'https://accounts.google.com'];
+    const OIDC_ISSUERS = ['https://accounts.google.com', 'http://accounts.google.com'];
     const IAP_JWK_URI = 'https://www.gstatic.com/iap/verify/public_key-jwk';
     const IAP_ISSUERS = ['https://cloud.google.com/iap'];
 
