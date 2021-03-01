@@ -60,7 +60,7 @@ use UnexpectedValueException;
  * $client = new CredentialsClient($credentials);
  *
  * $baseUri = 'https://www.googleapis.com/taskqueue/v1beta2/projects/';
- $ $request = new Request('GET', $baseUri . 'myproject/taskqueues/myqueue');
+ * $request = new Request('GET', $baseUri . 'myproject/taskqueues/myqueue');
  * $response = $client->send($request);
  * ```
  */

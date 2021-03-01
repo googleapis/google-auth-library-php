@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\SignBlob\PrivateKeySignBlobTrait
  */
 class PrivateKeySignBlobTraitTest extends TestCase
 {

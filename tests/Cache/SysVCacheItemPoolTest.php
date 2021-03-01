@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Cache\Tests;
+namespace Google\Cache\Tests;
 
 use Google\Cache\SysVCacheItemPool;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Cache\SysVCacheItemPoolTest
  */
 class SysVCacheItemPoolTest extends TestCase
 {

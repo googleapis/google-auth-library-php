@@ -19,10 +19,10 @@ declare(strict_types=1);
 
 namespace Google\Jwt\Client;
 
-use Firebase\JWT\JWK;
-use Firebase\JWT\JWT;
 use Firebase\JWT\BeforeValidException;
 use Firebase\JWT\ExpiredException;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
 use Firebase\JWT\SignatureInvalidException;
 use Google\Jwt\ClientInterface;
 use Google\Jwt\VerificationFailedException;

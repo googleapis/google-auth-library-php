@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Http\ClientFactory
  */
 class ClientFactoryTest extends TestCase
 {

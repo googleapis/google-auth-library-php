@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Cache\Tests;
+namespace Google\Cache\Tests;
 
 use Google\Cache\Item;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Cache\Item
  */
 class ItemTest extends TestCase
 {

@@ -30,7 +30,7 @@ use UnexpectedValueException;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Jwt\Client\FirebaseClient
  */
 class FirebaseClientTest extends TestCase
 {
@@ -108,8 +108,8 @@ class FirebaseClientTest extends TestCase
                 'exception' => [
                     'class' => SignatureInvalidException::class,
                     'message' => 'invalid signature!',
-                ],'
-                exceptionCode' => VerificationFailedException::SIGNATURE_INVALID,
+                ],
+                'exceptionCode' => VerificationFailedException::SIGNATURE_INVALID,
             ],
             [
                 'payload' => $payload,
@@ -164,7 +164,7 @@ class FirebaseClientTest extends TestCase
         $jwt = implode('.', [
             'fake-header',
             base64_encode(json_encode(['exp' => $expectedExp])),
-            'fake-sig'
+            'fake-sig',
         ]);
         $exp = $jwtClient->getExpirationWithoutVerification($jwt);
         $this->assertEquals($expectedExp, $exp);
@@ -173,7 +173,7 @@ class FirebaseClientTest extends TestCase
         $jwt = implode('.', [
             'fake-header',
             base64_encode(json_encode(['exp' => $expectedExpString])),
-            'fake-sig'
+            'fake-sig',
         ]);
         $exp = $jwtClient->getExpirationWithoutVerification($jwt);
         $this->assertEquals($expectedExpString, $exp);
@@ -189,7 +189,7 @@ class FirebaseClientTest extends TestCase
         $jwt = implode('.', [
             'fake-header',
             base64_encode(json_encode(['exp' => $expectedExp])),
-            'fake-sig'
+            'fake-sig',
         ]);
 
         $jwtClient->getExpirationWithoutVerification($jwt);
@@ -219,8 +219,8 @@ class FirebaseClientTest extends TestCase
         $this->expectExceptionCode(VerificationFailedException::EXPIRED);
 
         $payload = [
-            "message" => "abc",
-            "exp" => time() - 20
+            'message' => 'abc',
+            'exp' => time() - 20,
         ]; // time in the past
 
         $jwtClient = new FirebaseClient(new JWT(), new JWK());
@@ -235,8 +235,8 @@ class FirebaseClientTest extends TestCase
         $this->expectExceptionCode(VerificationFailedException::BEFORE_VALID);
 
         $payload = [
-            "message" => "abc",
-            "nbf" => time() + 20
+            'message' => 'abc',
+            'nbf' => time() + 20,
         ]; // time in the future
 
         $jwtClient = new FirebaseClient(new JWT(), new JWK());
@@ -251,8 +251,8 @@ class FirebaseClientTest extends TestCase
         $this->expectExceptionCode(VerificationFailedException::BEFORE_VALID);
 
         $payload = [
-            "message" => "abc",
-            "iat" => time() + 20
+            'message' => 'abc',
+            'iat' => time() + 20,
         ]; // time in the future
 
         $jwtClient = new FirebaseClient(new JWT(), new JWK());
@@ -267,8 +267,8 @@ class FirebaseClientTest extends TestCase
         $this->expectExceptionCode(VerificationFailedException::SIGNATURE_INVALID);
 
         $payload = [
-            "message" => "abc",
-            "exp" => time() + 20
+            'message' => 'abc',
+            'exp' => time() + 20,
         ]; // time in the future
 
         $jwtClient = new FirebaseClient(new JWT(), new JWK());

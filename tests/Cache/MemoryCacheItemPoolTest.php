@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Cache\Tests;
+namespace Google\Cache\Tests;
 
 use Google\Cache\MemoryCacheItemPool;
 use PHPUnit\Framework\TestCase;
@@ -23,7 +23,7 @@ use Psr\Cache\InvalidArgumentException;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Cache\MemoryCacheItemPool
  */
 class MemoryCacheItemPoolTest extends TestCase
 {

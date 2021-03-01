@@ -28,7 +28,7 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Http\ApiKeyClient
  */
 class ApiKeyClientTest extends TestCase
 {

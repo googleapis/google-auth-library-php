@@ -24,10 +24,8 @@ use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @group iam
- *
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\SignBlob\ServiceAccountApiSignBlobTrait
  */
 class ServiceAccountApiSignBlobTraitTest extends TestCase
 {

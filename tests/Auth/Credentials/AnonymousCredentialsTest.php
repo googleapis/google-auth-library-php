@@ -24,7 +24,7 @@ use PHPUnit\Framework\TestCase;
  * @group credentials
  *
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Credentials\AnonymousCredentials
  */
 class AnonymousCredentialsTest extends TestCase
 {

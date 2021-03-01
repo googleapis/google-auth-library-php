@@ -31,7 +31,12 @@ use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Credentials\ComputeCredentials
+ * @covers \Google\Auth\Credentials\CredentialsInterface
+ * @covers \Google\Auth\Credentials\OAuth2Credentials
+ * @covers \Google\Auth\Credentials\ServiceAccountCredentials
+ * @covers \Google\Auth\Credentials\ServiceAccountJwtAccessCredentials
+ * @covers \Google\Auth\Credentials\UserRefreshCredentials
  */
 class CredentialsTest extends TestCase
 {

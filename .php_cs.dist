@@ -5,6 +5,7 @@ return PhpCsFixer\Config::create()
         '@PhpCsFixer' => true,
         '@PSR2' => true,
         'no_superfluous_phpdoc_tags' => false,
+        'phpdoc_summary' => false,
         'concat_space' => ['spacing' => 'one'],
         'no_unused_imports' => true,
         'ordered_imports' => true,

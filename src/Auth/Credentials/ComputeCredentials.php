@@ -247,7 +247,7 @@ class ComputeCredentials implements
      *
      * @throws \Exception
      *
-     * @return array A set of auth related metadata, based on the token type.
+     * @return array a set of auth related metadata, based on the token type
      */
     private function fetchAuthTokenNoCache(): array
     {

@@ -29,7 +29,7 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Http\CredentialsClient
  */
 class CredentialsClientTest extends TestCase
 {

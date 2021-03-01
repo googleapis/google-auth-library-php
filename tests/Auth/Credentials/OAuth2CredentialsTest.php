@@ -26,7 +26,7 @@ use PHPUnit\Framework\TestCase;
  * @group credentials
  *
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Credentials\OAuth2Credentials
  */
 class OAuth2CredentialsTest extends TestCase
 {

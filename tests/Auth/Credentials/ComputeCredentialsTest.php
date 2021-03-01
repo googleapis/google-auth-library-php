@@ -27,7 +27,7 @@ use PHPUnit\Framework\TestCase;
  * @group credentials-compute
  *
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Credentials\ComputeCredentials
  */
 class ComputeCredentialsTest extends TestCase
 {

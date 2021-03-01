@@ -36,7 +36,7 @@ use UnexpectedValueException;
  * @runTestsInSeparateProcesses
  *
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\GoogleAuth
  */
 class GoogleAuthTest extends TestCase
 {

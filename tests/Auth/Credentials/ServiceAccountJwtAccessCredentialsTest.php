@@ -24,7 +24,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Credentials\ServiceAccountJwtAccessCredentials
  */
 class ServiceAccountJwtAccessCredentialsTest extends TestCase
 {

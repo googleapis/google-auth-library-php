@@ -26,7 +26,7 @@ use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Credentials\CredentialsTrait
  */
 class CredentialsTraitTest extends TestCase
 {

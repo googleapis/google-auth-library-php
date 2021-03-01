@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Compute
  */
 class ComputeTest extends TestCase
 {

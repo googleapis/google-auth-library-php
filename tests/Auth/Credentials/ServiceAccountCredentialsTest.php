@@ -28,7 +28,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\Credentials\ServiceAccountCredentials
  */
 class ServiceAccountCredentialsTest extends TestCase
 {

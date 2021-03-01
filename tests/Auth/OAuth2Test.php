@@ -37,7 +37,7 @@ use UnexpectedValueException;
 
 /**
  * @internal
- * @coversNothing
+ * @covers \Google\Auth\OAuth2
  */
 class OAuth2Test extends TestCase
 {
