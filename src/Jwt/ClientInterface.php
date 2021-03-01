@@ -41,6 +41,8 @@ interface ClientInterface
      * @param array  $keys
      * @param array  $allowedAlgs
      *
+     * @throws VerificationFailedException
+     *
      * @return array
      */
     public function decode(string $jwt, array $keys, array $allowedAlgs): array;

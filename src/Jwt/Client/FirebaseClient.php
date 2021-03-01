@@ -21,7 +21,11 @@ namespace Google\Jwt\Client;
 
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
+use Firebase\JWT\BeforeValidException;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\SignatureInvalidException;
 use Google\Jwt\ClientInterface;
+use Google\Jwt\VerificationFailedException;
 
 class FirebaseClient implements ClientInterface
 {
@@ -43,9 +47,22 @@ class FirebaseClient implements ClientInterface
         return $this->jwt->encode($payload, $signingKey, $signingAlg, $keyId);
     }
 
+    /**
+     * @throws VerificationFailedException
+     */
     public function decode(string $jwt, array $keys, array $allowedAlgs): array
     {
-        return (array) $this->jwt->decode($jwt, $keys, $allowedAlgs);
+        try {
+            return (array) $this->jwt->decode($jwt, $keys, $allowedAlgs);
+        } catch (BeforeValidException $e) {
+            $code = VerificationFailedException::BEFORE_VALID;
+        } catch (ExpiredException $e) {
+            $code = VerificationFailedException::EXPIRED;
+        } catch (SignatureInvalidException $e) {
+            $code = VerificationFailedException::SIGNATURE_INVALID;
+        }
+
+        throw new VerificationFailedException($e->getMessage(), $code, $e);
     }
 
     public function parseKeySet(array $keySet): array

@@ -24,6 +24,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\SignatureInvalidException;
 use Google\Auth\GoogleAuth;
 use Google\Jwt\Client\FirebaseClient;
+use Google\Jwt\VerificationFailedException;
 use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
 
@@ -38,7 +39,8 @@ class FirebaseClientTest extends TestCase
      */
     public function testDecode(
         array $payload,
-        array $expectedException = null
+        array $expectedException = null,
+        int $exceptionCode = null
     ) {
         // We cannot use mocks because Prophecy cannot mock static methods
         $jwt = new class() extends JWT {
@@ -65,7 +67,11 @@ class FirebaseClientTest extends TestCase
             $this->prophesize(JWK::class)->reveal()
         );
 
-        if ($expectedException) {
+        if ($exceptionCode) {
+            $this->expectException(VerificationFailedException::class);
+            $this->expectExceptionMessage($expectedException['message']);
+            $this->expectExceptionCode($exceptionCode);
+        } elseif ($expectedException) {
             $this->expectException($expectedException['class']);
             $this->expectExceptionMessage($expectedException['message']);
         }
@@ -91,31 +97,34 @@ class FirebaseClientTest extends TestCase
         return [
             [
                 'payload' => $payload,
-                'expectedException' => [
+                'exception' => [
                     'class' => ExpiredException::class,
                     'message' => 'expired!',
                 ],
+                'exceptionCode' => VerificationFailedException::EXPIRED,
             ],
             [
                 'payload' => $payload,
-                'expectedException' => [
+                'exception' => [
                     'class' => SignatureInvalidException::class,
                     'message' => 'invalid signature!',
-                ],
+                ],'
+                exceptionCode' => VerificationFailedException::SIGNATURE_INVALID,
             ],
             [
                 'payload' => $payload,
-                'expectedException' => [
+                'exception' => [
                     'class' => UnexpectedValueException::class,
                     'message' => 'invalid token!',
                 ],
             ],
             [
                 'payload' => $payload,
-                'expectedException' => [
+                'exception' => [
                     'class' => BeforeValidException::class,
                     'message' => 'ineligible cbf!',
                 ],
+                'exceptionCode' => VerificationFailedException::BEFORE_VALID,
             ],
         ];
     }
@@ -193,5 +202,78 @@ class FirebaseClientTest extends TestCase
 
         $jwtClient = new FirebaseClient(new JWT(), new JWK());
         $jwtClient->getExpirationWithoutVerification('thisisnota.jwt');
+    }
+
+    public function testVerificationWithExpired()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Wrong number of segments');
+
+        $jwtClient = new FirebaseClient(new JWT(), new JWK());
+        $jwtClient->getExpirationWithoutVerification('thisisnota.jwt');
+    }
+
+    public function testExpiredToken()
+    {
+        $this->expectException(VerificationFailedException::class);
+        $this->expectExceptionCode(VerificationFailedException::EXPIRED);
+
+        $payload = [
+            "message" => "abc",
+            "exp" => time() - 20
+        ]; // time in the past
+
+        $jwtClient = new FirebaseClient(new JWT(), new JWK());
+
+        $encoded = $jwtClient->encode($payload, 'my_key', 'HS256', 'key1');
+        $jwtClient->decode($encoded, ['key1' => 'my_key'], ['HS256']);
+    }
+
+    public function testBeforeValidTokenWithNbf()
+    {
+        $this->expectException(VerificationFailedException::class);
+        $this->expectExceptionCode(VerificationFailedException::BEFORE_VALID);
+
+        $payload = [
+            "message" => "abc",
+            "nbf" => time() + 20
+        ]; // time in the future
+
+        $jwtClient = new FirebaseClient(new JWT(), new JWK());
+
+        $encoded = $jwtClient->encode($payload, 'my_key', 'HS256', 'key1');
+        $jwtClient->decode($encoded, ['key1' => 'my_key'], ['HS256']);
+    }
+
+    public function testBeforeValidTokenWithIat()
+    {
+        $this->expectException(VerificationFailedException::class);
+        $this->expectExceptionCode(VerificationFailedException::BEFORE_VALID);
+
+        $payload = [
+            "message" => "abc",
+            "iat" => time() + 20
+        ]; // time in the future
+
+        $jwtClient = new FirebaseClient(new JWT(), new JWK());
+
+        $encoded = $jwtClient->encode($payload, 'my_key', 'HS256', 'key1');
+        $jwtClient->decode($encoded, ['key1' => 'my_key'], ['HS256']);
+    }
+
+    public function testSignatureInvalidToken()
+    {
+        $this->expectException(VerificationFailedException::class);
+        $this->expectExceptionCode(VerificationFailedException::SIGNATURE_INVALID);
+
+        $payload = [
+            "message" => "abc",
+            "exp" => time() + 20
+        ]; // time in the future
+
+        $jwtClient = new FirebaseClient(new JWT(), new JWK());
+
+        $encoded = $jwtClient->encode($payload, 'my_key', 'HS256', 'key1');
+        $jwtClient->decode($encoded, ['key1' => 'my_key2'], ['HS256']);
     }
 }
