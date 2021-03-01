@@ -20,6 +20,10 @@ declare(strict_types=1);
 namespace Google\Auth;
 
 use Google\Http\ClientInterface;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Client\ClientExceptionInterface;
 
@@ -112,6 +116,10 @@ final class Compute
 
                 return 'Google' == $resp->getHeaderLine(self::FLAVOR_HEADER);
             } catch (ClientExceptionInterface $e) {
+            } catch (ClientException $e) {
+            } catch (ServerException $e) {
+            } catch (RequestException $e) {
+            } catch (ConnectException $e) {
             }
         }
 
