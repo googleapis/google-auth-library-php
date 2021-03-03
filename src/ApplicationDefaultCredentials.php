@@ -195,74 +195,6 @@ class ApplicationDefaultCredentials
     }
 
     /**
-     * Obtains an AuthTokenMiddleware which will fetch an access token to use in
-     * the Authorization header. The middleware is configured with the default
-     * FetchAuthTokenInterface implementation to use in this environment.
-     *
-     * If supplied, $scope is used to in creating the credentials instance if
-     * this does not fallback to the Compute Engine defaults.
-     *
-     * @param array $jsonKey the json key file contents as array
-     * @param string|array $scope the scope of the access request, expressed
-     *        either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
-     *        provided if you have one already available for use.
-     * @param string $quotaProject specifies a project to bill for access
-     *   charges associated with the request.
-     * @param string|array $defaultScope The default scope to use if no
-     *   user-defined scopes exist, expressed either as an Array or as a
-     *   space-delimited string.
-     *
-     * @return CredentialsLoader
-     * @throws \Exception
-     */
-    public static function getCredentialsWithJsonKey(
-        array $jsonKey,
-        $scope = null,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null,
-        $quotaProject = null,
-        $defaultScope = null
-    ) {
-        $anyScope = $scope ?: $defaultScope;
-
-        if (!$httpHandler) {
-            if (!($client = HttpClientCache::getHttpClient())) {
-                $client = new Client();
-                HttpClientCache::setHttpClient($client);
-            }
-
-            $httpHandler = HttpHandlerFactory::build($client);
-        }
-
-        if (!is_null($jsonKey)) {
-            if ($quotaProject) {
-                $jsonKey['quota_project_id'] = $quotaProject;
-            }
-            $creds = CredentialsLoader::makeCredentials(
-                $scope,
-                $jsonKey,
-                $defaultScope
-            );
-        } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
-            $creds = new AppIdentityCredentials($anyScope);
-        } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
-            $creds = new GCECredentials(null, $anyScope, null, $quotaProject);
-        }
-
-        if (is_null($creds)) {
-            throw new DomainException(self::notFound());
-        }
-        if (!is_null($cache)) {
-            $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
-        }
-        return $creds;
-    }
-
-    /**
      * Obtains an AuthTokenMiddleware which will fetch an ID token to use in the
      * Authorization header. The middleware is configured with the default
      * FetchAuthTokenInterface implementation to use in this environment.
@@ -372,40 +304,5 @@ class ApplicationDefaultCredentials
         }
 
         return (new GCECache($gceCacheConfig, $cache))->onGce($httpHandler);
-    }
-
-    /**
-     * Obtains an AuthTokenMiddleware that uses the default FetchAuthTokenInterface
-     * implementation to use in this environment.
-     *
-     *
-     * If supplied, $scope is used to in creating the credentials instance if
-     * this does not fallback to the compute engine defaults.
-     *
-     * Requires the json key to be supplied as the first parameter
-     *
-     * @param array $jsonKey the json key file contents as array
-     * @param string|array scope the scope of the access request, expressed
-     *        either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
-     *        provided if you have one already available for use.
-     * @param string $quotaProject specifies a project to bill for access
-     *   charges associated with the request.
-     * @return AuthTokenMiddleware
-     * @throws DomainException if no implementation can be obtained.
-     */
-    public static function getMiddlewareWithJsonKey(
-        array $jsonKey,
-        $scope = null,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null,
-        $quotaProject = null
-    ) {
-        $creds = self::getCredentialsWithJsonKey($jsonKey, $scope, $httpHandler, $cacheConfig, $cache, $quotaProject);
-
-        return new AuthTokenMiddleware($creds, $httpHandler);
     }
 }

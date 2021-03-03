@@ -357,15 +357,6 @@ class ADCGetMiddlewareTest extends TestCase
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler));
     }
 
-    public function testLoadsOkIfCredsAreSubmitted()
-    {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
-        $keyStream = file_get_contents($keyFile);
-        $jsonKey = json_decode($keyStream, true);
-
-        $this->assertNotNull(ApplicationDefaultCredentials::getMiddlewareWithJsonKey($jsonKey, 'a scope'));
-    }
-
     /**
      * @expectedException DomainException
      */

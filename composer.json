@@ -2,11 +2,7 @@
   "name": "google/auth",
   "type": "library",
   "description": "Google Auth Library for PHP",
-  "keywords": [
-    "google",
-    "oauth2",
-    "authentication"
-  ],
+  "keywords": ["google", "oauth2", "authentication"],
   "homepage": "http://github.com/google/google-auth-library-php",
   "license": "Apache-2.0",
   "support": {
@@ -18,8 +14,7 @@
     "guzzlehttp/guzzle": "^5.3.1|^6.2.1|^7.0",
     "guzzlehttp/psr7": "^1.2",
     "psr/http-message": "^1.0",
-    "psr/cache": "^1.0",
-    "ext-json": "*"
+    "psr/cache": "^1.0"
   },
   "require-dev": {
     "guzzlehttp/promises": "0.1.1|^1.3",
@@ -27,8 +22,7 @@
     "phpunit/phpunit": "^4.8.36|^5.7",
     "sebastian/comparator": ">=1.2.3",
     "phpseclib/phpseclib": "^2",
-    "kelvinmo/simplejwt": "^0.2.5|^0.5.1",
-    "symfony/var-dumper": "^5.2"
+    "kelvinmo/simplejwt": "^0.2.5|^0.5.1"
   },
   "suggest": {
     "phpseclib/phpseclib": "May be used in place of OpenSSL for signing strings or for token management. Please require version ^2."
