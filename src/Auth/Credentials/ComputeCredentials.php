@@ -117,14 +117,19 @@ class ComputeCredentials implements
     private $jwtClient;
 
     /**
-     * @param array        $options
-     * @param array|string $options.scope                  the scope of the access request,
-     *                                                     expressed either as an array or as a space-delimited string.
-     * @param string       $options.targetAudience         The audience for the ID token.
-     * @param string       $options.quotaProject           Specifies a project to bill for access
-     *                                                     charges associated with the request.
-     * @param string       $options.serviceAccountIdentity [optional] Specify a service
-     *                                                     account identity name to use instead of "default".
+     * @param array                  $options
+     * @param array|string           $options.scope                  the scope of the access request,
+     *                                                               expressed either as an array or as a space-delimited string.
+     * @param string                 $options.targetAudience         The audience for the ID token.
+     * @param string                 $options.quotaProject           Specifies a project to bill for access
+     *                                                               charges associated with the request.
+     * @param string                 $options.serviceAccountIdentity [optional] Specify a service
+     *                                                               account identity name to use instead of "default".
+     * @param HttpClientInterface    $options.httpClient
+     * @param JwtClientInterface     $options.jwtClient
+     * @param CacheItemPoolInterface $options.cache
+     * @param string                 $options.cachePrefix
+     * @param int                    $options.cacheLifetime
      */
     public function __construct(array $options = [])
     {

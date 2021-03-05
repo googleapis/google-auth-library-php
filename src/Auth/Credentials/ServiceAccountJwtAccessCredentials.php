@@ -58,9 +58,14 @@ class ServiceAccountJwtAccessCredentials implements
     /**
      * Create a new ServiceAccountJwtAccessCredentials.
      *
-     * @param array|string $jsonKey JSON credential file path or JSON credentials
-     *                              as an associative array
-     * @param array $options
+     * @param array|string           $jsonKey               JSON credential file path or JSON credentials
+     *                                                      as an associative array
+     * @param array                  $options
+     * @param string                 $options.audience
+     * @param HttpClientInterface    $options.httpClient
+     * @param CacheItemPoolInterface $options.cache
+     * @param string                 $options.cachePrefix
+     * @param int                    $options.cacheLifetime
      */
     public function __construct($jsonKey, array $options = [])
     {

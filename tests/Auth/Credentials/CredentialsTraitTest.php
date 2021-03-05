@@ -342,7 +342,7 @@ class CredentialsTraitImplementation
         return $this->token;
     }
 
-    private function getCacheKey()
+    private function getCacheKey(): string
     {
         return $this->key;
     }

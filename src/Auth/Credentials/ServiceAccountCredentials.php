@@ -100,15 +100,19 @@ class ServiceAccountCredentials implements
     /**
      * Create a new ServiceAccountCredentials.
      *
-     * @param array|string $jsonKey                JSON credential file path or JSON
-     *                                             credentials in associative array
-     * @param array        $options
-     * @param array|string $options.scope          the scope of the access request, expressed
-     *                                             as an array or as a space-delimited string
-     * @param string       $options.subject        an email address account to impersonate, in
-     *                                             situations when the service account has been delegated domain
-     *                                             wide access
-     * @param string       $options.targetAudience The audience for the ID token.
+     * @param array|string           $jsonKey                JSON credential file path or JSON
+     *                                                       credentials in associative array
+     * @param array                  $options
+     * @param array|string           $options.scope          the scope of the access request, expressed
+     *                                                       as an array or as a space-delimited string
+     * @param string                 $options.subject        an email address account to impersonate, in
+     *                                                       situations when the service account has been delegated domain
+     *                                                       wide access
+     * @param string                 $options.targetAudience The audience for the ID token.
+     * @param HttpClientInterface    $options.httpClient
+     * @param CacheItemPoolInterface $options.cache
+     * @param string                 $options.cachePrefix
+     * @param int                    $options.cacheLifetime
      */
     public function __construct($jsonKey, array $options = [])
     {

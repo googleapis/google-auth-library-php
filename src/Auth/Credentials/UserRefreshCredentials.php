@@ -51,9 +51,14 @@ class UserRefreshCredentials implements CredentialsInterface
     /**
      * Create a new UserRefreshCredentials.
      *
-     * @param array        $jsonKey JSON credential as an associative array
-     * @param array|string $scope   the scope of the access request, expressed
-     *                              either as an Array or as a space-delimited String
+     * @param array                  $jsonKey               JSON credential as an associative array
+     * @param array                  $options
+     * @param array                  $options.scope         the scope of the access request, expressed
+     *                                                      either as an Array or as a space-delimited String
+     * @param HttpClientInterface    $options.httpClient
+     * @param CacheItemPoolInterface $options.cache
+     * @param string                 $options.cachePrefix
+     * @param int                    $options.cacheLifetime
      */
     public function __construct($jsonKey, array $options = [])
     {

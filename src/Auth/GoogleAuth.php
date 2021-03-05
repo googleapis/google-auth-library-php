@@ -96,7 +96,6 @@ class GoogleAuth
      *                                                      provided if you have one already available for use.
      * @param int                    $options.cacheLifetime
      * @param string                 $options.cachePrefix
-     *                                                      }
      */
     public function __construct(array $options = [])
     {
