@@ -177,40 +177,15 @@ If you want to use a specific JSON key instead of using `GOOGLE_APPLICATION_CRED
  do this:
  
 ```php
-use Google\Auth\CredentialsLoader;
-use Google\Auth\Middleware\AuthTokenMiddleware;
-use GuzzleHttp\HandlerStack;
-
 // Define the Google Application Credentials array
 $jsonKey = ['key' => 'value'];
 
-// define the scopes for your API call
-$scopes = ['https://www.googleapis.com/auth/drive.readonly'];
+// Using credentials option
+$client = new Google\Client(['credentials' => $jsonKey]);
 
-// Load credentials
-$creds = CredentialsLoader::makeCredentials($scopes, $jsonKey);
-
-// optional caching
-// $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
-
-// create middleware
-$middleware = new AuthTokenMiddleware($creds);
-$stack = HandlerStack::create();
-$stack->push($middleware);
-
-// create the HTTP client
-$client = new Client([
-  'handler' => $stack,
-  'base_uri' => 'https://www.googleapis.com',
-  'auth' => 'google_auth'  // authorize all requests
-]);
-
-// make the request
-$response = $client->get('drive/v2/files');
-
-// show the result!
-print_r((string) $response->getBody());
-
+// Or using setAuthConfig
+$client = new Google\Client();
+$client->setAuthConfig($jsonKey);
 ```
 
 #### Verifying JWTs
