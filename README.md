@@ -179,6 +179,7 @@ If you want to use a specific JSON key instead of using `GOOGLE_APPLICATION_CRED
 ```php
 use Google\Auth\CredentialsLoader;
 use Google\Auth\Middleware\AuthTokenMiddleware;
+use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
 // Define the Google Application Credentials array
