@@ -144,6 +144,10 @@ class ApplicationDefaultCredentials
      * @param string|array $defaultScope The default scope to use if no
      *   user-defined scopes exist, expressed either as an Array or as a
      *   space-delimited string.
+     * @param CacheItemPoolInterface $onGceCache A cache implementation to store
+     *        the results of internal helper methods, without causing a
+     *        `FetchAuthTokenCache` to be returned. Will only be used if `$cache` is
+     *        null.
      *
      * @return CredentialsLoader
      * @throws DomainException if no implementation can be obtained.
@@ -154,7 +158,8 @@ class ApplicationDefaultCredentials
         array $cacheConfig = null,
         CacheItemPoolInterface $cache = null,
         $quotaProject = null,
-        $defaultScope = null
+        $defaultScope = null,
+        CacheItemPoolInterface $onGceCache = null
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -181,7 +186,7 @@ class ApplicationDefaultCredentials
             );
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($anyScope);
-        } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
+        } elseif (self::onGce($httpHandler, $cacheConfig, !is_null($cache) ? $cache : $onGceCache)) {
             $creds = new GCECredentials(null, $anyScope, null, $quotaProject);
         }
 
