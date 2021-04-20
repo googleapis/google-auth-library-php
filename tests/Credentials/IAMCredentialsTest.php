@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\IAMCredentials;
 use PHPUnit\Framework\TestCase;
@@ -72,15 +72,19 @@ class IAMUpdateMetadataCallbackTest extends TestCase
         $update_metadata = $iam->getUpdateMetadataFunc();
         $this->assertInternalType('callable', $update_metadata);
 
-        $actual_metadata = call_user_func($update_metadata,
-            $metadata = array('foo' => 'bar'));
+        $actual_metadata = call_user_func(
+            $update_metadata,
+            $metadata = array('foo' => 'bar')
+        );
         $this->assertArrayHasKey(IAMCredentials::SELECTOR_KEY, $actual_metadata);
         $this->assertEquals(
             $actual_metadata[IAMCredentials::SELECTOR_KEY],
-            $selector);
+            $selector
+        );
         $this->assertArrayHasKey(IAMCredentials::TOKEN_KEY, $actual_metadata);
         $this->assertEquals(
             $actual_metadata[IAMCredentials::TOKEN_KEY],
-            $token);
+            $token
+        );
     }
 }

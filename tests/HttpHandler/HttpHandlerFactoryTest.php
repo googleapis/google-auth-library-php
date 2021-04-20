@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\HttpHandler;
 
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\Tests\BaseTest;
 
 class HttpHandlerFactoryTest extends BaseTest
 {
@@ -38,5 +39,14 @@ class HttpHandlerFactoryTest extends BaseTest
         HttpClientCache::setHttpClient(null);
         $handler = HttpHandlerFactory::build();
         $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle6HttpHandler', $handler);
+    }
+
+    public function testBuildsGuzzle7Handler()
+    {
+        $this->onlyGuzzle7();
+
+        HttpClientCache::setHttpClient(null);
+        $handler = HttpHandlerFactory::build();
+        $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle7HttpHandler', $handler);
     }
 }

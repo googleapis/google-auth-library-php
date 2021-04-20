@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
@@ -42,7 +42,8 @@ class URCGetCacheKeyTest extends TestCase
         $scope = ['scope/1', 'scope/2'];
         $sa = new UserRefreshCredentials(
             $scope,
-            $testJson);
+            $testJson
+        );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
             $testJson['client_id'] . ':' . $o->getCacheKey(),
@@ -143,21 +144,8 @@ class URCConstructorTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException PHPUnit_Framework_Error_Warning
-     */
-    public function testGcloudWarning()
-    {
-        putenv('SUPPRESS_GCLOUD_CREDS_WARNING=false');
-        $keyFile = __DIR__ . '/../fixtures2/gcloud.json';
-        $this->assertNotNull(
-            new UserRefreshCredentials('scope/1', $keyFile)
-        );
-    }
-
     public function testValid3LOauthCreds()
     {
-        putenv('SUPPRESS_GCLOUD_CREDS_WARNING=false');
         $keyFile = __DIR__ . '/../fixtures2/valid_oauth_creds.json';
         $this->assertNotNull(
             new UserRefreshCredentials('scope/1', $keyFile)
@@ -278,5 +266,15 @@ class URCFetchAuthTokenTest extends TestCase
         );
         $tokens = $sa->fetchAuthToken($httpHandler);
         $this->assertEquals($testJson, $tokens);
+    }
+}
+
+class URCGetQuotaProjectTest extends TestCase
+{
+    public function testGetQuotaProject()
+    {
+        $keyFile = __DIR__ . '/../fixtures2' . '/private.json';
+        $sa = new UserRefreshCredentials('a-scope', $keyFile);
+        $this->assertEquals('test_quota_project', $sa->getQuotaProject());
     }
 }

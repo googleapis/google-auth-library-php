@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Middleware;
 
 use Google\Auth\Middleware\ScopedAccessTokenMiddleware;
+use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
+use Prophecy\Argument;
 
 class ScopedAccessTokenMiddlewareTest extends BaseTest
 {
@@ -31,21 +33,11 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
 
     protected function setUp()
     {
-        $this->onlyGuzzle6();
+        $this->onlyGuzzle6And7();
 
-        $this->mockCacheItem =
-            $this
-                ->getMockBuilder('Psr\Cache\CacheItemInterface')
-                ->getMock();
-        $this->mockCache =
-            $this
-                ->getMockBuilder('Psr\Cache\CacheItemPoolInterface')
-                ->getMock();
-        $this->mockRequest =
-            $this
-                ->getMockBuilder('GuzzleHttp\Psr7\Request')
-                ->disableOriginalConstructor()
-                ->getMock();
+        $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $this->mockRequest = $this->prophesize('GuzzleHttp\Psr7\Request');
     }
 
     /**
@@ -65,17 +57,15 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) use ($token) {
             return $token;
         };
-        $this->mockRequest
-            ->expects($this->once())
-            ->method('withHeader')
-            ->with('authorization', 'Bearer ' . $token)
-            ->will($this->returnValue($this->mockRequest));
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
 
         // Run the test
         $middleware = new ScopedAccessTokenMiddleware($fakeAuthFunc, self::TEST_SCOPE);
         $mock = new MockHandler([new Response(200)]);
         $callable = $middleware($mock);
-        $callable($this->mockRequest, ['auth' => 'scoped']);
+        $callable($this->mockRequest->reveal(), ['auth' => 'scoped']);
     }
 
     public function testUsesCachedAuthToken()
@@ -84,35 +74,29 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) {
             return '';
         };
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(true));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('get')
-            ->will($this->returnValue($cachedValue));
-        $this->mockCache
-            ->expects($this->once())
-            ->method('getItem')
-            ->with($this->equalTo($this->getValidKeyName(self::TEST_SCOPE)))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockRequest
-            ->expects($this->once())
-            ->method('withHeader')
-            ->with('authorization', 'Bearer ' . $cachedValue)
-            ->will($this->returnValue($this->mockRequest));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($this->getValidKeyName(self::TEST_SCOPE))
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $cachedValue)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
 
         // Run the test
         $middleware = new ScopedAccessTokenMiddleware(
             $fakeAuthFunc,
             self::TEST_SCOPE,
             [],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $mock = new MockHandler([new Response(200)]);
         $callable = $middleware($mock);
-        $callable($this->mockRequest, ['auth' => 'scoped']);
+        $callable($this->mockRequest->reveal(), ['auth' => 'scoped']);
     }
 
     public function testGetsCachedAuthTokenUsingCachePrefix()
@@ -122,35 +106,29 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) {
             return '';
         };
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(true));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('get')
-            ->will($this->returnValue($cachedValue));
-        $this->mockCache
-            ->expects($this->once())
-            ->method('getItem')
-            ->with($this->equalTo($prefix . $this->getValidKeyName(self::TEST_SCOPE)))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockRequest
-            ->expects($this->once())
-            ->method('withHeader')
-            ->with('authorization', 'Bearer ' . $cachedValue)
-            ->will($this->returnValue($this->mockRequest));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($prefix . $this->getValidKeyName(self::TEST_SCOPE))
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $cachedValue)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
 
         // Run the test
         $middleware = new ScopedAccessTokenMiddleware(
             $fakeAuthFunc,
             self::TEST_SCOPE,
             ['prefix' => $prefix],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $mock = new MockHandler([new Response(200)]);
         $callable = $middleware($mock);
-        $callable($this->mockRequest, ['auth' => 'scoped']);
+        $callable($this->mockRequest->reveal(), ['auth' => 'scoped']);
     }
 
     public function testShouldSaveValueInCache()
@@ -159,36 +137,34 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) use ($token) {
             return $token;
         };
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(false));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('set')
-            ->with($this->equalTo($token))
-            ->will($this->returnValue(false));
-        $this->mockCache
-            ->expects($this->exactly(2))
-            ->method('getItem')
-            ->with($this->equalTo($this->getValidKeyName(self::TEST_SCOPE)))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockRequest
-            ->expects($this->once())
-            ->method('withHeader')
-            ->with('authorization', 'Bearer ' . $token)
-            ->will($this->returnValue($this->mockRequest));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->set($token)
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->expiresAfter(Argument::any())
+            ->shouldBeCalledTimes(1);
+        $this->mockCache->getItem($this->getValidKeyName(self::TEST_SCOPE))
+            ->shouldBeCalledTimes(2)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))
+            ->shouldBeCalled()
+            ->willReturn(true);
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
 
         // Run the test
         $middleware = new ScopedAccessTokenMiddleware(
             $fakeAuthFunc,
             self::TEST_SCOPE,
             [],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $mock = new MockHandler([new Response(200)]);
         $callable = $middleware($mock);
-        $callable($this->mockRequest, ['auth' => 'scoped']);
+        $callable($this->mockRequest->reveal(), ['auth' => 'scoped']);
     }
 
     public function testShouldSaveValueInCacheWithCacheOptions()
@@ -199,40 +175,34 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) use ($token) {
             return $token;
         };
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(false));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('set')
-            ->with($this->equalTo($token))
-            ->will($this->returnValue(false));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('expiresAfter')
-            ->with($this->equalTo($lifetime));
-        $this->mockCache
-            ->expects($this->exactly(2))
-            ->method('getItem')
-            ->with($this->equalTo($prefix . $this->getValidKeyName(self::TEST_SCOPE)))
-            ->will($this->returnValue($this->mockCacheItem));
-        $this->mockRequest
-            ->expects($this->once())
-            ->method('withHeader')
-            ->with('authorization', 'Bearer ' . $token)
-            ->will($this->returnValue($this->mockRequest));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->set($token)
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->expiresAfter($lifetime)
+            ->shouldBeCalledTimes(1);
+        $this->mockCache->getItem($prefix . $this->getValidKeyName(self::TEST_SCOPE))
+            ->shouldBeCalledTimes(2)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))
+            ->shouldBeCalled()
+            ->willReturn(true);
+        $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
 
         // Run the test
         $middleware = new ScopedAccessTokenMiddleware(
             $fakeAuthFunc,
             self::TEST_SCOPE,
             ['prefix' => $prefix, 'lifetime' => $lifetime],
-            $this->mockCache
+            $this->mockCache->reveal()
         );
         $mock = new MockHandler([new Response(200)]);
         $callable = $middleware($mock);
-        $callable($this->mockRequest, ['auth' => 'scoped']);
+        $callable($this->mockRequest->reveal(), ['auth' => 'scoped']);
     }
 
     public function testOnlyTouchesWhenAuthConfigScoped()
@@ -240,14 +210,12 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) {
             return '1/abcdef1234567890';
         };
-        $this->mockRequest
-            ->expects($this->never())
-            ->method('withHeader');
+        $this->mockRequest->withHeader()->shouldNotBeCalled();
 
         // Run the test
         $middleware = new ScopedAccessTokenMiddleware($fakeAuthFunc, self::TEST_SCOPE);
         $mock = new MockHandler([new Response(200)]);
         $callable = $middleware($mock);
-        $callable($this->mockRequest, ['auth' => 'not_scoped']);
+        $callable($this->mockRequest->reveal(), ['auth' => 'not_scoped']);
     }
 }

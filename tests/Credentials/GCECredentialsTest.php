@@ -15,21 +15,19 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
-use GuzzleHttp\ClientInterface;
+use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
-use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Prophecy\Promise\ReturnPromise;
 
 /**
  * @group credentials
  * @group credentials-gce
  */
-class GCECredentialsTest extends TestCase
+class GCECredentialsTest extends BaseTest
 {
     public function testOnGceMetadataFlavorHeader()
     {
@@ -141,8 +139,46 @@ class GCECredentialsTest extends TestCase
             buildResponse(200, [], Psr7\stream_for($jsonTokens)),
         ]);
         $g = new GCECredentials();
-        $this->assertEquals($wantedTokens, $g->fetchAuthToken($httpHandler));
+        $receivedToken = $g->fetchAuthToken($httpHandler);
+        $this->assertEquals(
+            $wantedTokens['access_token'],
+            $receivedToken['access_token']
+        );
+        $this->assertEquals(time() + 57, $receivedToken['expires_at']);
         $this->assertEquals(time() + 57, $g->getLastReceivedToken()['expires_at']);
+    }
+
+    public function testFetchAuthTokenShouldBeIdTokenWhenTargetAudienceIsSet()
+    {
+        $expectedToken = ['id_token' => 'idtoken12345'];
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expectedToken) {
+            $timesCalled++;
+            if ($timesCalled == 1) {
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+            $this->assertEquals(
+                '/computeMetadata/' . GCECredentials::ID_TOKEN_URI_PATH,
+                $request->getUri()->getPath()
+            );
+            $this->assertEquals(
+                'audience=a+target+audience',
+                $request->getUri()->getQuery()
+            );
+            return new Psr7\Response(200, [], Psr7\stream_for($expectedToken['id_token']));
+        };
+        $g = new GCECredentials(null, null, 'a+target+audience');
+        $this->assertEquals($expectedToken, $g->fetchAuthToken($httpHandler));
+        $this->assertEquals(2, $timesCalled);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Scope and targetAudience cannot both be supplied
+     */
+    public function testSettingBothScopeAndTargetAudienceThrowsException()
+    {
+        $g = new GCECredentials(null, 'a-scope', 'a+target+audience');
     }
 
     /**
@@ -150,15 +186,12 @@ class GCECredentialsTest extends TestCase
      */
     public function testFetchAuthTokenCustomScope($scope, $expected)
     {
-        $guzzleVersion = ClientInterface::VERSION;
-        if ($guzzleVersion[0] === '5') {
-            $this->markTestSkipped('Only compatible with guzzle 6+');
-        }
+        $this->onlyGuzzle6And7();
 
         $uri = null;
         $client = $this->prophesize('GuzzleHttp\ClientInterface');
         $client->send(Argument::any(), Argument::any())
-            ->will(function() use (&$uri) {
+            ->will(function () use (&$uri) {
                 $this->send(Argument::any(), Argument::any())->will(function ($args) use (&$uri) {
                     $uri = $args[0]->getUri();
 
@@ -226,10 +259,7 @@ class GCECredentialsTest extends TestCase
 
     public function testSignBlob()
     {
-        $guzzleVersion = ClientInterface::VERSION;
-        if ($guzzleVersion[0] === '5') {
-            $this->markTestSkipped('Only compatible with guzzle 6+');
-        }
+        $this->onlyGuzzle6And7();
 
         $expectedEmail = 'test@test.com';
         $expectedAccessToken = 'token';
@@ -262,10 +292,7 @@ class GCECredentialsTest extends TestCase
 
     public function testSignBlobWithLastReceivedAccessToken()
     {
-        $guzzleVersion = ClientInterface::VERSION;
-        if ($guzzleVersion[0] === '5') {
-            $this->markTestSkipped('Only compatible with guzzle 6+');
-        }
+        $this->onlyGuzzle6And7();
 
         $expectedEmail = 'test@test.com';
         $expectedAccessToken = 'token';
@@ -304,5 +331,139 @@ class GCECredentialsTest extends TestCase
         $creds->fetchAuthToken();
 
         $signature = $creds->signBlob($stringToSign);
+    }
+
+    public function testGetProjectId()
+    {
+        $this->onlyGuzzle6And7();
+
+        $expected = 'foobar';
+
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->willReturn(
+                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                buildResponse(200, [], Psr7\stream_for($expected)),
+                buildResponse(200, [], Psr7\stream_for('notexpected'))
+            );
+
+        HttpClientCache::setHttpClient($client->reveal());
+
+        $creds = new GCECredentials;
+        $this->assertEquals($expected, $creds->getProjectId());
+
+        // call again to test cached value
+        $this->assertEquals($expected, $creds->getProjectId());
+    }
+
+    public function testGetProjectIdShouldBeEmptyIfNotOnGCE()
+    {
+        $this->onlyGuzzle6And7();
+
+        // simulate retry attempts by returning multiple 500s
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->willReturn(
+                buildResponse(500),
+                buildResponse(500),
+                buildResponse(500)
+            );
+
+        HttpClientCache::setHttpClient($client->reveal());
+
+        $creds = new GCECredentials;
+        $this->assertNull($creds->getProjectId());
+    }
+
+    public function testGetTokenUriWithServiceAccountIdentity()
+    {
+        $tokenUri = GCECredentials::getTokenUri('foo');
+        $this->assertEquals(
+            'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/foo/token',
+            $tokenUri
+        );
+    }
+
+    public function testGetAccessTokenWithServiceAccountIdentity()
+    {
+        $expected = [
+            'access_token' => 'token12345',
+            'expires_in' => 123,
+        ];
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expected) {
+            $timesCalled++;
+            if ($timesCalled == 1) {
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+            $this->assertEquals(
+                '/computeMetadata/v1/instance/service-accounts/foo/token',
+                $request->getUri()->getPath()
+            );
+            $this->assertEquals('', $request->getUri()->getQuery());
+            return new Psr7\Response(200, [], Psr7\stream_for(json_encode($expected)));
+        };
+
+        $g = new GCECredentials(null, null, null, null, 'foo');
+        $this->assertEquals(
+            $expected['access_token'],
+            $g->fetchAuthToken($httpHandler)['access_token']
+        );
+    }
+
+    public function testGetIdTokenWithServiceAccountIdentity()
+    {
+        $expected = 'idtoken12345';
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expected) {
+            $timesCalled++;
+            if ($timesCalled == 1) {
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+            $this->assertEquals(
+                '/computeMetadata/v1/instance/service-accounts/foo/identity',
+                $request->getUri()->getPath()
+            );
+            $this->assertEquals(
+                'audience=a+target+audience',
+                $request->getUri()->getQuery()
+            );
+            return new Psr7\Response(200, [], Psr7\stream_for($expected));
+        };
+        $g = new GCECredentials(null, null, 'a+target+audience', null, 'foo');
+        $this->assertEquals(
+            ['id_token' => $expected],
+            $g->fetchAuthToken($httpHandler)
+        );
+    }
+
+    public function testGetClientNameUriWithServiceAccountIdentity()
+    {
+        $clientNameUri = GCECredentials::getClientNameUri('foo');
+        $this->assertEquals(
+            'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/foo/email',
+            $clientNameUri
+        );
+    }
+
+    public function testGetClientNameWithServiceAccountIdentity()
+    {
+        $expected = 'expected';
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expected) {
+            $timesCalled++;
+            if ($timesCalled == 1) {
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+            $this->assertEquals(
+                '/computeMetadata/v1/instance/service-accounts/foo/email',
+                $request->getUri()->getPath()
+            );
+            $this->assertEquals('', $request->getUri()->getQuery());
+            return new Psr7\Response(200, [], Psr7\stream_for($expected));
+        };
+
+        $creds = new GCECredentials(null, null, null, null, 'foo');
+        $this->assertEquals($expected, $creds->getClientName($httpHandler));
     }
 }

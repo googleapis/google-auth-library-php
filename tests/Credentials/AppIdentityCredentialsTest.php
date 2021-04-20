@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Credentials;
 
 use google\appengine\api\app_identity\AppIdentityService;
 // included from tests\mocks\AppIdentityService.php
@@ -217,6 +217,23 @@ class AppIdentityCredentialsTest extends TestCase
             'access_token' => $wantedToken['access_token'],
             'expires_at' => $wantedToken['expiration_time']
         ], $creds->getLastReceivedToken());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testGetProjectId()
+    {
+        $this->imitateInAppEngine();
+
+        $projectId = 'foobar';
+        AppIdentityService::$applicationId = $projectId;
+        $this->assertEquals($projectId, (new AppIdentityCredentials)->getProjectId());
+    }
+
+    public function testGetProjectOutsideAppEngine()
+    {
+        $this->assertNull((new AppIdentityCredentials)->getProjectId());
     }
 
     private function imitateInAppEngine()

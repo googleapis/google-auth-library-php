@@ -19,7 +19,6 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
-use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 
 class OAuth2AuthorizationUriTest extends TestCase
@@ -212,8 +211,10 @@ class OAuth2GrantTypeTest extends TestCase
         $o = new OAuth2($this->minimal);
         $o->setIssuer('an issuer');
         $o->setSigningKey('a key');
-        $this->assertEquals('urn:ietf:params:oauth:grant-type:jwt-bearer',
-            $o->getGrantType());
+        $this->assertEquals(
+            'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            $o->getGrantType()
+        );
     }
 
     public function testSetsKnownTypes()
@@ -239,7 +240,7 @@ class OAuth2GetCacheKeyTest extends TestCase
         'clientID' => 'aClientID',
     ];
 
-    public function testIsNullWithNoScopes()
+    public function testIsNullWithNoScopesOrAudience()
     {
         $o = new OAuth2($this->minimal);
         $this->assertNull($o->getCacheKey());
@@ -257,6 +258,14 @@ class OAuth2GetCacheKeyTest extends TestCase
         $o = new OAuth2($this->minimal);
         $o->setScope(['test/scope/1', 'test/scope/2']);
         $this->assertEquals('test/scope/1:test/scope/2', $o->getCacheKey());
+    }
+
+    public function testIsAudienceWhenScopeIsNull()
+    {
+        $aud = 'https://drive.googleapis.com';
+        $o = new OAuth2($this->minimal);
+        $o->setAudience($aud);
+        $this->assertEquals($aud, $o->getCacheKey());
     }
 }
 
@@ -427,6 +436,47 @@ class OAuth2JwtTest extends TestCase
         unset($testConfig['signingAlgorithm']);
         $o = new OAuth2($testConfig);
         $o->toJwt();
+    }
+
+    public function testCanHS256EncodeAValidPayloadWithSigningKeyId()
+    {
+        $testConfig = $this->signingMinimal;
+        $keys = array(
+            'example_key_id1' => 'example_key1',
+            'example_key_id2' => 'example_key2'
+        );
+        $testConfig['signingKey'] = $keys['example_key_id2'];
+        $testConfig['signingKeyId'] = 'example_key_id2';
+        $o = new OAuth2($testConfig);
+        $payload = $o->toJwt();
+        $roundTrip = $this->jwtDecode($payload, $keys, array('HS256'));
+        $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
+        $this->assertEquals($roundTrip->aud, $testConfig['audience']);
+        $this->assertEquals($roundTrip->scope, $testConfig['scope']);
+    }
+
+    public function testFailDecodeWithoutSigningKeyId()
+    {
+        $testConfig = $this->signingMinimal;
+        $keys = array(
+            'example_key_id1' => 'example_key1',
+            'example_key_id2' => 'example_key2'
+        );
+        $testConfig['signingKey'] = $keys['example_key_id2'];
+        $o = new OAuth2($testConfig);
+        $payload = $o->toJwt();
+
+        try {
+            $this->jwtDecode($payload, $keys, array('HS256'));
+        } catch (\Exception $e) {
+            if (($e instanceof \DomainException || $e instanceof \UnexpectedValueException) &&
+                $e->getMessage() === '"kid" empty, unable to lookup correct key') {
+                // Workaround: In old JWT versions throws DomainException
+                return;
+            }
+            throw $e;
+        }
+        $this->fail("Expected exception about problem with decode");
     }
 
     public function testCanHS256EncodeAValidPayload()
@@ -772,6 +822,78 @@ class OAuth2FetchAuthTokenTest extends TestCase
         $this->assertEquals('an_access_token', $o->getAccessToken());
         $this->assertEquals('an_id_token', $o->getIdToken());
         $this->assertEquals('a_refresh_token', $o->getRefreshToken());
+    }
+
+    /**
+     * @dataProvider provideGetLastReceivedToken
+     */
+    public function testGetLastReceivedToken(
+        $updateToken,
+        $expectedToken = null
+    ) {
+        $testConfig = $this->fetchAuthTokenMinimal;
+        $o = new OAuth2($testConfig);
+        $o->updateToken($updateToken);
+        $this->assertEquals(
+            $expectedToken ?: $updateToken,
+            $o->getLastReceivedToken()
+        );
+    }
+
+    public function provideGetLastReceivedToken()
+    {
+        $time = time();
+        return [
+            [
+                ['access_token' => 'abc'],
+                ['access_token' => 'abc', 'expires_at' => null],
+            ],
+            [
+                ['access_token' => 'abc', 'invalid-field' => 'foo'],
+                ['access_token' => 'abc', 'expires_at' => null],
+            ],
+            [
+                ['access_token' => 'abc', 'expires_at' => 1234567890],
+                ['access_token' => 'abc', 'expires_at' => 1234567890],
+            ],
+            [
+                ['id_token' => 'def'],
+                ['id_token' => 'def', 'expires_at' => null],
+            ],
+            [
+                ['id_token' => 'def', 'expires_at' => 1234567890],
+                ['id_token' => 'def', 'expires_at' => 1234567890],
+            ],
+            [
+                [
+                    'access_token' => 'abc',
+                    'expires_in' => 3600,
+                    'issued_at' => $time
+                ],
+                [
+                    'access_token' => 'abc',
+                    'expires_at' => $time + 3600,
+                    'expires_in' => 3600,
+                    'issued_at' => $time
+                ],
+            ],
+            [
+                ['access_token' => 'abc', 'issued_at' => 1234567890],
+                [
+                    'access_token' => 'abc',
+                    'expires_at' => null,
+                    'issued_at' => 1234567890
+                ],
+            ],
+            [
+                ['access_token' => 'abc', 'refresh_token' => 'xyz'],
+                [
+                    'access_token' => 'abc',
+                    'expires_at' => null,
+                    'refresh_token' => 'xyz'
+                ],
+            ],
+        ];
     }
 }
 

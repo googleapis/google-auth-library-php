@@ -15,54 +15,54 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\HttpHandler;
 
 use Google\Auth\HttpHandler\Guzzle6HttpHandler;
-use GuzzleHttp\Promise\Promise;
+use Google\Auth\Tests\BaseTest;
+use GuzzleHttp\Promise\FulfilledPromise;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
+/**
+ * @group http-handler
+ */
 class Guzzle6HttpHandlerTest extends BaseTest
 {
+    protected $client;
+    protected $handler;
+
     public function setUp()
     {
         $this->onlyGuzzle6();
 
-        $this->mockRequest =
-            $this
-                ->getMockBuilder('Psr\Http\Message\RequestInterface')
-                ->getMock();
-        $this->mockClient =
-            $this
-                ->getMockBuilder('GuzzleHttp\Client')
-                ->getMock();
+        $this->client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $this->handler = new Guzzle6HttpHandler($this->client->reveal());
     }
 
     public function testSuccessfullySendsRequest()
     {
-        $this->mockClient
-            ->expects($this->any())
-            ->method('send')
-            ->will($this->returnValue(new Response(200)));
+        $request = new Request('GET', 'https://domain.tld');
+        $options = ['key' => 'value'];
+        $response = new Response(200);
 
-        $handler = new Guzzle6HttpHandler($this->mockClient);
-        $response = $handler($this->mockRequest);
-        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
+        $this->client->send($request, $options)->willReturn($response);
+
+        $handler = $this->handler;
+
+        $this->assertSame($response, $handler($request, $options));
     }
 
     public function testSuccessfullySendsRequestAsync()
     {
-        $this->mockClient
-            ->expects($this->any())
-            ->method('sendAsync')
-            ->will($this->returnValue(new Promise(function () use (&$promise) {
-                return $promise->resolve(new Response(200, [], 'Body Text'));
-            })));
+        $request = new Request('GET', 'https://domain.tld');
+        $options = ['key' => 'value'];
+        $response = new Response(200);
+        $promise = new FulfilledPromise($response);
 
-        $handler = new Guzzle6HttpHandler($this->mockClient);
-        $promise = $handler->async($this->mockRequest);
-        $response = $promise->wait();
-        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('Body Text', (string) $response->getBody());
+        $this->client->sendAsync($request, $options)->willReturn($promise);
+
+        $handler = $this->handler;
+
+        $this->assertSame($response, $handler->async($request, $options)->wait());
     }
 }

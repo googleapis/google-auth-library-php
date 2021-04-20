@@ -18,9 +18,12 @@
 namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
+use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
+use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\ServiceAccountSignerTrait;
 use Google\Auth\SignBlobInterface;
+use InvalidArgumentException;
 
 /**
  * ServiceAccountCredentials supports authorization using a Google service
@@ -55,7 +58,10 @@ use Google\Auth\SignBlobInterface;
  *
  *   $res = $client->get('myproject/taskqueues/myqueue');
  */
-class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface
+class ServiceAccountCredentials extends CredentialsLoader implements
+    GetQuotaProjectInterface,
+    SignBlobInterface,
+    ProjectIdProviderInterface
 {
     use ServiceAccountSignerTrait;
 
@@ -67,6 +73,23 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
     protected $auth;
 
     /**
+     * The quota project associated with the JSON credentials
+     *
+     * @var string
+     */
+    protected $quotaProject;
+
+    /*
+     * @var string|null
+     */
+    protected $projectId;
+
+    /*
+     * @var array|null
+     */
+    private $lastReceivedJwtAccessToken;
+
+    /**
      * Create a new ServiceAccountCredentials.
      *
      * @param string|array $scope the scope of the access request, expressed
@@ -75,11 +98,13 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      *   as an associative array
      * @param string $sub an email address account to impersonate, in situations when
      *   the service account has been delegated domain wide access.
+     * @param string $targetAudience The audience for the ID token.
      */
     public function __construct(
         $scope,
         $jsonKey,
-        $sub = null
+        $sub = null,
+        $targetAudience = null
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -92,11 +117,25 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
         }
         if (!array_key_exists('client_email', $jsonKey)) {
             throw new \InvalidArgumentException(
-                'json key is missing the client_email field');
+                'json key is missing the client_email field'
+            );
         }
         if (!array_key_exists('private_key', $jsonKey)) {
             throw new \InvalidArgumentException(
-                'json key is missing the private_key field');
+                'json key is missing the private_key field'
+            );
+        }
+        if (array_key_exists('quota_project_id', $jsonKey)) {
+            $this->quotaProject = (string) $jsonKey['quota_project_id'];
+        }
+        if ($scope && $targetAudience) {
+            throw new InvalidArgumentException(
+                'Scope and targetAudience cannot both be supplied'
+            );
+        }
+        $additionalClaims = [];
+        if ($targetAudience) {
+            $additionalClaims = ['target_audience' => $targetAudience];
         }
         $this->auth = new OAuth2([
             'audience' => self::TOKEN_CREDENTIAL_URI,
@@ -106,7 +145,12 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
             'signingKey' => $jsonKey['private_key'],
             'sub' => $sub,
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
+            'additionalClaims' => $additionalClaims,
         ]);
+
+        $this->projectId = isset($jsonKey['project_id'])
+            ? $jsonKey['project_id']
+            : null;
     }
 
     /**
@@ -141,7 +185,24 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      */
     public function getLastReceivedToken()
     {
-        return $this->auth->getLastReceivedToken();
+        // If self-signed JWTs are being used, fetch the last received token
+        // from memory. Else, fetch it from OAuth2
+        return $this->useSelfSignedJwt()
+            ? $this->lastReceivedJwtAccessToken
+            : $this->auth->getLastReceivedToken();
+    }
+
+    /**
+     * Get the project ID from the service account keyfile.
+     *
+     * Returns null if the project ID does not exist in the keyfile.
+     *
+     * @param callable $httpHandler Not used by this credentials type.
+     * @return string|null
+     */
+    public function getProjectId(callable $httpHandler = null)
+    {
+        return $this->projectId;
     }
 
     /**
@@ -150,7 +211,6 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
      * @param array $metadata metadata hashmap
      * @param string $authUri optional auth uri
      * @param callable $httpHandler callback which delivers psr7 request
-     *
      * @return array updated metadata hashmap
      */
     public function updateMetadata(
@@ -159,8 +219,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
         callable $httpHandler = null
     ) {
         // scope exists. use oauth implementation
-        $scope = $this->auth->getScope();
-        if (!is_null($scope)) {
+        if (!$this->useSelfSignedJwt()) {
             return parent::updateMetadata($metadata, $authUri, $httpHandler);
         }
 
@@ -171,7 +230,14 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
         );
         $jwtCreds = new ServiceAccountJwtAccessCredentials($credJson);
 
-        return $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
+        $updatedMetadata = $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
+
+        if ($lastReceivedToken = $jwtCreds->getLastReceivedToken()) {
+            // Keep self-signed JWTs in memory as the last received token
+            $this->lastReceivedJwtAccessToken = $lastReceivedToken;
+        }
+
+        return $updatedMetadata;
     }
 
     /**
@@ -194,5 +260,20 @@ class ServiceAccountCredentials extends CredentialsLoader implements SignBlobInt
     public function getClientName(callable $httpHandler = null)
     {
         return $this->auth->getIssuer();
+    }
+
+    /**
+     * Get the quota project used for this API request
+     *
+     * @return string|null
+     */
+    public function getQuotaProject()
+    {
+        return $this->quotaProject;
+    }
+
+    private function useSelfSignedJwt()
+    {
+        return is_null($this->auth->getScope());
     }
 }

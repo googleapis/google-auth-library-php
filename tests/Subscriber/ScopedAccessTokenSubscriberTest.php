@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Subscriber;
 
 use Google\Auth\Subscriber\ScopedAccessTokenSubscriber;
+use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Transaction;
+use Prophecy\Argument;
 
 class ScopedAccessTokenSubscriberTest extends BaseTest
 {
@@ -34,19 +36,9 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
     {
         $this->onlyGuzzle5();
 
-        $this->mockCacheItem =
-            $this
-                ->getMockBuilder('Psr\Cache\CacheItemInterface')
-                ->getMock();
-        $this->mockCache =
-            $this
-                ->getMockBuilder('Psr\Cache\CacheItemPoolInterface')
-                ->getMock();
-        $this->mockRequest =
-            $this
-                ->getMockBuilder('GuzzleHttp\Psr7\Request')
-                ->disableOriginalConstructor()
-                ->getMock();
+        $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $this->mockRequest = $this->prophesize('GuzzleHttp\Psr7\Request');
     }
 
     /**
@@ -76,8 +68,11 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         };
         $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array());
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'scoped']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'scoped']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertSame(
@@ -92,26 +87,29 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) {
             return '';
         };
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(true));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('get')
-            ->will($this->returnValue($cachedValue));
-        $this->mockCache
-            ->expects($this->once())
-            ->method('getItem')
-            ->with($this->getValidKeyName(self::TEST_SCOPE))
-            ->will($this->returnValue($this->mockCacheItem));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($this->getValidKeyName(self::TEST_SCOPE))
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
 
         // Run the test
-        $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array(),
-            $this->mockCache);
+        $s = new ScopedAccessTokenSubscriber(
+            $fakeAuthFunc,
+            self::TEST_SCOPE,
+            [],
+            $this->mockCache->reveal()
+        );
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'scoped']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'scoped']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertSame(
@@ -127,27 +125,29 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) {
             return '';
         };
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(true));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('get')
-            ->will($this->returnValue($cachedValue));
-        $this->mockCache
-            ->expects($this->once())
-            ->method('getItem')
-            ->with($prefix . $this->getValidKeyName(self::TEST_SCOPE))
-            ->will($this->returnValue($this->mockCacheItem));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($prefix . $this->getValidKeyName(self::TEST_SCOPE))
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
 
         // Run the test
-        $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE,
+        $s = new ScopedAccessTokenSubscriber(
+            $fakeAuthFunc,
+            self::TEST_SCOPE,
             ['prefix' => $prefix],
-            $this->mockCache);
+            $this->mockCache->reveal()
+        );
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'scoped']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'scoped']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertSame(
@@ -162,25 +162,32 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) {
             return '2/abcdef1234567890';
         };
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(false));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('set')
-            ->with($this->equalTo($token))
-            ->will($this->returnValue(false));
-        $this->mockCache
-            ->expects($this->exactly(2))
-            ->method('getItem')
-            ->with($this->getValidKeyName(self::TEST_SCOPE))
-            ->will($this->returnValue($this->mockCacheItem));
-        $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array(),
-            $this->mockCache);
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->set($token)
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->expiresAfter(Argument::any())
+            ->shouldBeCalledTimes(1);
+        $this->mockCache->getItem($this->getValidKeyName(self::TEST_SCOPE))
+            ->shouldBeCalledTimes(2)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))
+            ->shouldBeCalledTimes(1);
+
+        $s = new ScopedAccessTokenSubscriber(
+            $fakeAuthFunc,
+            self::TEST_SCOPE,
+            [],
+            $this->mockCache->reveal()
+        );
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'scoped']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'scoped']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertSame(
@@ -197,31 +204,31 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) {
             return '2/abcdef1234567890';
         };
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->will($this->returnValue(false));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('set')
-            ->with($this->equalTo($token));
-        $this->mockCacheItem
-            ->expects($this->once())
-            ->method('expiresAfter')
-            ->with($this->equalTo($lifetime));
-        $this->mockCache
-            ->expects($this->exactly(2))
-            ->method('getItem')
-            ->with($prefix . $this->getValidKeyName(self::TEST_SCOPE))
-            ->will($this->returnValue($this->mockCacheItem));
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->set($token)
+            ->shouldBeCalledTimes(1);
+        $this->mockCacheItem->expiresAfter($lifetime)
+            ->shouldBeCalledTimes(1);
+        $this->mockCache->getItem($prefix . $this->getValidKeyName(self::TEST_SCOPE))
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))
+            ->shouldBeCalledTimes(1);
 
         // Run the test
-        $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE,
+        $s = new ScopedAccessTokenSubscriber(
+            $fakeAuthFunc,
+            self::TEST_SCOPE,
             ['prefix' => $prefix, 'lifetime' => $lifetime],
-            $this->mockCache);
+            $this->mockCache->reveal()
+        );
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'scoped']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'scoped']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertSame(
@@ -235,10 +242,13 @@ class ScopedAccessTokenSubscriberTest extends BaseTest
         $fakeAuthFunc = function ($unused_scopes) {
             return '1/abcdef1234567890';
         };
-        $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, array());
+        $s = new ScopedAccessTokenSubscriber($fakeAuthFunc, self::TEST_SCOPE, []);
         $client = new Client();
-        $request = $client->createRequest('GET', 'http://testing.org',
-            ['auth' => 'notscoped']);
+        $request = $client->createRequest(
+            'GET',
+            'http://testing.org',
+            ['auth' => 'notscoped']
+        );
         $before = new BeforeEvent(new Transaction($client, $request));
         $s->onBefore($before);
         $this->assertSame('', $request->getHeader('authorization'));
