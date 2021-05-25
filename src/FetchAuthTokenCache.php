@@ -112,6 +112,13 @@ class FetchAuthTokenCache implements
      */
     public function getClientName(callable $httpHandler = null)
     {
+        if (!$this->fetcher instanceof SignBlobInterface) {
+            throw new \RuntimeException(
+                'Credentials fetcher does not implement ' .
+                'Google\Auth\SignBlobInterface'
+            );
+        }
+        
         return $this->fetcher->getClientName($httpHandler);
     }
 
