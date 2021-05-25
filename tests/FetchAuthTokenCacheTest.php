@@ -245,7 +245,6 @@ class FetchAuthTokenCacheTest extends BaseTest
         $cachedFetcher->updateMetadata(['foo' => 'bar']);
     }
 
-
     public function testShouldReturnValueWhenNotExpired()
     {
         $cacheKey = 'myKey';
@@ -428,6 +427,23 @@ class FetchAuthTokenCacheTest extends BaseTest
         );
 
         $this->assertEquals($name, $fetcher->getClientName());
+    }
+
+    /**
+     * @expectedException RuntimeException
+     * @expectedExceptionMessage Credentials fetcher does not implement Google\Auth\SignBlobInterface
+     */
+    public function testGetClientNameWithInvalidFetcher()
+    {
+        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $cachedFetcher->getClientName();
     }
 
     public function testSignBlob()
