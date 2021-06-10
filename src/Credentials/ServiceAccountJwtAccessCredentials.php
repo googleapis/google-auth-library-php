@@ -110,7 +110,8 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
         $authUri = null,
         callable $httpHandler = null
     ) {
-        if (empty($authUri) && empty($this->auth->getScope())) {
+        $scope = $this->auth->getScope();
+        if (empty($authUri) && empty($scope)) {
             return $metadata;
         }
 
