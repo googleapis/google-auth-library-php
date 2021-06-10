@@ -391,6 +391,7 @@ class OAuth2JwtTest extends TestCase
     {
         $testConfig = $this->signingMinimal;
         unset($testConfig['audience']);
+        unset($testConfig['scope']);
         $o = new OAuth2($testConfig);
         $o->toJwt();
     }
