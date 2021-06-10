@@ -142,6 +142,13 @@ class FetchAuthTokenCache implements
             );
         }
 
+        // Fetch access token from cache for signing a blob
+        if ($this->fetcher instanceof Credentials\GCECredentials) {
+            $cached = $this->fetchAuthTokenFromCache();
+            $accessToken = isset($cached['access_token']) ? $cached['access_token'] : null;
+            return $this->fetcher->signBlob($stringToSign, $forceOpenSsl, $accessToken);
+        }
+
         return $this->fetcher->signBlob($stringToSign, $forceOpenSsl);
     }
 
