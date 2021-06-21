@@ -214,6 +214,46 @@ print_r((string) $response->getBody());
 
 ```
 
+#### Call using Proxy-Authorization Header
+If your application occupies the Authorization request header, 
+you can include the ID token in a `Proxy-Authorization: Bearer` 
+header instead. f a valid ID token is found in a `Proxy-Authorization` header, 
+IAP authorizes the request with it. After authorizing the request, IAP passes 
+the Authorization header to your application without processing the content.
+For this, use the static method `getProxyIdTokenMiddleware` on
+`ApplicationDefaultCredentials`.
+
+```php
+use Google\Auth\ApplicationDefaultCredentials;
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+
+// specify the path to your application credentials
+putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+
+// Provide the ID token audience. This can be a Client ID associated with an IAP application
+//    $targetAudience = 'IAP_CLIENT_ID.apps.googleusercontent.com';
+$targetAudience = 'YOUR_ID_TOKEN_AUDIENCE';
+
+// create middleware
+$middleware = ApplicationDefaultCredentials::getProxyIdTokenMiddleware($targetAudience);
+$stack = HandlerStack::create();
+$stack->push($middleware);
+
+// create the HTTP client
+$client = new Client([
+  'handler' => $stack,
+  'auth' => ['username','pass'], // basic or any other auth option
+  'proxy_auth' => 'google_auth',
+]);
+
+// make the request
+$response = $client->get('/');
+
+// show the result!
+print_r((string) $response->getBody());
+```
+
 #### Verifying JWTs
 
 If you are [using Google ID tokens to authenticate users][google-id-tokens], use
