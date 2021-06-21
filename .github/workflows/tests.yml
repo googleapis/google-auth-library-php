@@ -35,6 +35,9 @@ jobs:
                 command: |
                   composer remove --dev --ignore-platform-reqs phpunit/phpunit
                   composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit/phpunit:^7
+            - if: ${{ matrix.php == '5.6' || matrix.php == '7.0' || matrix.php == '7.1' }}
+              name: Run PHPUnit Patches
+              run: sh .github/apply-phpunit-patches.sh
             - name: Run Script
               run: vendor/bin/phpunit
     test_lowest:
@@ -42,7 +45,7 @@ jobs:
         strategy:
             matrix:
                 operating-system: [ ubuntu-latest ]
-                php: [ "5.6", "7.0", "7.1", "7.2" ]
+                php: [ "5.6", "7.2" ]
         name: PHP ${{matrix.php }} Unit Test Prefer Lowest
         steps:
             - uses: actions/checkout@v2
@@ -56,6 +59,9 @@ jobs:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer update --prefer-lowest
+            - if: ${{ matrix.php == '5.6' || matrix.php == '7.0' || matrix.php == '7.1' }}
+              name: Run PHPUnit Patches
+              run: sh .github/apply-phpunit-patches.sh
             - name: Run Script
               run: vendor/bin/phpunit
     guzzle6:
@@ -63,7 +69,7 @@ jobs:
         strategy:
             matrix:
                 operating-system: [ ubuntu-latest ]
-                php: [ "5.6", "7.2" ]
+                php: [ "7.2" ]
         name: PHP ${{ matrix.php }} Unit Test Guzzle 6
         steps:
             - uses: actions/checkout@v2
