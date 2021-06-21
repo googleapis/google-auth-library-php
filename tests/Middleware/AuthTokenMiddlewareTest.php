@@ -89,10 +89,10 @@ class AuthTokenMiddlewareTest extends BaseTest
         $token = 'idtoken12345';
         $authResult = ['id_token' => $token];
         $this->mockFetcher->fetchAuthToken(Argument::any())
-            ->shouldBeCalledOnce()
+            ->shouldBeCalledTimes(1)
             ->willReturn($authResult);
         $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
-            ->shouldBeCalledOnce()
+            ->shouldBeCalledTimes(1)
             ->willReturn($this->mockRequest);
 
         $middleware = new AuthTokenMiddleware($this->mockFetcher->reveal());
