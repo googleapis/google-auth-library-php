@@ -69,7 +69,7 @@ class IAMUpdateMetadataCallbackTest extends TestCase
         );
 
         $update_metadata = $iam->getUpdateMetadataFunc();
-        $this->assertTrue(is_callabe($update_metadata));
+        $this->assertTrue(is_callable($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
