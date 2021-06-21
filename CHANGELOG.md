@@ -1,3 +1,8 @@
+## 1.15.2 (06/21/2021)
+
+ * [fix]: ensure cached tokens are used for GCECredentials::signBlob (#340)
+ * [fix]: adds check for getClientName (#336)
+
 ## 1.15.1 (04/21/2021)
 
  * [fix]: update minimum phpseclib for vulnerability fix (#331)
