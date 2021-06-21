@@ -556,10 +556,10 @@ class SACJwtAccessTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertIsArray($authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearer_token = current($authorization);
-        $this->assertIsString($bearer_token);
+        $this->assertTrue(is_string($bearer_token));
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
         $this->assertGreaterThan(30, strlen($bearer_token));
 
@@ -574,10 +574,10 @@ class SACJwtAccessTest extends TestCase
         );
 
         $authorization2 = $actual_metadata2[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertIsArray($authorization2);
+        $this->assertTrue(is_array($authorization2));
 
         $bearer_token2 = current($authorization2);
-        $this->assertIsString($bearer_token2);
+        $this->assertTrue(is_string($bearer_token2));
         $this->assertEquals(0, strpos($bearer_token2, 'Bearer '));
         $this->assertGreaterThan(30, strlen($bearer_token2));
         $this->assertNotEquals($bearer_token2, $bearer_token);
@@ -628,10 +628,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertIsArray($authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearer_token = current($authorization);
-        $this->assertIsString($bearer_token);
+        $this->assertTrue(is_string($bearer_token));
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
         $this->assertGreaterThan(30, strlen($bearer_token));
     }
@@ -831,7 +831,7 @@ class SACJwtAccessComboTest extends TestCase
         );
         // no access_token is added to the metadata hash
         // but also, no error should be thrown
-        $this->assertIsArray($actual_metadata);
+        $this->assertTrue(is_array($actual_metadata));
         $this->assertArrayNotHasKey(
             CredentialsLoader::AUTH_METADATA_KEY,
             $actual_metadata
@@ -859,10 +859,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertIsArray($authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearerToken = current($authorization);
-        $this->assertIsString($bearerToken);
+        $this->assertTrue(is_string($bearerToken));
         $this->assertEquals(0, strpos($bearerToken, 'Bearer '));
         $token = str_replace('Bearer ', '', $bearerToken);
 

@@ -419,7 +419,7 @@ class OAuth2JwtTest extends TestCase
         unset($testConfig['scope']);
         $o = new OAuth2($testConfig);
         $jwt = $o->toJwt();
-        $this->assertIsString($jwt);
+        $this->assertTrue(is_string($jwt));
     }
 
     public function testFailsWithMissingSigningKey()

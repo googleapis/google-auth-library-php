@@ -209,10 +209,10 @@ class FetchAuthTokenCacheTest extends BaseTest
         );
 
         $authorization = $metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertIsArray($authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearerToken = current($authorization);
-        $this->assertIsString($bearerToken);
+        $this->assertTrue(is_string($bearerToken));
         $this->assertEquals(0, strpos($bearerToken, 'Bearer '));
         $token = str_replace('Bearer ', '', $bearerToken);
 
