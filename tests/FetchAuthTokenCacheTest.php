@@ -465,6 +465,41 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals($signature, $fetcher->signBlob($stringToSign, true));
     }
 
+    public function testGCECredentialsSignBlob()
+    {
+        $stringToSign = 'foobar';
+        $signature = 'helloworld';
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $token];
+
+        $mockGce = $this->prophesize('Google\Auth\Credentials\GCECredentials');
+        $mockGce->signBlob($stringToSign, true, $token)
+            ->shouldBeCalled()
+            ->willReturn($signature);
+
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $mockGce->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+
+        $fetcher = new FetchAuthTokenCache(
+            $mockGce->reveal(),
+            [],
+            $this->mockCache->reveal()
+        );
+
+        $this->assertEquals($signature, $fetcher->signBlob($stringToSign, true));
+    }
+
     /**
      * @expectedException RuntimeException
      */
