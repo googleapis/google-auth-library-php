@@ -22,6 +22,7 @@ use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
+use InvalidArgumentException;
 
 class ScopedAccessTokenMiddlewareTest extends BaseTest
 {
@@ -31,20 +32,17 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
     private $mockCache;
     private $mockRequest;
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->onlyGuzzle6And7();
-
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
         $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
         $this->mockRequest = $this->prophesize('GuzzleHttp\Psr7\Request');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testRequiresScopeAsAStringOrArray()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $fakeAuthFunc = function ($unused_scopes) {
             return '1/abcdef1234567890';
         };

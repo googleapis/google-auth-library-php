@@ -26,10 +26,8 @@ class SimpleMiddlewareTest extends BaseTest
     /**
      * @todo finish
      */
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->onlyGuzzle6And7();
-
         $this->mockRequest = $this->prophesize('GuzzleHttp\Psr7\Request');
     }
 

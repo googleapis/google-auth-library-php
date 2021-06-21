@@ -79,51 +79,6 @@ jobs:
                 command: composer require guzzlehttp/guzzle:^6 && composer update
             - name: Run Script
               run: vendor/bin/phpunit
-    # use dockerfiles for oooooolllllldddd versions of php, setup-php times out for those.
-    test_php55:
-        name: "PHP 5.5 Unit Test"
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-        - name: Run Unit Tests
-          uses: docker://php:5.5-cli
-          with:
-            entrypoint: ./.github/actions/unittest/entrypoint.sh
-    test_php55_lowest:
-        name: "PHP 5.5 Unit Test Prefer Lowest"
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-        - name: Run Unit Tests
-          uses: docker://php:5.5-cli
-          env:
-            composerargs: "--prefer-lowest"
-          with:
-            entrypoint: ./.github/actions/unittest/entrypoint.sh
-    test_php54:
-        name: "PHP 5.4 Unit Test"
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-        - name: Run Unit Tests
-          uses: docker://php:5.4-cli
-          with:
-            entrypoint: ./.github/actions/unittest/entrypoint.sh
-    test_php54_lowest:
-        name: "PHP 5.4 Unit Test Prefer Lowest"
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-        - name: Run Unit Tests
-          uses: docker://php:5.4-cli
-          env:
-            composerargs: "--prefer-lowest"
-          with:
-            entrypoint: ./.github/actions/unittest/entrypoint.sh
     style:
         runs-on: ubuntu-latest
         name: PHP Style Check

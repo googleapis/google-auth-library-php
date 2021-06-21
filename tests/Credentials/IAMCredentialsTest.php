@@ -19,6 +19,7 @@ namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\IAMCredentials;
 use PHPUnit\Framework\TestCase;
+use InvalidArgumentException;
 
 /**
  * @group credentials
@@ -26,11 +27,10 @@ use PHPUnit\Framework\TestCase;
  */
 class IAMConstructorTest extends TestCase
 {
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testShouldFailIfSelectorIsNotString()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $notAString = new \stdClass();
         $iam = new IAMCredentials(
             $notAString,
@@ -38,11 +38,10 @@ class IAMConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testShouldFailIfTokenIsNotString()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $notAString = new \stdClass();
         $iam = new IAMCredentials(
             '',
@@ -70,7 +69,7 @@ class IAMUpdateMetadataCallbackTest extends TestCase
         );
 
         $update_metadata = $iam->getUpdateMetadataFunc();
-        $this->assertInternalType('callable', $update_metadata);
+        $this->assertIsCallable($update_metadata);
 
         $actual_metadata = call_user_func(
             $update_metadata,

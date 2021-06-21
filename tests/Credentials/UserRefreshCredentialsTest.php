@@ -22,6 +22,9 @@ use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
+use DomainException;
+use InvalidArgumentException;
+use LogicException;
 
 // Creates a standard JSON auth object for testing.
 function createURCTestJson()
@@ -54,11 +57,9 @@ class URCGetCacheKeyTest extends TestCase
 
 class URCConstructorTest extends TestCase
 {
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testShouldFailIfScopeIsNotAValidType()
     {
+        $this->expectException(InvalidArgumentException::class);
         $testJson = createURCTestJson();
         $notAnArrayOrString = new \stdClass();
         $sa = new UserRefreshCredentials(
@@ -67,11 +68,9 @@ class URCConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testShouldFailIfJsonDoesNotHaveClientSecret()
     {
+        $this->expectException(InvalidArgumentException::class);
         $testJson = createURCTestJson();
         unset($testJson['client_secret']);
         $scope = ['scope/1', 'scope/2'];
@@ -81,11 +80,9 @@ class URCConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testShouldFailIfJsonDoesNotHaveRefreshToken()
     {
+        $this->expectException(InvalidArgumentException::class);
         $testJson = createURCTestJson();
         unset($testJson['refresh_token']);
         $scope = ['scope/1', 'scope/2'];
@@ -95,11 +92,9 @@ class URCConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testShouldFailIfJsonDoesNotHaveClientId()
     {
+        $this->expectException(InvalidArgumentException::class);
         $testJson = createURCTestJson();
         unset($testJson['client_id']);
         $scope = ['scope/1', 'scope/2'];
@@ -109,11 +104,9 @@ class URCConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testFailsToInitalizeFromANonExistentFile()
     {
+        $this->expectException(InvalidArgumentException::class);
         $keyFile = __DIR__ . '/../fixtures/does-not-exist-private.json';
         new UserRefreshCredentials('scope/1', $keyFile);
     }
@@ -126,11 +119,10 @@ class URCConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException LogicException
-     */
     public function testFailsToInitializeFromInvalidJsonData()
     {
+        $this->expectException(LogicException::class);
+
         $tmp = tmpfile();
         fwrite($tmp, '{');
 
@@ -155,7 +147,7 @@ class URCConstructorTest extends TestCase
 
 class URCFromEnvTest extends TestCase
 {
-    protected function tearDown()
+    protected function tearDown(): void
     {
         putenv(UserRefreshCredentials::ENV_VAR);  // removes it from
     }
@@ -165,11 +157,9 @@ class URCFromEnvTest extends TestCase
         $this->assertNull(UserRefreshCredentials::fromEnv('a scope'));
     }
 
-    /**
-     * @expectedException DomainException
-     */
     public function testFailsIfEnvSpecifiesNonExistentFile()
     {
+        $this->expectException(DomainException::class);
         $keyFile = __DIR__ . '/../fixtures/does-not-exist-private.json';
         putenv(UserRefreshCredentials::ENV_VAR . '=' . $keyFile);
         UserRefreshCredentials::fromEnv('a scope');
@@ -187,12 +177,12 @@ class URCFromWellKnownFileTest extends TestCase
 {
     private $originalHome;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->originalHome = getenv('HOME');
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         if ($this->originalHome != getenv('HOME')) {
             putenv('HOME=' . $this->originalHome);
@@ -218,11 +208,9 @@ class URCFromWellKnownFileTest extends TestCase
 
 class URCFetchAuthTokenTest extends TestCase
 {
-    /**
-     * @expectedException GuzzleHttp\Exception\ClientException
-     */
     public function testFailsOnClientErrors()
     {
+        $this->expectException(\GuzzleHttp\Exception\ClientException::class);
         $testJson = createURCTestJson();
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
@@ -235,11 +223,9 @@ class URCFetchAuthTokenTest extends TestCase
         $sa->fetchAuthToken($httpHandler);
     }
 
-    /**
-     * @expectedException GuzzleHttp\Exception\ServerException
-     */
     public function testFailsOnServerErrors()
     {
+        $this->expectException(\GuzzleHttp\Exception\ServerException::class);
         $testJson = createURCTestJson();
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
