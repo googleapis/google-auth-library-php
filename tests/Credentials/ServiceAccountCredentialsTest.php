@@ -311,7 +311,7 @@ class SACFetchAuthTokenTest extends TestCase
             $testJson
         );
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertIsCallable($update_metadata);
+        $this->assertTrue(is_callabe($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
@@ -513,7 +513,7 @@ class SACJwtAccessTest extends TestCase
         $this->assertNotNull($sa);
 
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertIsCallable($update_metadata);
+        $this->assertTrue(is_callabe($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
@@ -543,7 +543,7 @@ class SACJwtAccessTest extends TestCase
         $this->assertNotNull($sa);
 
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertIsCallable($update_metadata);
+        $this->assertTrue(is_callabe($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
@@ -615,7 +615,7 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertNotNull($sa);
 
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertIsCallable($update_metadata);
+        $this->assertTrue(is_callabe($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
@@ -822,7 +822,7 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertNotNull($sa);
 
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertIsCallable($update_metadata);
+        $this->assertTrue(is_callabe($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
