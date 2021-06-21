@@ -140,7 +140,7 @@ class ADCDefaultScopeTest extends TestCase
 
         // used default scope
         $tokenUri = $uriProperty->getValue($creds);
-        $this->assertStringContainsString('a+default+scope', $tokenUri);
+        $this->assertContains('a+default+scope', $tokenUri);
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             'a+user+scope', // $scope
@@ -156,7 +156,7 @@ class ADCDefaultScopeTest extends TestCase
 
         // did not use default scope
         $tokenUri = $uriProperty->getValue($creds);
-        $this->assertStringContainsString('a+user+scope', $tokenUri);
+        $this->assertContains('a+user+scope', $tokenUri);
     }
 
     /** @runInSeparateProcess */
