@@ -92,7 +92,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     /*
      * @var bool
      */
-    private $useJwtAccessWithScope;
+    private $useJwtAccessWithScope = false;
 
     /*
      * @var ServiceAccountJwtAccessCredentials|null
