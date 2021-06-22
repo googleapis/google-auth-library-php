@@ -138,7 +138,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
         }
 
         if (!empty($audience) && !empty($scope)) {
-            throw new UnexpectedValueException(
+            throw new \UnexpectedValueException(
                 'Cannot sign both audience and scope in JwtAccess'
             );
         }

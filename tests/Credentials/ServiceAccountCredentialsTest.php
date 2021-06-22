@@ -478,6 +478,19 @@ class SACJwtAccessTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException UnexpectedValueException
+     * @expectedExceptionMessage Cannot sign both audience and scope in JwtAccess
+     */
+    public function testFailsWithBothAudienceAndScope()
+    {
+        $scope = 'scope/1';
+        $audience = 'https://example.com/service';
+        $testJson = $this->createTestJson();
+        $sa = new ServiceAccountJwtAccessCredentials($testJson, $scope);
+        $sa->updateMetadata([], $audience);
+    }
+
     public function testCanInitializeFromJson()
     {
         $testJson = $this->createTestJson();

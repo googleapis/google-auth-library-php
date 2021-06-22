@@ -103,6 +103,19 @@ class OAuth2AuthorizationUriTest extends TestCase
         $o->buildFullAuthorizationUri();
     }
 
+    /**
+     * @expectedException DomainException
+     * @expectedExceptionMessage one of scope or aud should not be null
+     */
+    public function testAudOrScopeIsRequiredForJwt()
+    {
+        $o = new OAuth2([]);
+        $o->setSigningKey('a key');
+        $o->setSigningAlgorithm('RS256');
+        $o->setIssuer('an issuer');
+        $o->toJwt();
+    }
+
     public function testHasDefaultXXXTypeParams()
     {
         $o = new OAuth2($this->minimal);
