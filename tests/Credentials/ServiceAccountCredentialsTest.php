@@ -478,6 +478,19 @@ class SACJwtAccessTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException UnexpectedValueException
+     * @expectedExceptionMessage Cannot sign both audience and scope in JwtAccess
+     */
+    public function testFailsWithBothAudienceAndScope()
+    {
+        $scope = 'scope/1';
+        $audience = 'https://example.com/service';
+        $testJson = $this->createTestJson();
+        $sa = new ServiceAccountJwtAccessCredentials($testJson, $scope);
+        $sa->updateMetadata([], $audience);
+    }
+
     public function testCanInitializeFromJson()
     {
         $testJson = $this->createTestJson();
@@ -632,6 +645,148 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertInternalType('string', $bearer_token);
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
         $this->assertGreaterThan(30, strlen($bearer_token));
+    }
+
+    public function testUpdateMetadataWithScopeAndUseJwtAccessWithScopeParameter()
+    {
+        $testJson = $this->createTestJson();
+        // jwt access should be used even when scopes are supplied, no outbound
+        // call should be made
+        $scope = 'scope1 scope2';
+        $sa = new ServiceAccountCredentials(
+            $scope,
+            $testJson
+        );
+        $sa->useJwtAccessWithScope();
+
+        $actual_metadata = $sa->updateMetadata(
+            $metadata = array('foo' => 'bar'),
+            $authUri = 'https://example.com/service'
+        );
+
+        $this->assertArrayHasKey(
+            CredentialsLoader::AUTH_METADATA_KEY,
+            $actual_metadata
+        );
+
+        $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
+        $this->assertInternalType('array', $authorization);
+
+        $bearer_token = current($authorization);
+        $this->assertInternalType('string', $bearer_token);
+        $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
+
+        // Ensure scopes are signed inside
+        $token = substr($bearer_token, strlen('Bearer '));
+        $this->assertEquals(2, substr_count($token, '.'));
+        list($header, $payload, $sig) = explode('.', $bearer_token);
+        $json = json_decode(base64_decode($payload), true);
+        $this->assertInternalType('array', $json);
+        $this->assertArrayHasKey('scope', $json);
+        $this->assertEquals($json['scope'], $scope);
+    }
+
+    public function testUpdateMetadataWithScopeAndUseJwtAccessWithScopeParameterAndArrayScopes()
+    {
+        $testJson = $this->createTestJson();
+        // jwt access should be used even when scopes are supplied, no outbound
+        // call should be made
+        $scope = ['scope1', 'scope2'];
+        $sa = new ServiceAccountCredentials(
+            $scope,
+            $testJson
+        );
+        $sa->useJwtAccessWithScope();
+
+        $actual_metadata = $sa->updateMetadata(
+            $metadata = array('foo' => 'bar'),
+            $authUri = 'https://example.com/service'
+        );
+
+        $this->assertArrayHasKey(
+            CredentialsLoader::AUTH_METADATA_KEY,
+            $actual_metadata
+        );
+
+        $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
+        $this->assertInternalType('array', $authorization);
+
+        $bearer_token = current($authorization);
+        $this->assertInternalType('string', $bearer_token);
+        $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
+
+        // Ensure scopes are signed inside
+        $token = substr($bearer_token, strlen('Bearer '));
+        $this->assertEquals(2, substr_count($token, '.'));
+        list($header, $payload, $sig) = explode('.', $bearer_token);
+        $json = json_decode(base64_decode($payload), true);
+        $this->assertInternalType('array', $json);
+        $this->assertArrayHasKey('scope', $json);
+        $this->assertEquals($json['scope'], implode(' ', $scope));
+
+        // Test last received token
+        $cachedToken = $sa->getLastReceivedToken();
+        $this->assertInternalType('array', $cachedToken);
+        $this->assertArrayHasKey('access_token', $cachedToken);
+        $this->assertEquals($token, $cachedToken['access_token']);
+    }
+
+    public function testFetchAuthTokenWithScopeAndUseJwtAccessWithScopeParameter()
+    {
+        $testJson = $this->createTestJson();
+        // jwt access should be used even when scopes are supplied, no outbound
+        // call should be made
+        $scope = 'scope1 scope2';
+        $sa = new ServiceAccountCredentials(
+            $scope,
+            $testJson
+        );
+        $sa->useJwtAccessWithScope();
+
+        $access_token = $sa->fetchAuthToken();
+        $this->assertInternalType('array', $access_token);
+        $this->assertArrayHasKey('access_token', $access_token);
+        $token = $access_token['access_token'];
+
+        // Ensure scopes are signed inside
+        $this->assertEquals(2, substr_count($token, '.'));
+        list($header, $payload, $sig) = explode('.', $token);
+        $json = json_decode(base64_decode($payload), true);
+        $this->assertInternalType('array', $json);
+        $this->assertArrayHasKey('scope', $json);
+        $this->assertEquals($json['scope'], $scope);
+    }
+
+    public function testFetchAuthTokenWithScopeAndUseJwtAccessWithScopeParameterAndArrayScopes()
+    {
+        $testJson = $this->createTestJson();
+        // jwt access should be used even when scopes are supplied, no outbound
+        // call should be made
+        $scope = ['scope1', 'scope2'];
+        $sa = new ServiceAccountCredentials(
+            $scope,
+            $testJson
+        );
+        $sa->useJwtAccessWithScope();
+
+        $access_token = $sa->fetchAuthToken();
+        $this->assertInternalType('array', $access_token);
+        $this->assertArrayHasKey('access_token', $access_token);
+        $token = $access_token['access_token'];
+
+        // Ensure scopes are signed inside
+        $this->assertEquals(2, substr_count($token, '.'));
+        list($header, $payload, $sig) = explode('.', $token);
+        $json = json_decode(base64_decode($payload), true);
+        $this->assertInternalType('array', $json);
+        $this->assertArrayHasKey('scope', $json);
+        $this->assertEquals($json['scope'], implode(' ', $scope));
+
+        // Test last received token
+        $cachedToken = $sa->getLastReceivedToken();
+        $this->assertInternalType('array', $cachedToken);
+        $this->assertArrayHasKey('access_token', $cachedToken);
+        $this->assertEquals($token, $cachedToken['access_token']);
     }
 
     /** @runInSeparateProcess */
