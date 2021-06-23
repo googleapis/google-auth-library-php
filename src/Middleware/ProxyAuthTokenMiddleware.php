@@ -76,7 +76,7 @@ class ProxyAuthTokenMiddleware
      *
      *   $config = [..<oauth config param>.];
      *   $oauth2 = new OAuth2($config)
-     *   $middleware = new AuthTokenMiddleware($oauth2);
+     *   $middleware = new ProxyAuthTokenMiddleware($oauth2);
      *   $stack = HandlerStack::create();
      *   $stack->push($middleware);
      *

@@ -215,9 +215,10 @@ print_r((string) $response->getBody());
 ```
 
 #### Call using Proxy-Authorization Header
-If your application occupies the Authorization request header, 
+If your application is behind a proxy such as [Google Cloud IAP][iap-proxy-header],
+and your application occupies the `Authorization` request header, 
 you can include the ID token in a `Proxy-Authorization: Bearer` 
-header instead. f a valid ID token is found in a `Proxy-Authorization` header, 
+header instead. If a valid ID token is found in a `Proxy-Authorization` header, 
 IAP authorizes the request with it. After authorizing the request, IAP passes 
 the Authorization header to your application without processing the content.
 For this, use the static method `getProxyIdTokenMiddleware` on
@@ -243,7 +244,7 @@ $stack->push($middleware);
 // create the HTTP client
 $client = new Client([
   'handler' => $stack,
-  'auth' => ['username','pass'], // basic or any other auth option
+  'auth' => ['username', 'pass'], // auth option handled by your application
   'proxy_auth' => 'google_auth',
 ]);
 
@@ -253,6 +254,8 @@ $response = $client->get('/');
 // show the result!
 print_r((string) $response->getBody());
 ```
+
+[iap-proxy-header]: https://cloud.google.com/iap/docs/authentication-howto#authenticating_from_proxy-authorization_header
 
 #### Verifying JWTs
 

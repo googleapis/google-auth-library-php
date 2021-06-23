@@ -98,33 +98,6 @@ class ApplicationDefaultCredentials
     }
 
     /**
-     * Obtains an ProxyAuthTokenSubscriber that uses the default FetchAuthTokenInterface
-     * implementation to use in this environment.
-     *
-     * If supplied, $scope is used to in creating the credentials instance if
-     * this does not fallback to the compute engine defaults.
-     *
-     * @param string|array scope the scope of the access request, expressed
-     *        either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
-     *        provided if you have one already available for use.
-     * @return ProxyAuthTokenSubscriber
-     * @throws DomainException if no implementation can be obtained.
-     */
-    public static function getProxySubscriber(
-        $scope = null,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
-    ) {
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
-
-        return new ProxyAuthTokenSubscriber($creds, $httpHandler);
-    }
-
-    /**
      * Obtains an AuthTokenMiddleware that uses the default FetchAuthTokenInterface
      * implementation to use in this environment.
      *
@@ -152,36 +125,6 @@ class ApplicationDefaultCredentials
         $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $quotaProject);
 
         return new AuthTokenMiddleware($creds, $httpHandler);
-    }
-
-    /**
-     * Obtains an ProxyAuthTokenMiddleware that uses the default FetchAuthTokenInterface
-     * implementation to use in this environment.
-     *
-     * If supplied, $scope is used to in creating the credentials instance if
-     * this does not fallback to the compute engine defaults.
-     *
-     * @param string|array scope the scope of the access request, expressed
-     *        either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
-     *        provided if you have one already available for use.
-     * @param string $quotaProject specifies a project to bill for access
-     *   charges associated with the request.
-     * @return ProxyAuthTokenMiddleware
-     * @throws DomainException if no implementation can be obtained.
-     */
-    public static function getProxyMiddleware(
-        $scope = null,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null,
-        $quotaProject = null
-    ) {
-        $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $quotaProject);
-
-        return new ProxyAuthTokenMiddleware($creds, $httpHandler);
     }
 
     /**
