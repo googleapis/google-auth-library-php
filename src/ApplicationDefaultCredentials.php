@@ -26,7 +26,6 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\Middleware\ProxyAuthTokenMiddleware;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
-use Google\Auth\Subscriber\ProxyAuthTokenSubscriber;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
