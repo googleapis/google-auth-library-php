@@ -6,6 +6,7 @@ return (new PhpCsFixer\Config())
         'concat_space' => ['spacing' => 'one'],
         'no_unused_imports' => true,
         'ordered_imports' => true,
+        'new_with_braces' => true,
         'method_argument_space' => false,
         'whitespace_after_comma_in_array' => true,
         'method_argument_space' => [

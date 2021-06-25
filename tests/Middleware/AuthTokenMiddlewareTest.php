@@ -311,9 +311,9 @@ class AuthTokenMiddlewareTest extends BaseTest
             ['Google\Auth\Tests\Middleware\MiddlewareCallback::staticInvoke'],
             [['Google\Auth\Tests\Middleware\MiddlewareCallback', 'staticInvoke']],
             [$anonymousFunc],
-            [[new MiddlewareCallback, 'staticInvoke']],
-            [[new MiddlewareCallback, 'methodInvoke']],
-            [new MiddlewareCallback],
+            [[new MiddlewareCallback(), 'staticInvoke']],
+            [[new MiddlewareCallback(), 'methodInvoke']],
+            [new MiddlewareCallback()],
         ];
     }
 }
