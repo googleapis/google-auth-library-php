@@ -17,7 +17,6 @@
 
 namespace Google\Auth\Tests\Middleware;
 
-use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\Middleware\ProxyAuthTokenMiddleware;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Handler\MockHandler;
