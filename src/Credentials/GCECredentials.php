@@ -197,10 +197,10 @@ class GCECredentials extends CredentialsLoader implements
 
             $scope = implode(',', $scope);
 
-            $tokenUri = $tokenUri . '?scopes='. $scope;
+            $tokenUri = $tokenUri . '?scopes=' . $scope;
         } elseif ($targetAudience) {
             $tokenUri = self::getIdTokenUri($serviceAccountIdentity);
-            $tokenUri = $tokenUri . '?audience='. $targetAudience;
+            $tokenUri = $tokenUri . '?audience=' . $targetAudience;
             $this->targetAudience = $targetAudience;
         }
 

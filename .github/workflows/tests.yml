@@ -140,4 +140,4 @@ jobs:
                 max_attempts: 3
                 command: composer install
             - name: Run Script
-              run: vendor/bin/phpcs --standard=phpcs-ruleset.xml -p
+              run: vendor/bin/php-cs-fixer fix . --dry-run --diff
