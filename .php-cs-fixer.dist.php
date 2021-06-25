@@ -5,6 +5,7 @@ return (new PhpCsFixer\Config())
         '@PSR2' => true,
         'concat_space' => ['spacing' => 'one'],
         'no_unused_imports' => true,
+        'ordered_imports' => true,
         'method_argument_space' => false,
         'whitespace_after_comma_in_array' => true,
         'method_argument_space' => [

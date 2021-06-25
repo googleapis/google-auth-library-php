@@ -17,10 +17,10 @@
 
 namespace Google\Auth\Tests;
 
+use Google\Auth\Cache\MemoryCacheItemPool;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenCache;
-use Google\Auth\Credentials\ServiceAccountCredentials;
-use Google\Auth\Cache\MemoryCacheItemPool;
 use Prophecy\Argument;
 
 class FetchAuthTokenCacheTest extends BaseTest
