@@ -140,4 +140,6 @@ jobs:
                 max_attempts: 3
                 command: composer install
             - name: Run Script
-              run: vendor/bin/php-cs-fixer fix --dry-run --diff
+              run: |
+                composer require friendsofphp/php-cs-fixer:^3.0
+                vendor/bin/php-cs-fixer fix --dry-run --diff
