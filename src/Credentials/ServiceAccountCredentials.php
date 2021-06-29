@@ -186,7 +186,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        if ($this->useJwtAccessWithScope) {
+        if ($this->useSelfSignedJwt()) {
             $jwtCreds = $this->createJwtAccessCredentials();
 
             $accessToken = $jwtCreds->fetchAuthToken($httpHandler);
@@ -324,7 +324,12 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
     private function useSelfSignedJwt()
     {
-        // When true, ServiceAccountCredentials will always use JwtAccess
+        // If claims are set, this call is for "id_tokens"
+        if ($this->auth->getAdditionalClaims()) {
+            return false;
+        }
+        
+        // When true, ServiceAccountCredentials will always use JwtAccess for access tokens
         if ($this->useJwtAccessWithScope) {
             return true;
         }
