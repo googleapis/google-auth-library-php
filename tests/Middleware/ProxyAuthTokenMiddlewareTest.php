@@ -23,7 +23,6 @@ use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
-use Foo\bzar;
 
 class ProxyAuthTokenMiddlewareTest extends BaseTest
 {
