@@ -105,7 +105,7 @@ class ProxyAuthTokenMiddlewareTest extends BaseTest
         $authResult = ['id_token' => $token];
         $quotaProject = 'test-quota-project';
         $quotaProjectHeader = GetQuotaProjectInterface::X_GOOG_USER_PROJECT_HEADER;
-        $this->mockFetcher->willImplement(GetQuotaProjectInterface::class);
+        $this->mockFetcher->willImplement('Google\Auth\GetQuotaProjectInterface');
         $this->mockFetcher->fetchAuthToken(Argument::any())
             ->willReturn($authResult);
         $this->mockFetcher->getQuotaProject(Argument::any())
