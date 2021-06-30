@@ -138,7 +138,7 @@ class AppIdentityCredentialsTest extends TestCase
             }
         }
 
-        $creds = new AppIdentityCredentials;
+        $creds = new AppIdentityCredentials();
         $res = call_user_func_array([$creds, $method], $args);
 
         if ($expected) {
@@ -162,7 +162,7 @@ class AppIdentityCredentialsTest extends TestCase
     {
         $this->imitateInAppEngine();
 
-        $creds = new AppIdentityCredentials;
+        $creds = new AppIdentityCredentials();
         $string = 'test';
         $res = $creds->signBlob($string);
 
@@ -176,7 +176,7 @@ class AppIdentityCredentialsTest extends TestCase
     {
         $this->imitateInAppEngine();
 
-        $creds = new AppIdentityCredentials;
+        $creds = new AppIdentityCredentials();
 
         $expected = 'foobar';
         AppIdentityService::$serviceAccountName = $expected;
@@ -189,7 +189,7 @@ class AppIdentityCredentialsTest extends TestCase
 
     public function testGetLastReceivedTokenNullByDefault()
     {
-        $creds = new AppIdentityCredentials;
+        $creds = new AppIdentityCredentials();
         $this->assertNull($creds->getLastReceivedToken());
     }
 
@@ -200,7 +200,7 @@ class AppIdentityCredentialsTest extends TestCase
     {
         $this->imitateInAppEngine();
 
-        $creds = new AppIdentityCredentials;
+        $creds = new AppIdentityCredentials();
 
         $wantedToken = [
             'access_token' => '1/abdef1234567890',
@@ -228,12 +228,12 @@ class AppIdentityCredentialsTest extends TestCase
 
         $projectId = 'foobar';
         AppIdentityService::$applicationId = $projectId;
-        $this->assertEquals($projectId, (new AppIdentityCredentials)->getProjectId());
+        $this->assertEquals($projectId, (new AppIdentityCredentials())->getProjectId());
     }
 
     public function testGetProjectOutsideAppEngine()
     {
-        $this->assertNull((new AppIdentityCredentials)->getProjectId());
+        $this->assertNull((new AppIdentityCredentials())->getProjectId());
     }
 
     private function imitateInAppEngine()

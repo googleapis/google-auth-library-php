@@ -18,7 +18,6 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\AccessToken;
 use GuzzleHttp\Psr7\Response;
-use phpseclib\Crypt\RSA;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Http\Message\RequestInterface;

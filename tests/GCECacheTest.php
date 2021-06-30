@@ -20,7 +20,6 @@ namespace Google\Auth\Tests;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
-use Prophecy\Argument;
 
 class GCECacheTest extends BaseTest
 {
