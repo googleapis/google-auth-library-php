@@ -29,7 +29,7 @@ class ProxyAuthTokenMiddlewareTest extends BaseTest
     private $mockFetcher;
     private $mockRequest;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->onlyGuzzle6And7();
 
