@@ -152,6 +152,8 @@ class FetchAuthTokenTest extends BaseTest
         $oauth2Mock = $this->getOAuth2Mock();
         $oauth2Mock->getScope()
             ->willReturn($this->scopes);
+        $oauth2Mock->getAdditionalClaims()
+            ->willReturn([]);
 
         $credentials = new ServiceAccountCredentials($this->scopes, $jsonPath);
         $property->setValue($credentials, $oauth2Mock->reveal());
