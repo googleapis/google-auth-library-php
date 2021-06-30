@@ -8,3 +8,4 @@ composer.lock
 # IntelliJ
 .idea
 *.iml
+.php-cs-fixer.cache
