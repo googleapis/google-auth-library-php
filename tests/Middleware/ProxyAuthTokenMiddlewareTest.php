@@ -17,6 +17,7 @@
 
 namespace Google\Auth\Tests\Middleware;
 
+use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\Middleware\ProxyAuthTokenMiddleware;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Handler\MockHandler;
@@ -92,6 +93,29 @@ class ProxyAuthTokenMiddlewareTest extends BaseTest
             ->shouldBeCalledTimes(1)
             ->willReturn($this->mockRequest->reveal());
 
+        $middleware = new ProxyAuthTokenMiddleware($this->mockFetcher->reveal());
+        $mock = new MockHandler([new Response(200)]);
+        $callable = $middleware($mock);
+        $callable($this->mockRequest->reveal(), ['proxy_auth' => 'google_auth']);
+    }
+
+    public function testGetQuotaProject()
+    {
+        $token = 'idtoken12345';
+        $authResult = ['id_token' => $token];
+        $quotaProject = 'test-quota-project';
+        $quotaProjectHeader = GetQuotaProjectInterface::X_GOOG_USER_PROJECT_HEADER;
+        $this->mockFetcher->willImplement('Google\Auth\GetQuotaProjectInterface');
+        $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->willReturn($authResult);
+        $this->mockFetcher->getQuotaProject(Argument::any())
+            ->willReturn($quotaProject);
+        $this->mockRequest->withHeader('proxy-authorization', 'Bearer ' . $token)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
+        $this->mockRequest->withHeader($quotaProjectHeader, $quotaProject)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
         $middleware = new ProxyAuthTokenMiddleware($this->mockFetcher->reveal());
         $mock = new MockHandler([new Response(200)]);
         $callable = $middleware($mock);
