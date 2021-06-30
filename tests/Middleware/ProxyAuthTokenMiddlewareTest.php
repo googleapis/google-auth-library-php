@@ -31,8 +31,6 @@ class ProxyAuthTokenMiddlewareTest extends BaseTest
 
     protected function setUp(): void
     {
-        $this->onlyGuzzle6And7();
-
         $this->mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
         $this->mockRequest = $this->prophesize('GuzzleHttp\Psr7\Request');
     }
