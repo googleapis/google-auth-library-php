@@ -29,6 +29,95 @@ class CredentialsLoaderTest extends TestCase
         $this->assertArrayHasKey('authentication', $metadata);
         $this->assertEquals('foo', $metadata['authentication']);
     }
+
+    /** @runInSeparateProcess */
+    public function testGetDefaultClientCertSource()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures4/valid');
+
+        $callback = CredentialsLoader::getDefaultClientCertSource();
+        $this->assertNotNull($callback);
+
+        $output = $callback();
+        $this->assertEquals('foo', $output);
+    }
+
+    /** @runInSeparateProcess */
+    public function testNonExistantDefaultClientCertSource()
+    {
+        putenv('HOME=');
+
+        $callback = CredentialsLoader::getDefaultClientCertSource();
+        $this->assertNull($callback);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testDefaultClientCertSourceInvalidJsonThrowsException()
+    {
+        $this->expectException('UnexpectedValueException');
+        $this->expectExceptionMessage('Invalid client cert source JSON');
+        putenv('HOME=' . __DIR__ . '/fixtures4/invalidjson');
+
+        CredentialsLoader::getDefaultClientCertSource();
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testDefaultClientCertSourceInvalidKeyThrowsException()
+    {
+        $this->expectException('UnexpectedValueException');
+        $this->expectExceptionMessage('cert source requires "cert_provider_command"');
+        putenv('HOME=' . __DIR__ . '/fixtures4/invalidkey');
+
+        CredentialsLoader::getDefaultClientCertSource();
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testDefaultClientCertSourceInvalidValueThrowsException()
+    {
+        $this->expectException('UnexpectedValueException');
+        $this->expectExceptionMessage(
+            'cert source expects "cert_provider_command" to be an array'
+        );
+        putenv('HOME=' . __DIR__ . '/fixtures4/invalidvalue');
+
+        CredentialsLoader::getDefaultClientCertSource();
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testActualDefaultClientCertSource()
+    {
+        $clientCertSource = CredentialsLoader::getDefaultClientCertSource();
+        if (is_null($clientCertSource)) {
+            $this->markTestSkipped('No client cert source found');
+        }
+        $creds = $clientCertSource();
+        $this->assertTrue(is_string($creds));
+        $this->assertContains('-----BEGIN CERTIFICATE-----', $creds);
+        $this->assertContains('-----BEGIN PRIVATE KEY-----', $creds);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testDefaultClientCertSourceInvalidCmdThrowsException()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures4/invalidcmd');
+
+        $callback = CredentialsLoader::getDefaultClientCertSource();
+
+        // Close stderr so output doesnt show in our test runner
+        fclose(STDERR);
+
+        $this->assertNull($callback());
+    }
 }
 
 class TestCredentialsLoader extends CredentialsLoader

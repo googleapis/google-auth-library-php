@@ -21,6 +21,7 @@ use Google\Auth\Credentials\InsecureCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use GuzzleHttp\ClientInterface;
+use UnexpectedValueException;
 
 /**
  * CredentialsLoader contains the behaviour used to locate and find default
@@ -34,6 +35,7 @@ abstract class CredentialsLoader implements
     const ENV_VAR = 'GOOGLE_APPLICATION_CREDENTIALS';
     const WELL_KNOWN_PATH = 'gcloud/application_default_credentials.json';
     const NON_WINDOWS_WELL_KNOWN_PATH_BASE = '.config';
+    const MTLS_WELL_KNOWN_PATH = '.secureConnect/context_aware_metadata.json';
 
     /**
      * @param string $cause
@@ -246,5 +248,48 @@ abstract class CredentialsLoader implements
         $metadata_copy[self::AUTH_METADATA_KEY] = array('Bearer ' . $result['access_token']);
 
         return $metadata_copy;
+    }
+
+    public static function getDefaultClientCertSource()
+    {
+        if (!$clientCertSourceJson = self::loadDefaultClientCertSourceFile()) {
+            return null;
+        }
+        if (!isset($clientCertSourceJson['cert_provider_command'])) {
+            throw new UnexpectedValueException(
+                'cert source requires "cert_provider_command"'
+            );
+        }
+        if (!is_array($clientCertSourceJson['cert_provider_command'])) {
+            throw new UnexpectedValueException(
+                'cert source expects "cert_provider_command" to be an array'
+            );
+        }
+        $clientCertSourceCmd = $clientCertSourceJson['cert_provider_command'];
+
+        return function () use ($clientCertSourceCmd) {
+            $cmd = array_map('escapeshellarg', $clientCertSourceCmd);
+            exec(implode(' ', $cmd), $output, $returnVar);
+
+            if (0 === $returnVar) {
+                return implode(PHP_EOL, $output);
+            }
+            return null;
+        };
+    }
+
+    private static function loadDefaultClientCertSourceFile()
+    {
+        $rootEnv = self::isOnWindows() ? 'APPDATA' : 'HOME';
+        $path = sprintf('%s/%s', getenv($rootEnv), self::MTLS_WELL_KNOWN_PATH);
+        if (!file_exists($path)) {
+            return null;
+        }
+        $jsonKey = file_get_contents($path);
+        $clientCertSourceJson = json_decode($jsonKey, true);
+        if (!$clientCertSourceJson) {
+            throw new UnexpectedValueException('Invalid client cert source JSON');
+        }
+        return $clientCertSourceJson;
     }
 }
