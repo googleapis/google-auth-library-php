@@ -58,7 +58,7 @@ class ServiceAccountSignerTraitImpl
 
     public function __construct($signingKey)
     {
-        $this->auth = new AuthStub;
+        $this->auth = new AuthStub();
         $this->auth->signingKey = $signingKey;
     }
 }

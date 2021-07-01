@@ -17,10 +17,10 @@
 
 namespace Google\Auth\Tests;
 
+use Google\Auth\Cache\MemoryCacheItemPool;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenCache;
-use Google\Auth\Credentials\ServiceAccountCredentials;
-use Google\Auth\Cache\MemoryCacheItemPool;
 use Prophecy\Argument;
 
 class FetchAuthTokenCacheTest extends BaseTest
@@ -245,7 +245,6 @@ class FetchAuthTokenCacheTest extends BaseTest
         $cachedFetcher->updateMetadata(['foo' => 'bar']);
     }
 
-
     public function testShouldReturnValueWhenNotExpired()
     {
         $cacheKey = 'myKey';
@@ -430,6 +429,23 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals($name, $fetcher->getClientName());
     }
 
+    /**
+     * @expectedException RuntimeException
+     * @expectedExceptionMessage Credentials fetcher does not implement Google\Auth\SignBlobInterface
+     */
+    public function testGetClientNameWithInvalidFetcher()
+    {
+        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $cachedFetcher->getClientName();
+    }
+
     public function testSignBlob()
     {
         $stringToSign = 'foobar';
@@ -442,6 +458,41 @@ class FetchAuthTokenCacheTest extends BaseTest
 
         $fetcher = new FetchAuthTokenCache(
             $this->mockSigner->reveal(),
+            [],
+            $this->mockCache->reveal()
+        );
+
+        $this->assertEquals($signature, $fetcher->signBlob($stringToSign, true));
+    }
+
+    public function testGCECredentialsSignBlob()
+    {
+        $stringToSign = 'foobar';
+        $signature = 'helloworld';
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $token];
+
+        $mockGce = $this->prophesize('Google\Auth\Credentials\GCECredentials');
+        $mockGce->signBlob($stringToSign, true, $token)
+            ->shouldBeCalled()
+            ->willReturn($signature);
+
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $mockGce->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+
+        $fetcher = new FetchAuthTokenCache(
+            $mockGce->reveal(),
             [],
             $this->mockCache->reveal()
         );
