@@ -53,11 +53,11 @@ class CredentialsLoaderTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     * @expectedException UnexpectedValueException
+     * @expectedExceptionMessage Invalid client cert source JSON
      */
     public function testDefaultClientCertSourceInvalidJsonThrowsException()
     {
-        $this->expectException('UnexpectedValueException');
-        $this->expectExceptionMessage('Invalid client cert source JSON');
         putenv('HOME=' . __DIR__ . '/fixtures4/invalidjson');
 
         CredentialsLoader::getDefaultClientCertSource();
@@ -65,11 +65,11 @@ class CredentialsLoaderTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     * @expectedException UnexpectedValueException
+     * @expectedExceptionMessage cert source requires "cert_provider_command"
      */
     public function testDefaultClientCertSourceInvalidKeyThrowsException()
     {
-        $this->expectException('UnexpectedValueException');
-        $this->expectExceptionMessage('cert source requires "cert_provider_command"');
         putenv('HOME=' . __DIR__ . '/fixtures4/invalidkey');
 
         CredentialsLoader::getDefaultClientCertSource();
@@ -77,13 +77,11 @@ class CredentialsLoaderTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     * @expectedException UnexpectedValueException
+     * @expectedExceptionMessage cert source expects "cert_provider_command" to be an array
      */
     public function testDefaultClientCertSourceInvalidValueThrowsException()
     {
-        $this->expectException('UnexpectedValueException');
-        $this->expectExceptionMessage(
-            'cert source expects "cert_provider_command" to be an array'
-        );
         putenv('HOME=' . __DIR__ . '/fixtures4/invalidvalue');
 
         CredentialsLoader::getDefaultClientCertSource();
