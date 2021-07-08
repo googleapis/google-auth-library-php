@@ -36,6 +36,7 @@ abstract class CredentialsLoader implements
     const WELL_KNOWN_PATH = 'gcloud/application_default_credentials.json';
     const NON_WINDOWS_WELL_KNOWN_PATH_BASE = '.config';
     const MTLS_WELL_KNOWN_PATH = '.secureConnect/context_aware_metadata.json';
+    const MTLS_CERT_ENV_VAR = 'GOOGLE_API_USE_CLIENT_CERTIFICATE';
 
     /**
      * @param string $cause
@@ -276,6 +277,11 @@ abstract class CredentialsLoader implements
             }
             return null;
         };
+    }
+
+    public static function shouldLoadClientCertSource()
+    {
+        return 'true' === getenv(self::MTLS_CERT_ENV_VAR);
     }
 
     private static function loadDefaultClientCertSourceFile()
