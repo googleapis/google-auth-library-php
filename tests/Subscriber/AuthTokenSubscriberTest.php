@@ -296,9 +296,9 @@ class AuthTokenSubscriberTest extends BaseTest
             ['Google\Auth\Tests\Subscriber\SubscriberCallback::staticInvoke'],
             [['Google\Auth\Tests\Subscriber\SubscriberCallback', 'staticInvoke']],
             [$anonymousFunc],
-            [[new SubscriberCallback, 'staticInvoke']],
-            [[new SubscriberCallback, 'methodInvoke']],
-            [new SubscriberCallback],
+            [[new SubscriberCallback(), 'staticInvoke']],
+            [[new SubscriberCallback(), 'methodInvoke']],
+            [new SubscriberCallback()],
         ];
     }
 }
