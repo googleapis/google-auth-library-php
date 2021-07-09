@@ -116,6 +116,36 @@ class CredentialsLoaderTest extends TestCase
 
         $this->assertNull($callback());
     }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testShouldLoadClientCertSourceInvalidValueIsFalse()
+    {
+        putenv(CredentialsLoader::MTLS_CERT_ENV_VAR . '=foo');
+
+        $this->assertFalse(CredentialsLoader::shouldLoadClientCertSource());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testShouldLoadClientCertSourceDefaultValueIsFalse()
+    {
+        putenv(CredentialsLoader::MTLS_CERT_ENV_VAR);
+
+        $this->assertFalse(CredentialsLoader::shouldLoadClientCertSource());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testShouldLoadClientCertSourceIsTrue()
+    {
+        putenv(CredentialsLoader::MTLS_CERT_ENV_VAR . '=true');
+
+        $this->assertTrue(CredentialsLoader::shouldLoadClientCertSource());
+    }
 }
 
 class TestCredentialsLoader extends CredentialsLoader
