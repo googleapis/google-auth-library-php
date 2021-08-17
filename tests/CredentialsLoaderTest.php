@@ -104,6 +104,8 @@ class CredentialsLoaderTest extends TestCase
 
     /**
      * @runInSeparateProcess
+     * @expectedException RuntimeException
+     * @expectedExceptionMessage "cert_provider_command" failed with a nonzero exit code
      */
     public function testDefaultClientCertSourceInvalidCmdThrowsException()
     {
@@ -114,7 +116,7 @@ class CredentialsLoaderTest extends TestCase
         // Close stderr so output doesnt show in our test runner
         fclose(STDERR);
 
-        $this->assertNull($callback());
+        $callback();
     }
 
     /**

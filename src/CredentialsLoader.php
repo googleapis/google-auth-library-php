@@ -21,6 +21,7 @@ use Google\Auth\Credentials\InsecureCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use GuzzleHttp\ClientInterface;
+use RuntimeException;
 use UnexpectedValueException;
 
 /**
@@ -262,16 +263,6 @@ abstract class CredentialsLoader implements
         if (!$clientCertSourceJson = self::loadDefaultClientCertSourceFile()) {
             return null;
         }
-        if (!isset($clientCertSourceJson['cert_provider_command'])) {
-            throw new UnexpectedValueException(
-                'cert source requires "cert_provider_command"'
-            );
-        }
-        if (!is_array($clientCertSourceJson['cert_provider_command'])) {
-            throw new UnexpectedValueException(
-                'cert source expects "cert_provider_command" to be an array'
-            );
-        }
         $clientCertSourceCmd = $clientCertSourceJson['cert_provider_command'];
 
         return function () use ($clientCertSourceCmd) {
@@ -281,7 +272,9 @@ abstract class CredentialsLoader implements
             if (0 === $returnVar) {
                 return implode(PHP_EOL, $output);
             }
-            return null;
+            throw new RuntimeException(
+                '"cert_provider_command" failed with a nonzero exit code'
+            );
         };
     }
 
@@ -306,6 +299,16 @@ abstract class CredentialsLoader implements
         $clientCertSourceJson = json_decode($jsonKey, true);
         if (!$clientCertSourceJson) {
             throw new UnexpectedValueException('Invalid client cert source JSON');
+        }
+        if (!isset($clientCertSourceJson['cert_provider_command'])) {
+            throw new UnexpectedValueException(
+                'cert source requires "cert_provider_command"'
+            );
+        }
+        if (!is_array($clientCertSourceJson['cert_provider_command'])) {
+            throw new UnexpectedValueException(
+                'cert source expects "cert_provider_command" to be an array'
+            );
         }
         return $clientCertSourceJson;
     }
