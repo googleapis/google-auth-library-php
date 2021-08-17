@@ -292,7 +292,7 @@ abstract class CredentialsLoader implements
      */
     public static function shouldLoadClientCertSource()
     {
-        return 'true' === getenv(self::MTLS_CERT_ENV_VAR);
+        return filter_var(getenv(self::MTLS_CERT_ENV_VAR), FILTER_VALIDATE_BOOLEAN);
     }
 
     private static function loadDefaultClientCertSourceFile()
