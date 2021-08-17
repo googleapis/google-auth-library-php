@@ -285,6 +285,11 @@ abstract class CredentialsLoader implements
         };
     }
 
+    /**
+     * Determines whether or not the default device certificate should be loaded.
+     *
+     * @return bool
+     */
     public static function shouldLoadClientCertSource()
     {
         return 'true' === getenv(self::MTLS_CERT_ENV_VAR);
