@@ -251,6 +251,12 @@ abstract class CredentialsLoader implements
         return $metadata_copy;
     }
 
+    /**
+     * Gets a callable which returns the default device certification.
+     *
+     * @throws UnexpectedValueException
+     * @return callable|null
+     */
     public static function getDefaultClientCertSource()
     {
         if (!$clientCertSourceJson = self::loadDefaultClientCertSourceFile()) {
