@@ -1,6 +1,6 @@
 ## 1.18.0 (08/24/2021)
 
- *  [feat]: Adding support for guzzlehttp/psr7 v2 (#357)
+ *  [feat]: Add support for guzzlehttp/psr7 v2 (#357)
 
 ## 1.17.0 (08/17/2021)
 
