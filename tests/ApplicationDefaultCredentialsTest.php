@@ -22,6 +22,7 @@ use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -99,7 +100,7 @@ class ADCGetTest extends TestCase
         // simulate the response from GCE.
         $httpHandler = getHandler([
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+            buildResponse(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $this->assertInstanceOf(
@@ -122,7 +123,7 @@ class ADCDefaultScopeTest extends TestCase
             null, // $scope
             $httpHandler = getHandler([
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+                buildResponse(200, [], Utils::streamFor($jsonTokens)),
             ]), // $httpHandler
             null, // $cacheConfig
             null, // $cache
@@ -146,7 +147,7 @@ class ADCDefaultScopeTest extends TestCase
             'a+user+scope', // $scope
             getHandler([
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+                buildResponse(200, [], Utils::streamFor($jsonTokens)),
             ]), // $httpHandler
             null, // $cacheConfig
             null, // $cache
@@ -351,7 +352,7 @@ class ADCGetMiddlewareTest extends TestCase
         // simulate the response from GCE.
         $httpHandler = getHandler([
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+            buildResponse(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler));
@@ -552,7 +553,7 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
         // simulate the response from GCE.
         $httpHandler = getHandler([
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+            buildResponse(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $credentials = ApplicationDefaultCredentials::getIdTokenCredentials(
@@ -663,7 +664,7 @@ class ADCGetCredentialsWithQuotaProjectTest extends TestCase
         // simulate the response from GCE.
         $httpHandler = getHandler([
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+            buildResponse(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $credentials = ApplicationDefaultCredentials::getCredentials(
@@ -850,7 +851,7 @@ class ADCGetSubscriberTest extends BaseTest
         // simulate the response from GCE.
         $httpHandler = getHandler([
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+            buildResponse(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $this->assertNotNull(ApplicationDefaultCredentials::getSubscriber('a scope', $httpHandler));

@@ -21,6 +21,7 @@ use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Utils;
 use Prophecy\Argument;
 
 /**
@@ -136,7 +137,7 @@ class GCECredentialsTest extends BaseTest
         $jsonTokens = json_encode($wantedTokens);
         $httpHandler = getHandler([
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for($jsonTokens)),
+            buildResponse(200, [], Utils::streamFor($jsonTokens)),
         ]);
         $g = new GCECredentials();
         $receivedToken = $g->fetchAuthToken($httpHandler);
@@ -165,7 +166,7 @@ class GCECredentialsTest extends BaseTest
                 'audience=a+target+audience',
                 $request->getUri()->getQuery()
             );
-            return new Psr7\Response(200, [], Psr7\stream_for($expectedToken['id_token']));
+            return new Psr7\Response(200, [], Utils::streamFor($expectedToken['id_token']));
         };
         $g = new GCECredentials(null, null, 'a+target+audience');
         $this->assertEquals($expectedToken, $g->fetchAuthToken($httpHandler));
@@ -195,7 +196,7 @@ class GCECredentialsTest extends BaseTest
                 $this->send(Argument::any(), Argument::any())->will(function ($args) use (&$uri) {
                     $uri = $args[0]->getUri();
 
-                    return buildResponse(200, [], Psr7\stream_for('{"expires_in": 0}'));
+                    return buildResponse(200, [], Utils::streamFor('{"expires_in": 0}'));
                 });
 
                 return buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
@@ -233,8 +234,8 @@ class GCECredentialsTest extends BaseTest
 
         $httpHandler = getHandler([
             buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Psr7\stream_for($expected)),
-            buildResponse(200, [], Psr7\stream_for('notexpected'))
+            buildResponse(200, [], Utils::streamFor($expected)),
+            buildResponse(200, [], Utils::streamFor('notexpected'))
         ]);
 
         $creds = new GCECredentials();
@@ -280,8 +281,8 @@ class GCECredentialsTest extends BaseTest
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Psr7\stream_for($expectedEmail)),
-                buildResponse(200, [], Psr7\stream_for(json_encode($token)))
+                buildResponse(200, [], Utils::streamFor($expectedEmail)),
+                buildResponse(200, [], Utils::streamFor(json_encode($token)))
             );
 
         HttpClientCache::setHttpClient($client->reveal());
@@ -319,9 +320,9 @@ class GCECredentialsTest extends BaseTest
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Psr7\stream_for(json_encode($token1))),
-                buildResponse(200, [], Psr7\stream_for($expectedEmail)),
-                buildResponse(200, [], Psr7\stream_for(json_encode($token2)))
+                buildResponse(200, [], Utils::streamFor(json_encode($token1))),
+                buildResponse(200, [], Utils::streamFor($expectedEmail)),
+                buildResponse(200, [], Utils::streamFor(json_encode($token2)))
             );
 
         HttpClientCache::setHttpClient($client->reveal());
@@ -343,8 +344,8 @@ class GCECredentialsTest extends BaseTest
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
                 buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Psr7\stream_for($expected)),
-                buildResponse(200, [], Psr7\stream_for('notexpected'))
+                buildResponse(200, [], Utils::streamFor($expected)),
+                buildResponse(200, [], Utils::streamFor('notexpected'))
             );
 
         HttpClientCache::setHttpClient($client->reveal());
@@ -401,7 +402,7 @@ class GCECredentialsTest extends BaseTest
                 $request->getUri()->getPath()
             );
             $this->assertEquals('', $request->getUri()->getQuery());
-            return new Psr7\Response(200, [], Psr7\stream_for(json_encode($expected)));
+            return new Psr7\Response(200, [], Utils::streamFor(json_encode($expected)));
         };
 
         $g = new GCECredentials(null, null, null, null, 'foo');
@@ -428,7 +429,7 @@ class GCECredentialsTest extends BaseTest
                 'audience=a+target+audience',
                 $request->getUri()->getQuery()
             );
-            return new Psr7\Response(200, [], Psr7\stream_for($expected));
+            return new Psr7\Response(200, [], Utils::streamFor($expected));
         };
         $g = new GCECredentials(null, null, 'a+target+audience', null, 'foo');
         $this->assertEquals(
@@ -460,7 +461,7 @@ class GCECredentialsTest extends BaseTest
                 $request->getUri()->getPath()
             );
             $this->assertEquals('', $request->getUri()->getQuery());
-            return new Psr7\Response(200, [], Psr7\stream_for($expected));
+            return new Psr7\Response(200, [], Utils::streamFor($expected));
         };
 
         $creds = new GCECredentials(null, null, null, null, 'foo');
