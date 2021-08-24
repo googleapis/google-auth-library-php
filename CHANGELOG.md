@@ -1,7 +1,3 @@
-## 1.17.1 (08/25/2021)
-
-* [chore]: Replaced the use of deprecated functions in Guzzlehttp/Psr7 and bumbed the version from **^1.2** to **^1.7|^2.0**
-
 ## 1.17.0 (08/17/2021)
 
  * [fix]: consistently use useSelfSignedJwt method in ServiceAccountJwtAccessCredentials (#351)
