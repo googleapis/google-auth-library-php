@@ -19,6 +19,7 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\Iam;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -68,7 +69,7 @@ class IamTest extends TestCase
                 'payload' => base64_encode($expectedString)
             ], json_decode((string) $request->getBody(), true));
 
-            return new Psr7\Response(200, [], Psr7\stream_for(json_encode([
+            return new Psr7\Response(200, [], Utils::streamFor(json_encode([
                 'signedBlob' => $expectedResponse
             ])));
         };

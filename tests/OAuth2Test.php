@@ -18,7 +18,8 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\OAuth2;
-use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Query;
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 
 class OAuth2AuthorizationUriTest extends TestCase
@@ -119,7 +120,7 @@ class OAuth2AuthorizationUriTest extends TestCase
     public function testHasDefaultXXXTypeParams()
     {
         $o = new OAuth2($this->minimal);
-        $q = Psr7\parse_query($o->buildFullAuthorizationUri()->getQuery());
+        $q = Query::parse($o->buildFullAuthorizationUri()->getQuery());
         $this->assertEquals('code', $q['response_type']);
         $this->assertEquals('offline', $q['access_type']);
     }
@@ -127,7 +128,7 @@ class OAuth2AuthorizationUriTest extends TestCase
     public function testCanBeUrlObject()
     {
         $config = array_merge($this->minimal, [
-            'authorizationUri' => Psr7\uri_for('https://another/uri'),
+            'authorizationUri' => Utils::uriFor('https://another/uri'),
         ]);
         $o = new OAuth2($config);
         $this->assertEquals('/uri', $o->buildFullAuthorizationUri()->getPath());
@@ -144,7 +145,7 @@ class OAuth2AuthorizationUriTest extends TestCase
         ];
         $config = array_merge($this->minimal, ['state' => 'the_state']);
         $o = new OAuth2($config);
-        $q = Psr7\parse_query($o->buildFullAuthorizationUri($overrides)->getQuery());
+        $q = Query::parse($o->buildFullAuthorizationUri($overrides)->getQuery());
         $this->assertEquals('o_access_type', $q['access_type']);
         $this->assertEquals('o_client_id', $q['client_id']);
         $this->assertEquals('o_redirect_uri', $q['redirect_uri']);
@@ -156,14 +157,14 @@ class OAuth2AuthorizationUriTest extends TestCase
     {
         $with_strings = array_merge($this->minimal, ['scope' => 'scope1 scope2']);
         $o = new OAuth2($with_strings);
-        $q = Psr7\parse_query($o->buildFullAuthorizationUri()->getQuery());
+        $q = Query::parse($o->buildFullAuthorizationUri()->getQuery());
         $this->assertEquals('scope1 scope2', $q['scope']);
 
         $with_array = array_merge($this->minimal, [
             'scope' => ['scope1', 'scope2'],
         ]);
         $o = new OAuth2($with_array);
-        $q = Psr7\parse_query($o->buildFullAuthorizationUri()->getQuery());
+        $q = Query::parse($o->buildFullAuthorizationUri()->getQuery());
         $this->assertEquals('scope1 scope2', $q['scope']);
     }
 
@@ -589,7 +590,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Psr7\parse_query((string)$req->getBody());
+        $fields = Query::parse((string)$req->getBody());
         $this->assertEquals('authorization_code', $fields['grant_type']);
         $this->assertEquals('an_auth_code', $fields['code']);
     }
@@ -605,7 +606,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Psr7\parse_query((string)$req->getBody());
+        $fields = Query::parse((string)$req->getBody());
         $this->assertEquals('password', $fields['grant_type']);
         $this->assertEquals('a_password', $fields['password']);
         $this->assertEquals('a_username', $fields['username']);
@@ -621,7 +622,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Psr7\parse_query((string)$req->getBody());
+        $fields = Query::parse((string)$req->getBody());
         $this->assertEquals('refresh_token', $fields['grant_type']);
         $this->assertEquals('a_refresh_token', $fields['refresh_token']);
     }
@@ -634,7 +635,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $o = new OAuth2($testConfig);
         $o->setCode('an_auth_code');
         $request = $o->generateCredentialsRequest();
-        $fields = Psr7\parse_query((string)$request->getBody());
+        $fields = Query::parse((string)$request->getBody());
         $this->assertEquals('a_client_secret', $fields['client_secret']);
     }
 
@@ -645,7 +646,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $o = new OAuth2($testConfig);
         $o->setRefreshToken('a_refresh_token');
         $request = $o->generateCredentialsRequest();
-        $fields = Psr7\parse_query((string)$request->getBody());
+        $fields = Query::parse((string)$request->getBody());
         $this->assertEquals('a_client_secret', $fields['client_secret']);
     }
 
@@ -657,7 +658,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $o->setUsername('a_username');
         $o->setPassword('a_password');
         $request = $o->generateCredentialsRequest();
-        $fields = Psr7\parse_query((string)$request->getBody());
+        $fields = Query::parse((string)$request->getBody());
         $this->assertEquals('a_client_secret', $fields['client_secret']);
     }
 
@@ -672,7 +673,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Psr7\parse_query((string)$req->getBody());
+        $fields = Query::parse((string)$req->getBody());
         $this->assertEquals(OAuth2::JWT_URN, $fields['grant_type']);
         $this->assertArrayHasKey('assertion', $fields);
     }
@@ -688,7 +689,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Psr7\parse_query((string)$req->getBody());
+        $fields = Query::parse((string)$req->getBody());
         $this->assertEquals('my_value', $fields['my_param']);
         $this->assertEquals('urn:my_test_grant_type', $fields['grant_type']);
     }
@@ -741,7 +742,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         $testConfig = $this->fetchAuthTokenMinimal;
         $notJson = '{"foo": , this is cannot be passed as json" "bar"}';
         $httpHandler = getHandler([
-            buildResponse(200, [], Psr7\stream_for($notJson)),
+            buildResponse(200, [], Utils::streamFor($notJson)),
         ]);
         $o = new OAuth2($testConfig);
         $o->fetchAuthToken($httpHandler);
@@ -752,7 +753,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         $testConfig = $this->fetchAuthTokenMinimal;
         $json = '{"foo": "bar"}';
         $httpHandler = getHandler([
-            buildResponse(200, [], Psr7\stream_for($json)),
+            buildResponse(200, [], Utils::streamFor($json)),
         ]);
         $o = new OAuth2($testConfig);
         $tokens = $o->fetchAuthToken($httpHandler);
@@ -767,7 +768,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
             buildResponse(
                 200,
                 ['Content-Type' => 'application/x-www-form-urlencoded'],
-                Psr7\stream_for($json)
+                Utils::streamFor($json)
             ),
         ]);
         $o = new OAuth2($testConfig);
@@ -789,7 +790,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         ];
         $json = json_encode($wanted_updates);
         $httpHandler = getHandler([
-            buildResponse(200, [], Psr7\stream_for($json)),
+            buildResponse(200, [], Utils::streamFor($json)),
         ]);
         $o = new OAuth2($testConfig);
         $this->assertNull($o->getExpiresAt());
@@ -820,7 +821,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         ];
         $json = json_encode($wanted_updates);
         $httpHandler = getHandler([
-            buildResponse(200, [], Psr7\stream_for($json)),
+            buildResponse(200, [], Utils::streamFor($json)),
         ]);
         $o = new OAuth2($testConfig);
         $this->assertNull($o->getExpiresAt());

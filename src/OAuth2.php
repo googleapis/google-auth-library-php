@@ -19,8 +19,9 @@ namespace Google\Auth;
 
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
-use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -515,7 +516,7 @@ class OAuth2 implements FetchAuthTokenInterface
             'POST',
             $uri,
             $headers,
-            Psr7\build_query($params)
+            Query::build($params)
         );
     }
 
@@ -690,10 +691,10 @@ class OAuth2 implements FetchAuthTokenInterface
 
         // Construct the uri object; return it if it is valid.
         $result = clone $this->authorizationUri;
-        $existingParams = Psr7\parse_query($result->getQuery());
+        $existingParams = Query::parse($result->getQuery());
 
         $result = $result->withQuery(
-            Psr7\build_query(array_merge($existingParams, $params))
+            Query::build(array_merge($existingParams, $params))
         );
 
         if ($result->getScheme() != 'https') {
@@ -1369,7 +1370,7 @@ class OAuth2 implements FetchAuthTokenInterface
             return;
         }
 
-        return Psr7\uri_for($uri);
+        return Utils::uriFor($uri);
     }
 
     /**

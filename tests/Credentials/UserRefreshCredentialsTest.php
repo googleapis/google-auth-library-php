@@ -20,7 +20,7 @@ namespace Google\Auth\Tests\Credentials;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\OAuth2;
-use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 
 // Creates a standard JSON auth object for testing.
@@ -258,7 +258,7 @@ class URCFetchAuthTokenTest extends TestCase
         $testJsonText = json_encode($testJson);
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
-            buildResponse(200, [], Psr7\stream_for($testJsonText)),
+            buildResponse(200, [], Utils::streamFor($testJsonText)),
         ]);
         $sa = new UserRefreshCredentials(
             $scope,
