@@ -39,7 +39,7 @@ class RetryMiddleware
      *     @type int $retryAttempts number of retry attempts.
      * }
      */
-    public function __construct($config = [])
+    public function __construct(array $config = [])
     {
         if (!isset($config['retryAttempts'])) {
             throw new \InvalidArgumentException('requires retryAttempts to be set');
