@@ -41,7 +41,10 @@ class RetryMiddleware
      */
     public function __construct($config = [])
     {
-        $config = ['retryAttempts' => 1] + $config;
+        if (!isset($config['retryAttempts'])) {
+            throw new \InvalidArgumentException('requires retryAttempts to be set');
+        }
+
         $this->retryAttempts = $config['retryAttempts'];
     }
 
@@ -57,7 +60,7 @@ class RetryMiddleware
      *   $config = [..<oauth config param>.];
      *   $oauth2 = new OAuth2($config)
      *   $authMiddleware = new AuthTokenMiddleware($oauth2);
-     *   $retryMiddleware = new RetryMiddleware($retryAttempts = 3);
+     *   $retryMiddleware = new RetryMiddleware(['retryAttempts' => 3]);
      *   $stack = HandlerStack::create();
      *   $stack->push($authMiddleware);
      *   $stack->push($retryMiddleware);
