@@ -8,7 +8,7 @@ apt-get install -y --no-install-recommends \
     unzip \
     wget
 
-wget https://curl.haxx.se/ca/cacert.pem
+wget http://curl.haxx.se/ca/cacert.pem
 curl --silent --show-error --cacert cacert.pem https://getcomposer.org/installer | php
 php composer.phar self-update
 
