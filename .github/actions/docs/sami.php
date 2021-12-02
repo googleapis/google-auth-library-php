@@ -16,7 +16,7 @@ $iterator = Finder::create()
 
 $versions = GitVersionCollection::create($projectRoot)
     ->addFromTags('v1.*')
-    ->add('master', 'master branch');
+    ->add('main', 'main branch');
 
 return new Sami($iterator, [
     'title' => 'Google Auth Library for PHP API Reference',

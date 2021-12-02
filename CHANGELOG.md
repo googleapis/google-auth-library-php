@@ -56,7 +56,7 @@
 ## 1.11.1 (7/27/2020)
 
 * [fix]: catch ConnectException in GCE check (#294)
-* [docs]: Adds [reference docs](https://googleapis.github.io/google-auth-library-php/master)
+* [docs]: Adds [reference docs](https://googleapis.github.io/google-auth-library-php/main)
 
 ## 1.11.0 (7/22/2020)
 
