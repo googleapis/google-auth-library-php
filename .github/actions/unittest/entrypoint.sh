@@ -8,7 +8,7 @@ apt-get install -y --no-install-recommends \
     unzip \
     wget
 
-curl --silent --show-error https://getcomposer.org/installer | php
+curl -k --silent --show-error https://getcomposer.org/installer | php
 php composer.phar self-update
 
 echo "---Installing dependencies ---"
