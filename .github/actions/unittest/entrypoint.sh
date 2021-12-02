@@ -6,10 +6,10 @@ apt-get install -y --no-install-recommends \
     zip \
     curl \
     unzip \
+    ca-certificates \
     wget
 
-curl -k https://curl.haxx.se/ca/cacert.pem -O
-curl --silent --show-error --cacert cacert.pem https://getcomposer.org/installer | php
+curl --silent --show-error https://getcomposer.org/installer | php
 php composer.phar self-update
 
 echo "---Installing dependencies ---"
