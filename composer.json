@@ -6,7 +6,7 @@
   "homepage": "http://github.com/google/google-auth-library-php",
   "license": "Apache-2.0",
   "support": {
-    "docs": "https://googleapis.github.io/google-auth-library-php/master/"
+    "docs": "https://googleapis.github.io/google-auth-library-php/main/"
   },
   "require": {
     "php": ">=5.4",

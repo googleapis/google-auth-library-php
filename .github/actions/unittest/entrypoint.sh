@@ -6,6 +6,7 @@ apt-get install -y --no-install-recommends \
     zip \
     curl \
     unzip \
+    ca-certificates \
     wget
 
 curl --silent --show-error https://getcomposer.org/installer | php
