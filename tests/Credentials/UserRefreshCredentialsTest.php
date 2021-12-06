@@ -17,14 +17,14 @@
 
 namespace Google\Auth\Tests\Credentials;
 
+use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Utils;
-use PHPUnit\Framework\TestCase;
-use DomainException;
 use InvalidArgumentException;
 use LogicException;
+use PHPUnit\Framework\TestCase;
 
 // Creates a standard JSON auth object for testing.
 function createURCTestJson()

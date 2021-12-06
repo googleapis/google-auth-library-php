@@ -18,8 +18,8 @@
 namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\IAMCredentials;
-use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group credentials

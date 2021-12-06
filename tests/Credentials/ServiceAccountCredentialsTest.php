@@ -17,6 +17,7 @@
 
 namespace Google\Auth\Tests\Credentials;
 
+use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
@@ -24,10 +25,9 @@ use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
-use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 use LogicException;
-use DomainException;
+use PHPUnit\Framework\TestCase;
 
 // Creates a standard JSON auth object for testing.
 function createTestJson()

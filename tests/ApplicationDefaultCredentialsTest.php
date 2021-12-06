@@ -17,6 +17,7 @@
 
 namespace Google\Auth\Tests;
 
+use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
@@ -25,7 +26,6 @@ use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use DomainException;
 
 class ADCGetTest extends TestCase
 {

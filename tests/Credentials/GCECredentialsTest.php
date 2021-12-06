@@ -17,14 +17,14 @@
 
 namespace Google\Auth\Tests\Credentials;
 
+use Exception;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
-use Prophecy\Argument;
 use InvalidArgumentException;
-use Exception;
+use Prophecy\Argument;
 
 /**
  * @group credentials

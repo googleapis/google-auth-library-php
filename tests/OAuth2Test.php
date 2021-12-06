@@ -17,14 +17,13 @@
 
 namespace Google\Auth\Tests;
 
+use DomainException;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Utils;
-use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
-use DomainException;
-use Exception;
 
 class OAuth2AuthorizationUriTest extends TestCase
 {

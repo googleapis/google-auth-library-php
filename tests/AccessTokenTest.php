@@ -18,12 +18,12 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\AccessToken;
 use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Http\Message\RequestInterface;
-use SimpleJWT\JWT as SimpleJWT;
-use InvalidArgumentException;
 use RuntimeException;
+use SimpleJWT\JWT as SimpleJWT;
 
 /**
  * @group access-token

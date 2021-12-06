@@ -21,8 +21,8 @@ use Google\Auth\Middleware\ScopedAccessTokenMiddleware;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
-use Prophecy\Argument;
 use InvalidArgumentException;
+use Prophecy\Argument;
 
 class ScopedAccessTokenMiddlewareTest extends BaseTest
 {
