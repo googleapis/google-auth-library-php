@@ -1,16 +1,14 @@
 name: Test Suite
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
 
 jobs:
     test:
-        runs-on: ${{matrix.operating-system}}
+        runs-on: ubuntu-latest
         strategy:
             matrix:
-                operating-system: [ ubuntu-latest ]
                 php: [ "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
@@ -41,7 +39,7 @@ jobs:
             - name: Run Script
               run: vendor/bin/phpunit
     test_lowest:
-        runs-on: ${{matrix.operating-system}}
+        runs-on: ubuntu-latest
         strategy:
             matrix:
                 operating-system: [ ubuntu-latest ]
