@@ -67,7 +67,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *   The authorization server's HTTP endpoint capable of
      *   authenticating the end-user and obtaining authorization.
      *
-     * @var UriInterface
+     * @var Psr\Http\Message\UriInterface
      */
     private $authorizationUri;
 
@@ -76,7 +76,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *   The authorization server's HTTP endpoint capable of issuing
      *   tokens and refreshing expired tokens.
      *
-     * @var UriInterface
+     * @var Psr\Http\Message\UriInterface
      */
     private $tokenCredentialUri;
 
@@ -465,7 +465,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Generates a request for token credentials.
      *
-     * @return RequestInterface the authorization Url.
+     * @return Psr\Http\Message\RequestInterface the authorization Url.
      */
     public function generateCredentialsRequest()
     {
@@ -563,11 +563,11 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Parses the fetched tokens.
      *
-     * @param ResponseInterface $resp the response.
+     * @param Psr\Http\Message\ResponseInterface $resp the response.
      * @return array the tokens parsed from the response body.
      * @throws \Exception
      */
-    public function parseTokenResponse(ResponseInterface $resp)
+    public function parseTokenResponse(Psr\Http\Message\ResponseInterface $resp)
     {
         $body = (string)$resp->getBody();
         if ($resp->hasHeader('Content-Type') &&
@@ -654,7 +654,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * Builds the authorization Uri that the user should be redirected to.
      *
      * @param array $config configuration options that customize the return url
-     * @return UriInterface the authorization Url.
+     * @return Psr\Http\Message\UriInterface the authorization Url.
      * @throws InvalidArgumentException
      */
     public function buildFullAuthorizationUri(array $config = [])
@@ -721,7 +721,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * Gets the authorization server's HTTP endpoint capable of authenticating
      * the end-user and obtaining authorization.
      *
-     * @return UriInterface
+     * @return Psr\Http\Message\UriInterface
      */
     public function getAuthorizationUri()
     {
@@ -1362,7 +1362,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * @todo handle uri as array
      *
      * @param string $uri
-     * @return null|UriInterface
+     * @return null|Psr\Http\Message\UriInterface
      */
     private function coerceUri($uri)
     {
