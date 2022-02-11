@@ -18,9 +18,7 @@
 namespace Google\Auth;
 
 use DateTime;
-use Exception;
 use Firebase\JWT\ExpiredException;
-use Firebase\JWT\JWT;
 use Firebase\JWT\SignatureInvalidException;
 use Google\Auth\Cache\MemoryCacheItemPool;
 use Google\Auth\HttpHandler\HttpClientCache;
@@ -33,7 +31,6 @@ use phpseclib\Math\BigInteger;
 use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
 use SimpleJWT\InvalidTokenException;
-use SimpleJWT\JWT as SimpleJWT;
 use SimpleJWT\Keys\KeyFactory;
 use SimpleJWT\Keys\KeySet;
 use UnexpectedValueException;

@@ -90,7 +90,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->sysvKey = ftok(__FILE__, $this->options['proj']);
     }
 
-    public function getItem($key)
+    public function getItem($key): CacheItemInterface
     {
         $this->loadItems();
         return current($this->getItems([$key]));
@@ -99,7 +99,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function getItems(array $keys = [])
+    public function getItems(array $keys = []): iterable
     {
         $this->loadItems();
         $items = [];
@@ -114,7 +114,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function hasItem($key)
+    public function hasItem($key): bool
     {
         $this->loadItems();
         return isset($this->items[$key]) && $this->items[$key]->isHit();
@@ -123,7 +123,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function clear()
+    public function clear(): bool
     {
         $this->items = [];
         $this->deferredItems = [];
@@ -133,7 +133,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function deleteItem($key)
+    public function deleteItem($key): bool
     {
         return $this->deleteItems([$key]);
     }
@@ -141,7 +141,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function deleteItems(array $keys)
+    public function deleteItems(array $keys): bool
     {
         if (!$this->hasLoadedItems) {
             $this->loadItems();
@@ -156,7 +156,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function save(CacheItemInterface $item)
+    public function save(CacheItemInterface $item): bool
     {
         if (!$this->hasLoadedItems) {
             $this->loadItems();
@@ -169,7 +169,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function saveDeferred(CacheItemInterface $item)
+    public function saveDeferred(CacheItemInterface $item): bool
     {
         $this->deferredItems[$item->getKey()] = $item;
         return true;
@@ -178,7 +178,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      */
-    public function commit()
+    public function commit(): bool
     {
         foreach ($this->deferredItems as $item) {
             if ($this->save($item) === false) {
