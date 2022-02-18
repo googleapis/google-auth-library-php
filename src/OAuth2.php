@@ -26,6 +26,8 @@ use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 /**
  * OAuth2 supports authentication by OAuth2 2-legged flows.
@@ -1382,16 +1384,68 @@ class OAuth2 implements FetchAuthTokenInterface
     private function jwtDecode($idToken, $publicKey, $allowedAlgs)
     {
         if (class_exists('Firebase\JWT\JWT')) {
-            return \Firebase\JWT\JWT::decode($idToken, $publicKey, $allowedAlgs);
+            // Preserve Backwards Compatibility with firebase/php-jwt:6.0 by
+            // creating a Key object for every public key / alg combination.
+            if (class_exists('Firebase\JWT\Key') // True when using php-jwt v5.5 and v6.0
+                && !defined('Firebase\JWT\JWT::ASN1_INTEGER') // False when using php-jwt v5.5
+                && !$publicKey instanceof Key // True with previous (deprecated) usage
+            ) {
+                $keys = $this->getFirebaseJwtKeys($publicKey, $allowedAlgs);
+
+                // Default exception if none are caught
+                $e = new \InvalidArgumentException('Key may not be empty');
+                foreach ($keys as $key) {
+                    try {
+                        return JWT::decode($idToken, $key);
+                    } catch (\Exception $e) {
+                        // try next alg
+                    }
+                }
+                throw $e;
+            }
+            return JWT::decode($idToken, $publicKey, $allowedAlgs);
         }
 
-        return \JWT::decode($idToken, $publicKey, $allowedAlgs);
+        return JWT::decode($idToken, $publicKey, $allowedAlgs);
+    }
+
+    private function getFirebaseJwtKeys($publicKey, $allowedAlgs)
+    {
+        if (count($allowedAlgs) > 1) {
+            throw new \InvalidArgumentException(
+                'To have multiple allowed algorithms, You must provide an'
+                . ' array of Firebase\JWT\Key objects.'
+                . ' See https://github.com/firebase/php-jwt for more information.');
+        }
+
+        // If $allowedAlgs is empty, assume $publicKey is Key or Key[].
+        if (count($allowedAlgs) == 0) {
+            return $publicKey;
+        }
+        $allowedAlg = array_pop($allowedAlgs);
+        if (is_array($publicKey)) {
+            // When publicKey is greater than 1, create keys with the single alg.
+            if (count($publicKey) > 1) {
+                $keys = array();
+                foreach ($publicKey as $kid => $pubkey) {
+                    $keys[$kid] = new Key($pubkey, $allowedAlg);
+                }
+                return $keys;
+            }
+
+            // We have one key and one alg, create a key with them.
+            $key = new Key(array_pop($publicKey), $allowedAlgs);
+        } else {
+            $key = new Key($publicKey, $allowedAlgs);
+        }
+
+        return array($key);
     }
 
     private function jwtEncode($assertion, $signingKey, $signingAlgorithm, $signingKeyId = null)
     {
         if (class_exists('Firebase\JWT\JWT')) {
-            return \Firebase\JWT\JWT::encode(
+            return JWT::encode(
                 $assertion,
                 $signingKey,
                 $signingAlgorithm,
@@ -1399,7 +1453,7 @@ class OAuth2 implements FetchAuthTokenInterface
             );
         }
 
-        return \JWT::encode($assertion, $signingKey, $signingAlgorithm, $signingKeyId);
+        return JWT::encode($assertion, $signingKey, $signingAlgorithm, $signingKeyId);
     }
 
     /**

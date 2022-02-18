@@ -535,15 +535,14 @@ class OAuth2JwtTest extends TestCase
         $this->assertEquals($roundTrip->target_audience, $targetAud);
     }
 
-    private function jwtDecode()
+    private function jwtDecode($payload, $publicKey, $algs)
     {
-        $args = func_get_args();
-        $class = 'JWT';
-        if (class_exists('Firebase\JWT\JWT')) {
-            $class = 'Firebase\JWT\JWT';
-        }
+        // use private jwtDecode method since the logic exists there already
+        $o = new OAuth2([]);
+        $method = new \ReflectionMethod($o, 'jwtDecode');
+        $method->setAccessible(true);
 
-        return call_user_func_array("$class::decode", $args);
+        return $method->invoke($o, $payload, $publicKey, $algs);
     }
 }
 
@@ -940,7 +939,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
         $o->setIdToken($not_a_jwt);
-        $o->verifyIdToken($this->publicKey);
+        $o->verifyIdToken($this->publicKey, ['RS256']);
     }
 
     /**

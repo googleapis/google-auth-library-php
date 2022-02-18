@@ -815,8 +815,16 @@ class SACJwtAccessComboTest extends TestCase
         if (class_exists('Firebase\JWT\JWT')) {
             $class = 'Firebase\JWT\JWT';
         }
+        if (class_exists('Firebase\JWT\JWT')) {
+            $class = 'Firebase\JWT\JWT';
+        }
         $jwt = new $class();
-        $result = $jwt::decode($token, $key, ['RS256']);
+        if (class_exists('Firebase\JWT\Key')) {
+            $key = new \Firebase\JWT\Key($key, 'RS256');
+            $result = $jwt::decode($token, $key);
+        } else {
+            $result = $jwt::decode($token, $key, ['RS256']);
+        }
 
         $this->assertEquals($authUri, $result->aud);
     }
