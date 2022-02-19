@@ -15,11 +15,15 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests\Cache;
+namespace Google\Cache\Tests;
 
-use Google\Auth\Cache\Item;
+use Google\Cache\Item;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ * @covers \Google\Cache\Item
+ */
 class ItemTest extends TestCase
 {
     public function getItem($key)
@@ -53,6 +57,8 @@ class ItemTest extends TestCase
 
     /**
      * @dataProvider values
+     *
+     * @param mixed $value
      */
     public function testSetsValue($value)
     {
@@ -71,7 +77,7 @@ class ItemTest extends TestCase
             [null],
             [new \DateTime()],
             [['test']],
-            ['value']
+            ['value'],
         ];
     }
 

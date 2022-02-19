@@ -15,10 +15,26 @@
  * limitations under the License.
  */
 
-namespace Google\Cache;
+namespace Google\Auth\SignBlob;
 
-use Psr\Cache\InvalidArgumentException as PsrInvalidArgumentException;
-
-class InvalidArgumentException extends \InvalidArgumentException implements PsrInvalidArgumentException
+/**
+ * Describes a class which supports signing arbitrary strings.
+ */
+interface SignBlobInterface
 {
+    /**
+     * Sign a string using the method which is best for a given credentials type.
+     *
+     * @param string $stringToSign the string to sign
+     *
+     * @return string The resulting signature. Value should be base64-encoded.
+     */
+    public function signBlob(string $stringToSign): string;
+
+    /**
+     * Returns the client email required for signing blobs.
+     *
+     * @return string
+     */
+    public function getClientEmail(): string;
 }

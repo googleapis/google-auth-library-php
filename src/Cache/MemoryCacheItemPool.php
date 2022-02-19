@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Cache;
+declare(strict_types=1);
+
+namespace Google\Cache;
 
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -168,14 +170,16 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      * Determines if the provided key is valid.
      *
      * @param string $key
-     * @return bool
+     *
      * @throws InvalidArgumentException
+     *
+     * @return bool
      */
     private function isValidKey($key)
     {
         $invalidCharacters = '{}()/\\\\@:';
 
-        if (!is_string($key) || preg_match("#[$invalidCharacters]#", $key)) {
+        if (!is_string($key) || preg_match("#[{$invalidCharacters}]#", $key)) {
             throw new InvalidArgumentException('The provided key is not valid: ' . var_export($key, true));
         }
 

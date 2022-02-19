@@ -1,12 +1,12 @@
 <?php
-/*
- * Copyright 2018 Google Inc.
+/**
+ * Copyright 2020 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,16 +15,24 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Cache\Tests;
+declare(strict_types=1);
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+namespace Google\Auth\Jwt;
 
-use Google\Cache\Item;
-use Google\Cache\SysVCacheItemPool;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
+use Google\Jwt\Client\FirebaseClient;
+use Google\Jwt\ClientInterface;
 
-$value = $argv[1];
-// Use the same variableKey in the test.
-$pool = new SysVCacheItemPool(['variableKey' => 99]);
-$item = new Item('separate-process-item');
-$item->set($value);
-$pool->save($item);
+class ClientFactory
+{
+    /**
+     * Builds out a default http client.
+     *
+     * @return ClientInterface
+     */
+    public static function build(): ClientInterface
+    {
+        return new FirebaseClient(new JWT(), new JWK());
+    }
+}

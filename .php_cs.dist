@@ -1,0 +1,25 @@
+<?php
+
+return PhpCsFixer\Config::create()
+    ->setRules([
+        '@PhpCsFixer' => true,
+        '@PSR2' => true,
+        'no_superfluous_phpdoc_tags' => false,
+        'phpdoc_summary' => false,
+        'concat_space' => ['spacing' => 'one'],
+        'no_unused_imports' => true,
+        'ordered_imports' => true,
+        'method_argument_space' => false,
+        'whitespace_after_comma_in_array' => true,
+        'method_argument_space' => [
+            'keep_multiple_spaces_after_comma' => true
+        ],
+        'return_type_declaration' => [
+            'space_before' => 'none'
+        ],
+    ])
+    ->setFinder(
+        PhpCsFixer\Finder::create()
+            ->in(__DIR__)
+    )
+;
