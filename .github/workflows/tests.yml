@@ -12,21 +12,21 @@ jobs:
                 php: [ "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: ${{ matrix.php }}
             - if: ${{ matrix.php != '8.0' }}
               name: Install Dependencies
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer install
             - if: ${{ matrix.php == '8.0' }}
               name: Install Dependencies (PHP 8.0)
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
@@ -46,13 +46,13 @@ jobs:
                 php: [ "5.6", "7.2" ]
         name: PHP ${{matrix.php }} Unit Test Prefer Lowest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
@@ -70,13 +70,13 @@ jobs:
                 php: [ "7.2" ]
         name: PHP ${{ matrix.php }} Unit Test Guzzle 6
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
@@ -87,13 +87,13 @@ jobs:
         runs-on: ubuntu-latest
         name: PHP Style Check
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: "7.4"
             - name: Install Dependencies
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
