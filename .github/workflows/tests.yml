@@ -21,14 +21,14 @@ jobs:
                 php-version: ${{ matrix.php }}
             - if: ${{ matrix.php != '8.0' }}
               name: Install Dependencies
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer install
             - if: ${{ matrix.php == '8.0' }}
               name: Install Dependencies (PHP 8.0)
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
@@ -51,7 +51,7 @@ jobs:
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
@@ -72,7 +72,7 @@ jobs:
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
@@ -134,7 +134,7 @@ jobs:
               with:
                 php-version: "7.4"
             - name: Install Dependencies
-              uses: nick-invision/retry@v1
+              uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
