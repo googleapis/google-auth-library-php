@@ -27,8 +27,8 @@ use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use LogicException;
-use UnexpectedValueException;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 // Creates a standard JSON auth object for testing.
 function createTestJson()

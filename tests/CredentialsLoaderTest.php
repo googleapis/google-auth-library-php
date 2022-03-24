@@ -18,9 +18,9 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\CredentialsLoader;
-use UnexpectedValueException;
 use RuntimeException;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 class CredentialsLoaderTest extends TestCase
 {

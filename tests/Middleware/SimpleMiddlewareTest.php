@@ -19,10 +19,10 @@ namespace Google\Auth\Tests\Middleware;
 
 use Google\Auth\Middleware\SimpleMiddleware;
 use Google\Auth\Tests\BaseTest;
+use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Handler\MockHandler;
 use Psr\Http\Message\UriInterface;
 
 class SimpleMiddlewareTest extends BaseTest
