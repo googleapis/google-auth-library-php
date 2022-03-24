@@ -33,7 +33,7 @@ jobs:
                 command: |
                   composer remove --dev --ignore-platform-reqs phpunit/phpunit
                   composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit/phpunit:^7
-            - if: ${{ matrix.php == '5.6' || matrix.php == '7.0' || matrix.php == '7.1' }}
+            - if: ${{ contains(fromJson('["5.6", "7.0", "7.1"]'), matrix.php)}}
               name: Run PHPUnit Patches
               run: sh .github/apply-phpunit-patches.sh
             - name: Run Script
