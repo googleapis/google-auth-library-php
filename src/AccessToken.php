@@ -444,9 +444,7 @@ class AccessToken
      */
     protected function callJwtStatic($method, array $args = [])
     {
-        $class = class_exists('Firebase\JWT\JWT')
-            ? 'Firebase\JWT\JWT'
-            : 'JWT';
+        $class = 'Firebase\JWT\JWT';
         return call_user_func_array([$class, $method], $args);
     }
 
