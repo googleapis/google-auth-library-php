@@ -23,7 +23,6 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
-use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
@@ -585,7 +584,7 @@ class SACJwtAccessTest extends TestCase
     }
 }
 
-class SACJwtAccessComboTest extends BaseTest
+class SACJwtAccessComboTest extends TestCase
 {
     private $privateKey;
 
@@ -660,10 +659,10 @@ class SACJwtAccessComboTest extends BaseTest
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertIsArray($authorization);
+        $this->assertInternalType('array', $authorization);
 
         $bearer_token = current($authorization);
-        $this->assertIsString($bearer_token);
+        $this->assertInternalType('string', $bearer_token);
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
 
         // Ensure scopes are signed inside
@@ -671,7 +670,7 @@ class SACJwtAccessComboTest extends BaseTest
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $bearer_token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertIsArray($json);
+        $this->assertInternalType('array', $json);
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], $scope);
     }
@@ -699,10 +698,10 @@ class SACJwtAccessComboTest extends BaseTest
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertIsArray($authorization);
+        $this->assertInternalType('array', $authorization);
 
         $bearer_token = current($authorization);
-        $this->assertIsString($bearer_token);
+        $this->assertInternalType('string', $bearer_token);
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
 
         // Ensure scopes are signed inside
@@ -710,13 +709,13 @@ class SACJwtAccessComboTest extends BaseTest
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $bearer_token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertIsArray($json);
+        $this->assertInternalType('array', $json);
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], implode(' ', $scope));
 
         // Test last received token
         $cachedToken = $sa->getLastReceivedToken();
-        $this->assertIsArray($cachedToken);
+        $this->assertInternalType('array', $cachedToken);
         $this->assertArrayHasKey('access_token', $cachedToken);
         $this->assertEquals($token, $cachedToken['access_token']);
     }
@@ -734,7 +733,7 @@ class SACJwtAccessComboTest extends BaseTest
         $sa->useJwtAccessWithScope();
 
         $access_token = $sa->fetchAuthToken();
-        $this->assertIsArray($access_token);
+        $this->assertInternalType('array', $access_token);
         $this->assertArrayHasKey('access_token', $access_token);
         $token = $access_token['access_token'];
 
@@ -742,7 +741,7 @@ class SACJwtAccessComboTest extends BaseTest
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertIsArray($json);
+        $this->assertInternalType('array', $json);
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], $scope);
     }
@@ -760,7 +759,7 @@ class SACJwtAccessComboTest extends BaseTest
         $sa->useJwtAccessWithScope();
 
         $access_token = $sa->fetchAuthToken();
-        $this->assertIsArray($access_token);
+        $this->assertInternalType('array', $access_token);
         $this->assertArrayHasKey('access_token', $access_token);
         $token = $access_token['access_token'];
 
@@ -768,13 +767,13 @@ class SACJwtAccessComboTest extends BaseTest
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertIsArray($json);
+        $this->assertInternalType('array', $json);
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], implode(' ', $scope));
 
         // Test last received token
         $cachedToken = $sa->getLastReceivedToken();
-        $this->assertIsArray($cachedToken);
+        $this->assertInternalType('array', $cachedToken);
         $this->assertArrayHasKey('access_token', $cachedToken);
         $this->assertEquals($token, $cachedToken['access_token']);
     }

@@ -21,7 +21,6 @@ use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
-use Google\Auth\Tests\BaseTest;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
@@ -110,7 +109,7 @@ class ADCGetTest extends TestCase
     }
 }
 
-class ADCDefaultScopeTest extends BaseTest
+class ADCDefaultScopeTest extends TestCase
 {
     /** @runInSeparateProcess */
     public function testGceCredentials()
@@ -141,7 +140,7 @@ class ADCDefaultScopeTest extends BaseTest
 
         // used default scope
         $tokenUri = $uriProperty->getValue($creds);
-        $this->assertStringContainsString('a+default+scope', $tokenUri);
+        $this->assertContains('a+default+scope', $tokenUri);
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             'a+user+scope', // $scope
@@ -157,7 +156,7 @@ class ADCDefaultScopeTest extends BaseTest
 
         // did not use default scope
         $tokenUri = $uriProperty->getValue($creds);
-        $this->assertStringContainsString('a+user+scope', $tokenUri);
+        $this->assertContains('a+user+scope', $tokenUri);
     }
 
     /** @runInSeparateProcess */

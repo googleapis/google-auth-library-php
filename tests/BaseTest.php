@@ -41,44 +41,4 @@ abstract class BaseTest extends TestCase
     {
         return preg_replace('|[^a-zA-Z0-9_\.! ]|', '', $key);
     }
-
-    public static function assertStringContainsString(
-        string $needle,
-        string $haystack,
-        string $message = ''
-    ): void {
-        if (method_exists(TestCase::class, 'assertStringContainsString')) {
-            parent::assertStringContainsString($needle, $haystack, $message);
-
-            return;
-        }
-
-        self::assertContains($needle, $haystack, $message);
-    }
-
-    public static function assertIsArray(
-        $actual,
-        string $message = ''
-    ): void {
-        if (method_exists(TestCase::class, 'assertIsArray')) {
-            parent::assertIsArray($actual, $message);
-
-            return;
-        }
-
-        self::assertInternalType('array', $actual, $message);
-    }
-
-    public static function assertIsString(
-        $string,
-        string $message = ''
-    ): void {
-        if (method_exists(TestCase::class, 'assertIsString')) {
-            parent::assertIsString($string, $message);
-
-            return;
-        }
-
-        self::assertInternalType('string', $string, $message);
-    }
 }

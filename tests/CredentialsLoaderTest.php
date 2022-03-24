@@ -18,11 +18,11 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\CredentialsLoader;
-use Google\Auth\Tests\BaseTest;
 use UnexpectedValueException;
 use RuntimeException;
+use PHPUnit\Framework\TestCase;
 
-class CredentialsLoaderTest extends BaseTest
+class CredentialsLoaderTest extends TestCase
 {
     public function testUpdateMetadataSkipsWhenAuthenticationisSet()
     {
@@ -103,8 +103,8 @@ class CredentialsLoaderTest extends BaseTest
         }
         $creds = $clientCertSource();
         $this->assertTrue(is_string($creds));
-        $this->assertStringContainsString('-----BEGIN CERTIFICATE-----', $creds);
-        $this->assertStringContainsString('-----BEGIN PRIVATE KEY-----', $creds);
+        $this->assertContains('-----BEGIN CERTIFICATE-----', $creds);
+        $this->assertContains('-----BEGIN PRIVATE KEY-----', $creds);
     }
 
     /**
