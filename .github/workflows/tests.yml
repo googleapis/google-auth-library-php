@@ -9,7 +9,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php: [ "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1" ]
+                php: [ "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
             - uses: actions/checkout@v3
@@ -23,7 +23,7 @@ jobs:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer install
-            - if: ${{ contains(fromJson('["5.6", "7.0", "7.1"]'), matrix.php)}}
+            - if: ${{ contains(fromJson('["7.0", "7.1"]'), matrix.php)}}
               name: Run PHPUnit Patches
               run: sh .github/apply-phpunit-patches.sh
             - name: Run Script
@@ -32,7 +32,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php: [ "5.6", "7.2" ]
+                php: [ "7.0", "7.2" ]
         name: PHP ${{matrix.php }} Unit Test Prefer Lowest
         steps:
             - uses: actions/checkout@v3
@@ -46,7 +46,7 @@ jobs:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer update --prefer-lowest
-            - if: ${{ matrix.php == '5.6' }}
+            - if: ${{ matrix.php == '7.0' }}
               name: Run PHPUnit Patches
               run: sh .github/apply-phpunit-patches.sh
             - name: Run Script
