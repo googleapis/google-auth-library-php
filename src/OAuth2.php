@@ -42,6 +42,8 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * TODO: determine known methods from the keys of JWT::methods.
+     *
+     * @var array<string>
      */
     public static $knownSigningAlgorithms = array(
         'HS256',
@@ -53,7 +55,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * The well known grant types.
      *
-     * @var array
+     * @var array<string>
      */
     public static $knownGrantTypes = array(
         'authorization_code',
@@ -121,7 +123,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * The scope of the access request, expressed either as an Array or as a
      * space-delimited string.
      *
-     * @var array
+     * @var array<string>
      */
     private $scope;
 
@@ -244,12 +246,16 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * When using an extension grant type, this is the set of parameters used by
      * that extension.
+     *
+     * @var array<mixed>
      */
     private $extensionParams;
 
     /**
      * When using the toJwt function, these claims will be added to the JWT
      * payload.
+     *
+     * @var array<mixed>
      */
     private $additionalClaims;
 
@@ -319,7 +325,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *   When using an extension grant type, this is the set of parameters used
      *   by that extension.
      *
-     * @param array $config Configuration array
+     * @param array<mixed> $config Configuration array
      */
     public function __construct(array $config)
     {
@@ -379,14 +385,14 @@ class OAuth2 implements FetchAuthTokenInterface
      * `\InvalidArgumentException`.
      *
      * @param string $publicKey The public key to use to authenticate the token
-     * @param array $allowed_algs List of supported verification algorithms
+     * @param array<string> $allowed_algs List of supported verification algorithms
      * @throws \DomainException if the token is missing an audience.
      * @throws \DomainException if the audience does not match the one set in
      *         the OAuth2 class instance.
      * @throws \UnexpectedValueException If the token is invalid
-     * @throws SignatureInvalidException If the signature is invalid.
-     * @throws BeforeValidException If the token is not yet valid.
-     * @throws ExpiredException If the token has expired.
+     * @throws \Firebase\JWT\SignatureInvalidException If the signature is invalid.
+     * @throws \Firebase\JWT\BeforeValidException If the token is not yet valid.
+     * @throws \Firebase\JWT\ExpiredException If the token has expired.
      * @return null|object
      */
     public function verifyIdToken($publicKey = null, $allowed_algs = array())
@@ -410,7 +416,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Obtains the encoded jwt from the instance data.
      *
-     * @param array $config array optional configuration parameters
+     * @param array<mixed> $config array optional configuration parameters
      * @return string
      */
     public function toJwt(array $config = [])
@@ -524,7 +530,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * Fetches the auth tokens based on the current state.
      *
      * @param callable $httpHandler callback which delivers psr7 request
-     * @return array the response
+     * @return array<mixed> the response
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
@@ -732,7 +738,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * Gets the authorization server's HTTP endpoint capable of issuing tokens
      * and refreshing expired tokens.
      *
-     * @return string
+     * @return ?UriInterface
      */
     public function getTokenCredentialUri()
     {
@@ -753,7 +759,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Gets the redirection URI used in the initial request.
      *
-     * @return string
+     * @return ?string
      */
     public function getRedirectUri()
     {
@@ -788,7 +794,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Gets the scope of the access requests as a space-delimited String.
      *
-     * @return string
+     * @return ?string
      */
     public function getScope()
     {
@@ -832,7 +838,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Gets the current grant type.
      *
-     * @return string
+     * @return ?string
      */
     public function getGrantType()
     {
@@ -1071,7 +1077,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Gets the signing key id when using an assertion profile.
      *
-     * @return string
+     * @return ?string
      */
     public function getSigningKeyId()
     {
@@ -1091,7 +1097,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Gets the signing algorithm when using an assertion profile.
      *
-     * @return string
+     * @return ?string
      */
     public function getSigningAlgorithm()
     {
@@ -1117,6 +1123,8 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Gets the set of parameters used by extension when using an extension
      * grant type.
+     *
+     * @return array<mixed>
      */
     public function getExtensionParams()
     {
@@ -1127,7 +1135,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * Sets the set of parameters used by extension when using an extension
      * grant type.
      *
-     * @param $extensionParams
+     * @param array<mixed> $extensionParams
      */
     public function setExtensionParams($extensionParams)
     {
@@ -1136,6 +1144,8 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * Gets the number of seconds assertions are valid for.
+     *
+     * @return int
      */
     public function getExpiry()
     {
@@ -1385,9 +1395,17 @@ class OAuth2 implements FetchAuthTokenInterface
             return \Firebase\JWT\JWT::decode($idToken, $publicKey, $allowedAlgs);
         }
 
+        // @phpstan-ignore-next-line
         return \JWT::decode($idToken, $publicKey, $allowedAlgs);
     }
 
+    /**
+     * @param array<mixed> $assertion
+     * @param string $signingKey
+     * @param string $signingAlgorithm
+     * @param string $signingKeyId
+     * @return string
+     */
     private function jwtEncode($assertion, $signingKey, $signingAlgorithm, $signingKeyId = null)
     {
         if (class_exists('Firebase\JWT\JWT')) {
@@ -1399,6 +1417,7 @@ class OAuth2 implements FetchAuthTokenInterface
             );
         }
 
+        // @phpstan-ignore-next-line
         return \JWT::encode($assertion, $signingKey, $signingAlgorithm, $signingKeyId);
     }
 
@@ -1417,8 +1436,8 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
-     * @param array $params
-     * @return array
+     * @param array<mixed> $params
+     * @return array<mixed>
      */
     private function addClientCredentials(&$params)
     {
