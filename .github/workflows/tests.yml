@@ -42,7 +42,6 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                operating-system: [ ubuntu-latest ]
                 php: [ "5.6", "7.2" ]
         name: PHP ${{matrix.php }} Unit Test Prefer Lowest
         steps:
@@ -66,7 +65,6 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                operating-system: [ ubuntu-latest ]
                 php: [ "7.2" ]
         name: PHP ${{ matrix.php }} Unit Test Guzzle 6
         steps:
