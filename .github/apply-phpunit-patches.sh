@@ -2,7 +2,7 @@
 
 # Script used from php-webdriver/php-webdriver
 
-# All commands below must no fail
+# All commands below must not fail
 set -e
 
 # Be in the root dir
