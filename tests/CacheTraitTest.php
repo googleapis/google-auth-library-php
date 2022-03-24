@@ -27,7 +27,7 @@ class CacheTraitTest extends TestCase
     private $mockCacheItem;
     private $mockCache;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
@@ -121,6 +121,7 @@ class CacheTraitTest extends TestCase
         ]);
 
         $cachedValue = $implementation->gCachedValue();
+        $this->assertEquals(null, $cachedValue);
     }
 
     public function testSuccessfullySetsToCache()

@@ -23,15 +23,6 @@ use Google\Auth\Tests\BaseTest;
 
 class HttpHandlerFactoryTest extends BaseTest
 {
-    public function testBuildsGuzzle5Handler()
-    {
-        $this->onlyGuzzle5();
-
-        HttpClientCache::setHttpClient(null);
-        $handler = HttpHandlerFactory::build();
-        $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle5HttpHandler', $handler);
-    }
-
     public function testBuildsGuzzle6Handler()
     {
         $this->onlyGuzzle6();

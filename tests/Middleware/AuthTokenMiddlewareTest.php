@@ -31,10 +31,8 @@ class AuthTokenMiddlewareTest extends BaseTest
     private $mockCache;
     private $mockRequest;
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->onlyGuzzle6And7();
-
         $this->mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
         $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
@@ -91,8 +89,10 @@ class AuthTokenMiddlewareTest extends BaseTest
         $token = 'idtoken12345';
         $authResult = ['id_token' => $token];
         $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->shouldBeCalledTimes(1)
             ->willReturn($authResult);
         $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
+            ->shouldBeCalledTimes(1)
             ->willReturn($this->mockRequest);
 
         $middleware = new AuthTokenMiddleware($this->mockFetcher->reveal());

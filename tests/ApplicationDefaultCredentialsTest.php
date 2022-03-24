@@ -17,6 +17,7 @@
 
 namespace Google\Auth\Tests;
 
+use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
@@ -30,12 +31,12 @@ class ADCGetTest extends TestCase
 {
     private $originalHome;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->originalHome = getenv('HOME');
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         if ($this->originalHome != getenv('HOME')) {
             putenv('HOME=' . $this->originalHome);
@@ -43,11 +44,10 @@ class ADCGetTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR);  // removes it from
     }
 
-    /**
-     * @expectedException DomainException
-     */
     public function testIsFailsEnvSpecifiesNonExistentFile()
     {
+        $this->expectException(DomainException::class);
+
         $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getCredentials('a scope');
@@ -70,11 +70,10 @@ class ADCGetTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException DomainException
-     */
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
+        $this->expectException(DomainException::class);
+
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
         // simulate not being GCE and retry attempts by returning multiple 500s
         $httpHandler = getHandler([
@@ -267,12 +266,12 @@ class ADCGetMiddlewareTest extends TestCase
 {
     private $originalHome;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->originalHome = getenv('HOME');
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         if ($this->originalHome != getenv('HOME')) {
             putenv('HOME=' . $this->originalHome);
@@ -280,11 +279,10 @@ class ADCGetMiddlewareTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR);  // removes it if assigned
     }
 
-    /**
-     * @expectedException DomainException
-     */
     public function testIsFailsEnvSpecifiesNonExistentFile()
     {
+        $this->expectException(DomainException::class);
+
         $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getMiddleware('a scope');
@@ -303,11 +301,10 @@ class ADCGetMiddlewareTest extends TestCase
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope'));
     }
 
-    /**
-     * @expectedException DomainException
-     */
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
+        $this->expectException(DomainException::class);
+
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
 
         // simulate not being GCE and retry attempts by returning multiple 500s
@@ -338,6 +335,8 @@ class ADCGetMiddlewareTest extends TestCase
             $cacheOptions,
             $cachePool->reveal()
         );
+
+        $this->assertNotNull($middleware);
     }
 
     public function testSuccedsIfNoDefaultFilesButIsOnGCE()
@@ -358,11 +357,10 @@ class ADCGetMiddlewareTest extends TestCase
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler));
     }
 
-    /**
-     * @expectedException DomainException
-     */
     public function testOnGceCacheWithHit()
     {
+        $this->expectException(DomainException::class);
+
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
 
         $mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
@@ -462,12 +460,12 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
     private $originalHome;
     private $targetAudience = 'a target audience';
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->originalHome = getenv('HOME');
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         if ($this->originalHome != getenv('HOME')) {
             putenv('HOME=' . $this->originalHome);
@@ -475,11 +473,10 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR);  // removes environment variable
     }
 
-    /**
-     * @expectedException DomainException
-     */
     public function testIsFailsEnvSpecifiesNonExistentFile()
     {
+        $this->expectException(DomainException::class);
+
         $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
@@ -489,20 +486,23 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
     {
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
+
+        $creds = ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
+
+        $this->assertNotNull($creds);
     }
 
     public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
         putenv('HOME=' . __DIR__ . '/fixtures');
-        ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
+        $creds = ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
+        $this->assertNotNull($creds);
     }
 
-    /**
-     * @expectedException DomainException
-     */
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
+        $this->expectException(DomainException::class);
+
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
 
         // simulate not being GCE and retry attempts by returning multiple 500s
@@ -512,10 +512,12 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
             buildResponse(500)
         ]);
 
-        ApplicationDefaultCredentials::getIdTokenCredentials(
+        $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
             $this->targetAudience,
             $httpHandler
         );
+
+        $this->assertNotNull($creds);
     }
 
     public function testWithCacheOptions()
@@ -573,12 +575,12 @@ class ADCGetCredentialsWithQuotaProjectTest extends TestCase
     private $originalHome;
     private $quotaProject = 'a-quota-project';
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->originalHome = getenv('HOME');
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         if ($this->originalHome != getenv('HOME')) {
             putenv('HOME=' . $this->originalHome);
@@ -693,7 +695,7 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
     private $originalServiceAccount;
     private $targetAudience = 'a target audience';
 
-    protected function setUp()
+    protected function setUp(): void
     {
         // set home to be somewhere else
         $this->originalHome = getenv('HOME');
@@ -704,7 +706,7 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
         putenv(ServiceAccountCredentials::ENV_VAR);
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         // removes it if assigned
         putenv('HOME=' . $this->originalHome);
@@ -758,102 +760,5 @@ class ADCGetCredentialsAppEngineTest extends BaseTest
             'Google\Auth\Credentials\GCECredentials',
             $creds
         );
-    }
-}
-
-// @todo consider a way to DRY this and above class up
-class ADCGetSubscriberTest extends BaseTest
-{
-    private $originalHome;
-
-    protected function setUp()
-    {
-        $this->onlyGuzzle5();
-
-        $this->originalHome = getenv('HOME');
-    }
-
-    protected function tearDown()
-    {
-        if ($this->originalHome != getenv('HOME')) {
-            putenv('HOME=' . $this->originalHome);
-        }
-        putenv(ServiceAccountCredentials::ENV_VAR);  // removes it if assigned
-    }
-
-    /**
-     * @expectedException DomainException
-     */
-    public function testIsFailsEnvSpecifiesNonExistentFile()
-    {
-        $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        ApplicationDefaultCredentials::getSubscriber('a scope');
-    }
-
-    public function testLoadsOKIfEnvSpecifiedIsValid()
-    {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        $this->assertNotNull(ApplicationDefaultCredentials::getSubscriber('a scope'));
-    }
-
-    public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
-    {
-        putenv('HOME=' . __DIR__ . '/fixtures');
-        $this->assertNotNull(ApplicationDefaultCredentials::getSubscriber('a scope'));
-    }
-
-    /**
-     * @expectedException DomainException
-     */
-    public function testFailsIfNotOnGceAndNoDefaultFileFound()
-    {
-        putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
-
-        // simulate not being GCE by return 500
-        $httpHandler = getHandler([
-            buildResponse(500),
-        ]);
-
-        ApplicationDefaultCredentials::getSubscriber('a scope', $httpHandler);
-    }
-
-    public function testWithCacheOptions()
-    {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-
-        $httpHandler = getHandler([
-            buildResponse(200),
-        ]);
-
-        $cacheOptions = [];
-        $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
-
-        $subscriber = ApplicationDefaultCredentials::getSubscriber(
-            'a scope',
-            $httpHandler,
-            $cacheOptions,
-            $cachePool->reveal()
-        );
-    }
-
-    public function testSuccedsIfNoDefaultFilesButIsOnGCE()
-    {
-        $wantedTokens = [
-            'access_token' => '1/abdef1234567890',
-            'expires_in' => '57',
-            'token_type' => 'Bearer',
-        ];
-        $jsonTokens = json_encode($wantedTokens);
-
-        // simulate the response from GCE.
-        $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Utils::streamFor($jsonTokens)),
-        ]);
-
-        $this->assertNotNull(ApplicationDefaultCredentials::getSubscriber('a scope', $httpHandler));
     }
 }

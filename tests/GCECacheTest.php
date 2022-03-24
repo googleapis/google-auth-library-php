@@ -26,7 +26,7 @@ class GCECacheTest extends BaseTest
     private $mockCacheItem;
     private $mockCache;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
         $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
