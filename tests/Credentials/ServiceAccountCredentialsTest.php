@@ -18,6 +18,7 @@
 namespace Google\Auth\Tests\Credentials;
 
 use DomainException;
+use Firebase\JWT\JWT;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
@@ -799,12 +800,7 @@ class SACJwtAccessComboTest extends TestCase
         $token = str_replace('Bearer ', '', $metadata['authorization'][0]);
         $key = file_get_contents(__DIR__ . '/../fixtures3/key.pub');
 
-        $class = 'JWT';
-        if (class_exists('Firebase\JWT\JWT')) {
-            $class = 'Firebase\JWT\JWT';
-        }
-        $jwt = new $class();
-        $result = $jwt::decode($token, $key, ['RS256']);
+        $result = JWT::decode($token, $key, ['RS256']);
 
         $this->assertEquals($authUri, $result->aud);
     }

@@ -18,6 +18,7 @@
 namespace Google\Auth\Tests;
 
 use DomainException;
+use Firebase\JWT\JWT;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Utils;
@@ -449,7 +450,7 @@ class OAuth2JwtTest extends TestCase
         $testConfig['signingKeyId'] = 'example_key_id2';
         $o = new OAuth2($testConfig);
         $payload = $o->toJwt();
-        $roundTrip = $this->jwtDecode($payload, $keys, array('HS256'));
+        $roundTrip = JWT::decode($payload, $keys, array('HS256'));
         $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
         $this->assertEquals($roundTrip->aud, $testConfig['audience']);
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -467,7 +468,7 @@ class OAuth2JwtTest extends TestCase
         $payload = $o->toJwt();
 
         try {
-            $this->jwtDecode($payload, $keys, array('HS256'));
+            JWT::decode($payload, $keys, array('HS256'));
         } catch (\Exception $e) {
             // Workaround: In old JWT versions throws DomainException
             $this->assertTrue(
@@ -484,7 +485,7 @@ class OAuth2JwtTest extends TestCase
         $testConfig = $this->signingMinimal;
         $o = new OAuth2($testConfig);
         $payload = $o->toJwt();
-        $roundTrip = $this->jwtDecode($payload, $testConfig['signingKey'], array('HS256'));
+        $roundTrip = JWT::decode($payload, $testConfig['signingKey'], array('HS256'));
         $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
         $this->assertEquals($roundTrip->aud, $testConfig['audience']);
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -499,7 +500,7 @@ class OAuth2JwtTest extends TestCase
         $o->setSigningAlgorithm('RS256');
         $o->setSigningKey($privateKey);
         $payload = $o->toJwt();
-        $roundTrip = $this->jwtDecode($payload, $publicKey, array('RS256'));
+        $roundTrip = JWT::decode($payload, $publicKey, array('RS256'));
         $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
         $this->assertEquals($roundTrip->aud, $testConfig['audience']);
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -516,19 +517,8 @@ class OAuth2JwtTest extends TestCase
         $o->setSigningAlgorithm('RS256');
         $o->setSigningKey($privateKey);
         $payload = $o->toJwt();
-        $roundTrip = $this->jwtDecode($payload, $publicKey, array('RS256'));
+        $roundTrip = JWT::decode($payload, $publicKey, array('RS256'));
         $this->assertEquals($roundTrip->target_audience, $targetAud);
-    }
-
-    private function jwtDecode()
-    {
-        $args = func_get_args();
-        $class = 'JWT';
-        if (class_exists('Firebase\JWT\JWT')) {
-            $class = 'Firebase\JWT\JWT';
-        }
-
-        return call_user_func_array("$class::decode", $args);
     }
 }
 
@@ -931,7 +921,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
             'iat' => $now,
         ];
         $o = new OAuth2($testConfig);
-        $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, 'RS256');
+        $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
         $o->setIdToken($jwtIdToken);
         $o->verifyIdToken($this->publicKey, ['RS256']);
     }
@@ -948,7 +938,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
             'iat' => $now,
         ];
         $o = new OAuth2($testConfig);
-        $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, 'RS256');
+        $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
         $o->setIdToken($jwtIdToken);
         $o->verifyIdToken($this->publicKey, ['RS256']);
     }
@@ -965,20 +955,9 @@ class OAuth2VerifyIdTokenTest extends TestCase
         ];
         $o = new OAuth2($testConfig);
         $alg = 'RS256';
-        $jwtIdToken = $this->jwtEncode($origIdToken, $this->privateKey, $alg);
+        $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, $alg);
         $o->setIdToken($jwtIdToken);
         $roundTrip = $o->verifyIdToken($this->publicKey, array($alg));
         $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
-    }
-
-    private function jwtEncode()
-    {
-        $args = func_get_args();
-        $class = 'JWT';
-        if (class_exists('Firebase\JWT\JWT')) {
-            $class = 'Firebase\JWT\JWT';
-        }
-
-        return call_user_func_array("$class::encode", $args);
     }
 }
