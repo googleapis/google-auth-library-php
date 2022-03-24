@@ -17,7 +17,13 @@
 
 namespace Google\Auth\Tests\Middleware;
 
+use Google\Auth\Middleware\SimpleMiddleware;
 use Google\Auth\Tests\BaseTest;
+use GuzzleHttp\Psr7\Query;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Handler\MockHandler;
+use Psr\Http\Message\UriInterface;
 
 class SimpleMiddlewareTest extends BaseTest
 {
@@ -28,10 +34,31 @@ class SimpleMiddlewareTest extends BaseTest
      */
     protected function setUp(): void
     {
-        $this->mockRequest = $this->prophesize('GuzzleHttp\Psr7\Request');
+        $this->mockRequest = $this->prophesize(Request::class);
     }
 
-    public function testTest()
+    public function testApiKey()
     {
+        $testKey = 'foo';
+        $params = Query::build(['key' => $testKey]);
+
+        $mockUri = $this->prophesize(UriInterface::class);
+        $mockUri->getQuery()
+            ->shouldBeCalledTimes(1)
+            ->willReturn('');
+        $mockUri->withQuery($params)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($mockUri->reveal());
+        $this->mockRequest->getUri()
+            ->shouldBeCalledTimes(2)
+            ->willReturn($mockUri->reveal());
+        $this->mockRequest->withUri($mockUri->reveal())
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
+
+        $middleware = new SimpleMiddleware(['key' => $testKey]);
+        $mock = new MockHandler([new Response(200)]);
+        $callable = $middleware($mock);
+        $callable($this->mockRequest->reveal(), ['auth' => 'simple']);
     }
 }

@@ -23,10 +23,12 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
+use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use LogicException;
+use UnexpectedValueException;
 use PHPUnit\Framework\TestCase;
 
 // Creates a standard JSON auth object for testing.
@@ -467,12 +469,11 @@ class SACJwtAccessTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException UnexpectedValueException
-     * @expectedExceptionMessage Cannot sign both audience and scope in JwtAccess
-     */
     public function testFailsWithBothAudienceAndScope()
     {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('Cannot sign both audience and scope in JwtAccess');
+
         $scope = 'scope/1';
         $audience = 'https://example.com/service';
         $testJson = $this->createTestJson();
@@ -584,7 +585,7 @@ class SACJwtAccessTest extends TestCase
     }
 }
 
-class SACJwtAccessComboTest extends TestCase
+class SACJwtAccessComboTest extends BaseTest
 {
     private $privateKey;
 
@@ -659,10 +660,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertIsArray($authorization);
 
         $bearer_token = current($authorization);
-        $this->assertInternalType('string', $bearer_token);
+        $this->assertIsString($bearer_token);
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
 
         // Ensure scopes are signed inside
@@ -670,7 +671,7 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $bearer_token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertIsArray($json);
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], $scope);
     }
@@ -698,10 +699,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertIsArray($authorization);
 
         $bearer_token = current($authorization);
-        $this->assertInternalType('string', $bearer_token);
+        $this->assertIsString($bearer_token);
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
 
         // Ensure scopes are signed inside
@@ -709,13 +710,13 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $bearer_token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertIsArray($json);
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], implode(' ', $scope));
 
         // Test last received token
         $cachedToken = $sa->getLastReceivedToken();
-        $this->assertInternalType('array', $cachedToken);
+        $this->assertIsArray($cachedToken);
         $this->assertArrayHasKey('access_token', $cachedToken);
         $this->assertEquals($token, $cachedToken['access_token']);
     }
@@ -733,7 +734,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $access_token = $sa->fetchAuthToken();
-        $this->assertInternalType('array', $access_token);
+        $this->assertIsArray($access_token);
         $this->assertArrayHasKey('access_token', $access_token);
         $token = $access_token['access_token'];
 
@@ -741,7 +742,7 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertIsArray($json);
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], $scope);
     }
@@ -759,7 +760,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $access_token = $sa->fetchAuthToken();
-        $this->assertInternalType('array', $access_token);
+        $this->assertIsArray($access_token);
         $this->assertArrayHasKey('access_token', $access_token);
         $token = $access_token['access_token'];
 
@@ -767,13 +768,13 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertIsArray($json);
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], implode(' ', $scope));
 
         // Test last received token
         $cachedToken = $sa->getLastReceivedToken();
-        $this->assertInternalType('array', $cachedToken);
+        $this->assertIsArray($cachedToken);
         $this->assertArrayHasKey('access_token', $cachedToken);
         $this->assertEquals($token, $cachedToken['access_token']);
     }

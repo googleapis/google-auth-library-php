@@ -101,12 +101,10 @@ class OAuth2AuthorizationUriTest extends TestCase
         $o->buildFullAuthorizationUri();
     }
 
-    /**
-     * @expectedException DomainException
-     * @expectedExceptionMessage one of scope or aud should not be null
-     */
     public function testAudOrScopeIsRequiredForJwt()
     {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('one of scope or aud should not be null');
         $o = new OAuth2([]);
         $o->setSigningKey('a key');
         $o->setSigningAlgorithm('RS256');
@@ -471,12 +469,12 @@ class OAuth2JwtTest extends TestCase
         try {
             $this->jwtDecode($payload, $keys, array('HS256'));
         } catch (\Exception $e) {
-            if (($e instanceof \DomainException || $e instanceof \UnexpectedValueException) &&
-                $e->getMessage() === '"kid" empty, unable to lookup correct key') {
-                // Workaround: In old JWT versions throws DomainException
-                return;
-            }
-            throw $e;
+            // Workaround: In old JWT versions throws DomainException
+            $this->assertTrue(
+                ($e instanceof \DomainException || $e instanceof \UnexpectedValueException)
+                && $e->getMessage() === '"kid" empty, unable to lookup correct key'
+            );
+            return;
         }
         $this->fail("Expected exception about problem with decode");
     }
