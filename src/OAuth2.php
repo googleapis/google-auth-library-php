@@ -18,6 +18,7 @@
 namespace Google\Auth;
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Query;
@@ -380,7 +381,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * `\InvalidArgumentException`.
      *
      * @param string $publicKey The public key to use to authenticate the token
-     * @param array $allowed_algs List of supported verification algorithms
+     * @param string $allowed_alg The supported verification algorithm
      * @throws \DomainException if the token is missing an audience.
      * @throws \DomainException if the audience does not match the one set in
      *         the OAuth2 class instance.
@@ -390,14 +391,14 @@ class OAuth2 implements FetchAuthTokenInterface
      * @throws ExpiredException If the token has expired.
      * @return null|object
      */
-    public function verifyIdToken($publicKey = null, $allowed_algs = array())
+    public function verifyIdToken($publicKey = null, $allowed_alg)
     {
         $idToken = $this->getIdToken();
         if (is_null($idToken)) {
             return null;
         }
 
-        $resp = $this->jwtDecode($idToken, $publicKey, $allowed_algs);
+        $resp = $this->jwtDecode($idToken, $publicKey, $allowed_alg);
         if (!property_exists($resp, 'aud')) {
             throw new \DomainException('No audience found the id token');
         }
@@ -1377,12 +1378,12 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * @param string $idToken
      * @param string|array|null $publicKey
-     * @param array $allowedAlgs
+     * @param string $allowedAlg
      * @return object
      */
-    private function jwtDecode($idToken, $publicKey, $allowedAlgs)
+    private function jwtDecode($idToken, $publicKey, $allowedAlg)
     {
-        return JWT::decode($idToken, $publicKey, $allowedAlgs);
+        return JWT::decode($idToken, new Key($publicKey, $allowedAlg));
     }
 
     private function jwtEncode($assertion, $signingKey, $signingAlgorithm, $signingKeyId = null)

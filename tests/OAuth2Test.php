@@ -19,6 +19,7 @@ namespace Google\Auth\Tests;
 
 use DomainException;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Utils;
@@ -450,7 +451,10 @@ class OAuth2JwtTest extends TestCase
         $testConfig['signingKeyId'] = 'example_key_id2';
         $o = new OAuth2($testConfig);
         $payload = $o->toJwt();
-        $roundTrip = JWT::decode($payload, $keys, array('HS256'));
+        $roundTrip = JWT::decode($payload, array(
+            'example_key_id1' => new Key('example_key1', 'HS256'),
+            'example_key_id2' => new Key('example_key2', 'HS256')
+        ));
         $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
         $this->assertEquals($roundTrip->aud, $testConfig['audience']);
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -468,7 +472,10 @@ class OAuth2JwtTest extends TestCase
         $payload = $o->toJwt();
 
         try {
-            JWT::decode($payload, $keys, array('HS256'));
+            JWT::decode($payload, array(
+                'example_key_id1' => new Key('example_key1', 'HS256'),
+                'example_key_id2' => new Key('example_key2', 'HS256')
+            ));
         } catch (\Exception $e) {
             // Workaround: In old JWT versions throws DomainException
             $this->assertTrue(
@@ -485,7 +492,7 @@ class OAuth2JwtTest extends TestCase
         $testConfig = $this->signingMinimal;
         $o = new OAuth2($testConfig);
         $payload = $o->toJwt();
-        $roundTrip = JWT::decode($payload, $testConfig['signingKey'], array('HS256'));
+        $roundTrip = JWT::decode($payload, new Key($testConfig['signingKey'], 'HS256'));
         $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
         $this->assertEquals($roundTrip->aud, $testConfig['audience']);
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -500,7 +507,7 @@ class OAuth2JwtTest extends TestCase
         $o->setSigningAlgorithm('RS256');
         $o->setSigningKey($privateKey);
         $payload = $o->toJwt();
-        $roundTrip = JWT::decode($payload, $publicKey, array('RS256'));
+        $roundTrip = JWT::decode($payload, new Key($publicKey, 'RS256'));
         $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
         $this->assertEquals($roundTrip->aud, $testConfig['audience']);
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -517,7 +524,7 @@ class OAuth2JwtTest extends TestCase
         $o->setSigningAlgorithm('RS256');
         $o->setSigningKey($privateKey);
         $payload = $o->toJwt();
-        $roundTrip = JWT::decode($payload, $publicKey, array('RS256'));
+        $roundTrip = JWT::decode($payload, new Key($publicKey, 'RS256'));
         $this->assertEquals($roundTrip->target_audience, $targetAud);
     }
 }
@@ -907,7 +914,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
         $o->setIdToken($not_a_jwt);
-        $o->verifyIdToken($this->publicKey);
+        $o->verifyIdToken($this->publicKey, 'RS256');
     }
 
     public function testFailsIfAudienceIsMissing()
@@ -923,7 +930,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $o = new OAuth2($testConfig);
         $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
         $o->setIdToken($jwtIdToken);
-        $o->verifyIdToken($this->publicKey, ['RS256']);
+        $o->verifyIdToken($this->publicKey, 'RS256');
     }
 
     public function testFailsIfAudienceIsWrong()
@@ -940,7 +947,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $o = new OAuth2($testConfig);
         $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
         $o->setIdToken($jwtIdToken);
-        $o->verifyIdToken($this->publicKey, ['RS256']);
+        $o->verifyIdToken($this->publicKey, 'RS256');
     }
 
     public function testShouldReturnAValidIdToken()
@@ -957,7 +964,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $alg = 'RS256';
         $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, $alg);
         $o->setIdToken($jwtIdToken);
-        $roundTrip = $o->verifyIdToken($this->publicKey, array($alg));
+        $roundTrip = $o->verifyIdToken($this->publicKey, $alg);
         $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
     }
 }
