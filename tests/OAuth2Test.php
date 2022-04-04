@@ -19,6 +19,7 @@ namespace Google\Auth\Tests;
 
 use DomainException;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Utils;
@@ -442,15 +443,15 @@ class OAuth2JwtTest extends TestCase
     public function testCanHS256EncodeAValidPayloadWithSigningKeyId()
     {
         $testConfig = $this->signingMinimal;
-        $keys = array(
-            'example_key_id1' => 'example_key1',
-            'example_key_id2' => 'example_key2'
-        );
-        $testConfig['signingKey'] = $keys['example_key_id2'];
+        $keys = [
+            'example_key_id1' => new Key('example_key1', 'HS256'),
+            'example_key_id2' => new Key('example_key2', 'HS256'),
+        ];
+        $testConfig['signingKey'] = $keys['example_key_id2']->getKeyMaterial();
         $testConfig['signingKeyId'] = 'example_key_id2';
         $o = new OAuth2($testConfig);
         $payload = $o->toJwt();
-        $roundTrip = JWT::decode($payload, $keys, array('HS256'));
+        $roundTrip = JWT::decode($payload, $keys);
         $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
         $this->assertEquals($roundTrip->aud, $testConfig['audience']);
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -459,16 +460,16 @@ class OAuth2JwtTest extends TestCase
     public function testFailDecodeWithoutSigningKeyId()
     {
         $testConfig = $this->signingMinimal;
-        $keys = array(
-            'example_key_id1' => 'example_key1',
-            'example_key_id2' => 'example_key2'
-        );
-        $testConfig['signingKey'] = $keys['example_key_id2'];
+        $keys = [
+            'example_key_id1' => new Key('example_key1', 'HS256'),
+            'example_key_id2' => new Key('example_key2', 'HS256'),
+        ];
+        $testConfig['signingKey'] = $keys['example_key_id2']->getKeyMaterial();
         $o = new OAuth2($testConfig);
         $payload = $o->toJwt();
 
         try {
-            JWT::decode($payload, $keys, array('HS256'));
+            JWT::decode($payload, $keys);
         } catch (\Exception $e) {
             // Workaround: In old JWT versions throws DomainException
             $this->assertTrue(
@@ -485,7 +486,7 @@ class OAuth2JwtTest extends TestCase
         $testConfig = $this->signingMinimal;
         $o = new OAuth2($testConfig);
         $payload = $o->toJwt();
-        $roundTrip = JWT::decode($payload, $testConfig['signingKey'], array('HS256'));
+        $roundTrip = JWT::decode($payload, new Key($testConfig['signingKey'], 'HS256'));
         $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
         $this->assertEquals($roundTrip->aud, $testConfig['audience']);
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -500,7 +501,7 @@ class OAuth2JwtTest extends TestCase
         $o->setSigningAlgorithm('RS256');
         $o->setSigningKey($privateKey);
         $payload = $o->toJwt();
-        $roundTrip = JWT::decode($payload, $publicKey, array('RS256'));
+        $roundTrip = JWT::decode($payload, new Key($publicKey, 'RS256'));
         $this->assertEquals($roundTrip->iss, $testConfig['issuer']);
         $this->assertEquals($roundTrip->aud, $testConfig['audience']);
         $this->assertEquals($roundTrip->scope, $testConfig['scope']);
@@ -517,7 +518,7 @@ class OAuth2JwtTest extends TestCase
         $o->setSigningAlgorithm('RS256');
         $o->setSigningKey($privateKey);
         $payload = $o->toJwt();
-        $roundTrip = JWT::decode($payload, $publicKey, array('RS256'));
+        $roundTrip = JWT::decode($payload, new Key($publicKey, 'RS256'));
         $this->assertEquals($roundTrip->target_audience, $targetAud);
     }
 }

@@ -380,12 +380,15 @@ class OAuth2 implements FetchAuthTokenInterface
      * newer versions, if a public key is not given, this method will throw an
      * `\InvalidArgumentException`.
      *
-     * @param string $publicKey The public key to use to authenticate the token
-     * @param array $allowed_algs List of supported verification algorithms
+     * @param string|Key|Key[] $publicKey The public key to use to authenticate the token
+     * @param string|array $allowed_algs algorithm or array of supported verification algorithms.
+     *        IMPORTANT: providing more than one algorithm will throw an exception, use the Key
+     *        object instead.
      * @throws \DomainException if the token is missing an audience.
      * @throws \DomainException if the audience does not match the one set in
      *         the OAuth2 class instance.
      * @throws \UnexpectedValueException If the token is invalid
+     * @throws \InvalidArgumentException If more than one value for allowed_algs is supplied
      * @throws SignatureInvalidException If the signature is invalid.
      * @throws BeforeValidException If the token is not yet valid.
      * @throws ExpiredException If the token has expired.
@@ -1441,9 +1444,9 @@ class OAuth2 implements FetchAuthTokenInterface
             }
 
             // We have one key and one alg, create a key with them.
-            $key = new Key(array_pop($publicKey), $allowedAlgs);
+            $key = new Key(array_pop($publicKey), $allowedAlg);
         } else {
-            $key = new Key($publicKey, $allowedAlgs);
+            $key = new Key($publicKey, $allowedAlg);
         }
 
         return array($key);
