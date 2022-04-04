@@ -17,7 +17,6 @@
 
 namespace Google\Auth;
 
-use Firebase\JWT\JWT;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Query;
@@ -1384,27 +1383,24 @@ class OAuth2 implements FetchAuthTokenInterface
      */
     private function jwtDecode($idToken, $publicKey, $allowedAlgs)
     {
-        if (class_exists('Firebase\JWT\JWT')) {
-            // Preserve Backwards Compatibility with firebase/php-jwt:6.0 by
-            // creating a Key object for every public key / alg combination.
-            if (class_exists('Firebase\JWT\Key') // True when using php-jwt v5.5 and v6.0
-                && !defined('Firebase\JWT\JWT::ASN1_INTEGER') // False when using php-jwt v5.5
-                && !$publicKey instanceof Key // True with previous (deprecated) usage
-            ) {
-                $keys = $this->getFirebaseJwtKeys($publicKey, $allowedAlgs);
+        // Preserve Backwards Compatibility with firebase/php-jwt:6.0 by
+        // creating a Key object for every public key / alg combination.
+        if (class_exists('Firebase\JWT\Key') // True when using php-jwt v5.5 and v6.0
+            && !defined('Firebase\JWT\JWT::ASN1_INTEGER') // False when using php-jwt v5.5
+            && !$publicKey instanceof Key // True with previous (deprecated) usage
+        ) {
+            $keys = $this->getFirebaseJwtKeys($publicKey, $allowedAlgs);
 
-                // Default exception if none are caught
-                $e = new \InvalidArgumentException('Key may not be empty');
-                foreach ($keys as $key) {
-                    try {
-                        return JWT::decode($idToken, $key);
-                    } catch (\Exception $e) {
-                        // try next alg
-                    }
+            // Default exception if none are caught
+            $e = new \InvalidArgumentException('Key may not be empty');
+            foreach ($keys as $key) {
+                try {
+                    return JWT::decode($idToken, $key);
+                } catch (\Exception $e) {
+                    // try next alg
                 }
-                throw $e;
             }
-            return JWT::decode($idToken, $publicKey, $allowedAlgs);
+            throw $e;
         }
 
         return JWT::decode($idToken, $publicKey, $allowedAlgs);
