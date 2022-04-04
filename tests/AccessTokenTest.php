@@ -225,7 +225,7 @@ class AccessTokenTest extends TestCase
                 $this->payload,
                 null,
                 'foo',
-                new UnexpectedValueException('Audience does not match');
+                new UnexpectedValueException('Audience does not match'),
             ]
         ];
     }
