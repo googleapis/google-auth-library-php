@@ -12,14 +12,14 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         - name: Checkout
-          uses: actions/checkout@v2
+          uses: actions/checkout@v3
         - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
         - name: Setup PHP
           uses: shivammathur/setup-php@v2
           with:
             php-version: 7.3
         - name: Install Dependencies
-          uses: nick-invision/retry@v1
+          uses: nick-invision/retry@v2
           with:
             timeout_minutes: 10
             max_attempts: 3

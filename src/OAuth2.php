@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Firebase\JWT\JWT;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Query;
@@ -1444,16 +1445,12 @@ class OAuth2 implements FetchAuthTokenInterface
 
     private function jwtEncode($assertion, $signingKey, $signingAlgorithm, $signingKeyId = null)
     {
-        if (class_exists('Firebase\JWT\JWT')) {
-            return JWT::encode(
-                $assertion,
-                $signingKey,
-                $signingAlgorithm,
-                $signingKeyId
-            );
-        }
-
-        return JWT::encode($assertion, $signingKey, $signingAlgorithm, $signingKeyId);
+        return JWT::encode(
+            $assertion,
+            $signingKey,
+            $signingAlgorithm,
+            $signingKeyId
+        );
     }
 
     /**

@@ -7,24 +7,10 @@ use PHPUnit\Framework\TestCase;
 
 abstract class BaseTest extends TestCase
 {
-    protected function onlyGuzzle5()
-    {
-        if ($this->getGuzzleMajorVersion() !== 5) {
-            $this->markTestSkipped('Guzzle 5 only');
-        }
-    }
-
     protected function onlyGuzzle6()
     {
         if ($this->getGuzzleMajorVersion() !== 6) {
             $this->markTestSkipped('Guzzle 6 only');
-        }
-    }
-
-    protected function onlyGuzzle6And7()
-    {
-        if (!in_array($this->getGuzzleMajorVersion(), [6, 7])) {
-            $this->markTestSkipped('Guzzle 6 and 7 only');
         }
     }
 

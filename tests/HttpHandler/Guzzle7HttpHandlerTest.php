@@ -24,7 +24,7 @@ use Google\Auth\HttpHandler\Guzzle7HttpHandler;
  */
 class Guzzle7HttpHandlerTest extends Guzzle6HttpHandlerTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         $this->onlyGuzzle7();
 

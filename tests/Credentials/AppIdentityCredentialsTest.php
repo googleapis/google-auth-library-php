@@ -75,13 +75,6 @@ class AppIdentityCredentialsTest extends TestCase
         $this->assertEquals(array(), $g->fetchAuthToken());
     }
 
-    /* @expectedException */
-    public function testThrowsExceptionIfClassDoesntExist()
-    {
-        $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
-        $g = new AppIdentityCredentials();
-    }
-
     /**
      * @runInSeparateProcess
      */
@@ -131,17 +124,13 @@ class AppIdentityCredentialsTest extends TestCase
     public function testMethodsFailWhenNotInAppEngine($method, $args = [], $expected = null)
     {
         if ($expected === null) {
-            if (method_exists($this, 'expectException')) {
-                $this->expectException('\Exception');
-            } else {
-                $this->setExpectedException('\Exception');
-            }
+            $this->expectException(\Exception::class);
         }
 
         $creds = new AppIdentityCredentials();
         $res = call_user_func_array([$creds, $method], $args);
 
-        if ($expected) {
+        if ($expected !== null) {
             $this->assertEquals($expected, $res);
         }
     }

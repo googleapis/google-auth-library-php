@@ -25,7 +25,7 @@ class MemoryCacheItemPoolTest extends TestCase
 {
     private $pool;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->pool = new MemoryCacheItemPool();
     }
@@ -157,47 +157,52 @@ class MemoryCacheItemPoolTest extends TestCase
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnGetItem($key)
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $this->pool->getItem($key);
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnGetItems($key)
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $this->pool->getItems([$key]);
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnHasItem($key)
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $this->pool->hasItem($key);
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnDeleteItem($key)
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $this->pool->deleteItem($key);
     }
 
     /**
-     * @expectedException \Psr\Cache\InvalidArgumentException
      * @dataProvider invalidKeys
      */
     public function testCheckInvalidKeysOnDeleteItems($key)
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $this->pool->deleteItems([$key]);
     }
 

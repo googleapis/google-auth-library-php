@@ -31,7 +31,7 @@ class Guzzle6HttpHandlerTest extends BaseTest
     protected $client;
     protected $handler;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->onlyGuzzle6();
 
