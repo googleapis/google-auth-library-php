@@ -17,6 +17,8 @@
 
 namespace Google\Auth;
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Query;
@@ -26,8 +28,6 @@ use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 
 /**
  * OAuth2 supports authentication by OAuth2 2-legged flows.
@@ -375,15 +375,13 @@ class OAuth2 implements FetchAuthTokenInterface
      * - otherwise returns the payload in the idtoken as a PHP object.
      *
      * The behavior of this method varies depending on the version of
-     * `firebase/php-jwt` you are using. In versions lower than 3.0.0, if
-     * `$publicKey` is null, the key is decoded without being verified. In
-     * newer versions, if a public key is not given, this method will throw an
-     * `\InvalidArgumentException`.
+     * `firebase/php-jwt` you are using. In versions 6.0 and above, you cannot
+     * provide multiple $allowed_algs, and instead must provide an array of Key
+     * objects as the $publicKey.
      *
      * @param string|Key|Key[] $publicKey The public key to use to authenticate the token
      * @param string|array $allowed_algs algorithm or array of supported verification algorithms.
-     *        IMPORTANT: providing more than one algorithm will throw an exception, use the Key
-     *        object instead.
+     *        Providing more than one algorithm will throw an exception.
      * @throws \DomainException if the token is missing an audience.
      * @throws \DomainException if the audience does not match the one set in
      *         the OAuth2 class instance.
