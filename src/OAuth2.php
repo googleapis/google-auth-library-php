@@ -1377,15 +1377,15 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * @param string $idToken
-     * @param string|array|null $publicKey
-     * @param array $allowedAlgs
+     * @param Key|Key[]|string|array|null $publicKey
+     * @param string|array $allowedAlg
      * @return object
      */
     private function jwtDecode($idToken, $publicKey, $allowedAlgs)
     {
         // Preserve Backwards Compatibility with firebase/php-jwt:6.0 by
         // creating a Key object for every public key / alg combination.
-        if (class_exists('Firebase\JWT\Key') // True when using php-jwt v5.5 and v6.0
+        if (class_exists(Key::class) // True when using php-jwt v5.5 and v6.0
             && !defined('Firebase\JWT\JWT::ASN1_INTEGER') // False when using php-jwt v5.5
             && !$publicKey instanceof Key // True with previous (deprecated) usage
         ) {
@@ -1406,20 +1406,30 @@ class OAuth2 implements FetchAuthTokenInterface
         return JWT::decode($idToken, $publicKey, $allowedAlgs);
     }
 
+    /**
+     * @return Key|Keys[]
+     */
     private function getFirebaseJwtKeys($publicKey, $allowedAlgs)
     {
-        if (count($allowedAlgs) > 1) {
-            throw new \InvalidArgumentException(
-                'To have multiple allowed algorithms, You must provide an'
-                . ' array of Firebase\JWT\Key objects.'
-                . ' See https://github.com/firebase/php-jwt for more information.');
-        }
-
         // If $allowedAlgs is empty, assume $publicKey is Key or Key[].
-        if (count($allowedAlgs) == 0) {
+        if (empty($allowedAlgs)) {
             return $publicKey;
         }
-        $allowedAlg = array_pop($allowedAlgs);
+
+        if (is_string($allowedAlgs)) {
+            $allowedAlg = $allowedAlg;
+        } elseif (is_array($allowedAlgs)) {
+            if (count($allowedAlgs) > 1) {
+                throw new \InvalidArgumentException(
+                    'To have multiple allowed algorithms, You must provide an'
+                    . ' array of Firebase\JWT\Key objects.'
+                    . ' See https://github.com/firebase/php-jwt for more information.');
+            }
+            $allowedAlg = array_pop($allowedAlgs);
+        } else {
+            throw new \InvalidArgumentException('$allowedAlgs must be a string or array.');
+        }
+
         if (is_array($publicKey)) {
             // When publicKey is greater than 1, create keys with the single alg.
             if (count($publicKey) > 1) {
