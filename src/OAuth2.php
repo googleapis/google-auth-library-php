@@ -1399,13 +1399,13 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
-     * @return Key|Keys[]
+     * @return Keys[]
      */
     private function getFirebaseJwtKeys($publicKey, $allowedAlgs)
     {
         // If $allowedAlgs is empty, assume $publicKey is Key or Key[].
         if (empty($allowedAlgs)) {
-            return $publicKey;
+            return (array) $publicKey;
         }
 
         if (is_string($allowedAlgs)) {
