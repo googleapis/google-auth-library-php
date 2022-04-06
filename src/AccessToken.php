@@ -204,8 +204,8 @@ class AccessToken
         $jwt = $this->callSimpleJwtDecode([$token, $jwkset, 'ES256']);
         $payload = $jwt->getClaims();
 
-        if (isset($payload['aud'])) {
-            if ($audience && $payload['aud'] != $audience) {
+        if ($audience) {
+            if (!isset($payload['aud']) || $payload['aud'] != $audience) {
                 throw new UnexpectedValueException('Audience does not match');
             }
         }
@@ -266,8 +266,8 @@ class AccessToken
             ['RS256']
         ]);
 
-        if (property_exists($payload, 'aud')) {
-            if ($audience && $payload->aud != $audience) {
+        if ($audience) {
+            if (!property_exists($payload, 'aud') || $payload->aud != $audience) {
                 throw new UnexpectedValueException('Audience does not match');
             }
         }
@@ -444,9 +444,7 @@ class AccessToken
      */
     protected function callJwtStatic($method, array $args = [])
     {
-        $class = class_exists('Firebase\JWT\JWT')
-            ? 'Firebase\JWT\JWT'
-            : 'JWT';
+        $class = 'Firebase\JWT\JWT';
         return call_user_func_array([$class, $method], $args);
     }
 

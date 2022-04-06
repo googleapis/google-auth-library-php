@@ -18,10 +18,13 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\AccessToken;
 use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Http\Message\RequestInterface;
+use RuntimeException;
 use SimpleJWT\JWT as SimpleJWT;
+use UnexpectedValueException;
 
 /**
  * @group access-token
@@ -35,7 +38,7 @@ class AccessTokenTest extends TestCase
     private $publicKey;
     private $allowedAlgs;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->cache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
         $this->jwt = $this->prophesize('Firebase\JWT\JWT');
@@ -218,6 +221,11 @@ class AccessTokenTest extends TestCase
                 null,
                 AccessToken::IAP_CERT_URL,
                 'baz'
+            ], [
+                $this->payload,
+                null,
+                'foo',
+                new UnexpectedValueException('Audience does not match'),
             ]
         ];
     }
@@ -309,12 +317,11 @@ class AccessTokenTest extends TestCase
         ]);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Failed to retrieve verification certificates from path
-     */
     public function testRetrieveCertsFromLocationLocalFileInvalidFilePath()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Failed to retrieve verification certificates from path');
+
         $certsLocation = __DIR__ . '/fixtures/federated-certs-does-not-exist.json';
 
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
@@ -336,12 +343,11 @@ class AccessTokenTest extends TestCase
         ]);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage federated sign-on certs expects "keys" to be set
-     */
     public function testRetrieveCertsInvalidData()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('federated sign-on certs expects "keys" to be set');
+
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
         $item->get()
             ->shouldBeCalledTimes(1)
@@ -359,12 +365,11 @@ class AccessTokenTest extends TestCase
         $token->verify($this->token);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage federated sign-on certs expects "keys" to be set
-     */
     public function testRetrieveCertsFromLocationLocalFileInvalidFileData()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('federated sign-on certs expects "keys" to be set');
+
         $temp = tmpfile();
         fwrite($temp, '{}');
         $certsLocation = stream_get_meta_data($temp)['uri'];
@@ -432,12 +437,11 @@ class AccessTokenTest extends TestCase
         $token->verify($this->token);
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage bad news guys
-     */
     public function testRetrieveCertsFromLocationRemoteBadRequest()
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('bad news guys');
+
         $badBody = 'bad news guys';
 
         $httpHandler = function (RequestInterface $request) use ($badBody) {

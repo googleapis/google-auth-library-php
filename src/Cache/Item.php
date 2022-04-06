@@ -169,14 +169,7 @@ final class Item implements CacheItemInterface
             return true;
         }
 
-        // We test for two types here due to the fact the DateTimeInterface
-        // was not introduced until PHP 5.5. Checking for the DateTime type as
-        // well allows us to support 5.4.
         if ($expiration instanceof \DateTimeInterface) {
-            return true;
-        }
-
-        if ($expiration instanceof \DateTime) {
             return true;
         }
 

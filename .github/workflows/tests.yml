@@ -1,17 +1,15 @@
 name: Test Suite
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
 
 jobs:
     test:
-        runs-on: ${{matrix.operating-system}}
+        runs-on: ubuntu-latest
         strategy:
             matrix:
-                operating-system: [ ubuntu-latest ]
-                php: [ "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0" ]
+                php: [ "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
             - uses: actions/checkout@v3
@@ -19,30 +17,22 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                 php-version: ${{ matrix.php }}
-            - if: ${{ matrix.php != '8.0' }}
-              name: Install Dependencies
+            - name: Install Dependencies
               uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer install
-            - if: ${{ matrix.php == '8.0' }}
-              name: Install Dependencies (PHP 8.0)
-              uses: nick-invision/retry@v2
-              with:
-                timeout_minutes: 10
-                max_attempts: 3
-                command: |
-                  composer remove --dev --ignore-platform-reqs phpunit/phpunit
-                  composer require --dev --ignore-platform-reqs --update-with-all-dependencies phpunit/phpunit:^7
+            - if: ${{ contains(fromJson('["5.6", "7.0", "7.1"]'), matrix.php)}}
+              name: Run PHPUnit Patches
+              run: sh .github/apply-phpunit-patches.sh
             - name: Run Script
               run: vendor/bin/phpunit
     test_lowest:
-        runs-on: ${{matrix.operating-system}}
+        runs-on: ubuntu-latest
         strategy:
             matrix:
-                operating-system: [ ubuntu-latest ]
-                php: [ "5.6", "7.0", "7.1", "7.2" ]
+                php: [ "5.6", "7.2" ]
         name: PHP ${{matrix.php }} Unit Test Prefer Lowest
         steps:
             - uses: actions/checkout@v3
@@ -56,14 +46,16 @@ jobs:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer update --prefer-lowest
+            - if: ${{ matrix.php == '5.6' }}
+              name: Run PHPUnit Patches
+              run: sh .github/apply-phpunit-patches.sh
             - name: Run Script
               run: vendor/bin/phpunit
     guzzle6:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                operating-system: [ ubuntu-latest ]
-                php: [ "5.6", "7.2" ]
+                php: [ "7.2" ]
         name: PHP ${{ matrix.php }} Unit Test Guzzle 6
         steps:
             - uses: actions/checkout@v3
@@ -79,52 +71,6 @@ jobs:
                 command: composer require guzzlehttp/guzzle:^6 && composer update
             - name: Run Script
               run: vendor/bin/phpunit
-    # use dockerfiles for oooooolllllldddd versions of php, setup-php times out for those.
-    test_php55:
-        name: "PHP 5.5 Unit Test"
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Run Unit Tests
-          uses: docker://php:5.5-cli
-          with:
-            entrypoint: ./.github/actions/unittest/entrypoint.sh
-    test_php55_lowest:
-        name: "PHP 5.5 Unit Test Prefer Lowest"
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Run Unit Tests
-          uses: docker://php:5.5-cli
-          env:
-            composerargs: "--prefer-lowest"
-          with:
-            entrypoint: ./.github/actions/unittest/entrypoint.sh
-    test_php54:
-        name: "PHP 5.4 Unit Test"
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Run Unit Tests
-          uses: docker://php:5.4-cli
-          with:
-            entrypoint: ./.github/actions/unittest/entrypoint.sh
-    test_php54_lowest:
-        name: "PHP 5.4 Unit Test Prefer Lowest"
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Run Unit Tests
-          uses: docker://php:5.4-cli
-          env:
-            composerargs: "--prefer-lowest"
-          with:
-            entrypoint: ./.github/actions/unittest/entrypoint.sh
-
     style:
         runs-on: ubuntu-latest
         name: PHP Style Check
