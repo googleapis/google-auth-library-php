@@ -1,3 +1,10 @@
+## 1.19.0 (03/24/2022)
+
+ * Dropped support for: 
+   * PHP 5.4 and 5.5
+   * Guzzle 5
+   * Firebase JWT 2.0, 3.0, and 4.0
+
 ## 1.18.0 (08/24/2021)
 
  *  [feat]: Add support for guzzlehttp/psr7 v2 (#357)
