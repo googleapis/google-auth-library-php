@@ -457,7 +457,7 @@ class OAuth2 implements FetchAuthTokenInterface
         }
         $assertion += $this->getAdditionalClaims();
 
-        return $this->jwtEncode(
+        return JWT::encode(
             $assertion,
             $this->getSigningKey(),
             $this->getSigningAlgorithm(),
@@ -1424,31 +1424,14 @@ class OAuth2 implements FetchAuthTokenInterface
 
         if (is_array($publicKey)) {
             // When publicKey is greater than 1, create keys with the single alg.
-            if (count($publicKey) > 1) {
-                $keys = array();
-                foreach ($publicKey as $kid => $pubkey) {
-                    $keys[$kid] = new Key($pubkey, $allowedAlg);
-                }
-                return $keys;
+            $keys = [];
+            foreach ($publicKey as $kid => $pubkey) {
+                $keys[$kid] = new Key($pubkey, $allowedAlg);
             }
-
-            // We have one key and one alg, create a key with them.
-            $key = new Key(array_pop($publicKey), $allowedAlg);
-        } else {
-            $key = new Key($publicKey, $allowedAlg);
+            return $keys;
         }
 
-        return array($key);
-    }
-
-    private function jwtEncode($assertion, $signingKey, $signingAlgorithm, $signingKeyId = null)
-    {
-        return JWT::encode(
-            $assertion,
-            $signingKey,
-            $signingAlgorithm,
-            $signingKeyId
-        );
+        return [new Key($publicKey, $allowedAlg)];
     }
 
     /**
