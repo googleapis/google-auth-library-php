@@ -3,3 +3,5 @@ parameters:
     level: 7
     paths:
     - src
+    excludePaths:
+    - src/HttpHandler/Guzzle5HttpHandler.php
