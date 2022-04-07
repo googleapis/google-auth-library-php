@@ -49,7 +49,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      *
-     * @return array
+     * @return iterable
      *   A traversable collection of Cache Items keyed by the cache keys of
      *   each item. A Cache item will be returned for each key, even if that
      *   key is not found. However, if no keys are specified then an empty
