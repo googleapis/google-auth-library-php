@@ -20,7 +20,6 @@ namespace Google\Auth;
 use Google\Auth\Credentials\InsecureCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
-use GuzzleHttp\ClientInterface;
 use RuntimeException;
 use UnexpectedValueException;
 

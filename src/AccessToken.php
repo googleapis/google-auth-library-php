@@ -136,6 +136,8 @@ class AccessToken
                 return $this->verifyRs256($token, $certs, $audience, $issuer);
             }
             return $this->verifyEs256($token, $certs, $audience, $issuer);
+        } catch (ExpiredException $e) {  // firebase/php-jwt 5+
+        } catch (SignatureInvalidException $e) {  // firebase/php-jwt 5+
         } catch (InvalidTokenException $e) { // simplejwt
         } catch (DomainException $e) { // @phpstan-ignore-line
         } catch (InvalidArgumentException $e) {

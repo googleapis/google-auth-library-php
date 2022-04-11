@@ -87,7 +87,7 @@ class ApplicationDefaultCredentials
      * @return AuthTokenSubscriber
      * @throws DomainException if no implementation can be obtained.
      */
-    public static function getSubscriber( // @phpstan-ignore-line
+    public static function getSubscriber(// @phpstan-ignore-line
         $scope = null,
         callable $httpHandler = null,
         array $cacheConfig = null,

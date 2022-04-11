@@ -84,7 +84,7 @@ class AppIdentityCredentials extends CredentialsLoader implements
      */
     public function __construct($scope = [])
     {
-        $this->scope = is_array($scope) ? $scope : explode(' ', $scope);
+        $this->scope = is_array($scope) ? $scope : explode(' ', (string) $scope);
     }
 
     /**
