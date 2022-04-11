@@ -40,7 +40,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      *
      * @return CacheItemInterface The corresponding Cache Item.
      */
-    public function getItem($key)
+    public function getItem($key): CacheItemInterface
     {
         return current($this->getItems([$key])); // @phpstan-ignore-line
     }
@@ -48,18 +48,18 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      *
-     * @return array<CacheItemInterface>
+     * @return iterable
      *   A traversable collection of Cache Items keyed by the cache keys of
      *   each item. A Cache item will be returned for each key, even if that
      *   key is not found. However, if no keys are specified then an empty
      *   traversable MUST be returned instead.
      */
-    public function getItems(array $keys = [])
+    public function getItems(array $keys = []): iterable
     {
         $items = [];
-
+        $itemClass = \PHP_VERSION_ID >= 80000 ? TypedItem::class : Item::class;
         foreach ($keys as $key) {
-            $items[$key] = $this->hasItem($key) ? clone $this->items[$key] : new Item($key);
+            $items[$key] = $this->hasItem($key) ? clone $this->items[$key] : new $itemClass($key);
         }
 
         return $items;
@@ -71,7 +71,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      * @return bool
      *   True if item exists in the cache, false otherwise.
      */
-    public function hasItem($key)
+    public function hasItem($key): bool
     {
         $this->isValidKey($key);
 
@@ -84,7 +84,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      * @return bool
      *   True if the pool was successfully cleared. False if there was an error.
      */
-    public function clear()
+    public function clear(): bool
     {
         $this->items = [];
         $this->deferredItems = [];
@@ -98,7 +98,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      * @return bool
      *   True if the item was successfully removed. False if there was an error.
      */
-    public function deleteItem($key)
+    public function deleteItem($key): bool
     {
         return $this->deleteItems([$key]);
     }
@@ -109,7 +109,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      * @return bool
      *   True if the items were successfully removed. False if there was an error.
      */
-    public function deleteItems(array $keys)
+    public function deleteItems(array $keys): bool
     {
         array_walk($keys, [$this, 'isValidKey']);
 
@@ -126,7 +126,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      * @return bool
      *   True if the item was successfully persisted. False if there was an error.
      */
-    public function save(CacheItemInterface $item)
+    public function save(CacheItemInterface $item): bool
     {
         $this->items[$item->getKey()] = $item;
 
@@ -139,7 +139,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      * @return bool
      *   False if the item could not be queued or if a commit was attempted and failed. True otherwise.
      */
-    public function saveDeferred(CacheItemInterface $item)
+    public function saveDeferred(CacheItemInterface $item): bool
     {
         $this->deferredItems[$item->getKey()] = $item;
 
@@ -152,7 +152,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      * @return bool
      *   True if all not-yet-saved items were successfully saved or there were none. False otherwise.
      */
-    public function commit()
+    public function commit(): bool
     {
         foreach ($this->deferredItems as $item) {
             $this->save($item);

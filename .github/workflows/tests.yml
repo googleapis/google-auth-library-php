@@ -9,7 +9,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php: [ "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1" ]
+                php: [ "7.1", "7.2", "7.3", "7.4", "8.0", "8.1" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
             - uses: actions/checkout@v3
@@ -23,46 +23,34 @@ jobs:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer install
-            - if: ${{ contains(fromJson('["5.6", "7.0", "7.1"]'), matrix.php)}}
-              name: Run PHPUnit Patches
-              run: sh .github/apply-phpunit-patches.sh
             - name: Run Script
               run: vendor/bin/phpunit
     test_lowest:
         runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                php: [ "5.6", "7.2" ]
-        name: PHP ${{matrix.php }} Unit Test Prefer Lowest
+        name: Test Prefer Lowest
         steps:
             - uses: actions/checkout@v3
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: ${{ matrix.php }}
+                php-version: "7.1"
             - name: Install Dependencies
               uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer update --prefer-lowest
-            - if: ${{ matrix.php == '5.6' }}
-              name: Run PHPUnit Patches
-              run: sh .github/apply-phpunit-patches.sh
             - name: Run Script
               run: vendor/bin/phpunit
     guzzle6:
         runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                php: [ "7.2" ]
-        name: PHP ${{ matrix.php }} Unit Test Guzzle 6
+        name: Test Guzzle 6
         steps:
             - uses: actions/checkout@v3
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: ${{ matrix.php }}
+                php-version: "7.2"
             - name: Install Dependencies
               uses: nick-invision/retry@v2
               with:
@@ -79,7 +67,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: "7.4"
+                php-version: "8.0"
             - name: Install Dependencies
               uses: nick-invision/retry@v2
               with:
