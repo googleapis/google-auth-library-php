@@ -103,7 +103,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
 
     /**
      * @param array<mixed> $keys
-     * @return array<CacheItemInterface>
+     * @return iterable<CacheItemInterface>
      */
     public function getItems(array $keys = []): iterable
     {
