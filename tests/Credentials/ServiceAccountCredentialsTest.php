@@ -661,10 +661,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearer_token = current($authorization);
-        $this->assertInternalType('string', $bearer_token);
+        $this->assertTrue(is_string($bearer_token));
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
 
         // Ensure scopes are signed inside
@@ -672,7 +672,7 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $bearer_token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertTrue(is_array($json));
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], $scope);
     }
@@ -700,10 +700,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearer_token = current($authorization);
-        $this->assertInternalType('string', $bearer_token);
+        $this->assertTrue(is_string($bearer_token));
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
 
         // Ensure scopes are signed inside
@@ -711,13 +711,13 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $bearer_token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertTrue(is_array($json));
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], implode(' ', $scope));
 
         // Test last received token
         $cachedToken = $sa->getLastReceivedToken();
-        $this->assertInternalType('array', $cachedToken);
+        $this->assertTrue(is_array($cachedToken));
         $this->assertArrayHasKey('access_token', $cachedToken);
         $this->assertEquals($token, $cachedToken['access_token']);
     }
@@ -735,7 +735,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $access_token = $sa->fetchAuthToken();
-        $this->assertInternalType('array', $access_token);
+        $this->assertTrue(is_array($access_token));
         $this->assertArrayHasKey('access_token', $access_token);
         $token = $access_token['access_token'];
 
@@ -743,7 +743,7 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertTrue(is_array($json));
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], $scope);
     }
@@ -761,7 +761,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $access_token = $sa->fetchAuthToken();
-        $this->assertInternalType('array', $access_token);
+        $this->assertTrue(is_array($access_token));
         $this->assertArrayHasKey('access_token', $access_token);
         $token = $access_token['access_token'];
 
@@ -769,13 +769,13 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertTrue(is_array($json));
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], implode(' ', $scope));
 
         // Test last received token
         $cachedToken = $sa->getLastReceivedToken();
-        $this->assertInternalType('array', $cachedToken);
+        $this->assertTrue(is_array($cachedToken));
         $this->assertArrayHasKey('access_token', $cachedToken);
         $this->assertEquals($token, $cachedToken['access_token']);
     }

@@ -103,8 +103,8 @@ class CredentialsLoaderTest extends TestCase
         }
         $creds = $clientCertSource();
         $this->assertTrue(is_string($creds));
-        $this->assertContains('-----BEGIN CERTIFICATE-----', $creds);
-        $this->assertContains('-----BEGIN PRIVATE KEY-----', $creds);
+        $this->assertStringContainsString('-----BEGIN CERTIFICATE-----', $creds);
+        $this->assertStringContainsString('-----BEGIN PRIVATE KEY-----', $creds);
     }
 
     /**

@@ -41,4 +41,13 @@ abstract class BaseTest extends TestCase
     {
         return preg_replace('|[^a-zA-Z0-9_\.! ]|', '', $key);
     }
+
+    protected function getCacheItemClass()
+    {
+        if (\PHP_VERSION_ID >= 80000) {
+            return 'Google\Auth\Cache\TypedItem';
+        }
+
+        return 'Google\Auth\Cache\Item';
+    }
 }

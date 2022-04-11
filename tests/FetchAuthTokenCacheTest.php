@@ -157,9 +157,11 @@ class FetchAuthTokenCacheTest extends BaseTest
             ->shouldBeCalled()
             ->willReturn($value);
         $this->mockCacheItem->set($value)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(1500)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->save($this->mockCacheItem)
             ->shouldBeCalledTimes(1);
         $this->mockFetcher->updateMetadata(Argument::type('array'), null, null)
@@ -299,9 +301,11 @@ class FetchAuthTokenCacheTest extends BaseTest
             ->shouldBeCalledTimes(1)
             ->willReturn($cachedValue);
         $this->mockCacheItem->set($newToken)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(1500)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($cacheKey)
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());
@@ -368,9 +372,10 @@ class FetchAuthTokenCacheTest extends BaseTest
             ->willReturn(false);
         $this->mockCacheItem->set($cachedValue)
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter($lifetime)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($prefix . $cacheKey)
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());
