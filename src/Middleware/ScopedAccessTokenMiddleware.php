@@ -40,16 +40,6 @@ class ScopedAccessTokenMiddleware
     const DEFAULT_CACHE_LIFETIME = 1500;
 
     /**
-     * @var CacheItemPoolInterface
-     */
-    private $cache;
-
-    /**
-     * @var array<mixed> configuration
-     */
-    private $cacheConfig;
-
-    /**
      * @var callable
      */
     private $tokenFunc;
