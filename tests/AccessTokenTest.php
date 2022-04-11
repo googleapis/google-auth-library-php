@@ -24,6 +24,7 @@ use Prophecy\Argument;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
 use SimpleJWT\JWT as SimpleJWT;
+use UnexpectedValueException;
 
 /**
  * @group access-token
@@ -220,6 +221,11 @@ class AccessTokenTest extends TestCase
                 null,
                 AccessToken::IAP_CERT_URL,
                 'baz'
+            ], [
+                $this->payload,
+                null,
+                'foo',
+                new UnexpectedValueException('Audience does not match'),
             ]
         ];
     }
