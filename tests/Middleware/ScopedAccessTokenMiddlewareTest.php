@@ -140,9 +140,10 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
             ->willReturn(false);
         $this->mockCacheItem->set($token)
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(Argument::any())
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($this->getValidKeyName(self::TEST_SCOPE))
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());
@@ -178,9 +179,10 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
             ->willReturn(false);
         $this->mockCacheItem->set($token)
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter($lifetime)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($prefix . $this->getValidKeyName(self::TEST_SCOPE))
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());

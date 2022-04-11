@@ -128,9 +128,11 @@ class CacheTraitTest extends TestCase
     {
         $value = '1234';
         $this->mockCacheItem->set($value)
-            ->shouldBeCalled();
+            ->shouldBeCalled()
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(Argument::any())
-            ->shouldBeCalled();
+            ->shouldBeCalled()
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem('key')
             ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))

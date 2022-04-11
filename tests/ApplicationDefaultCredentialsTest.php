@@ -140,7 +140,7 @@ class ADCDefaultScopeTest extends TestCase
 
         // used default scope
         $tokenUri = $uriProperty->getValue($creds);
-        $this->assertContains('a+default+scope', $tokenUri);
+        $this->assertStringContainsString('a+default+scope', $tokenUri);
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             'a+user+scope', // $scope
@@ -156,7 +156,7 @@ class ADCDefaultScopeTest extends TestCase
 
         // did not use default scope
         $tokenUri = $uriProperty->getValue($creds);
-        $this->assertContains('a+user+scope', $tokenUri);
+        $this->assertStringContainsString('a+user+scope', $tokenUri);
     }
 
     /** @runInSeparateProcess */
@@ -396,9 +396,11 @@ class ADCGetMiddlewareTest extends TestCase
         $mockCacheItem->isHit()
             ->willReturn(false);
         $mockCacheItem->set(true)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($mockCacheItem->reveal());
         $mockCacheItem->expiresAfter(1500)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($mockCacheItem->reveal());
 
         $mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
         $mockCache->getItem(GCECache::GCE_CACHE_KEY)
@@ -433,9 +435,11 @@ class ADCGetMiddlewareTest extends TestCase
         $mockCacheItem->isHit()
             ->willReturn(false);
         $mockCacheItem->set(true)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($mockCacheItem->reveal());
         $mockCacheItem->expiresAfter($lifetime)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($mockCacheItem->reveal());
 
         $mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
         $mockCache->getItem($prefix . GCECache::GCE_CACHE_KEY)

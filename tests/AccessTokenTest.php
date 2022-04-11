@@ -289,9 +289,11 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn(null);
         $item->set($certsData)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($item->reveal());
         $item->expiresAt(Argument::type('\DateTime'))
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($item->reveal());
 
         $this->cache->getItem('google_auth_certs_cache|' . sha1($certsLocation))
             ->shouldBeCalledTimes(1)
@@ -411,9 +413,11 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn(null);
         $item->set($certsData)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($item->reveal());
         $item->expiresAt(Argument::type('\DateTime'))
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($item->reveal());
 
         $this->cache->getItem('google_auth_certs_cache|federated_signon_certs_v3')
             ->shouldBeCalledTimes(1)

@@ -86,9 +86,11 @@ class GCECacheTest extends BaseTest
             ->shouldBeCalledTimes(1)
             ->willReturn(false);
         $this->mockCacheItem->set(true)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(1500)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem(GCECache::GCE_CACHE_KEY)
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());
@@ -139,9 +141,11 @@ class GCECacheTest extends BaseTest
         $this->mockCacheItem->isHit()
             ->willReturn(false);
         $this->mockCacheItem->set(true)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter($lifetime)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($prefix . GCECache::GCE_CACHE_KEY)
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());
