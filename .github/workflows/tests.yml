@@ -29,7 +29,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php: [ "7.1", "8.1" ]
+                php: [ "7.1", "7.4" ]
         name: PHP ${{matrix.php }} Unit Test Prefer Lowest
         steps:
             - uses: actions/checkout@v3
@@ -47,16 +47,13 @@ jobs:
               run: vendor/bin/phpunit
     guzzle6:
         runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                php: [ "7.2" ]
-        name: PHP ${{ matrix.php }} Unit Test Guzzle 6
+        name: Test Guzzle 6
         steps:
             - uses: actions/checkout@v3
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: ${{ matrix.php }}
+                php-version: "7.2"
             - name: Install Dependencies
               uses: nick-invision/retry@v2
               with:
