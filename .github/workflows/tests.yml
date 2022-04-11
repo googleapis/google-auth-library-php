@@ -29,7 +29,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php: [ "7.1", "7.2" ]
+                php: [ "7.1", "8.1" ]
         name: PHP ${{matrix.php }} Unit Test Prefer Lowest
         steps:
             - uses: actions/checkout@v3
