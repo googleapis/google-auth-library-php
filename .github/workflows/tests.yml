@@ -91,5 +91,6 @@ jobs:
       - name: Run Script
         run: |
           composer install
-          composer global require phpstan/phpstan
+          # NOTE: PHPStan 1.15.0 throws a child process error on Cache/Item.php, so we must use 1.14.0 for now.
+          composer global require phpstan/phpstan:~1.14.0
           ~/.composer/vendor/bin/phpstan analyse
