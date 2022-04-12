@@ -1451,7 +1451,9 @@ class OAuth2 implements FetchAuthTokenInterface
     {
         $keys = $this->getFirebaseJwtKeys($publicKey, $allowedAlgs);
 
-        // Default exception if none are caught
+        // Default exception if none are caught. We are using the same exception
+        // class and message from firebase/php-jwt to preserve backwards
+        // compatibility.
         $e = new \InvalidArgumentException('Key may not be empty');
         foreach ($keys as $key) {
             try {
