@@ -944,6 +944,57 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $o->verifyIdToken($this->publicKey, ['RS256']);
     }
 
+    public function testFailsWithStringPublicKeyAndAllowedAlgsGreaterThanOne()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('To have multiple allowed algorithms');
+
+        $testConfig = $this->verifyIdTokenMinimal;
+        $not_a_jwt = 'not a jot';
+        $o = new OAuth2($testConfig);
+        $o->setIdToken($not_a_jwt);
+        $o->verifyIdToken($this->publicKey, ['RS256', 'ES256']);
+    }
+
+    public function testFailsWithStringPublicKeyAndNoAllowedAlgs()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('When allowed algorithms is empty');
+
+        $testConfig = $this->verifyIdTokenMinimal;
+        $not_a_jwt = 'not a jot';
+        $o = new OAuth2($testConfig);
+        $o->setIdToken($not_a_jwt);
+        $o->verifyIdToken($this->publicKey, []);
+    }
+
+    public function testFailsWithStringInPublicKeyArrayAndNoAllowedAlgs()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('When allowed algorithms is empty');
+
+        $testConfig = $this->verifyIdTokenMinimal;
+        $not_a_jwt = 'not a jot';
+        $o = new OAuth2($testConfig);
+        $o->setIdToken($not_a_jwt);
+        $o->verifyIdToken([
+            new Key($this->publicKey, 'RS256'),
+            $this->publicKey,
+        ], []);
+    }
+
+    public function testFailsWithInalidAllowedAlgs()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('allowed algorithms must be a string or array');
+
+        $testConfig = $this->verifyIdTokenMinimal;
+        $not_a_jwt = 'not a jot';
+        $o = new OAuth2($testConfig);
+        $o->setIdToken($not_a_jwt);
+        $o->verifyIdToken($this->publicKey, 123);
+    }
+
     public function testShouldReturnAValidIdToken()
     {
         $testConfig = $this->verifyIdTokenMinimal;

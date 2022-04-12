@@ -1464,17 +1464,35 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
-     * @param string|string[] $publicKey
-     * @param string|string[] allowedAlgs
-     * @return \Firebase\JWT\Keys[]
+     * @param Key|Key[]|string|string[] $publicKey
+     * @param string|string[] $allowedAlgs
+     * @return Key[]
      */
     private function getFirebaseJwtKeys($publicKey, $allowedAlgs)
     {
-        // If $allowedAlgs is empty, assume $publicKey is Key or Key[].
-        if (empty($allowedAlgs)) {
-            return (array) $publicKey;
+        // If $publicKey is instance of Key, return it
+        if ($publicKey instanceof Key) {
+            return [$publicKey];
         }
 
+        // If $allowedAlgs is empty, $publicKey must be Key or Key[].
+        if (empty($allowedAlgs)) {
+            $pubKeys = [];
+            foreach ((array) $publicKey as $kid => $pubKey) {
+                if (!$pubKey instanceof Key) {
+                    throw new \InvalidArgumentException(sprintf(
+                        'When allowed algorithms is empty, the public key must'
+                        . 'be an instance of %s or an array of %s objects',
+                        Key::class,
+                        Key::class
+                    ));
+                }
+                $pubKeys[$kid] = $pubKey;
+            }
+            return $pubKeys;
+        }
+
+        $allowedAlg = null;
         if (is_string($allowedAlgs)) {
             $allowedAlg = $allowedAlg;
         } elseif (is_array($allowedAlgs)) {
@@ -1486,14 +1504,18 @@ class OAuth2 implements FetchAuthTokenInterface
             }
             $allowedAlg = array_pop($allowedAlgs);
         } else {
-            throw new \InvalidArgumentException('$allowedAlgs must be a string or array.');
+            throw new \InvalidArgumentException('allowed algorithms must be a string or array.');
         }
 
         if (is_array($publicKey)) {
             // When publicKey is greater than 1, create keys with the single alg.
             $keys = [];
             foreach ($publicKey as $kid => $pubkey) {
-                $keys[$kid] = new Key($pubkey, $allowedAlg);
+                if ($pubkey instanceof Key) {
+                    $keys[$kid] = $pubkey;
+                } else {
+                    $keys[$kid] = new Key($pubkey, $allowedAlg);
+                }
             }
             return $keys;
         }
