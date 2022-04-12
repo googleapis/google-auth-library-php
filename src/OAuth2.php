@@ -1443,8 +1443,8 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * @param string $idToken
-     * @param Key|Key[]|string|array<string> $publicKey
-     * @param string|array<string> $allowedAlgs
+     * @param Key|Key[]|string|string[] $publicKey
+     * @param string|string[] $allowedAlgs
      * @return object
      */
     private function jwtDecode($idToken, $publicKey, $allowedAlgs)
@@ -1464,7 +1464,9 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
-     * @return Keys[]
+     * @param string|string[] $publicKey
+     * @param string|string[] allowedAlgs
+     * @return \Firebase\JWT\Keys[]
      */
     private function getFirebaseJwtKeys($publicKey, $allowedAlgs)
     {
