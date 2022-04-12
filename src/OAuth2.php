@@ -1378,7 +1378,7 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * @param string $idToken
-     * @param Key|Key[]|string|array|null $publicKey
+     * @param Key|Key[]|string|array $publicKey
      * @param string|array $allowedAlg
      * @return object
      */
