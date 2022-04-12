@@ -60,6 +60,7 @@
                                             <option value="../../../v1.17.0/index.html" data-version="v1.17.0">v1.17.0</option>
                                             <option value="../../../v1.18.0/index.html" data-version="v1.18.0">v1.18.0</option>
                                             <option value="../../../v1.19.0/index.html" data-version="v1.19.0">v1.19.0</option>
+                                            <option value="../../../v1.20.0/index.html" data-version="v1.20.0">v1.20.0</option>
                                             <option value="../../../main/index.html" data-version="main">main branch</option>
                                     </select>
             </form>
@@ -194,7 +195,7 @@
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    array|bool
+                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>|false
                 </div>
                 <div class="col-md-8 type">
                     <a href="#method_verify">verify</a>(string $token, array $options = [])
@@ -207,7 +208,7 @@
                     bool
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method_revoke">revoke</a>(string|array $token, array $options = [])
+                    <a href="#method_revoke">revoke</a>(string|<abbr title="Google\Auth\array<mixed>">array<mixed></abbr> $token, array $options = [])
         
                                             <p>Revoke an OAuth2 access token or refresh token. This method will revoke the current access
 token, if a token isn't provided.</p>                </div>
@@ -275,8 +276,8 @@ token, if a token isn't provided.</p>                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_verify">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/AccessToken.php#L106">line 106</a></div>
-        <code>                    array|bool
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/AccessToken.php#L108">line 108</a></div>
+        <code>                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>|false
     <strong>verify</strong>(string $token, array $options = [])
         </code>
     </h3>
@@ -300,39 +301,21 @@ accepted.  By default, the id token must have been issued to this OAuth2 client.
                     <tr>
                 <td>array</td>
                 <td>$options</td>
-                <td>[optional] Configuration options.</td>
-            </tr>
-                    <tr>
-                <td>string</td>
-                <td>$options.audience</td>
-                <td>The indended recipient of the token.</td>
-            </tr>
-                    <tr>
-                <td>string</td>
-                <td>$options.issuer</td>
-                <td>The intended issuer of the token.</td>
-            </tr>
-                    <tr>
-                <td>string</td>
-                <td>$options.cacheKey</td>
-                <td>The cache key of the cached certs. Defaults to
+                <td>[optional] {
+    Configuration options.
+    @type string $audience The indended recipient of the token.
+    @type string $issuer The intended issuer of the token.
+    @type string $cacheKey The cache key of the cached certs. Defaults to
        the sha1 of $certsLocation if provided, otherwise is set to
-       "federated_signon_certs_v3".</td>
-            </tr>
-                    <tr>
-                <td>string</td>
-                <td>$options.certsLocation</td>
-                <td>The location (remote or local) from which
+       "federated_signon_certs_v3".
+    @type string $certsLocation The location (remote or local) from which
        to retrieve certificates, if not cached. This value should only be
        provided in limited circumstances in which you are sure of the
-       behavior.</td>
-            </tr>
-                    <tr>
-                <td>bool</td>
-                <td>$options.throwException</td>
-                <td>Whether the function should throw an
+       behavior.
+    @type bool $throwException Whether the function should throw an
        exception if the verification fails. This is useful for
-       determining the reason verification failed.</td>
+       determining the reason verification failed.
+}</td>
             </tr>
             </table>
 
@@ -341,7 +324,7 @@ accepted.  By default, the id token must have been issued to this OAuth2 client.
 
                     <table class="table table-condensed">
         <tr>
-            <td>array|bool</td>
+            <td><abbr title="Google\Auth\array<mixed>">array<mixed></abbr>|false</td>
             <td>the token payload, if successful, or false if not.</td>
         </tr>
     </table>
@@ -385,7 +368,7 @@ accepted.  By default, the id token must have been issued to this OAuth2 client.
                     <h3 id="method_revoke">
         <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/AccessToken.php#L293">line 293</a></div>
         <code>                    bool
-    <strong>revoke</strong>(string|array $token, array $options = [])
+    <strong>revoke</strong>(string|<abbr title="Google\Auth\array<mixed>">array<mixed></abbr> $token, array $options = [])
         </code>
     </h3>
     <div class="details">
@@ -400,7 +383,7 @@ token, if a token isn't provided.</p>                                           
 
                     <table class="table table-condensed">
                     <tr>
-                <td>string|array</td>
+                <td>string|<abbr title="Google\Auth\array<mixed>">array<mixed></abbr></td>
                 <td>$token</td>
                 <td>The token (access token or a refresh token) that should be revoked.</td>
             </tr>
@@ -429,7 +412,7 @@ token, if a token isn't provided.</p>                                           
             </div>
                     <div class="method-item">
                     <h3 id="method_callJwtStatic">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/AccessToken.php#L445">line 445</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/AccessToken.php#L453">line 453</a></div>
         <code>            protected        mixed
     <strong>callJwtStatic</strong>(string $method, array $args = [])
         </code>
@@ -474,7 +457,7 @@ token, if a token isn't provided.</p>                                           
             </div>
                     <div class="method-item">
                     <h3 id="method_callSimpleJwtDecode">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/AccessToken.php#L457">line 457</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/AccessToken.php#L464">line 464</a></div>
         <code>            protected        mixed
     <strong>callSimpleJwtDecode</strong>(array $args = [])
         </code>

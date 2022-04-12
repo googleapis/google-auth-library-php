@@ -60,6 +60,7 @@
                                             <option value="../../../../v1.17.0/index.html" data-version="v1.17.0">v1.17.0</option>
                                             <option value="../../../../v1.18.0/index.html" data-version="v1.18.0">v1.18.0</option>
                                             <option value="../../../../v1.19.0/index.html" data-version="v1.19.0">v1.19.0</option>
+                                            <option value="../../../../v1.20.0/index.html" data-version="v1.20.0">v1.20.0</option>
                                             <option value="../../../../main/index.html" data-version="main">main branch</option>
                                     </select>
             </form>
@@ -172,7 +173,7 @@ used to preserve the access token for a given lifetime.</p>
                     
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method___construct">__construct</a>(callable $tokenFunc, array|string $scopes, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
+                    <a href="#method___construct">__construct</a>(callable $tokenFunc, <abbr title="Google\Auth\Middleware\array<string>">array<string></abbr>|string $scopes, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
         
                                             <p>Creates a new ScopedAccessTokenMiddleware.</p>                </div>
                 <div class="col-md-2"></div>
@@ -195,9 +196,9 @@ used to preserve the access token for a given lifetime.</p>
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Middleware/ScopedAccessTokenMiddleware.php#L70">line 70</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Middleware/ScopedAccessTokenMiddleware.php#L60">line 60</a></div>
         <code>                    
-    <strong>__construct</strong>(callable $tokenFunc, array|string $scopes, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
+    <strong>__construct</strong>(callable $tokenFunc, <abbr title="Google\Auth\Middleware\array<string>">array<string></abbr>|string $scopes, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
         </code>
     </h3>
     <div class="details">
@@ -216,7 +217,7 @@ used to preserve the access token for a given lifetime.</p>
                 <td>a token generator function</td>
             </tr>
                     <tr>
-                <td>array|string</td>
+                <td><abbr title="Google\Auth\Middleware\array<string>">array<string></abbr>|string</td>
                 <td>$scopes</td>
                 <td>the token authentication scopes</td>
             </tr>
@@ -241,7 +242,7 @@ used to preserve the access token for a given lifetime.</p>
             </div>
                     <div class="method-item">
                     <h3 id="method___invoke">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Middleware/ScopedAccessTokenMiddleware.php#L125">line 125</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Middleware/ScopedAccessTokenMiddleware.php#L115">line 115</a></div>
         <code>                    <a target="_blank" href="http://php.net/Closure">Closure</a>
     <strong>__invoke</strong>(callable $handler)
         </code>
