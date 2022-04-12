@@ -38,18 +38,17 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
     /**
      * {@inheritdoc}
      *
-     * @return CacheItemInterface
-     *   The corresponding Cache Item.
+     * @return CacheItemInterface The corresponding Cache Item.
      */
     public function getItem($key): CacheItemInterface
     {
-        return current($this->getItems([$key]));
+        return current($this->getItems([$key]));  // @phpstan-ignore-line
     }
 
     /**
      * {@inheritdoc}
      *
-     * @return iterable
+     * @return iterable<CacheItemInterface>
      *   A traversable collection of Cache Items keyed by the cache keys of
      *   each item. A Cache item will be returned for each key, even if that
      *   key is not found. However, if no keys are specified then an empty
