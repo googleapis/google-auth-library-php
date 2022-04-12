@@ -1379,7 +1379,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * @param string $idToken
      * @param Key|Key[]|string|array $publicKey
-     * @param string|array $allowedAlg
+     * @param string|array $allowedAlgs
      * @return object
      */
     private function jwtDecode($idToken, $publicKey, $allowedAlgs)
