@@ -1479,7 +1479,7 @@ class OAuth2 implements FetchAuthTokenInterface
 
         // If $allowedAlgs is empty, $publicKey must be Key or Key[].
         if (empty($allowedAlgs)) {
-            $pubKeys = [];
+            $keys = [];
             foreach ((array) $publicKey as $kid => $pubKey) {
                 if (!$pubKey instanceof Key) {
                     throw new \InvalidArgumentException(sprintf(
@@ -1489,9 +1489,9 @@ class OAuth2 implements FetchAuthTokenInterface
                         Key::class
                     ));
                 }
-                $pubKeys[$kid] = $pubKey;
+                $keys[$kid] = $pubKey;
             }
-            return $pubKeys;
+            return $keys;
         }
 
         $allowedAlg = null;
@@ -1512,11 +1512,11 @@ class OAuth2 implements FetchAuthTokenInterface
         if (is_array($publicKey)) {
             // When publicKey is greater than 1, create keys with the single alg.
             $keys = [];
-            foreach ($publicKey as $kid => $pubkey) {
-                if ($pubkey instanceof Key) {
-                    $keys[$kid] = $pubkey;
+            foreach ($publicKey as $kid => $pubKey) {
+                if ($pubKey instanceof Key) {
+                    $keys[$kid] = $pubKey;
                 } else {
-                    $keys[$kid] = new Key($pubkey, $allowedAlg);
+                    $keys[$kid] = new Key($pubKey, $allowedAlg);
                 }
             }
             return $keys;
