@@ -983,7 +983,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
         ], []);
     }
 
-    public function testFailsWithInalidAllowedAlgs()
+    public function testFailsWithInvalidTypeForAllowedAlgs()
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('allowed algorithms must be a string or array');
