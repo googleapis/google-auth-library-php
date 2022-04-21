@@ -70,7 +70,7 @@ abstract class CredentialsLoader implements
      */
     public static function fromEnv()
     {
-        $path = getenv(self::ENV_VAR);
+        $path = getenv(self::ENV_VAR) ?: config('app.google_application_credentials');
         if (empty($path)) {
             return null;
         }
