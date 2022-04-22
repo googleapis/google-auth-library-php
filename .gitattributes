@@ -3,7 +3,7 @@
 .gitattributes export-ignore
 .github export-ignore
 .gitignore export-ignore
-phpcs-ruleset.xml export-ignore
+phpstan.neon.dist export-ignore
 phpunit.xml.dist export-ignore
 .php-cs-fixer.dist.php export-ignore
 CHANGELOG.md export-ignore
