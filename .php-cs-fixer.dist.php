@@ -3,6 +3,7 @@
 return (new PhpCsFixer\Config())
     ->setRules([
         '@PSR2' => true,
+        'array_syntax' => ['syntax' => 'short'],
         'concat_space' => ['spacing' => 'one'],
         'no_unused_imports' => true,
         'ordered_imports' => true,

@@ -1009,7 +1009,7 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $alg = 'RS256';
         $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, $alg);
         $o->setIdToken($jwtIdToken);
-        $roundTrip = $o->verifyIdToken($this->publicKey, array($alg));
+        $roundTrip = $o->verifyIdToken($this->publicKey, [$alg]);
         $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
     }
 }

@@ -72,7 +72,7 @@ class AppIdentityCredentialsTest extends TestCase
     public function testFetchAuthTokenShouldBeEmptyIfNotOnAppEngine()
     {
         $g = new AppIdentityCredentials();
-        $this->assertEquals(array(), $g->fetchAuthToken());
+        $this->assertEquals([], $g->fetchAuthToken());
     }
 
     /**
