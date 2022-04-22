@@ -305,7 +305,7 @@ class SACFetchAuthTokenTest extends TestCase
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
         $access_token = 'accessToken123';
-        $responseText = json_encode(array('access_token' => $access_token));
+        $responseText = json_encode(['access_token' => $access_token]);
         $httpHandler = getHandler([
             buildResponse(200, [], Utils::streamFor($responseText)),
         ]);
@@ -318,7 +318,7 @@ class SACFetchAuthTokenTest extends TestCase
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = null,
             $httpHandler
         );
@@ -328,7 +328,7 @@ class SACFetchAuthTokenTest extends TestCase
         );
         $this->assertEquals(
             $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
-            array('Bearer ' . $access_token)
+            ['Bearer ' . $access_token]
         );
     }
 
@@ -519,7 +519,7 @@ class SACJwtAccessTest extends TestCase
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = null
         );
         $this->assertArrayNotHasKey(
@@ -549,7 +549,7 @@ class SACJwtAccessTest extends TestCase
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/service'
         );
         $this->assertArrayHasKey(
@@ -567,7 +567,7 @@ class SACJwtAccessTest extends TestCase
 
         $actual_metadata2 = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/anotherService'
         );
         $this->assertArrayHasKey(
@@ -621,7 +621,7 @@ class SACJwtAccessComboTest extends TestCase
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/service'
         );
         $this->assertArrayHasKey(
@@ -651,7 +651,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $actual_metadata = $sa->updateMetadata(
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/service'
         );
 
@@ -690,7 +690,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $actual_metadata = $sa->updateMetadata(
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/service'
         );
 
@@ -822,7 +822,7 @@ class SACJwtAccessComboTest extends TestCase
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = null
         );
         // no access_token is added to the metadata hash
@@ -846,7 +846,7 @@ class SACJwtAccessComboTest extends TestCase
         );
         $this->assertNotNull($sa);
         $metadata = $sa->updateMetadata(
-            array('foo' => 'bar'),
+            ['foo' => 'bar'],
             'https://example.com/service'
         );
         $this->assertArrayHasKey(

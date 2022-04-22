@@ -111,7 +111,7 @@ class GCECredentialsTest extends BaseTest
             buildResponse(500)
         ]);
         $g = new GCECredentials();
-        $this->assertEquals(array(), $g->fetchAuthToken($httpHandler));
+        $this->assertEquals([], $g->fetchAuthToken($httpHandler));
     }
 
     public function testFetchAuthTokenShouldFailIfResponseIsNotJson()
