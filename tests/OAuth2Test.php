@@ -478,7 +478,7 @@ class OAuth2JwtTest extends TestCase
             );
             return;
         }
-        $this->fail("Expected exception about problem with decode");
+        $this->fail('Expected exception about problem with decode');
     }
 
     public function testCanHS256EncodeAValidPayload()
