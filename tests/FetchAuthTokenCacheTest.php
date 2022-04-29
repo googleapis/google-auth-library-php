@@ -22,6 +22,7 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenCache;
 use Prophecy\Argument;
+use RuntimeException;
 
 class FetchAuthTokenCacheTest extends BaseTest
 {
@@ -30,7 +31,7 @@ class FetchAuthTokenCacheTest extends BaseTest
     private $mockCache;
     private $mockSigner;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->mockFetcher = $this->prophesize();
         $this->mockFetcher->willImplement('Google\Auth\FetchAuthTokenInterface');
@@ -156,9 +157,11 @@ class FetchAuthTokenCacheTest extends BaseTest
             ->shouldBeCalled()
             ->willReturn($value);
         $this->mockCacheItem->set($value)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(1500)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->save($this->mockCacheItem)
             ->shouldBeCalledTimes(1);
         $this->mockFetcher->updateMetadata(Argument::type('array'), null, null)
@@ -208,10 +211,10 @@ class FetchAuthTokenCacheTest extends BaseTest
         );
 
         $authorization = $metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearerToken = current($authorization);
-        $this->assertInternalType('string', $bearerToken);
+        $this->assertTrue(is_string($bearerToken));
         $this->assertEquals(0, strpos($bearerToken, 'Bearer '));
         $token = str_replace('Bearer ', '', $bearerToken);
 
@@ -228,12 +231,11 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertNotEquals($metadata, $metadata3);
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Credentials fetcher does not implement Google\Auth\UpdateMetadataInterface
-     */
     public function testUpdateMetadataWithInvalidFetcher()
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Credentials fetcher does not implement Google\Auth\UpdateMetadataInterface');
+
         $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
 
         // Run the test.
@@ -299,9 +301,11 @@ class FetchAuthTokenCacheTest extends BaseTest
             ->shouldBeCalledTimes(1)
             ->willReturn($cachedValue);
         $this->mockCacheItem->set($newToken)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(1500)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($cacheKey)
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());
@@ -368,9 +372,10 @@ class FetchAuthTokenCacheTest extends BaseTest
             ->willReturn(false);
         $this->mockCacheItem->set($cachedValue)
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter($lifetime)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($prefix . $cacheKey)
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());
@@ -429,12 +434,11 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals($name, $fetcher->getClientName());
     }
 
-    /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Credentials fetcher does not implement Google\Auth\SignBlobInterface
-     */
     public function testGetClientNameWithInvalidFetcher()
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Credentials fetcher does not implement Google\Auth\SignBlobInterface');
+
         $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
 
         // Run the test.
@@ -500,11 +504,10 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals($signature, $fetcher->signBlob($stringToSign, true));
     }
 
-    /**
-     * @expectedException RuntimeException
-     */
     public function testSignBlobInvalidFetcher()
     {
+        $this->expectException(RuntimeException::class);
+
         $this->mockFetcher->signBlob('test')
             ->shouldNotbeCalled();
 
@@ -536,11 +539,10 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals($projectId, $fetcher->getProjectId());
     }
 
-    /**
-     * @expectedException RuntimeException
-     */
     public function testGetProjectIdInvalidFetcher()
     {
+        $this->expectException(RuntimeException::class);
+
         $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
         $mockFetcher->getProjectId()
             ->shouldNotbeCalled();

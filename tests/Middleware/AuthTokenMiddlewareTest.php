@@ -31,10 +31,8 @@ class AuthTokenMiddlewareTest extends BaseTest
     private $mockCache;
     private $mockRequest;
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->onlyGuzzle6And7();
-
         $this->mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
         $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
@@ -91,8 +89,10 @@ class AuthTokenMiddlewareTest extends BaseTest
         $token = 'idtoken12345';
         $authResult = ['id_token' => $token];
         $this->mockFetcher->fetchAuthToken(Argument::any())
+            ->shouldBeCalledTimes(1)
             ->willReturn($authResult);
         $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
+            ->shouldBeCalledTimes(1)
             ->willReturn($this->mockRequest);
 
         $middleware = new AuthTokenMiddleware($this->mockFetcher->reveal());
@@ -220,9 +220,10 @@ class AuthTokenMiddlewareTest extends BaseTest
             ->willReturn(false);
         $this->mockCacheItem->set($cachedValue)
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter($lifetime)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($prefix . $cacheKey)
             ->shouldBeCalled()
             ->willReturn($this->mockCacheItem->reveal());
@@ -264,9 +265,11 @@ class AuthTokenMiddlewareTest extends BaseTest
         $this->mockCacheItem->isHit()
             ->willReturn(false);
         $this->mockCacheItem->set($cachedValue)
-            ->shouldBeCalled();
+            ->shouldBeCalled()
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(Argument::any())
-            ->shouldBeCalled();
+            ->shouldBeCalled()
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($prefix . $cacheKey)
             ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))

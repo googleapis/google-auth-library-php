@@ -27,7 +27,7 @@ class CacheTraitTest extends TestCase
     private $mockCacheItem;
     private $mockCache;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
@@ -121,15 +121,18 @@ class CacheTraitTest extends TestCase
         ]);
 
         $cachedValue = $implementation->gCachedValue();
+        $this->assertEquals(null, $cachedValue);
     }
 
     public function testSuccessfullySetsToCache()
     {
         $value = '1234';
         $this->mockCacheItem->set($value)
-            ->shouldBeCalled();
+            ->shouldBeCalled()
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(Argument::any())
-            ->shouldBeCalled();
+            ->shouldBeCalled()
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem('key')
             ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))
@@ -167,9 +170,6 @@ class CacheTraitTest extends TestCase
 class CacheTraitImplementation
 {
     use CacheTrait;
-
-    private $cache;
-    private $cacheConfig;
 
     public function __construct(array $config = [])
     {

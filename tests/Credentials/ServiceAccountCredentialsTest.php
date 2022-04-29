@@ -17,6 +17,9 @@
 
 namespace Google\Auth\Tests\Credentials;
 
+use DomainException;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
@@ -24,7 +27,10 @@ use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
+use InvalidArgumentException;
+use LogicException;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 // Creates a standard JSON auth object for testing.
 function createTestJson()
@@ -95,11 +101,10 @@ class SACGetCacheKeyTest extends TestCase
 
 class SACConstructorTest extends TestCase
 {
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testShouldFailIfScopeIsNotAValidType()
     {
+        $this->expectexception(InvalidArgumentException::class);
+
         $testJson = createTestJson();
         $notAnArrayOrString = new \stdClass();
         $sa = new ServiceAccountCredentials(
@@ -108,11 +113,10 @@ class SACConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testShouldFailIfJsonDoesNotHaveClientEmail()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $testJson = createTestJson();
         unset($testJson['client_email']);
         $scope = ['scope/1', 'scope/2'];
@@ -122,11 +126,10 @@ class SACConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testShouldFailIfJsonDoesNotHavePrivateKey()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $testJson = createTestJson();
         unset($testJson['private_key']);
         $scope = ['scope/1', 'scope/2'];
@@ -136,11 +139,10 @@ class SACConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testFailsToInitalizeFromANonExistentFile()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
         new ServiceAccountCredentials('scope/1', $keyFile);
     }
@@ -153,11 +155,10 @@ class SACConstructorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException LogicException
-     */
     public function testFailsToInitializeFromInvalidJsonData()
     {
+        $this->expectException(LogicException::class);
+
         $tmp = tmpfile();
         fwrite($tmp, '{');
 
@@ -174,7 +175,7 @@ class SACConstructorTest extends TestCase
 
 class SACFromEnvTest extends TestCase
 {
-    protected function tearDown()
+    protected function tearDown(): void
     {
         putenv(ServiceAccountCredentials::ENV_VAR);  // removes it from
     }
@@ -184,11 +185,9 @@ class SACFromEnvTest extends TestCase
         $this->assertNull(ServiceAccountCredentials::fromEnv());
     }
 
-    /**
-     * @expectedException DomainException
-     */
     public function testFailsIfEnvSpecifiesNonExistentFile()
     {
+        $this->expectException(DomainException::class);
         $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getCredentials('a scope');
@@ -206,12 +205,12 @@ class SACFromWellKnownFileTest extends TestCase
 {
     private $originalHome;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->originalHome = getenv('HOME');
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         if ($this->originalHome != getenv('HOME')) {
             putenv('HOME=' . $this->originalHome);
@@ -239,7 +238,7 @@ class SACFetchAuthTokenTest extends TestCase
 {
     private $privateKey;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->privateKey =
             file_get_contents(__DIR__ . '/../fixtures' . '/private.pem');
@@ -253,11 +252,10 @@ class SACFetchAuthTokenTest extends TestCase
         return $testJson;
     }
 
-    /**
-     * @expectedException GuzzleHttp\Exception\ClientException
-     */
     public function testFailsOnClientErrors()
     {
+        $this->expectException(\GuzzleHttp\Exception\ClientException::class);
+
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
@@ -270,11 +268,10 @@ class SACFetchAuthTokenTest extends TestCase
         $sa->fetchAuthToken($httpHandler);
     }
 
-    /**
-     * @expectedException GuzzleHttp\Exception\ServerException
-     */
     public function testFailsOnServerErrors()
     {
+        $this->expectException(\GuzzleHttp\Exception\ServerException::class);
+
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
@@ -308,7 +305,7 @@ class SACFetchAuthTokenTest extends TestCase
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
         $access_token = 'accessToken123';
-        $responseText = json_encode(array('access_token' => $access_token));
+        $responseText = json_encode(['access_token' => $access_token]);
         $httpHandler = getHandler([
             buildResponse(200, [], Utils::streamFor($responseText)),
         ]);
@@ -317,11 +314,11 @@ class SACFetchAuthTokenTest extends TestCase
             $testJson
         );
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertInternalType('callable', $update_metadata);
+        $this->assertTrue(is_callable($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = null,
             $httpHandler
         );
@@ -331,7 +328,7 @@ class SACFetchAuthTokenTest extends TestCase
         );
         $this->assertEquals(
             $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
-            array('Bearer ' . $access_token)
+            ['Bearer ' . $access_token]
         );
     }
 
@@ -356,12 +353,11 @@ class SACFetchAuthTokenTest extends TestCase
         $this->assertEquals(1, $timesCalled);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Scope and targetAudience cannot both be supplied
-     */
     public function testSettingBothScopeAndTargetAudienceThrowsException()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Scope and targetAudience cannot both be supplied');
+
         $testJson = $this->createTestJson();
         $sa = new ServiceAccountCredentials(
             'a-scope',
@@ -406,7 +402,7 @@ class SACJwtAccessTest extends TestCase
 {
     private $privateKey;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->privateKey =
             file_get_contents(__DIR__ . '/../fixtures' . '/private.pem');
@@ -420,11 +416,10 @@ class SACJwtAccessTest extends TestCase
         return $testJson;
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testFailsToInitalizeFromANonExistentFile()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
         new ServiceAccountJwtAccessCredentials($keyFile);
     }
@@ -437,11 +432,9 @@ class SACJwtAccessTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException LogicException
-     */
     public function testFailsToInitializeFromInvalidJsonData()
     {
+        $this->expectException(LogicException::class);
         $tmp = tmpfile();
         fwrite($tmp, '{');
 
@@ -455,11 +448,10 @@ class SACJwtAccessTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testFailsOnMissingClientEmail()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $testJson = $this->createTestJson();
         unset($testJson['client_email']);
         $sa = new ServiceAccountJwtAccessCredentials(
@@ -467,11 +459,10 @@ class SACJwtAccessTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testFailsOnMissingPrivateKey()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $testJson = $this->createTestJson();
         unset($testJson['private_key']);
         $sa = new ServiceAccountJwtAccessCredentials(
@@ -479,12 +470,11 @@ class SACJwtAccessTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException UnexpectedValueException
-     * @expectedExceptionMessage Cannot sign both audience and scope in JwtAccess
-     */
     public function testFailsWithBothAudienceAndScope()
     {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('Cannot sign both audience and scope in JwtAccess');
+
         $scope = 'scope/1';
         $audience = 'https://example.com/service';
         $testJson = $this->createTestJson();
@@ -525,11 +515,11 @@ class SACJwtAccessTest extends TestCase
         $this->assertNotNull($sa);
 
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertInternalType('callable', $update_metadata);
+        $this->assertTrue(is_callable($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = null
         );
         $this->assertArrayNotHasKey(
@@ -555,11 +545,11 @@ class SACJwtAccessTest extends TestCase
         $this->assertNotNull($sa);
 
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertInternalType('callable', $update_metadata);
+        $this->assertTrue(is_callable($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/service'
         );
         $this->assertArrayHasKey(
@@ -568,16 +558,16 @@ class SACJwtAccessTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearer_token = current($authorization);
-        $this->assertInternalType('string', $bearer_token);
+        $this->assertTrue(is_string($bearer_token));
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
         $this->assertGreaterThan(30, strlen($bearer_token));
 
         $actual_metadata2 = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/anotherService'
         );
         $this->assertArrayHasKey(
@@ -586,10 +576,10 @@ class SACJwtAccessTest extends TestCase
         );
 
         $authorization2 = $actual_metadata2[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization2);
+        $this->assertTrue(is_array($authorization2));
 
         $bearer_token2 = current($authorization2);
-        $this->assertInternalType('string', $bearer_token2);
+        $this->assertTrue(is_string($bearer_token2));
         $this->assertEquals(0, strpos($bearer_token2, 'Bearer '));
         $this->assertGreaterThan(30, strlen($bearer_token2));
         $this->assertNotEquals($bearer_token2, $bearer_token);
@@ -600,7 +590,7 @@ class SACJwtAccessComboTest extends TestCase
 {
     private $privateKey;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->privateKey =
             file_get_contents(__DIR__ . '/../fixtures' . '/private.pem');
@@ -627,11 +617,11 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertNotNull($sa);
 
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertInternalType('callable', $update_metadata);
+        $this->assertTrue(is_callable($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/service'
         );
         $this->assertArrayHasKey(
@@ -640,10 +630,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearer_token = current($authorization);
-        $this->assertInternalType('string', $bearer_token);
+        $this->assertTrue(is_string($bearer_token));
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
         $this->assertGreaterThan(30, strlen($bearer_token));
     }
@@ -661,7 +651,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $actual_metadata = $sa->updateMetadata(
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/service'
         );
 
@@ -671,10 +661,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearer_token = current($authorization);
-        $this->assertInternalType('string', $bearer_token);
+        $this->assertTrue(is_string($bearer_token));
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
 
         // Ensure scopes are signed inside
@@ -682,7 +672,7 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $bearer_token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertTrue(is_array($json));
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], $scope);
     }
@@ -700,7 +690,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $actual_metadata = $sa->updateMetadata(
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = 'https://example.com/service'
         );
 
@@ -710,10 +700,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearer_token = current($authorization);
-        $this->assertInternalType('string', $bearer_token);
+        $this->assertTrue(is_string($bearer_token));
         $this->assertEquals(0, strpos($bearer_token, 'Bearer '));
 
         // Ensure scopes are signed inside
@@ -721,13 +711,13 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $bearer_token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertTrue(is_array($json));
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], implode(' ', $scope));
 
         // Test last received token
         $cachedToken = $sa->getLastReceivedToken();
-        $this->assertInternalType('array', $cachedToken);
+        $this->assertTrue(is_array($cachedToken));
         $this->assertArrayHasKey('access_token', $cachedToken);
         $this->assertEquals($token, $cachedToken['access_token']);
     }
@@ -745,7 +735,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $access_token = $sa->fetchAuthToken();
-        $this->assertInternalType('array', $access_token);
+        $this->assertTrue(is_array($access_token));
         $this->assertArrayHasKey('access_token', $access_token);
         $token = $access_token['access_token'];
 
@@ -753,7 +743,7 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertTrue(is_array($json));
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], $scope);
     }
@@ -771,7 +761,7 @@ class SACJwtAccessComboTest extends TestCase
         $sa->useJwtAccessWithScope();
 
         $access_token = $sa->fetchAuthToken();
-        $this->assertInternalType('array', $access_token);
+        $this->assertTrue(is_array($access_token));
         $this->assertArrayHasKey('access_token', $access_token);
         $token = $access_token['access_token'];
 
@@ -779,13 +769,13 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertEquals(2, substr_count($token, '.'));
         list($header, $payload, $sig) = explode('.', $token);
         $json = json_decode(base64_decode($payload), true);
-        $this->assertInternalType('array', $json);
+        $this->assertTrue(is_array($json));
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], implode(' ', $scope));
 
         // Test last received token
         $cachedToken = $sa->getLastReceivedToken();
-        $this->assertInternalType('array', $cachedToken);
+        $this->assertTrue(is_array($cachedToken));
         $this->assertArrayHasKey('access_token', $cachedToken);
         $this->assertEquals($token, $cachedToken['access_token']);
     }
@@ -810,13 +800,7 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertArrayHasKey('authorization', $metadata);
         $token = str_replace('Bearer ', '', $metadata['authorization'][0]);
         $key = file_get_contents(__DIR__ . '/../fixtures3/key.pub');
-
-        $class = 'JWT';
-        if (class_exists('Firebase\JWT\JWT')) {
-            $class = 'Firebase\JWT\JWT';
-        }
-        $jwt = new $class();
-        $result = $jwt::decode($token, $key, ['RS256']);
+        $result = JWT::decode($token, new Key($key, 'RS256'));
 
         $this->assertEquals($authUri, $result->aud);
     }
@@ -834,16 +818,16 @@ class SACJwtAccessComboTest extends TestCase
         $this->assertNotNull($sa);
 
         $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertInternalType('callable', $update_metadata);
+        $this->assertTrue(is_callable($update_metadata));
 
         $actual_metadata = call_user_func(
             $update_metadata,
-            $metadata = array('foo' => 'bar'),
+            $metadata = ['foo' => 'bar'],
             $authUri = null
         );
         // no access_token is added to the metadata hash
         // but also, no error should be thrown
-        $this->assertInternalType('array', $actual_metadata);
+        $this->assertTrue(is_array($actual_metadata));
         $this->assertArrayNotHasKey(
             CredentialsLoader::AUTH_METADATA_KEY,
             $actual_metadata
@@ -862,7 +846,7 @@ class SACJwtAccessComboTest extends TestCase
         );
         $this->assertNotNull($sa);
         $metadata = $sa->updateMetadata(
-            array('foo' => 'bar'),
+            ['foo' => 'bar'],
             'https://example.com/service'
         );
         $this->assertArrayHasKey(
@@ -871,10 +855,10 @@ class SACJwtAccessComboTest extends TestCase
         );
 
         $authorization = $metadata[CredentialsLoader::AUTH_METADATA_KEY];
-        $this->assertInternalType('array', $authorization);
+        $this->assertTrue(is_array($authorization));
 
         $bearerToken = current($authorization);
-        $this->assertInternalType('string', $bearerToken);
+        $this->assertTrue(is_string($bearerToken));
         $this->assertEquals(0, strpos($bearerToken, 'Bearer '));
         $token = str_replace('Bearer ', '', $bearerToken);
 

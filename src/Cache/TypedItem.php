@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2022 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,49 +17,42 @@
 
 namespace Google\Auth\Cache;
 
-use DateTime;
-use DateTimeInterface;
-use DateTimeZone;
 use Psr\Cache\CacheItemInterface;
-use TypeError;
 
 /**
  * A cache item.
  */
-final class Item implements CacheItemInterface
+final class TypedItem implements CacheItemInterface
 {
-    /**
-     * @var string
-     */
-    private $key;
-
     /**
      * @var mixed
      */
-    private $value;
+    private mixed $value;
 
     /**
-     * @var DateTimeInterface|null
+     * @var \DateTimeInterface|null
      */
-    private $expiration;
+    private ?\DateTimeInterface $expiration;
 
     /**
      * @var bool
      */
-    private $isHit = false;
+    private bool $isHit = false;
 
     /**
      * @param string $key
      */
-    public function __construct($key)
-    {
+    public function __construct(
+        private string $key
+    ) {
         $this->key = $key;
+        $this->expiration = null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getKey()
+    public function getKey(): string
     {
         return $this->key;
     }
@@ -67,7 +60,7 @@ final class Item implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
-    public function get()
+    public function get(): mixed
     {
         return $this->isHit() ? $this->value : null;
     }
@@ -75,7 +68,7 @@ final class Item implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
-    public function isHit()
+    public function isHit(): bool
     {
         if (!$this->isHit) {
             return false;
@@ -91,7 +84,7 @@ final class Item implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
-    public function set($value)
+    public function set(mixed $value): static
     {
         $this->isHit = true;
         $this->value = $value;
@@ -102,7 +95,7 @@ final class Item implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
-    public function expiresAt($expiration)
+    public function expiresAt($expiration): static
     {
         if ($this->isValidExpiration($expiration)) {
             $this->expiration = $expiration;
@@ -116,13 +109,13 @@ final class Item implements CacheItemInterface
             gettype($expiration)
         );
 
-        throw new TypeError($error);
+        throw new \TypeError($error);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function expiresAfter($time)
+    public function expiresAfter($time): static
     {
         if (is_int($time)) {
             $this->expiration = $this->currentTime()->add(new \DateInterval("PT{$time}S"));
@@ -135,7 +128,7 @@ final class Item implements CacheItemInterface
                        'instance of DateInterval or of the type integer, %s given';
             $error = sprintf($message, get_class($this), gettype($time));
 
-            throw new TypeError($error);
+            throw new \TypeError($error);
         }
 
         return $this;
@@ -153,7 +146,10 @@ final class Item implements CacheItemInterface
             return true;
         }
 
-        if ($expiration instanceof DateTimeInterface) {
+        // We test for two types here due to the fact the DateTimeInterface
+        // was not introduced until PHP 5.5. Checking for the DateTime type as
+        // well allows us to support 5.4.
+        if ($expiration instanceof \DateTimeInterface) {
             return true;
         }
 
@@ -161,10 +157,10 @@ final class Item implements CacheItemInterface
     }
 
     /**
-     * @return DateTime
+     * @return \DateTime
      */
     protected function currentTime()
     {
-        return new DateTime('now', new DateTimeZone('UTC'));
+        return new \DateTime('now', new \DateTimeZone('UTC'));
     }
 }

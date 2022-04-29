@@ -19,6 +19,8 @@ namespace Google\Auth\Tests;
 
 use Google\Auth\CredentialsLoader;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use UnexpectedValueException;
 
 class CredentialsLoaderTest extends TestCase
 {
@@ -53,11 +55,12 @@ class CredentialsLoaderTest extends TestCase
 
     /**
      * @runInSeparateProcess
-     * @expectedException UnexpectedValueException
-     * @expectedExceptionMessage Invalid client cert source JSON
      */
     public function testDefaultClientCertSourceInvalidJsonThrowsException()
     {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('Invalid client cert source JSON');
+
         putenv('HOME=' . __DIR__ . '/fixtures4/invalidjson');
 
         CredentialsLoader::getDefaultClientCertSource();
@@ -65,11 +68,12 @@ class CredentialsLoaderTest extends TestCase
 
     /**
      * @runInSeparateProcess
-     * @expectedException UnexpectedValueException
-     * @expectedExceptionMessage cert source requires "cert_provider_command"
      */
     public function testDefaultClientCertSourceInvalidKeyThrowsException()
     {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('cert source requires "cert_provider_command"');
+
         putenv('HOME=' . __DIR__ . '/fixtures4/invalidkey');
 
         CredentialsLoader::getDefaultClientCertSource();
@@ -77,11 +81,12 @@ class CredentialsLoaderTest extends TestCase
 
     /**
      * @runInSeparateProcess
-     * @expectedException UnexpectedValueException
-     * @expectedExceptionMessage cert source expects "cert_provider_command" to be an array
      */
     public function testDefaultClientCertSourceInvalidValueThrowsException()
     {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('cert source expects "cert_provider_command" to be an array');
+
         putenv('HOME=' . __DIR__ . '/fixtures4/invalidvalue');
 
         CredentialsLoader::getDefaultClientCertSource();
@@ -98,17 +103,18 @@ class CredentialsLoaderTest extends TestCase
         }
         $creds = $clientCertSource();
         $this->assertTrue(is_string($creds));
-        $this->assertContains('-----BEGIN CERTIFICATE-----', $creds);
-        $this->assertContains('-----BEGIN PRIVATE KEY-----', $creds);
+        $this->assertStringContainsString('-----BEGIN CERTIFICATE-----', $creds);
+        $this->assertStringContainsString('-----BEGIN PRIVATE KEY-----', $creds);
     }
 
     /**
      * @runInSeparateProcess
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage "cert_provider_command" failed with a nonzero exit code
      */
     public function testDefaultClientCertSourceInvalidCmdThrowsException()
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('"cert_provider_command" failed with a nonzero exit code');
+
         putenv('HOME=' . __DIR__ . '/fixtures4/invalidcmd');
 
         $callback = CredentialsLoader::getDefaultClientCertSource();

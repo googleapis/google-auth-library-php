@@ -21,6 +21,7 @@ use Google\Auth\Middleware\ScopedAccessTokenMiddleware;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 use Prophecy\Argument;
 
 class ScopedAccessTokenMiddlewareTest extends BaseTest
@@ -31,20 +32,17 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
     private $mockCache;
     private $mockRequest;
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->onlyGuzzle6And7();
-
         $this->mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
         $this->mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
         $this->mockRequest = $this->prophesize('GuzzleHttp\Psr7\Request');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testRequiresScopeAsAStringOrArray()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $fakeAuthFunc = function ($unused_scopes) {
             return '1/abcdef1234567890';
         };
@@ -142,9 +140,10 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
             ->willReturn(false);
         $this->mockCacheItem->set($token)
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter(Argument::any())
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($this->getValidKeyName(self::TEST_SCOPE))
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());
@@ -180,9 +179,10 @@ class ScopedAccessTokenMiddlewareTest extends BaseTest
             ->willReturn(false);
         $this->mockCacheItem->set($token)
             ->shouldBeCalledTimes(1)
-            ->willReturn(false);
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCacheItem->expiresAfter($lifetime)
-            ->shouldBeCalledTimes(1);
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
         $this->mockCache->getItem($prefix . $this->getValidKeyName(self::TEST_SCOPE))
             ->shouldBeCalledTimes(2)
             ->willReturn($this->mockCacheItem->reveal());
