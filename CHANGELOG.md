@@ -1,3 +1,12 @@
+## 1.21.0 (04/13/2022)
+
+ * [feat]: add support for Firebase v6.0 (#391)
+
+## 1.20.0 (04/11/2022)
+
+ * [feat]: add support for psr/cache:3 (#364)
+ * Dropped Support for PHP 5.6 and 7.0
+
 ## 1.19.0 (03/24/2022)
 
  * Dropped support for: 
