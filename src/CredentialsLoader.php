@@ -212,13 +212,17 @@ abstract class CredentialsLoader implements
             return $metadata;
         }
         $result = $this->fetchAuthToken($httpHandler);
-        if (!isset($result['access_token'])) {
+        if (isset($result['access_token'])) {
+            $metadata_copy = $metadata;
+            $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['access_token']];
+            return $metadata_copy;
+        } else if (isset($result['id_token'])) {
+            $metadata_copy = $metadata;
+            $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['id_token']];
+            return $metadata_copy;
+        } else {
             return $metadata;
         }
-        $metadata_copy = $metadata;
-        $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['access_token']];
-
-        return $metadata_copy;
     }
 
     /**
