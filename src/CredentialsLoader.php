@@ -216,7 +216,7 @@ abstract class CredentialsLoader implements
             $metadata_copy = $metadata;
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['access_token']];
             return $metadata_copy;
-        } else if (isset($result['id_token'])) {
+        } elseif (isset($result['id_token'])) {
             $metadata_copy = $metadata;
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['id_token']];
             return $metadata_copy;
