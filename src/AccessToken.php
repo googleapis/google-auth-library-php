@@ -140,13 +140,12 @@ class AccessToken
         } catch (ExpiredException $e) {  // firebase/php-jwt 5+
         } catch (SignatureInvalidException $e) {  // firebase/php-jwt 5+
         } catch (InvalidTokenException $e) { // simplejwt
-        } catch (DomainException $e) { // @phpstan-ignore-line
         } catch (InvalidArgumentException $e) {
         } catch (UnexpectedValueException $e) {
         }
 
         if ($throwException) {
-            throw $e; // @phpstan-ignore-line
+            throw $e;
         }
 
         return false;
