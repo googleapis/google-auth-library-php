@@ -146,7 +146,7 @@ class AccessToken
         }
 
         if ($throwException) {
-            throw $e;
+            throw $e; // @phpstan-ignore-line
         }
 
         return false;
