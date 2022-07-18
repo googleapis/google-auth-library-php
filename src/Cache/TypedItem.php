@@ -24,7 +24,7 @@ use Psr\Cache\CacheItemInterface;
  *
  * This class will be used by MemoryCacheItemPool and SysVCacheItemPool
  * on PHP 8.0 and above. It is compatible with psr/cache 3.0 (PSR-6).
- * @see Google\Auth\Cache\Item for compatiblity with previous versions of PHP.
+ * @see Item for compatiblity with previous versions of PHP.
  */
 final class TypedItem implements CacheItemInterface
 {
