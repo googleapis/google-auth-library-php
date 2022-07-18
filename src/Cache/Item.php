@@ -25,6 +25,8 @@ use TypeError;
 
 /**
  * A cache item.
+ *
+ * This class is for compatiblility with psr/cache 1.0 and 2.0 (PSR-6).
  */
 final class Item implements CacheItemInterface
 {
