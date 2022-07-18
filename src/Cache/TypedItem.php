@@ -21,6 +21,9 @@ use Psr\Cache\CacheItemInterface;
 
 /**
  * A cache item.
+ *
+ * This class works only on PHP 8.0 and above, and is compatible with
+ * psr/cache 3.0 (PSR-6).
  */
 final class TypedItem implements CacheItemInterface
 {
