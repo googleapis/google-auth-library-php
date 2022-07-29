@@ -38,6 +38,8 @@ abstract class CredentialsLoader implements
     const MTLS_WELL_KNOWN_PATH = '.secureConnect/context_aware_metadata.json';
     const MTLS_CERT_ENV_VAR = 'GOOGLE_API_USE_CLIENT_CERTIFICATE';
 
+    private static $logger;
+
     /**
      * @param string $cause
      * @return string
@@ -212,6 +214,7 @@ abstract class CredentialsLoader implements
             return $metadata;
         }
         $result = $this->fetchAuthToken($httpHandler);
+        $this->logTokenInfo($result);
         if (!isset($result['access_token'])) {
             return $metadata;
         }
@@ -283,5 +286,56 @@ abstract class CredentialsLoader implements
             );
         }
         return $clientCertSourceJson;
+    }
+
+    protected function logTokenInfo(array $token = null)
+    {
+        if ('true' !== getenv('GOOGLE_CLOUD_DEBUG')) {
+            return;
+        }
+
+        if (isset($token['access_token'])
+            && 1 === count($token)
+            && 2 === substr_count($token['access_token'], '.')
+        ) {
+            list($headerB64, $payloadB64, $sig) = explode('.', $token['access_token']);
+            $payload = json_decode(base64_decode($payloadB64), true);
+            $token['expires_at'] = $payload['exp'];
+            $token['scope'] = $payload['scope'] ?? null;
+        } else {
+            $this->log('No Access Token');
+        }
+
+        if (isset($this->auth)) {
+            $token['issuer'] = $this->auth->getIssuer();
+            $token['scope'] = $token['scope'] ?? $this->auth->getScope();
+            $token['token_type'] = $token['token_type'] ?? $this->auth->getGrantType();
+        }
+
+        $this->log(sprintf('Token Expiry: %s', $token['expires_at'] ?? 'NOT SET'));
+        $this->log(sprintf('Token Type: %s', $token['token_type'] ?? 'NOT SET'));
+        $this->log(sprintf('Scope: %s', $token['scope'] ?? 'NOT SET'));
+        $this->log(sprintf('Service Account: %s', $token['issuer'] ?? 'NOT SET'));
+    }
+
+    protected function log($line)
+    {
+        if (is_null(self::$logger)) {
+            self::$logger = new BasicLogger();
+        }
+        self::$logger->debug($line);
+    }
+
+    public static function setLogger($logger)
+    {
+        self::$logger = $logger;
+    }
+}
+
+class BasicLogger
+{
+    public function debug($message, array $context = array())
+    {
+        fwrite(STDERR, rtrim($message) . "\n");
     }
 }

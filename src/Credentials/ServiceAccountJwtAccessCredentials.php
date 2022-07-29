@@ -119,6 +119,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
     ) {
         $scope = $this->auth->getScope();
         if (empty($authUri) && empty($scope)) {
+            $this->logTokenInfo([]);
             return $metadata;
         }
 
