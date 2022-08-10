@@ -132,7 +132,8 @@
     
 
             <div class="description">
-            <p>A cache item.</p>                                </div>
+            <p>A cache item.</p>            <p>This class will be used by MemoryCacheItemPool and SysVCacheItemPool
+on PHP 7.4 and below. It is compatible with psr/cache 1.0 and 2.0 (PSR-6).</p>                    </div>
     
     
     
@@ -230,7 +231,7 @@
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L54">line 54</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L58">line 58</a></div>
         <code>                    
     <strong>__construct</strong>(string $key)
         </code>
@@ -259,7 +260,7 @@
             </div>
                     <div class="method-item">
                     <h3 id="method_getKey">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L62">line 62</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L66">line 66</a></div>
         <code>                    string
     <strong>getKey</strong>()
         </code>
@@ -290,7 +291,7 @@ the higher level callers when needed.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_get">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L70">line 70</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L74">line 74</a></div>
         <code>                    mixed
     <strong>get</strong>()
         </code>
@@ -324,7 +325,7 @@ differentiate between "null value was found" and "no value was found."</p>      
             </div>
                     <div class="method-item">
                     <h3 id="method_isHit">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L78">line 78</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L82">line 82</a></div>
         <code>                    bool
     <strong>isHit</strong>()
         </code>
@@ -355,7 +356,7 @@ and calling get().</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_set">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L94">line 94</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L98">line 98</a></div>
         <code>                    <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>
     <strong>set</strong>(mixed $value)
         </code>
@@ -397,7 +398,7 @@ Library.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_expiresAt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L105">line 105</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L109">line 109</a></div>
         <code>                    <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>
     <strong>expiresAt</strong>(<a target="_blank" href="http://php.net/DateTimeInterface">DateTimeInterface</a>|null $expiration)
         </code>
@@ -440,7 +441,7 @@ Library.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_expiresAfter">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L125">line 125</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L129">line 129</a></div>
         <code>                    <abbr title="Psr\Cache\CacheItemInterface">CacheItemInterface</abbr>
     <strong>expiresAfter</strong>(int|<a target="_blank" href="http://php.net/DateInterval">DateInterval</a>|null $time)
         </code>
@@ -484,7 +485,7 @@ Library.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_currentTime">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L166">line 166</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/Cache/Item.php#L170">line 170</a></div>
         <code>            protected        <a target="_blank" href="http://php.net/DateTime">DateTime</a>
     <strong>currentTime</strong>()
         </code>
