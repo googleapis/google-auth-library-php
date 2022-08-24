@@ -36,7 +36,7 @@ class FetchAuthTokenCache implements
      * @var FetchAuthTokenInterface
      */
     private $fetcher;
-        
+
     /**
      * @var int
      */
@@ -255,7 +255,7 @@ class FetchAuthTokenCache implements
                 // (for JwtAccess and ID tokens)
                 return $cached;
             }
-            if (time() < ($cached['expires_at'] + $this->eagerRefreshThresholdSeconds) {
+            if ((time() + $this->eagerRefreshThresholdSeconds) < $cached['expires_at']) {
                 // access token is not expired
                 return $cached;
             }
