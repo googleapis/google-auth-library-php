@@ -29,6 +29,11 @@ use Psr\Cache\CacheItemInterface;
 final class TypedItem implements CacheItemInterface
 {
     /**
+     * @var string
+     */
+    private string $key;
+    
+    /**
      * @var mixed
      */
     private mixed $value;
@@ -47,7 +52,7 @@ final class TypedItem implements CacheItemInterface
      * @param string $key
      */
     public function __construct(
-        private string $key
+        string $key
     ) {
         $this->key = $key;
         $this->expiration = null;
