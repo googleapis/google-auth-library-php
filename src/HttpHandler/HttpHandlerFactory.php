@@ -16,11 +16,11 @@
  */
 namespace Google\Auth\HttpHandler;
 
+use GuzzleHttp\BodySummarizer;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
-use GuzzleHttp\BodySummarizer;
 
 class HttpHandlerFactory
 {
