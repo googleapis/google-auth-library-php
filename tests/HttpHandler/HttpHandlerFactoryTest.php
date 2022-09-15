@@ -20,6 +20,8 @@ namespace Google\Auth\Tests\HttpHandler;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Tests\BaseTest;
+use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\UriInterface;
 
 class HttpHandlerFactoryTest extends BaseTest
 {
@@ -39,5 +41,33 @@ class HttpHandlerFactoryTest extends BaseTest
         HttpClientCache::setHttpClient(null);
         $handler = HttpHandlerFactory::build();
         $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle7HttpHandler', $handler);
+    }
+
+    public function testBuildsGuzzle7HandlerWithExtendedTruncation()
+    {
+        $this->onlyGuzzle7();
+
+        $longString = str_repeat('x', 240);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage($longString);
+
+        $uri = $this->prophesize(UriInterface::class);
+        $uri->getScheme()->willReturn('foo');
+        $uri->getHost()->willReturn('foo');
+        $uri->getPort()->willReturn(123);
+        $uri->getFragment()->willReturn('');
+        $uri->withFragment('')->willReturn($uri->reveal());
+        $uri->__toString()->will(
+            function () use ($longString) {
+                throw new \Exception($longString);
+            }
+        );
+
+        $request = new Request('get', $uri->reveal());
+
+        HttpClientCache::setHttpClient(null);
+        $handler = HttpHandlerFactory::build();
+
+        $handler($request);
     }
 }
