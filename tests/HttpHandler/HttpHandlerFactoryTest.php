@@ -20,8 +20,12 @@ namespace Google\Auth\Tests\HttpHandler;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Tests\BaseTest;
-use GuzzleHttp\Psr7\Request;
-use Psr\Http\Message\UriInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use ReflectionClass;
 
 class HttpHandlerFactoryTest extends BaseTest
 {
@@ -47,27 +51,32 @@ class HttpHandlerFactoryTest extends BaseTest
     {
         $this->onlyGuzzle7();
 
-        $longString = str_repeat('x', 240);
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage($longString);
+        // Guzzle defaults to 120 characters. We expect to see our message truncated at 240
+        $defaultTruncatedLength = 240;
+        $longMessage = str_repeat('x', 2500);
+        $expectedMessage = str_repeat('x', $defaultTruncatedLength) . ' (truncated...)';
+        $this->expectException(RequestException::class);
+        $this->expectExceptionMessage($expectedMessage);
 
-        $uri = $this->prophesize(UriInterface::class);
-        $uri->getScheme()->willReturn('foo');
-        $uri->getHost()->willReturn('foo');
-        $uri->getPort()->willReturn(123);
-        $uri->getFragment()->willReturn('');
-        $uri->withFragment('')->willReturn($uri->reveal());
-        $uri->__toString()->will(
-            function () use ($longString) {
-                throw new \Exception($longString);
-            }
-        );
+        // Create a mock error response with a long message
+        $newStack = HandlerStack::create(new MockHandler([
+            new Response(500, [], $longMessage),
+        ]));
 
-        $request = new Request('get', $uri->reveal());
-
-        HttpClientCache::setHttpClient(null);
+        // Get access to the default middleware stack so we can add it to our mock handler
         $handler = HttpHandlerFactory::build();
+        $clientProp = (new ReflectionClass($handler))->getParentClass()->getProperty('client');
+        $clientProp->setAccessible(true);
 
-        $handler($request);
+        $handlerStack = $clientProp->getValue($handler)->getConfig('handler');
+        $stackProp = (new ReflectionClass($handlerStack))->getProperty('stack');
+        $stackProp->setAccessible(true);
+
+        foreach ($stackProp->getValue($handlerStack) as $idx => $middleware) {
+            $newStack->push($middleware[0], $middleware[1]);
+        }
+
+        $client = new Client(['handler' => $newStack]);
+        $client->request('GET', '/');
     }
 }

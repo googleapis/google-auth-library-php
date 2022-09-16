@@ -39,7 +39,8 @@ class HttpHandlerFactory
                 // double the # of characters before truncation by default
                 $bodySummarizer = new BodySummarizer(240);
                 $stack = HandlerStack::create();
-                $stack->push(Middleware::httpErrors($bodySummarizer), 'http_errors');
+                $stack->remove('http_errors');
+                $stack->unshift(Middleware::httpErrors($bodySummarizer), 'http_errors');
             }
             $client = new Client(['handler' => $stack]);
         }
