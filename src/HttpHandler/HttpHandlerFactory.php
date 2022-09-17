@@ -18,6 +18,10 @@ namespace Google\Auth\HttpHandler;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\MessageFormatter;
+use Monolog\Logger;
 
 class HttpHandlerFactory
 {
@@ -31,6 +35,17 @@ class HttpHandlerFactory
     public static function build(ClientInterface $client = null)
     {
         $client = $client ?: new Client();
+        $stack = HandlerStack::create();
+        $stack->push(
+            Middleware::log(
+                new Logger('Logger'),
+                new RequestResponseDebugFormatter()
+            )
+        );
+
+        $client = $client ?: new Client([
+            'handler' => $stack
+        ]);
 
         $version = null;
         if (defined('GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
