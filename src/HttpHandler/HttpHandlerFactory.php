@@ -34,7 +34,6 @@ class HttpHandlerFactory
      */
     public static function build(ClientInterface $client = null)
     {
-        $client = $client ?: new Client();
         $stack = HandlerStack::create();
         $stack->push(
             Middleware::log(
