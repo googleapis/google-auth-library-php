@@ -53,7 +53,7 @@ class HttpHandlerFactoryTest extends BaseTest
 
         // Guzzle defaults to 120 characters. We expect to see our message truncated at 240
         $defaultTruncatedLength = 240;
-        $longMessage = str_repeat('x', 2500);
+        $longMessage = str_repeat('x', $defaultTruncatedLength + 1);
         $expectedMessage = str_repeat('x', $defaultTruncatedLength) . ' (truncated...)';
         $this->expectException(RequestException::class);
         $this->expectExceptionMessage($expectedMessage);
