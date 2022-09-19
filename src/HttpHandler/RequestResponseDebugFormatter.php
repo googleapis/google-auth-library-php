@@ -39,8 +39,9 @@ class RequestResponseDebugFormatter extends MessageFormatter
     public function format(
         RequestInterface $request,
         ResponseInterface $response = null,
-        \Exception $error = null
-    ) {
+        \Exception|\Throwable $error = null
+    ): string {
+        return "hello";
         $message = sprintf('%s %s', $request->getMethod(), (string) $request->getUri());
 
         if (!is_null($response)) {
