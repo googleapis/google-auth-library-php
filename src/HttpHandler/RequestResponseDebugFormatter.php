@@ -127,7 +127,7 @@ class RequestResponseDebugFormatter extends MessageFormatter
         $safe_auth_header_length = strlen('Bearer ') + 36;
         if (isset($headers['Authorization'])) {
           $h['Authorization'] = sprintf(
-            '%s%s(len=%i)',
+            '%s%s(len=%s)',
             substr($headers['Authorization'], 0, $safe_auth_header_length),
             '*****',
             strlen($headers['Authorization']) - strlen('Bearer ')
