@@ -21,7 +21,6 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\MessageFormatter;
-use Monolog\Logger;
 
 class HttpHandlerFactory
 {
@@ -37,13 +36,13 @@ class HttpHandlerFactory
         $stack = HandlerStack::create();
         $stack->push(
             Middleware::log(
-                new Logger('Logger'),
+                new \Firehed\SimpleLogger\Stdout(),
                 new RequestResponseDebugFormatter()
             )
         );
-
         $client = $client ?: new Client([
-            'handler' => $stack
+            'handler' => $stack,
+            'headers' => ['X-Return-Encrypted-Headers' => 'request_and_response']
         ]);
 
         $version = null;

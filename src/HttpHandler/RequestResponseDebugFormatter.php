@@ -41,7 +41,6 @@ class RequestResponseDebugFormatter extends MessageFormatter
         ResponseInterface $response = null,
         \Exception|\Throwable $error = null
     ): string {
-        return "hello";
         $message = sprintf('%s %s', $request->getMethod(), (string) $request->getUri());
 
         if (!is_null($response)) {
@@ -125,13 +124,10 @@ class RequestResponseDebugFormatter extends MessageFormatter
         $h = [];
         # Truncate auth token to 36 bytes, which is identifiable but
         # does not leak key in logs:
-        $safe_auth_header_length = strlen('Bearer ') + 36;
+        $bearer_length = strlen('Bearer ');
         if (isset($headers['Authorization'])) {
-          $h['Authorization'] = sprintf(
-            '%s%s(len=%s)',
-            substr($headers['Authorization'], 0, $safe_auth_header_length),
-            '*****',
-            strlen($headers['Authorization']) - strlen('Bearer ')
+          $h['Debug-Auth-Type'] = substr(
+            $headers['Authorization'], $bearer_length, $bearer_length + 6
           );
         }
         if (isset($headers['X-Goog-User-Project'])) {
