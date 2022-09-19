@@ -130,7 +130,7 @@ class RequestResponseDebugFormatter extends MessageFormatter
             '%s%s(len=%i)',
             substr($headers['Authorization'], 0, $safe_auth_header_length),
             '*****',
-            strlen($headers['Authorization'])
+            strlen($headers['Authorization']) - strlen('Bearer ')
           );
         }
         if (isset($headers['X-Goog-User-Project'])) {
