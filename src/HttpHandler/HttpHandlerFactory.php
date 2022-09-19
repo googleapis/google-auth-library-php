@@ -42,7 +42,7 @@ class HttpHandlerFactory
         );
         $client = $client ?: new Client([
             'handler' => $stack,
-            'headers' => ['X-Return-Encrypted-Headers' => 'request_and_response']
+            'headers' => ['X-Return-Encrypted-Headers' => 'response']
         ]);
 
         $version = null;

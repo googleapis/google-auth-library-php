@@ -27,8 +27,10 @@ class RequestResponseDebugFormatter extends MessageFormatter
      * - Request method.
      * - Request URI.
      * - Response status.
-     * - Truncated Authoriztion header.
+     * - Fingerprint for auth token.
+     * - Access token type.
      * - X-Google-Project-Id header.
+     * - Debug headers on error.
      * - Error raised (if applicable).
      * 
      * @param RequestInterface Guzzle request.
@@ -69,7 +71,7 @@ class RequestResponseDebugFormatter extends MessageFormatter
             'target' => $request->getRequestTarget(),
             'method' => $request->getMethod(),
             'uri' => (string) $request->getUri(),
-            'headers' => $this->headers($request->getHeaders()),
+            'headers' => $this->headers($request->getHeaders(), false),
         ];
         return $data;
     }
@@ -88,7 +90,7 @@ class RequestResponseDebugFormatter extends MessageFormatter
 
         return [
             'status' => $response->getStatusCode(),
-            'headers' => $this->headers($response->getHeaders()),
+            'headers' => $this->headers($response->getHeaders(), $response->getStatusCode() != 200),
         ];
     }
 
@@ -116,7 +118,7 @@ class RequestResponseDebugFormatter extends MessageFormatter
      * @param  array  $headers
      * @return array
      */
-    protected function headers($headers)
+    protected function headers($headers, $is_error_resp)
     {
         $headers = array_map(function ($header) {
             return $header[0] ?? [];
@@ -127,11 +129,15 @@ class RequestResponseDebugFormatter extends MessageFormatter
         $bearer_length = strlen('Bearer ');
         if (isset($headers['Authorization'])) {
           $h['Debug-Auth-Type'] = substr(
-            $headers['Authorization'], $bearer_length, $bearer_length + 6
+            $headers['Authorization'], $bearer_length, 6
           );
+          $h['Debug-Auth-Fingerprint'] = hash('sha512', $headers['Authorization']);
         }
         if (isset($headers['X-Goog-User-Project'])) {
-          $h['X-Goog-User-Project'] = $headers['X-Goog-User-Project'];
+            $h['X-Goog-User-Project'] = $headers['X-Goog-User-Project'];
+        }
+        if (isset($headers['X-Encrypted-Debug-Headers']) && $is_error_resp) {
+            $h['X-Encrypted-Debug-Headers'] = $headers['X-Encrypted-Debug-Headers'];
         }
         return $h;
     }
