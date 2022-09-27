@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.23.0](https://github.com/googleapis/google-auth-library-php/compare/v1.22.0...v1.23.0) (2022-09-26)
+
+
+### Features
+
+* Double default truncateAt for guzzle error output ([#415](https://github.com/googleapis/google-auth-library-php/issues/415)) ([e2f6a89](https://github.com/googleapis/google-auth-library-php/commit/e2f6a89ea0edb040db917b47153d2efb04ecd9bb))
+
 ## 1.20.0 (04/11/2022)
 
  * [feat]: add support for psr/cache:3 (#364)
