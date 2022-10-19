@@ -159,6 +159,33 @@ class ADCDefaultScopeTest extends TestCase
         $this->assertStringContainsString('a+user+scope', $tokenUri);
     }
 
+    public function testImpersonatedServiceAccountCredentials()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures5');
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            null,
+            null,
+            null,
+            null,
+            null,
+            'a default scope'
+        );
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\ImpersonatedServiceAccountCredentials',
+            $creds);
+
+        $this->assertEquals('service_account_name@namespace.iam.gserviceaccount.com', $creds->getClientName());
+
+        $sourceClientProperty = (new ReflectionClass($creds))->getProperty('sourceClient');
+        $sourceClientProperty ->setAccessible(true);
+
+        // used default scope
+        $sourceClient = $sourceClientProperty ->getValue($creds);
+        $this->assertInstanceOf(
+            'Google\Auth\Credentials\UserRefreshCredentials',
+            $sourceClient);
+    }
+
     /** @runInSeparateProcess */
     public function testUserRefreshCredentials()
     {
