@@ -20,9 +20,12 @@ namespace Google\Auth\Tests\Credentials;
 use Exception;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
 use InvalidArgumentException;
 use Prophecy\Argument;
 
@@ -373,6 +376,26 @@ class GCECredentialsTest extends BaseTest
             'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/foo/token',
             $tokenUri
         );
+    }
+
+    public function testSetIsOnGceToFalseReturnsEmptyCreds()
+    {
+        $creds = new GCECredentials();
+        $creds->setIsOnGce(false);
+        $this->assertEquals([], $creds->fetchAuthToken());
+    }
+
+    public function testSetIsOnGceToTrueWhenNotOnGceThrowsException()
+    {
+        if (GCECredentials::onGCE()) {
+            $this->markTestSkipped('Must not be on GCE for this test');
+        }
+        $this->expectException(ConnectException::class);
+
+        $httpHandler = HttpHandlerFactory::build(new Client(['timeout' => 0.1]));
+        $creds = new GCECredentials();
+        $creds->setIsOnGce(true);
+        $creds->fetchAuthToken($httpHandler);
     }
 
     public function testGetAccessTokenWithServiceAccountIdentity()

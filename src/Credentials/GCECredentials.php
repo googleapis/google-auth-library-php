@@ -556,6 +556,7 @@ class GCECredentials extends CredentialsLoader implements
         // Implicitly set hasCheckedGce to true
         $this->hasCheckedOnGce = true;
 
+        // Set isOnGce
         $this->isOnGce = $isOnGce;
     }
 }
