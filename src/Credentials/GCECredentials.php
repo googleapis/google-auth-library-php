@@ -547,7 +547,7 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
-     * Set whether or not
+     * Set whether or not we've already checked the GCE environment.
      *
      * @param bool $isOnGce
      */
