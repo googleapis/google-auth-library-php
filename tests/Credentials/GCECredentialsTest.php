@@ -20,13 +20,11 @@ namespace Google\Auth\Tests\Credentials;
 use Exception;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
-use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Tests\BaseTest;
-use GuzzleHttp\Psr7;
-use GuzzleHttp\Psr7\Utils;
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use Prophecy\Argument;
 

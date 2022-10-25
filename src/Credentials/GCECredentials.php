@@ -550,6 +550,8 @@ class GCECredentials extends CredentialsLoader implements
      * Set whether or not we've already checked the GCE environment.
      *
      * @param bool $isOnGce
+     *
+     * @return void
      */
     public function setIsOnGce($isOnGce)
     {
