@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.23.1](https://github.com/googleapis/google-auth-library-php/compare/v1.23.0...v1.23.1) (2022-10-25)
+
+
+### Bug Fixes
+
+* Do not call GCECredentials::onGCE if ADC has already checked ([#422](https://github.com/googleapis/google-auth-library-php/issues/422)) ([085cc64](https://github.com/googleapis/google-auth-library-php/commit/085cc64c6ae260f917aebf2bc519b4fb6f3400f0))
+
 ## [1.23.0](https://github.com/googleapis/google-auth-library-php/compare/v1.22.0...v1.23.0) (2022-09-26)
 
 
