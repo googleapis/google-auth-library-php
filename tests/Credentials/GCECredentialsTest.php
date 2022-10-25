@@ -25,7 +25,8 @@ use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use Prophecy\Argument;
 
@@ -387,12 +388,10 @@ class GCECredentialsTest extends BaseTest
 
     public function testSetIsOnGceToTrueWhenNotOnGceThrowsException()
     {
-        if (GCECredentials::onGCE()) {
-            $this->markTestSkipped('Must not be on GCE for this test');
-        }
-        $this->expectException(ConnectException::class);
+        $this->expectException(ClientException::class);
+        $this->expectExceptionMessage('408 Request Time-out');
 
-        $httpHandler = HttpHandlerFactory::build(new Client(['timeout' => 0.1]));
+        $httpHandler = getHandler([new Response(408)]);
         $creds = new GCECredentials();
         $creds->setIsOnGce(true);
         $creds->fetchAuthToken($httpHandler);
