@@ -29,9 +29,11 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
-use phpseclib\Crypt\RSA;
-use phpseclib\Math\BigInteger;
 use Psr\Cache\CacheItemPoolInterface;
+use phpseclib\Crypt\RSA;
+use phpseclib\Math\BigInteger as BigInteger2;
+use phpseclib3\Math\BigInteger as BigInteger3;
+use phpseclib3\Crypt\PublicKeyLoader;
 use RuntimeException;
 use SimpleJWT\InvalidTokenException;
 use SimpleJWT\JWT as SimpleJWT;
@@ -246,18 +248,10 @@ class AccessToken
                     'RSA certs expects "n" and "e" to be set'
                 );
             }
-            $rsa = new RSA();
-            $rsa->loadKey([
-                'n' => new BigInteger($this->callJwtStatic('urlsafeB64Decode', [
-                    $cert['n'],
-                ]), 256),
-                'e' => new BigInteger($this->callJwtStatic('urlsafeB64Decode', [
-                    $cert['e']
-                ]), 256),
-            ]);
+            $publicKey = $this->loadPhpsecPublicKey($cert);
 
             // create an array of key IDs to certs for the JWT library
-            $keys[$cert['kid']] = new Key($rsa->getPublicKey(), 'RS256');
+            $keys[$cert['kid']] = new Key($publicKey, 'RS256');
         }
 
         $payload = $this->callJwtStatic('decode', [
@@ -398,13 +392,83 @@ class AccessToken
      */
     private function checkAndInitializePhpsec()
     {
-        // @codeCoverageIgnoreStart
-        if (!class_exists('phpseclib\Crypt\RSA')) {
-            throw new RuntimeException('Please require phpseclib/phpseclib v2 to use this utility.');
+        if (!$this->checkAndInitializePhpsec2() && !$this->checkPhpsec3()) {
+            throw new RuntimeException('Please require phpseclib/phpseclib v2 or v3 to use this utility.');
         }
-        // @codeCoverageIgnoreEnd
+    }
 
-        $this->setPhpsecConstants();
+    private function loadPhpsecPublicKey(array $cert)
+    {
+        if (class_exists(RSA::class)) {
+            return $this->loadPhpsec2PublicKey($cert);
+        }
+        return $this->loadPhpsec3PublicKey($cert);
+    }
+
+
+    private function loadPhpsec3PublicKey(array $cert)
+    {
+        $key = PublicKeyLoader::load([
+            'n' => new BigInteger3($this->callJwtStatic('urlsafeB64Decode', [
+                $cert['n'],
+            ]), 256),
+            'e' => new BigInteger3($this->callJwtStatic('urlsafeB64Decode', [
+                $cert['e']
+            ]), 256),
+        ]);
+        return $key->toString('PKCS1');
+    }
+
+    private function loadPhpsec2PublicKey(array $cert)
+    {
+        $key = new RSA();
+        $key->loadKey([
+            'n' => new BigInteger2($this->callJwtStatic('urlsafeB64Decode', [
+                $cert['n'],
+            ]), 256),
+            'e' => new BigInteger2($this->callJwtStatic('urlsafeB64Decode', [
+                $cert['e']
+            ]), 256),
+        ]);
+        return $key->getPublicKey();
+    }
+
+    /**
+     * @return bool
+     */
+    private function checkAndInitializePhpsec2()
+    {
+        if (!class_exists('phpseclib\Crypt\RSA')) {
+            return false;
+        }
+
+        /**
+         * phpseclib calls "phpinfo" by default, which requires special
+         * whitelisting in the AppEngine VM environment. This function
+         * sets constants to bypass the need for phpseclib to check phpinfo
+         *
+         * @see phpseclib/Math/BigInteger
+         * @see https://github.com/GoogleCloudPlatform/getting-started-php/issues/85
+         * @codeCoverageIgnore
+         */
+        if (filter_var(getenv('GAE_VM'), FILTER_VALIDATE_BOOLEAN)) {
+            if (!defined('MATH_BIGINTEGER_OPENSSL_ENABLED')) {
+                define('MATH_BIGINTEGER_OPENSSL_ENABLED', true);
+            }
+            if (!defined('CRYPT_RSA_MODE')) {
+                define('CRYPT_RSA_MODE', RSA::MODE_OPENSSL);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    private function checkPhpsec3()
+    {
+        return class_exists('phpseclib3\Crypt\RSA');
     }
 
     /**
@@ -417,29 +481,6 @@ class AccessToken
             throw new RuntimeException('Please require kelvinmo/simplejwt ^0.2 to use this utility.');
         }
         // @codeCoverageIgnoreEnd
-    }
-
-    /**
-     * phpseclib calls "phpinfo" by default, which requires special
-     * whitelisting in the AppEngine VM environment. This function
-     * sets constants to bypass the need for phpseclib to check phpinfo
-     *
-     * @see phpseclib/Math/BigInteger
-     * @see https://github.com/GoogleCloudPlatform/getting-started-php/issues/85
-     * @codeCoverageIgnore
-     *
-     * @return void
-     */
-    private function setPhpsecConstants()
-    {
-        if (filter_var(getenv('GAE_VM'), FILTER_VALIDATE_BOOLEAN)) {
-            if (!defined('MATH_BIGINTEGER_OPENSSL_ENABLED')) {
-                define('MATH_BIGINTEGER_OPENSSL_ENABLED', true);
-            }
-            if (!defined('CRYPT_RSA_MODE')) {
-                define('CRYPT_RSA_MODE', RSA::MODE_OPENSSL);
-            }
-        }
     }
 
     /**
