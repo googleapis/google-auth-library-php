@@ -34,7 +34,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     /**
      * @var UserRefreshCredentials
      */
-    protected $sourceClient;
+    protected $sourceCredentials;
 
     /**
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that has be created with
