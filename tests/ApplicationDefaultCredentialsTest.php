@@ -176,7 +176,7 @@ class ADCDefaultScopeTest extends TestCase
 
         $this->assertEquals('service_account_name@namespace.iam.gserviceaccount.com', $creds->getClientName());
 
-        $sourceCredentialsProperty = (new ReflectionClass($creds))->getProperty('sourceClient');
+        $sourceCredentialsProperty = (new ReflectionClass($creds))->getProperty('sourceCredentials');
         $sourceCredentialsProperty->setAccessible(true);
 
         // used default scope
