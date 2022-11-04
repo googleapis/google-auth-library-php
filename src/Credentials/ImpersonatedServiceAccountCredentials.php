@@ -67,7 +67,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
 
         $this->impersonatedServiceAccountName = $this->getImpersonatedServiceAccountNameFromUrl($jsonKey['service_account_impersonation_url']);
 
-        $this->sourceClient = new UserRefreshCredentials($scope, $jsonKey['source_credentials']);
+        $this->sourceCredentials = new UserRefreshCredentials($scope, $jsonKey['source_credentials']);
     }
 
     /**
@@ -111,7 +111,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        return $this->sourceClient->fetchAuthToken($httpHandler);
+        return $this->sourceCredentials->fetchAuthToken($httpHandler);
     }
 
     /**
@@ -119,7 +119,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getCacheKey()
     {
-        return $this->sourceClient->getCacheKey();
+        return $this->sourceCredentials->getCacheKey();
     }
 
     /**
@@ -127,6 +127,6 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getLastReceivedToken()
     {
-        return $this->sourceClient->getLastReceivedToken();
+        return $this->sourceCredentials->getLastReceivedToken();
     }
 }

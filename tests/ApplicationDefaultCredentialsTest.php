@@ -176,14 +176,14 @@ class ADCDefaultScopeTest extends TestCase
 
         $this->assertEquals('service_account_name@namespace.iam.gserviceaccount.com', $creds->getClientName());
 
-        $sourceClientProperty = (new ReflectionClass($creds))->getProperty('sourceClient');
-        $sourceClientProperty ->setAccessible(true);
+        $sourceCredentialsProperty = (new ReflectionClass($creds))->getProperty('sourceClient');
+        $sourceCredentialsProperty->setAccessible(true);
 
         // used default scope
-        $sourceClient = $sourceClientProperty ->getValue($creds);
+        $sourceCredentials = $sourceCredentialsProperty->getValue($creds);
         $this->assertInstanceOf(
             'Google\Auth\Credentials\UserRefreshCredentials',
-            $sourceClient);
+            $sourceCredentials);
     }
 
     /** @runInSeparateProcess */
