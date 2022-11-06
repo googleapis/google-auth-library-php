@@ -29,11 +29,11 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
-use Psr\Cache\CacheItemPoolInterface;
 use phpseclib\Crypt\RSA;
 use phpseclib\Math\BigInteger as BigInteger2;
-use phpseclib3\Math\BigInteger as BigInteger3;
 use phpseclib3\Crypt\PublicKeyLoader;
+use phpseclib3\Math\BigInteger as BigInteger3;
+use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
 use SimpleJWT\InvalidTokenException;
 use SimpleJWT\JWT as SimpleJWT;
@@ -248,7 +248,7 @@ class AccessToken
                     'RSA certs expects "n" and "e" to be set'
                 );
             }
-            $publicKey = $this->loadPhpsecPublicKey($cert);
+            $publicKey = $this->loadPhpsecPublicKey($cert['n'], $cert['e']);
 
             // create an array of key IDs to certs for the JWT library
             $keys[$cert['kid']] = new Key($publicKey, 'RS256');
@@ -397,46 +397,35 @@ class AccessToken
         }
     }
 
-    private function loadPhpsecPublicKey(array $cert)
+    private function loadPhpsecPublicKey(string $modulus, string $exponent): string
     {
-        if (class_exists(RSA::class)) {
-            return $this->loadPhpsec2PublicKey($cert);
+        if (class_exists(RSA::class) && class_exists(BigInteger2::class)) {
+            $key = new RSA();
+            $key->loadKey([
+                'n' => new BigInteger2($this->callJwtStatic('urlsafeB64Decode', [
+                    $modulus,
+                ]), 256),
+                'e' => new BigInteger2($this->callJwtStatic('urlsafeB64Decode', [
+                    $exponent
+                ]), 256),
+            ]);
+            return $key->getPublicKey();
         }
-        return $this->loadPhpsec3PublicKey($cert);
-    }
-
-
-    private function loadPhpsec3PublicKey(array $cert)
-    {
         $key = PublicKeyLoader::load([
             'n' => new BigInteger3($this->callJwtStatic('urlsafeB64Decode', [
-                $cert['n'],
+                $modulus,
             ]), 256),
             'e' => new BigInteger3($this->callJwtStatic('urlsafeB64Decode', [
-                $cert['e']
+                $exponent
             ]), 256),
         ]);
         return $key->toString('PKCS1');
     }
 
-    private function loadPhpsec2PublicKey(array $cert)
-    {
-        $key = new RSA();
-        $key->loadKey([
-            'n' => new BigInteger2($this->callJwtStatic('urlsafeB64Decode', [
-                $cert['n'],
-            ]), 256),
-            'e' => new BigInteger2($this->callJwtStatic('urlsafeB64Decode', [
-                $cert['e']
-            ]), 256),
-        ]);
-        return $key->getPublicKey();
-    }
-
     /**
      * @return bool
      */
-    private function checkAndInitializePhpsec2()
+    private function checkAndInitializePhpsec2(): bool
     {
         if (!class_exists('phpseclib\Crypt\RSA')) {
             return false;
@@ -466,7 +455,7 @@ class AccessToken
     /**
      * @return bool
      */
-    private function checkPhpsec3()
+    private function checkPhpsec3(): bool
     {
         return class_exists('phpseclib3\Crypt\RSA');
     }
