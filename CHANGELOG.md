@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.24.0](https://github.com/googleapis/google-auth-library-php/compare/v1.23.1...v1.24.0) (2022-11-28)
+
+
+### Features
+
+* Add ImpersonatedServiceAccountCredentials ([#421](https://github.com/googleapis/google-auth-library-php/issues/421)) ([de766e9](https://github.com/googleapis/google-auth-library-php/commit/de766e956645dd114478be918363d06fd928b558))
+
 ## [1.23.1](https://github.com/googleapis/google-auth-library-php/compare/v1.23.0...v1.23.1) (2022-10-25)
 
 
