@@ -2,6 +2,27 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.24.0](https://github.com/googleapis/google-auth-library-php/compare/v1.23.1...v1.24.0) (2022-11-28)
+
+
+### Features
+
+* Add ImpersonatedServiceAccountCredentials ([#421](https://github.com/googleapis/google-auth-library-php/issues/421)) ([de766e9](https://github.com/googleapis/google-auth-library-php/commit/de766e956645dd114478be918363d06fd928b558))
+
+## [1.23.1](https://github.com/googleapis/google-auth-library-php/compare/v1.23.0...v1.23.1) (2022-10-25)
+
+
+### Bug Fixes
+
+* Do not call GCECredentials::onGCE if ADC has already checked ([#422](https://github.com/googleapis/google-auth-library-php/issues/422)) ([085cc64](https://github.com/googleapis/google-auth-library-php/commit/085cc64c6ae260f917aebf2bc519b4fb6f3400f0))
+
+## [1.23.0](https://github.com/googleapis/google-auth-library-php/compare/v1.22.0...v1.23.0) (2022-09-26)
+
+
+### Features
+
+* Double default truncateAt for guzzle error output ([#415](https://github.com/googleapis/google-auth-library-php/issues/415)) ([e2f6a89](https://github.com/googleapis/google-auth-library-php/commit/e2f6a89ea0edb040db917b47153d2efb04ecd9bb))
+
 ## 1.20.0 (04/11/2022)
 
  * [feat]: add support for psr/cache:3 (#364)
