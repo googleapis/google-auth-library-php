@@ -93,9 +93,9 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnAppEngineFlexIsTrueWhenGaeInstanceHasAefPrefix()
     {
-        putenv('GAE_INSTANCE=aef-default-20180313t154438');
+        $_ENV['GAE_INSTANCE'] = 'aef-default-20180313t154438';
         $this->assertTrue(GCECredentials::onAppEngineFlexible());
-        putenv('GAE_INSTANCE');
+        unset($_ENV['GAE_INSTANCE']);
     }
 
     public function testGetCacheKeyShouldNotBeEmpty()

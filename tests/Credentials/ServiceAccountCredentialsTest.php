@@ -177,7 +177,7 @@ class SACFromEnvTest extends TestCase
 {
     protected function tearDown(): void
     {
-        putenv(ServiceAccountCredentials::ENV_VAR);  // removes it from
+        unset($_ENV[ServiceAccountCredentials::ENV_VAR]); // removes environment variable
     }
 
     public function testIsNullIfEnvVarIsNotSet()
@@ -189,14 +189,14 @@ class SACFromEnvTest extends TestCase
     {
         $this->expectException(DomainException::class);
         $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $_ENV[ServiceAccountCredentials::ENV_VAR] = $keyFile;
         ApplicationDefaultCredentials::getCredentials('a scope');
     }
 
     public function testSucceedIfFileExists()
     {
         $keyFile = __DIR__ . '/../fixtures' . '/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $_ENV[ServiceAccountCredentials::ENV_VAR] = $keyFile;
         $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
     }
 }
@@ -207,19 +207,19 @@ class SACFromWellKnownFileTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->originalHome = getenv('HOME');
+        $this->originalHome = array_key_exists('HOME', $_ENV) ? $_ENV['HOME'] : false;
     }
 
     protected function tearDown(): void
     {
-        if ($this->originalHome != getenv('HOME')) {
-            putenv('HOME=' . $this->originalHome);
+        if ($this->originalHome != array_key_exists('HOME', $_ENV) ? $_ENV['HOME'] : false) {
+            $_ENV['HOME'] = $this->originalHome;
         }
     }
 
     public function testIsNullIfFileDoesNotExist()
     {
-        putenv('HOME=' . __DIR__ . '/../not_exists_fixtures');
+        $_ENV['HOME'] = __DIR__ . '/../not_exists_fixtures';
         $this->assertNull(
             ServiceAccountCredentials::fromWellKnownFile()
         );
@@ -227,7 +227,7 @@ class SACFromWellKnownFileTest extends TestCase
 
     public function testSucceedIfFileIsPresent()
     {
-        putenv('HOME=' . __DIR__ . '/../fixtures');
+        $_ENV['HOME'] = __DIR__ . '/../fixtures';
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -784,7 +784,7 @@ class SACJwtAccessComboTest extends TestCase
     public function testJwtAccessFromApplicationDefault()
     {
         $keyFile = __DIR__ . '/../fixtures3/service_account_credentials.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $_ENV[ServiceAccountCredentials::ENV_VAR] = $keyFile;
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
             null, // $httpHandler

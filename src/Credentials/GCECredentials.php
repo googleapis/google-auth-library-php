@@ -297,7 +297,7 @@ class GCECredentials extends CredentialsLoader implements
      */
     public static function onAppEngineFlexible()
     {
-        return substr((string) getenv('GAE_INSTANCE'), 0, 4) === 'aef-';
+        return substr((string) array_key_exists('GAE_INSTANCE', $_ENV) ? $_ENV['GAE_INSTANCE'] : false, 0, 4) === 'aef-';
     }
 
     /**

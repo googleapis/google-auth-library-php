@@ -35,7 +35,7 @@ class CredentialsLoaderTest extends TestCase
     /** @runInSeparateProcess */
     public function testGetDefaultClientCertSource()
     {
-        putenv('HOME=' . __DIR__ . '/fixtures4/valid');
+        $_ENV['HOME'] = __DIR__ . '/fixtures4/valid';
 
         $callback = CredentialsLoader::getDefaultClientCertSource();
         $this->assertNotNull($callback);
@@ -47,7 +47,7 @@ class CredentialsLoaderTest extends TestCase
     /** @runInSeparateProcess */
     public function testNonExistantDefaultClientCertSource()
     {
-        putenv('HOME=');
+        $_ENV['HOME'] = '';
 
         $callback = CredentialsLoader::getDefaultClientCertSource();
         $this->assertNull($callback);
@@ -61,7 +61,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('Invalid client cert source JSON');
 
-        putenv('HOME=' . __DIR__ . '/fixtures4/invalidjson');
+        $_ENV['HOME'] = __DIR__ . '/fixtures4/invalidjson';
 
         CredentialsLoader::getDefaultClientCertSource();
     }
@@ -74,7 +74,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('cert source requires "cert_provider_command"');
 
-        putenv('HOME=' . __DIR__ . '/fixtures4/invalidkey');
+        $_ENV['HOME'] = __DIR__ . '/fixtures4/invalidkey';
 
         CredentialsLoader::getDefaultClientCertSource();
     }
@@ -87,7 +87,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('cert source expects "cert_provider_command" to be an array');
 
-        putenv('HOME=' . __DIR__ . '/fixtures4/invalidvalue');
+        $_ENV['HOME'] = __DIR__ . '/fixtures4/invalidvalue';
 
         CredentialsLoader::getDefaultClientCertSource();
     }
@@ -115,7 +115,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('"cert_provider_command" failed with a nonzero exit code');
 
-        putenv('HOME=' . __DIR__ . '/fixtures4/invalidcmd');
+        $_ENV['HOME'] = __DIR__ . '/fixtures4/invalidcmd';
 
         $callback = CredentialsLoader::getDefaultClientCertSource();
 
@@ -130,7 +130,7 @@ class CredentialsLoaderTest extends TestCase
      */
     public function testShouldLoadClientCertSourceInvalidValueIsFalse()
     {
-        putenv(CredentialsLoader::MTLS_CERT_ENV_VAR . '=foo');
+        $_ENV[CredentialsLoader::MTLS_CERT_ENV_VAR] = 'foo';
 
         $this->assertFalse(CredentialsLoader::shouldLoadClientCertSource());
     }
@@ -140,7 +140,7 @@ class CredentialsLoaderTest extends TestCase
      */
     public function testShouldLoadClientCertSourceDefaultValueIsFalse()
     {
-        putenv(CredentialsLoader::MTLS_CERT_ENV_VAR);
+        unset($_ENV[CredentialsLoader::MTLS_CERT_ENV_VAR]);
 
         $this->assertFalse(CredentialsLoader::shouldLoadClientCertSource());
     }
@@ -150,7 +150,7 @@ class CredentialsLoaderTest extends TestCase
      */
     public function testShouldLoadClientCertSourceIsTrue()
     {
-        putenv(CredentialsLoader::MTLS_CERT_ENV_VAR . '=true');
+        $_ENV[CredentialsLoader::MTLS_CERT_ENV_VAR] = 'true';
 
         $this->assertTrue(CredentialsLoader::shouldLoadClientCertSource());
     }

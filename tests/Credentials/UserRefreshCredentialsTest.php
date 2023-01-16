@@ -149,7 +149,7 @@ class URCFromEnvTest extends TestCase
 {
     protected function tearDown(): void
     {
-        putenv(UserRefreshCredentials::ENV_VAR);  // removes it from
+        unset($_ENV[UserRefreshCredentials::ENV_VAR]);  // removes environment variable
     }
 
     public function testIsNullIfEnvVarIsNotSet()
@@ -161,14 +161,14 @@ class URCFromEnvTest extends TestCase
     {
         $this->expectException(DomainException::class);
         $keyFile = __DIR__ . '/../fixtures/does-not-exist-private.json';
-        putenv(UserRefreshCredentials::ENV_VAR . '=' . $keyFile);
+        $_ENV[UserRefreshCredentials::ENV_VAR] = $keyFile;
         UserRefreshCredentials::fromEnv('a scope');
     }
 
     public function testSucceedIfFileExists()
     {
         $keyFile = __DIR__ . '/../fixtures2/private.json';
-        putenv(UserRefreshCredentials::ENV_VAR . '=' . $keyFile);
+        $_ENV[UserRefreshCredentials::ENV_VAR] = $keyFile;
         $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
     }
 }
@@ -179,19 +179,19 @@ class URCFromWellKnownFileTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->originalHome = getenv('HOME');
+        $this->originalHome = array_key_exists('HOME', $_ENV) ? $_ENV['HOME'] : false;
     }
 
     protected function tearDown(): void
     {
-        if ($this->originalHome != getenv('HOME')) {
-            putenv('HOME=' . $this->originalHome);
+        if ($this->originalHome != array_key_exists('HOME', $_ENV) ? $_ENV['HOME'] : false) {
+            $_ENV['HOME'] = $this->originalHome;
         }
     }
 
     public function testIsNullIfFileDoesNotExist()
     {
-        putenv('HOME=' . __DIR__ . '/../not_exist_fixtures');
+        $_ENV['HOME'] = __DIR__ . '/../not_exist_fixtures';
         $this->assertNull(
             UserRefreshCredentials::fromWellKnownFile('a scope')
         );
@@ -199,7 +199,7 @@ class URCFromWellKnownFileTest extends TestCase
 
     public function testSucceedIfFileIsPresent()
     {
-        putenv('HOME=' . __DIR__ . '/../fixtures2');
+        $_ENV['HOME'] = __DIR__ . '/../fixtures2';
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );

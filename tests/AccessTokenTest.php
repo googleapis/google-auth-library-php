@@ -232,7 +232,7 @@ class AccessTokenTest extends TestCase
 
     public function testEsVerifyEndToEnd()
     {
-        if (!$jwt = getenv('IAP_IDENTITY_TOKEN')) {
+        if (!$jwt = array_key_exists('IAP_IDENTITY_TOKEN', $_ENV) ? $_ENV['IAP_IDENTITY_TOKEN'] : false) {
             $this->markTestSkipped('Set the IAP_IDENTITY_TOKEN env var');
         }
 

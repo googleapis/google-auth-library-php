@@ -432,7 +432,7 @@ class AccessToken
      */
     private function setPhpsecConstants()
     {
-        if (filter_var(getenv('GAE_VM'), FILTER_VALIDATE_BOOLEAN)) {
+        if (filter_var(array_key_exists('GAE_VM', $_ENV) ? $_ENV['GAE_VM'] : false, FILTER_VALIDATE_BOOLEAN)) {
             if (!defined('MATH_BIGINTEGER_OPENSSL_ENABLED')) {
                 define('MATH_BIGINTEGER_OPENSSL_ENABLED', true);
             }

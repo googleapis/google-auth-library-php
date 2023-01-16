@@ -59,10 +59,10 @@ Once downloaded, store the path to this file in the
 `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
 ```php
-putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+$_ENV['GOOGLE_APPLICATION_CREDENTIALS'] = '/path/to/my/credentials.json';
 ```
 
-> PHP's `putenv` function is just one way to set an environment variable.
+> PHP's `$_ENV` variable is just one way to set an environment variable.
 > Consider using `.htaccess` or apache configuration files as well.
 
 #### Enable the API you want to use
@@ -83,7 +83,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
 // specify the path to your application credentials
-putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+$_ENV['GOOGLE_APPLICATION_CREDENTIALS'] = '/path/to/my/credentials.json';
 
 // define the scopes for your API call
 $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
@@ -136,7 +136,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
 // specify the path to your application credentials
-putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+$_ENV['GOOGLE_APPLICATION_CREDENTIALS'] = '/path/to/my/credentials.json';
 
 // Provide the ID token audience. This can be a Client ID associated with an IAP application,
 // Or the URL associated with a CloudRun App
@@ -230,7 +230,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
 // specify the path to your application credentials
-putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+$_ENV['GOOGLE_APPLICATION_CREDENTIALS'] = '/path/to/my/credentials.json';
 
 // Provide the ID token audience. This can be a Client ID associated with an IAP application
 //    $targetAudience = 'IAP_CLIENT_ID.apps.googleusercontent.com';
