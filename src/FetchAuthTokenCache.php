@@ -60,6 +60,9 @@ class FetchAuthTokenCache implements
         ], (array) $cacheConfig);
     }
 
+    /**
+     * @return FetchAuthTokenInterface
+     */
     public function getFetcher()
     {
         return $this->fetcher;
