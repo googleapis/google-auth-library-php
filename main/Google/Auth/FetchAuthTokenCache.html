@@ -172,6 +172,17 @@ FetchAuthTokenInterface</p>                                </div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
+                    <a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a>
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getFetcher">getFetcher</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
                     <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>
                 </div>
                 <div class="col-md-8 type">
@@ -299,8 +310,36 @@ fetcher.</p>                </div>
 
             </div>
                     <div class="method-item">
+                    <h3 id="method_getFetcher">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L66">line 66</a></div>
+        <code>                    <a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a>
+    <strong>getFetcher</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td><a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a></td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method_fetchAuthToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L73">line 73</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L81">line 81</a></div>
         <code>                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>
     <strong>fetchAuthToken</strong>(callable $httpHandler = null)
         </code>
@@ -350,7 +389,7 @@ from the supplied fetcher.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getCacheKey">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L89">line 89</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L97">line 97</a></div>
         <code>                    string
     <strong>getCacheKey</strong>()
         </code>
@@ -378,7 +417,7 @@ from the supplied fetcher.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getLastReceivedToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L97">line 97</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L105">line 105</a></div>
         <code>                    null|<abbr title="Google\Auth\array<mixed>">array<mixed></abbr>
     <strong>getLastReceivedToken</strong>()
         </code>
@@ -413,7 +452,7 @@ from the supplied fetcher.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getClientName">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L108">line 108</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L116">line 116</a></div>
         <code>                    string
     <strong>getClientName</strong>(callable $httpHandler = null)
         </code>
@@ -454,7 +493,7 @@ from the supplied fetcher.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_signBlob">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L131">line 131</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L139">line 139</a></div>
         <code>                    string
     <strong>signBlob</strong>(string $stringToSign, bool $forceOpenSsl = false)
         </code>
@@ -511,7 +550,7 @@ from the supplied fetcher.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getQuotaProject">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L157">line 157</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L165">line 165</a></div>
         <code>                    string|null
     <strong>getQuotaProject</strong>()
         </code>
@@ -542,7 +581,7 @@ fetcher.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getProjectId">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L174">line 174</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L182">line 182</a></div>
         <code>                    string|null
     <strong>getProjectId</strong>(callable $httpHandler = null)
         </code>
@@ -582,7 +621,7 @@ fetcher.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_updateMetadata">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L196">line 196</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/FetchAuthTokenCache.php#L204">line 204</a></div>
         <code>                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>
     <strong>updateMetadata</strong>(<abbr title="Google\Auth\array<mixed>">array<mixed></abbr> $metadata, string $authUri = null, callable $httpHandler = null)
         </code>
