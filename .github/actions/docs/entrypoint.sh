@@ -3,6 +3,7 @@
 apt-get update
 apt-get install -y git
 git reset --hard HEAD
+git fetch origin
 
 mkdir .docs
 mkdir .cache
