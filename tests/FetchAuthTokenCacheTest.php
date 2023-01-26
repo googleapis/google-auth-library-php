@@ -550,4 +550,17 @@ class FetchAuthTokenCacheTest extends BaseTest
 
         $fetcher->getProjectId();
     }
+
+    public function testGetFetcher()
+    {
+        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface')
+            ->reveal();
+        $fetcher = new FetchAuthTokenCache(
+            $mockFetcher,
+            [],
+            $this->mockCache->reveal()
+        );
+
+        $this->assertSame($mockFetcher, $fetcher->getFetcher());
+    }
 }
