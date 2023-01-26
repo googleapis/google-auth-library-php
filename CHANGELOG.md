@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.25.0](https://github.com/googleapis/google-auth-library-php/compare/v1.24.0...v1.25.0) (2023-01-26)
+
+
+### Features
+
+* Add getFetcher to FetchAuthTokenCache ([#431](https://github.com/googleapis/google-auth-library-php/issues/431)) ([cf7ac54](https://github.com/googleapis/google-auth-library-php/commit/cf7ac54454bbb8ad6d12c652c05f5d7b5eb2d701))
+
 ## [1.24.0](https://github.com/googleapis/google-auth-library-php/compare/v1.23.1...v1.24.0) (2022-11-28)
 
 
