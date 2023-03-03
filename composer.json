@@ -22,7 +22,7 @@
     "phpunit/phpunit": "^7.5||^9.0.0",
     "phpspec/prophecy-phpunit": "^1.1||^2.0",
     "sebastian/comparator": ">=1.2.3",
-    "phpseclib/phpseclib": "^2.0.31",
+    "phpseclib/phpseclib": "^2.0.31||^3.0",
     "kelvinmo/simplejwt": "^0.2.5|^0.5.1"
   },
   "suggest": {
