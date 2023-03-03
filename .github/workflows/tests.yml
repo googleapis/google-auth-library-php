@@ -9,7 +9,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php: [ "7.1", "7.2", "7.3", "7.4", "8.0", "8.1" ]
+                php: [ "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
             - uses: actions/checkout@v3
@@ -79,7 +79,7 @@ jobs:
       runs-on: ubuntu-latest
       name: PHPStan Static Analysis
       steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -87,5 +87,5 @@ jobs:
       - name: Run Script
         run: |
           composer install
-          composer global require phpstan/phpstan
+          composer global require phpstan/phpstan:^1.8
           ~/.composer/vendor/bin/phpstan analyse

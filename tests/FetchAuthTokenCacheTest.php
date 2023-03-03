@@ -251,7 +251,7 @@ class FetchAuthTokenCacheTest extends BaseTest
     {
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
-        $expiresAt = time() + 10;
+        $expiresAt = time() + 20;
         $cachedValue = [
             'access_token' => $token,
             'expires_at' => $expiresAt,
@@ -289,6 +289,50 @@ class FetchAuthTokenCacheTest extends BaseTest
         $cacheKey = 'myKey';
         $token = '2/abcdef1234567890';
         $expiresAt = time() - 10;
+        $cachedValue = [
+            'access_token' => $token,
+            'expires_at' => $expiresAt,
+        ];
+        $newToken = ['access_token' => '3/abcdef1234567890'];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCacheItem->set($newToken)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockCacheItem->expiresAfter(1500)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockCache->getItem($cacheKey)
+            ->shouldBeCalledTimes(2)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken(null)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($newToken);
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+        $this->mockCache->save($this->mockCacheItem)
+            ->shouldBeCalledTimes(1);
+
+        // Run the test.
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher->reveal(),
+            null,
+            $this->mockCache->reveal()
+        );
+        $accessToken = $cachedFetcher->fetchAuthToken();
+        $this->assertEquals($newToken, $accessToken);
+    }
+
+    public function testShouldNotReturnValueWhenExpiredWithinEagerThreshold()
+    {
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $expiresAt = time() + 5;
         $cachedValue = [
             'access_token' => $token,
             'expires_at' => $expiresAt,
@@ -554,5 +598,18 @@ class FetchAuthTokenCacheTest extends BaseTest
         );
 
         $fetcher->getProjectId();
+    }
+
+    public function testGetFetcher()
+    {
+        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface')
+            ->reveal();
+        $fetcher = new FetchAuthTokenCache(
+            $mockFetcher,
+            [],
+            $this->mockCache->reveal()
+        );
+
+        $this->assertSame($mockFetcher, $fetcher->getFetcher());
     }
 }

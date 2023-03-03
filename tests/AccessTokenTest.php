@@ -89,7 +89,7 @@ class AccessTokenTest extends TestCase
             $this->cache->reveal()
         );
 
-        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) use ($payload, $exception) {
+        $token->mocks['decode'] = function ($token, $keys) use ($payload, $exception) {
             $this->assertEquals($this->token, $token);
 
             if ($exception) {
@@ -307,9 +307,9 @@ class AccessTokenTest extends TestCase
             $this->cache->reveal()
         );
 
-        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
+        $token->mocks['decode'] = function ($token, $keys) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals(['RS256'], $allowedAlgs);
+            $this->assertEquals('RS256', array_pop($keys)->getAlgorithm());
 
             return (object) $this->payload;
         };
@@ -431,9 +431,9 @@ class AccessTokenTest extends TestCase
             $this->cache->reveal()
         );
 
-        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
+        $token->mocks['decode'] = function ($token, $keys) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals(['RS256'], $allowedAlgs);
+            $this->assertEquals('RS256', array_pop($keys)->getAlgorithm());
 
             return (object) $this->payload;
         };

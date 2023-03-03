@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\InsecureCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
@@ -120,7 +121,7 @@ abstract class CredentialsLoader implements
      *   user-defined scopes exist, expressed either as an Array or as a
      *   space-delimited string.
      *
-     * @return ServiceAccountCredentials|UserRefreshCredentials
+     * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials
      */
     public static function makeCredentials(
         $scope,
@@ -139,6 +140,11 @@ abstract class CredentialsLoader implements
         if ($jsonKey['type'] == 'authorized_user') {
             $anyScope = $scope ?: $defaultScope;
             return new UserRefreshCredentials($anyScope, $jsonKey);
+        }
+
+        if ($jsonKey['type'] == 'impersonated_service_account') {
+            $anyScope = $scope ?: $defaultScope;
+            return new ImpersonatedServiceAccountCredentials($anyScope, $jsonKey);
         }
 
         throw new \InvalidArgumentException('invalid value in the type field');
@@ -212,12 +218,12 @@ abstract class CredentialsLoader implements
             return $metadata;
         }
         $result = $this->fetchAuthToken($httpHandler);
-        if (!isset($result['access_token'])) {
-            return $metadata;
-        }
         $metadata_copy = $metadata;
-        $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['access_token']];
-
+        if (isset($result['access_token'])) {
+            $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['access_token']];
+        } elseif (isset($result['id_token'])) {
+            $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['id_token']];
+        }
         return $metadata_copy;
     }
 
