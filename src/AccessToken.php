@@ -320,7 +320,7 @@ class AccessToken
     private function getCerts($location, $cacheKey, array $options = [])
     {
         $cacheItem = $this->cache->getItem($cacheKey);
-        $certs = $cacheItem ? $cacheItem->get() : null; // @phpstan-ignore-line
+        $certs = $cacheItem ? $cacheItem->get() : null;
 
         $gotNewCerts = false;
         if (!$certs) {
