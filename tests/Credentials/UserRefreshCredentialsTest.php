@@ -253,6 +253,20 @@ class URCFetchAuthTokenTest extends TestCase
         $tokens = $sa->fetchAuthToken($httpHandler);
         $this->assertEquals($testJson, $tokens);
     }
+
+    public function testGetGrantedScope()
+    {
+        $responseJson = json_encode(['scope' => 'scope/1 scope/2']);
+        $httpHandler = getHandler([
+            buildResponse(200, [], Utils::streamFor($responseJson)),
+        ]);
+        $sa = new UserRefreshCredentials(
+            '',
+            createURCTestJson()
+        );
+        $sa->fetchAuthToken($httpHandler);
+        $this->assertEquals('scope/1 scope/2', $sa->getGrantedScope());
+    }
 }
 
 class URCGetQuotaProjectTest extends TestCase
