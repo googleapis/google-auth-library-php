@@ -269,6 +269,13 @@ class OAuth2 implements FetchAuthTokenInterface
     private $additionalClaims;
 
     /**
+     * Added flag to enable/disable partial consent screen
+     *
+     * @var ?string
+     */
+    private $partConsent;
+
+    /**
      * Create a new OAuthCredentials.
      *
      * The configuration array accepts various options
@@ -357,6 +364,7 @@ class OAuth2 implements FetchAuthTokenInterface
             'signingAlgorithm' => null,
             'scope' => null,
             'additionalClaims' => [],
+	    'partConsent' => '',
         ], $config);
 
         $this->setAuthorizationUri($opts['authorizationUri']);
@@ -377,6 +385,7 @@ class OAuth2 implements FetchAuthTokenInterface
         $this->setScope($opts['scope']);
         $this->setExtensionParams($opts['extensionParams']);
         $this->setAdditionalClaims($opts['additionalClaims']);
+        $this->setPartConsent($opts['partConsent']);
         $this->updateToken($opts);
     }
 
@@ -694,6 +703,7 @@ class OAuth2 implements FetchAuthTokenInterface
             'redirect_uri' => $this->redirectUri,
             'state' => $this->state,
             'scope' => $this->getScope(),
+            'enable_serial_consent' => $this->partConsent,
         ], $config);
 
         // Validate the auth_params
@@ -709,6 +719,11 @@ class OAuth2 implements FetchAuthTokenInterface
             throw new InvalidArgumentException(
                 'prompt and approval_prompt are mutually exclusive'
             );
+        }
+
+        // set default consent as old consent if not defined or has other values than 'true'
+        if (empty($params['enable_serial_consent'])||$params['enable_serial_consent'] != 'true') {
+            $params['enable_serial_consent'] = 'false';
         }
 
         // Construct the uri object; return it if it is valid.
@@ -1408,6 +1423,11 @@ class OAuth2 implements FetchAuthTokenInterface
     public function getAdditionalClaims()
     {
         return $this->additionalClaims;
+    }
+
+    public function setPartConsent($partConsent)
+    {
+        $this->partConsent = $partConsent;
     }
 
     /**
