@@ -27,6 +27,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * @group credentials
@@ -34,6 +35,8 @@ use Prophecy\Argument;
  */
 class GCECredentialsTest extends BaseTest
 {
+    use ProphecyTrait;
+
     public function testOnGceMetadataFlavorHeader()
     {
         $hasHeader = false;

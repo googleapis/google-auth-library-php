@@ -21,6 +21,7 @@ use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
 use SimpleJWT\JWT as SimpleJWT;
@@ -31,6 +32,8 @@ use UnexpectedValueException;
  */
 class AccessTokenTest extends TestCase
 {
+    use ProphecyTrait;
+
     private $cache;
     private $payload;
 

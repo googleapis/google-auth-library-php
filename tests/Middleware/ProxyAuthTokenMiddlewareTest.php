@@ -23,9 +23,12 @@ use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class ProxyAuthTokenMiddlewareTest extends BaseTest
 {
+    use ProphecyTrait;
+
     private $mockFetcher;
     private $mockRequest;
 

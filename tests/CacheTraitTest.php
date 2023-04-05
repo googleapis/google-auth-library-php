@@ -20,9 +20,12 @@ namespace Google\Auth\Tests;
 use Google\Auth\CacheTrait;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class CacheTraitTest extends TestCase
 {
+    use ProphecyTrait;
+
     private $mockFetcher;
     private $mockCacheItem;
     private $mockCache;

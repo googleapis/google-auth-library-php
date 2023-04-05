@@ -24,9 +24,12 @@ use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\UriInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class SimpleMiddlewareTest extends BaseTest
 {
+    use ProphecyTrait;
+
     private $mockRequest;
 
     /**

@@ -26,9 +26,12 @@ use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\OAuth2;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class FetchAuthTokenTest extends BaseTest
 {
+    use ProphecyTrait;
+
     private $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
 
     /**

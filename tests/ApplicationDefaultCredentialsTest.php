@@ -25,6 +25,7 @@ use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use ReflectionClass;
 
 class ADCGetTest extends TestCase
@@ -291,6 +292,8 @@ class ADCDefaultScopeTest extends TestCase
 
 class ADCGetMiddlewareTest extends TestCase
 {
+    use ProphecyTrait;
+
     private $originalHome;
 
     protected function setUp(): void
@@ -488,6 +491,8 @@ class ADCGetMiddlewareTest extends TestCase
 
 class ADCGetCredentialsWithTargetAudienceTest extends TestCase
 {
+    use ProphecyTrait;
+
     private $originalHome;
     private $targetAudience = 'a target audience';
 
@@ -603,6 +608,8 @@ class ADCGetCredentialsWithTargetAudienceTest extends TestCase
 
 class ADCGetCredentialsWithQuotaProjectTest extends TestCase
 {
+    use ProphecyTrait;
+
     private $originalHome;
     private $quotaProject = 'a-quota-project';
 

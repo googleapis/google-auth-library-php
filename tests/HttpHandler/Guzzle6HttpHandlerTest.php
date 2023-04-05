@@ -22,12 +22,15 @@ use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * @group http-handler
  */
 class Guzzle6HttpHandlerTest extends BaseTest
 {
+    use ProphecyTrait;
+
     protected $client;
     protected $handler;
 
