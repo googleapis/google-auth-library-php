@@ -40,28 +40,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
     private $quotaProject = 'a-quota-project';
     private $originalServiceAccount;
 
-    // protected function setUp(): void
-    // {
-    //     $this->originalHome = getenv('HOME');
-    //     putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
-
-    //     $this->originalServiceAccount = getenv(ServiceAccountCredentials::ENV_VAR);
-    //     putenv(ServiceAccountCredentials::ENV_VAR);
-    // }
-
-    // protected function tearDown(): void
-    // {
-    //     if ($this->originalHome != getenv('HOME')) {
-    //         putenv('HOME=' . $this->originalHome);
-    //     }
-    //     if ($this->originalServiceAccount) {
-    //         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $this->originalServiceAccount);
-    //     } else {
-    //         putenv(ServiceAccountCredentials::ENV_VAR);  // removes it from
-    //     }
-    //     putenv('GAE_INSTANCE');
-    // }
-
     public function testGetCredentialsFailsIfEnvSpecifiesNonExistentFile()
     {
         $this->expectException(DomainException::class);
