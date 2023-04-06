@@ -26,6 +26,7 @@ use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use LogicException;
@@ -259,7 +260,7 @@ class SACFetchAuthTokenTest extends TestCase
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
-            buildResponse(400),
+            new Response(400),
         ]);
         $sa = new ServiceAccountCredentials(
             $scope,
@@ -275,7 +276,7 @@ class SACFetchAuthTokenTest extends TestCase
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
-            buildResponse(500),
+            new Response(500),
         ]);
         $sa = new ServiceAccountCredentials(
             $scope,
@@ -290,7 +291,7 @@ class SACFetchAuthTokenTest extends TestCase
         $testJsonText = json_encode($testJson);
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
-            buildResponse(200, [], Utils::streamFor($testJsonText)),
+            new Response(200, [], Utils::streamFor($testJsonText)),
         ]);
         $sa = new ServiceAccountCredentials(
             $scope,
@@ -307,7 +308,7 @@ class SACFetchAuthTokenTest extends TestCase
         $access_token = 'accessToken123';
         $responseText = json_encode(['access_token' => $access_token]);
         $httpHandler = getHandler([
-            buildResponse(200, [], Utils::streamFor($responseText)),
+            new Response(200, [], Utils::streamFor($responseText)),
         ]);
         $sa = new ServiceAccountCredentials(
             $scope,
@@ -500,7 +501,7 @@ class SACJwtAccessTest extends TestCase
         $this->assertNotNull($sa);
 
         $httpHandler = getHandler([
-            buildResponse(200),
+            new Response(200),
         ]);
         $result = $sa->fetchAuthToken($httpHandler); // authUri has not been set
         $this->assertNull($result);

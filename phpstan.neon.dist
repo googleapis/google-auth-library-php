@@ -6,5 +6,4 @@ parameters:
     featureToggles:
       disableRuntimeReflectionProvider: true
     excludePaths:
-    - src/HttpHandler/Guzzle5HttpHandler.php
     - src/Cache/Item.php

@@ -55,9 +55,9 @@ class GCECredentialsTest extends BaseTest
     {
         // simulate retry attempts by returning multiple 400s
         $httpHandler = getHandler([
-            buildResponse(400),
-            buildResponse(400),
-            buildResponse(400)
+            new Response(400),
+            new Response(400),
+            new Response(400)
         ]);
         $this->assertFalse(GCECredentials::onGCE($httpHandler));
     }
@@ -66,9 +66,9 @@ class GCECredentialsTest extends BaseTest
     {
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
-            buildResponse(500),
-            buildResponse(500),
-            buildResponse(500)
+            new Response(500),
+            new Response(500),
+            new Response(500)
         ]);
         $this->assertFalse(GCECredentials::onGCE($httpHandler));
     }
@@ -76,7 +76,7 @@ class GCECredentialsTest extends BaseTest
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()
     {
         $httpHandler = getHandler([
-            buildResponse(200),
+            new Response(200),
         ]);
         $this->assertFalse(GCECredentials::onGCE($httpHandler));
     }
@@ -84,7 +84,7 @@ class GCECredentialsTest extends BaseTest
     public function testOnGCEIsOkIfGoogleIsTheFlavor()
     {
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         ]);
         $this->assertTrue(GCECredentials::onGCE($httpHandler));
     }
@@ -111,9 +111,9 @@ class GCECredentialsTest extends BaseTest
     {
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
-            buildResponse(500),
-            buildResponse(500),
-            buildResponse(500)
+            new Response(500),
+            new Response(500),
+            new Response(500)
         ]);
         $g = new GCECredentials();
         $this->assertEquals([], $g->fetchAuthToken($httpHandler));
@@ -126,8 +126,8 @@ class GCECredentialsTest extends BaseTest
 
         $notJson = '{"foo": , this is cannot be passed as json" "bar"}';
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], $notJson),
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], $notJson),
         ]);
         $g = new GCECredentials();
         $g->fetchAuthToken($httpHandler);
@@ -142,8 +142,8 @@ class GCECredentialsTest extends BaseTest
         ];
         $jsonTokens = json_encode($wantedTokens);
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Utils::streamFor($jsonTokens)),
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
         $g = new GCECredentials();
         $receivedToken = $g->fetchAuthToken($httpHandler);
@@ -199,10 +199,10 @@ class GCECredentialsTest extends BaseTest
                 $this->send(Argument::any(), Argument::any())->will(function ($args) use (&$uri) {
                     $uri = $args[0]->getUri();
 
-                    return buildResponse(200, [], Utils::streamFor('{"expires_in": 0}'));
+                    return new Response(200, [], Utils::streamFor('{"expires_in": 0}'));
                 });
 
-                return buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+                return new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
             });
 
         HttpClientCache::setHttpClient($client->reveal());
@@ -236,9 +236,9 @@ class GCECredentialsTest extends BaseTest
         $expected = 'foobar';
 
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Utils::streamFor($expected)),
-            buildResponse(200, [], Utils::streamFor('notexpected'))
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($expected)),
+            new Response(200, [], Utils::streamFor('notexpected'))
         ]);
 
         $creds = new GCECredentials();
@@ -252,9 +252,9 @@ class GCECredentialsTest extends BaseTest
     {
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
-            buildResponse(500),
-            buildResponse(500),
-            buildResponse(500)
+            new Response(500),
+            new Response(500),
+            new Response(500)
         ]);
 
         $creds = new GCECredentials();
@@ -281,9 +281,9 @@ class GCECredentialsTest extends BaseTest
         $client = $this->prophesize('GuzzleHttp\ClientInterface');
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
-                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Utils::streamFor($expectedEmail)),
-                buildResponse(200, [], Utils::streamFor(json_encode($token)))
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                new Response(200, [], Utils::streamFor($expectedEmail)),
+                new Response(200, [], Utils::streamFor(json_encode($token)))
             );
 
         HttpClientCache::setHttpClient($client->reveal());
@@ -318,10 +318,10 @@ class GCECredentialsTest extends BaseTest
         $client = $this->prophesize('GuzzleHttp\ClientInterface');
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
-                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Utils::streamFor(json_encode($token1))),
-                buildResponse(200, [], Utils::streamFor($expectedEmail)),
-                buildResponse(200, [], Utils::streamFor(json_encode($token2)))
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                new Response(200, [], Utils::streamFor(json_encode($token1))),
+                new Response(200, [], Utils::streamFor($expectedEmail)),
+                new Response(200, [], Utils::streamFor(json_encode($token2)))
             );
 
         HttpClientCache::setHttpClient($client->reveal());
@@ -340,9 +340,9 @@ class GCECredentialsTest extends BaseTest
         $client = $this->prophesize('GuzzleHttp\ClientInterface');
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
-                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Utils::streamFor($expected)),
-                buildResponse(200, [], Utils::streamFor('notexpected'))
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                new Response(200, [], Utils::streamFor($expected)),
+                new Response(200, [], Utils::streamFor('notexpected'))
             );
 
         HttpClientCache::setHttpClient($client->reveal());
@@ -360,9 +360,9 @@ class GCECredentialsTest extends BaseTest
         $client = $this->prophesize('GuzzleHttp\ClientInterface');
         $client->send(Argument::any(), Argument::any())
             ->willReturn(
-                buildResponse(500),
-                buildResponse(500),
-                buildResponse(500)
+                new Response(500),
+                new Response(500),
+                new Response(500)
             );
 
         HttpClientCache::setHttpClient($client->reveal());

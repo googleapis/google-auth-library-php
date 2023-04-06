@@ -23,6 +23,7 @@ use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -73,9 +74,9 @@ class ApplicationDefaultCredentialsTest extends TestCase
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
         // simulate not being GCE and retry attempts by returning multiple 500s
         $httpHandler = getHandler([
-            buildResponse(500),
-            buildResponse(500),
-            buildResponse(500)
+            new Response(500),
+            new Response(500),
+            new Response(500)
         ]);
 
         ApplicationDefaultCredentials::getCredentials('a scope', $httpHandler);
@@ -94,8 +95,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         // simulate the response from GCE.
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Utils::streamFor($jsonTokens)),
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $this->assertInstanceOf(
@@ -113,8 +114,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
             $httpHandler = getHandler([
-                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Utils::streamFor($jsonTokens)),
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                new Response(200, [], Utils::streamFor($jsonTokens)),
             ]), // $httpHandler
             null, // $cacheConfig
             null, // $cache
@@ -137,8 +138,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $creds = ApplicationDefaultCredentials::getCredentials(
             'a+user+scope', // $scope
             getHandler([
-                buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                buildResponse(200, [], Utils::streamFor($jsonTokens)),
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                new Response(200, [], Utils::streamFor($jsonTokens)),
             ]), // $httpHandler
             null, // $cacheConfig
             null, // $cache
@@ -307,9 +308,9 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         // simulate not being GCE and retry attempts by returning multiple 500s
         $httpHandler = getHandler([
-            buildResponse(500),
-            buildResponse(500),
-            buildResponse(500)
+            new Response(500),
+            new Response(500),
+            new Response(500)
         ]);
 
         ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler);
@@ -321,7 +322,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $httpHandler = getHandler([
-            buildResponse(200),
+            new Response(200),
         ]);
 
         $cacheOptions = [];
@@ -348,8 +349,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         // simulate the response from GCE.
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Utils::streamFor($jsonTokens)),
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope', $httpHandler));
@@ -490,9 +491,9 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         // simulate not being GCE and retry attempts by returning multiple 500s
         $httpHandler = getHandler([
-            buildResponse(500),
-            buildResponse(500),
-            buildResponse(500)
+            new Response(500),
+            new Response(500),
+            new Response(500)
         ]);
 
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
@@ -509,7 +510,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $httpHandler = getHandler([
-            buildResponse(200),
+            new Response(200),
         ]);
 
         $cacheOptions = [];
@@ -537,8 +538,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         // simulate the response from GCE.
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Utils::streamFor($jsonTokens)),
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $credentials = ApplicationDefaultCredentials::getIdTokenCredentials(
@@ -595,7 +596,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $httpHandler = getHandler([
-            buildResponse(200),
+            new Response(200),
         ]);
 
         $cacheOptions = [];
@@ -629,8 +630,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         // simulate the response from GCE.
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-            buildResponse(200, [], Utils::streamFor($jsonTokens)),
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
 
         $credentials = ApplicationDefaultCredentials::getCredentials(
@@ -668,7 +669,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         putenv('GAE_INSTANCE=aef-default-20180313t154438');
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         ]);
         $this->assertInstanceOf(
             'Google\Auth\Credentials\GCECredentials',
@@ -682,7 +683,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         putenv('GAE_INSTANCE=aef-default-20180313t154438');
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
         $httpHandler = getHandler([
-            buildResponse(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         ]);
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
             $this->targetAudience,
