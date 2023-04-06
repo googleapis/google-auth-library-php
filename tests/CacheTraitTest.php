@@ -177,7 +177,7 @@ class CacheTraitImplementation
     public function __construct(array $config = [])
     {
         $this->key = array_key_exists('key', $config) ? $config['key'] : 'key';
-        $this->cache = isset($config['cache']) ? $config['cache'] : null;
+        $this->cache = $config['cache'] ?? null;
         $this->cacheConfig = [
             'prefix' => '',
             'lifetime' => 1000,
