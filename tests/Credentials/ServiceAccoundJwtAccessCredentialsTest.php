@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2015 Google Inc.
+ * Copyright 2023 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
 
-class ServiceAccountCredentialsTest extends TestCase
+class ServiceAccountJwtAccessCredentialsTest extends TestCase
 {
     private function createTestJson()
     {
@@ -48,305 +48,7 @@ class ServiceAccountCredentialsTest extends TestCase
         ];
     }
 
-    public function testShouldBeTheSameAsOAuth2WithTheSameScope()
-    {
-        $testJson = $this->createTestJson();
-        $scope = ['scope/1', 'scope/2'];
-        $sa = new ServiceAccountCredentials(
-            $scope,
-            $testJson
-        );
-        $o = new OAuth2(['scope' => $scope]);
-        $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey(),
-            $sa->getCacheKey()
-        );
-    }
-
-    public function testShouldBeTheSameAsOAuth2WithTheSameScopeWithSub()
-    {
-        $testJson = $this->createTestJson();
-        $scope = ['scope/1', 'scope/2'];
-        $sub = 'sub123';
-        $sa = new ServiceAccountCredentials(
-            $scope,
-            $testJson,
-            $sub
-        );
-        $o = new OAuth2(['scope' => $scope]);
-        $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
-            $sa->getCacheKey()
-        );
-    }
-
-    public function testShouldBeTheSameAsOAuth2WithTheSameScopeWithSubAddedLater()
-    {
-        $testJson = $this->createTestJson();
-        $scope = ['scope/1', 'scope/2'];
-        $sub = 'sub123';
-        $sa = new ServiceAccountCredentials(
-            $scope,
-            $testJson,
-            null
-        );
-        $sa->setSub($sub);
-
-        $o = new OAuth2(['scope' => $scope]);
-        $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
-            $sa->getCacheKey()
-        );
-    }
-
-    public function testShouldFailIfScopeIsNotAValidType()
-    {
-        $this->expectexception(InvalidArgumentException::class);
-
-        $testJson = $this->createTestJson();
-        $notAnArrayOrString = new \stdClass();
-        $sa = new ServiceAccountCredentials(
-            $notAnArrayOrString,
-            $testJson
-        );
-    }
-
-    public function testShouldFailIfJsonDoesNotHaveClientEmail()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $testJson = $this->createTestJson();
-        unset($testJson['client_email']);
-        $scope = ['scope/1', 'scope/2'];
-        $sa = new ServiceAccountCredentials(
-            $scope,
-            $testJson
-        );
-    }
-
-    public function testShouldFailIfJsonDoesNotHavePrivateKey()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $testJson = $this->createTestJson();
-        unset($testJson['private_key']);
-        $scope = ['scope/1', 'scope/2'];
-        $sa = new ServiceAccountCredentials(
-            $scope,
-            $testJson
-        );
-    }
-
     public function testFailsToInitalizeFromANonExistentFile()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
-        new ServiceAccountCredentials('scope/1', $keyFile);
-    }
-
-    public function testInitalizeFromAFile()
-    {
-        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
-        $this->assertNotNull(
-            new ServiceAccountCredentials('scope/1', $keyFile)
-        );
-    }
-
-    public function testFailsToInitializeFromInvalidJsonData()
-    {
-        $this->expectException(LogicException::class);
-
-        $tmp = tmpfile();
-        fwrite($tmp, '{');
-
-        $path = stream_get_meta_data($tmp)['uri'];
-
-        try {
-            new ServiceAccountCredentials('scope/1', $path);
-        } catch (\Exception $e) {
-            fclose($tmp);
-            throw $e;
-        }
-    }
-
-    public function testIsNullIfEnvVarIsNotSet()
-    {
-        $this->assertNull(ServiceAccountCredentials::fromEnv());
-    }
-
-    /** @runInSeparateProcess */
-    public function testFailsIfEnvSpecifiesNonExistentFile()
-    {
-        $this->expectException(DomainException::class);
-        $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        ApplicationDefaultCredentials::getCredentials('a scope');
-    }
-
-    /** @runInSeparateProcess */
-    public function testSucceedIfFileExists()
-    {
-        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
-    }
-
-    /** @runInSeparateProcess */
-    public function testIsNullIfFileDoesNotExist()
-    {
-        putenv('HOME=' . __DIR__ . '/../not_exists_fixtures');
-        $this->assertNull(
-            ServiceAccountCredentials::fromWellKnownFile()
-        );
-    }
-
-    /** @runInSeparateProcess */
-    public function testSucceedIfFileIsPresent()
-    {
-        putenv('HOME=' . __DIR__ . '/../fixtures');
-        $this->assertNotNull(
-            ApplicationDefaultCredentials::getCredentials('a scope')
-        );
-    }
-
-    public function testFailsOnClientErrors()
-    {
-        $this->expectException(\GuzzleHttp\Exception\ClientException::class);
-
-        $testJson = $this->createTestJson();
-        $scope = ['scope/1', 'scope/2'];
-        $httpHandler = getHandler([
-            new Response(400),
-        ]);
-        $sa = new ServiceAccountCredentials(
-            $scope,
-            $testJson
-        );
-        $sa->fetchAuthToken($httpHandler);
-    }
-
-    public function testFailsOnServerErrors()
-    {
-        $this->expectException(\GuzzleHttp\Exception\ServerException::class);
-
-        $testJson = $this->createTestJson();
-        $scope = ['scope/1', 'scope/2'];
-        $httpHandler = getHandler([
-            new Response(500),
-        ]);
-        $sa = new ServiceAccountCredentials(
-            $scope,
-            $testJson
-        );
-        $sa->fetchAuthToken($httpHandler);
-    }
-
-    public function testCanFetchCredsOK()
-    {
-        $testJson = $this->createTestJson();
-        $testJsonText = json_encode($testJson);
-        $scope = ['scope/1', 'scope/2'];
-        $httpHandler = getHandler([
-            new Response(200, [], Utils::streamFor($testJsonText)),
-        ]);
-        $sa = new ServiceAccountCredentials(
-            $scope,
-            $testJson
-        );
-        $tokens = $sa->fetchAuthToken($httpHandler);
-        $this->assertEquals($testJson, $tokens);
-    }
-
-    public function testUpdateMetadataFunc()
-    {
-        $testJson = $this->createTestJson();
-        $scope = ['scope/1', 'scope/2'];
-        $access_token = 'accessToken123';
-        $responseText = json_encode(['access_token' => $access_token]);
-        $httpHandler = getHandler([
-            new Response(200, [], Utils::streamFor($responseText)),
-        ]);
-        $sa = new ServiceAccountCredentials(
-            $scope,
-            $testJson
-        );
-        $update_metadata = $sa->getUpdateMetadataFunc();
-        $this->assertTrue(is_callable($update_metadata));
-
-        $actual_metadata = call_user_func(
-            $update_metadata,
-            $metadata = ['foo' => 'bar'],
-            $authUri = null,
-            $httpHandler
-        );
-        $this->assertArrayHasKey(
-            CredentialsLoader::AUTH_METADATA_KEY,
-            $actual_metadata
-        );
-        $this->assertEquals(
-            $actual_metadata[CredentialsLoader::AUTH_METADATA_KEY],
-            ['Bearer ' . $access_token]
-        );
-    }
-
-    public function testShouldBeIdTokenWhenTargetAudienceIsSet()
-    {
-        $testJson = $this->createTestJson();
-        $expectedToken = ['id_token' => 'idtoken12345'];
-        $timesCalled = 0;
-        $httpHandler = function ($request) use (&$timesCalled, $expectedToken) {
-            $timesCalled++;
-            parse_str($request->getBody(), $post);
-            $this->assertArrayHasKey('assertion', $post);
-            list($header, $payload, $sig) = explode('.', $post['assertion']);
-            $jwtParams = json_decode(base64_decode($payload), true);
-            $this->assertArrayHasKey('target_audience', $jwtParams);
-            $this->assertEquals('a target audience', $jwtParams['target_audience']);
-
-            return new Psr7\Response(200, [], Utils::streamFor(json_encode($expectedToken)));
-        };
-        $sa = new ServiceAccountCredentials(null, $testJson, null, 'a target audience');
-        $this->assertEquals($expectedToken, $sa->fetchAuthToken($httpHandler));
-        $this->assertEquals(1, $timesCalled);
-    }
-
-    public function testSettingBothScopeAndTargetAudienceThrowsException()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Scope and targetAudience cannot both be supplied');
-
-        $testJson = $this->createTestJson();
-        $sa = new ServiceAccountCredentials(
-            'a-scope',
-            $testJson,
-            null,
-            'a-target-audience'
-        );
-    }
-
-    public function testReturnsClientEmail()
-    {
-        $testJson = $this->createTestJson();
-        $sa = new ServiceAccountCredentials('scope/1', $testJson);
-        $this->assertEquals($testJson['client_email'], $sa->getClientName());
-    }
-
-    public function testGetProjectId()
-    {
-        $testJson = $this->createTestJson();
-        $sa = new ServiceAccountCredentials('scope/1', $testJson);
-        $this->assertEquals($testJson['project_id'], $sa->getProjectId());
-    }
-
-    public function testGetQuotaProject()
-    {
-        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
-        $sa = new ServiceAccountCredentials('scope/1', $keyFile);
-        $this->assertEquals('test_quota_project', $sa->getQuotaProject());
-    }
-
-    public function testJwtFailsToInitalizeFromANonExistentFile()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -354,7 +56,7 @@ class ServiceAccountCredentialsTest extends TestCase
         new ServiceAccountJwtAccessCredentials($keyFile);
     }
 
-    public function testJwtInitalizeFromAFile()
+    public function testInitalizeFromAFile()
     {
         $keyFile = __DIR__ . '/../fixtures' . '/private.json';
         $this->assertNotNull(
@@ -362,7 +64,7 @@ class ServiceAccountCredentialsTest extends TestCase
         );
     }
 
-    public function testJwtFailsToInitializeFromInvalidJsonData()
+    public function testFailsToInitializeFromInvalidJsonData()
     {
         $this->expectException(LogicException::class);
         $tmp = tmpfile();
@@ -466,7 +168,7 @@ class ServiceAccountCredentialsTest extends TestCase
         $this->assertEquals($token, $sa->getLastReceivedToken());
     }
 
-    public function testJwtUpdateMetadataFunc()
+    public function testUpdateMetadataFunc()
     {
         $testJson = $this->createTestJson();
         $sa = new ServiceAccountJwtAccessCredentials(
@@ -692,7 +394,7 @@ class ServiceAccountCredentialsTest extends TestCase
     }
 
     /** @runInSeparateProcess */
-    public function testJwtAccessFromApplicationDefault()
+    public function testAccessFromApplicationDefault()
     {
         $keyFile = __DIR__ . '/../fixtures3/service_account_credentials.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
@@ -778,7 +480,7 @@ class ServiceAccountCredentialsTest extends TestCase
         $this->assertEquals($token, $lastReceivedToken['access_token']);
     }
 
-    public function testJwtShouldBeTheSameAsOAuth2WithTheSameScope()
+    public function testShouldBeTheSameAsOAuth2WithTheSameScope()
     {
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
@@ -786,20 +488,20 @@ class ServiceAccountCredentialsTest extends TestCase
         $this->assertNull($sa->getCacheKey());
     }
 
-    public function testJwtReturnsClientEmail()
+    public function testReturnsClientEmail()
     {
         $testJson = $this->createTestJson();
         $sa = new ServiceAccountJwtAccessCredentials($testJson);
         $this->assertEquals($testJson['client_email'], $sa->getClientName());
     }
-    public function testJwtGetProjectId()
+    public function testGetProjectId()
     {
         $testJson = $this->createTestJson();
         $sa = new ServiceAccountJwtAccessCredentials($testJson);
         $this->assertEquals($testJson['project_id'], $sa->getProjectId());
     }
 
-    public function testJwtGetQuotaProject()
+    public function testGetQuotaProject()
     {
         $keyFile = __DIR__ . '/../fixtures' . '/private.json';
         $sa = new ServiceAccountJwtAccessCredentials($keyFile);
