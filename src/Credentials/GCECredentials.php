@@ -130,19 +130,19 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * Result of fetchAuthToken.
      *
-     * @var array<mixed>
+     * @var array<mixed>|null
      */
-    protected array $lastReceivedToken;
+    protected ?array $lastReceivedToken = null;
 
     /**
      * @var string|null
      */
-    private ?string $clientName;
+    private ?string $clientName = null;
 
     /**
      * @var string|null
      */
-    private ?string $projectId;
+    private ?string $projectId = null;
 
     /**
      * @var string
@@ -157,7 +157,7 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * @var string|null
      */
-    private ?string $quotaProject;
+    private ?string $quotaProject = null;
 
     /**
      * @var string|null

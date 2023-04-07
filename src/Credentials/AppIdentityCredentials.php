@@ -63,9 +63,9 @@ class AppIdentityCredentials extends CredentialsLoader implements
     /**
      * Result of fetchAuthToken.
      *
-     * @var array<mixed>
+     * @var array<mixed>|null
      */
-    protected array $lastReceivedToken;
+    protected ?array $lastReceivedToken = null;
 
     /**
      * Array of OAuth2 scopes to be requested.
@@ -74,7 +74,7 @@ class AppIdentityCredentials extends CredentialsLoader implements
      */
     private array $scope;
 
-    private string $clientName;
+    private ?string $clientName = null;
 
     /**
      * @param string|string[] $scope One or more scopes.

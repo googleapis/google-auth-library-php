@@ -52,12 +52,12 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
      *
      * @var string
      */
-    protected string $quotaProject;
+    protected ?string $quotaProject = null;
 
     /**
      * @var string
      */
-    public string $projectId;
+    public ?string $projectId = null;
 
     /**
      * Create a new ServiceAccountJwtAccessCredentials.

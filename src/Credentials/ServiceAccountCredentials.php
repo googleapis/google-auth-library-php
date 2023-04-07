@@ -77,17 +77,17 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      *
      * @var string
      */
-    protected string $quotaProject;
+    protected ?string $quotaProject = null;
 
     /**
      * @var string|null
      */
-    protected ?string $projectId;
+    protected ?string $projectId = null;
 
     /**
      * @var array<mixed>|null
      */
-    private ?array $lastReceivedJwtAccessToken;
+    private ?array $lastReceivedJwtAccessToken = null;
 
     /**
      * @var bool
@@ -97,7 +97,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     /**
      * @var ServiceAccountJwtAccessCredentials|null
      */
-    private ?ServiceAccountJwtAccessCredentials $jwtAccessCredentials;
+    private ?ServiceAccountJwtAccessCredentials $jwtAccessCredentials = null;
 
     /**
      * Create a new ServiceAccountCredentials.
