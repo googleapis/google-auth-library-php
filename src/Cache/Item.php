@@ -32,25 +32,11 @@ use TypeError;
  */
 final class Item implements CacheItemInterface
 {
-    /**
-     * @var string
-     */
-    private $key;
-
-    /**
-     * @var mixed
-     */
+    private string $key;
+    /** @var mixed */
     private $value;
-
-    /**
-     * @var DateTimeInterface|null
-     */
-    private $expiration;
-
-    /**
-     * @var bool
-     */
-    private $isHit = false;
+    private ?DateTimeInterface $expiration;
+    private bool $isHit = false;
 
     /**
      * @param string $key

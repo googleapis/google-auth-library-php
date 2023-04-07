@@ -36,30 +36,24 @@ class SysVCacheItemPool implements CacheItemPoolInterface
 
     const DEFAULT_PERM = 0600;
 
-    /**
-     * @var int
-     */
-    private $sysvKey;
+    private int $sysvKey;
 
     /**
      * @var CacheItemInterface[]
      */
-    private $items;
+    private array$items;
 
     /**
-     * @var CacheItemInterface[]
+     * @var array CacheItemInterface[]
      */
     private $deferredItems;
 
     /**
      * @var array<mixed>
      */
-    private $options;
+    private array $options;
 
-    /**
-     * @var bool
-     */
-    private $hasLoadedItems = false;
+    private bool $hasLoadedItems = false;
 
     /**
      * Create a SystemV shared memory based CacheItemPool.

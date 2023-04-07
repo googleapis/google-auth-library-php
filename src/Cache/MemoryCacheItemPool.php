@@ -28,12 +28,12 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
     /**
      * @var CacheItemInterface[]
      */
-    private $items;
+    private array $items;
 
     /**
      * @var CacheItemInterface[]
      */
-    private $deferredItems;
+    private array $deferredItems;
 
     /**
      * {@inheritdoc}

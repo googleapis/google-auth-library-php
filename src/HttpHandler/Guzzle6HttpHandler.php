@@ -22,10 +22,7 @@ use Psr\Http\Message\ResponseInterface;
 
 class Guzzle6HttpHandler
 {
-    /**
-     * @var ClientInterface
-     */
-    private $client;
+    private ClientInterface $client;
 
     /**
      * @param ClientInterface $client

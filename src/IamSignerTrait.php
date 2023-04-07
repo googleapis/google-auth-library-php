@@ -27,7 +27,7 @@ trait IamSignerTrait
     /**
      * @var Iam|null
      */
-    private $iam;
+    private ?Iam $iam;
 
     /**
      * Sign a string using the default service account private key.

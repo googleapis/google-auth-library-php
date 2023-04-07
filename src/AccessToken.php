@@ -63,7 +63,7 @@ class AccessToken
     /**
      * @var CacheItemPoolInterface
      */
-    private $cache;
+    private ?CacheItemPoolInterface $cache;
 
     /**
      * @param callable $httpHandler [optional] An HTTP Handler to deliver PSR-7 requests.

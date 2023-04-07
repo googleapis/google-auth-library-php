@@ -29,7 +29,7 @@ class InsecureCredentials implements FetchAuthTokenInterface
     /**
      * @var array{access_token:string}
      */
-    private $token = [
+    private array $token = [
         'access_token' => ''
     ];
 

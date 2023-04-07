@@ -73,7 +73,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @var ?UriInterface
      */
-    private $authorizationUri;
+    private ?UriInterface $authorizationUri;
 
     /**
      * - tokenCredentialUri
@@ -82,44 +82,44 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @var UriInterface
      */
-    private $tokenCredentialUri;
+    private ?UriInterface $tokenCredentialUri;
 
     /**
      * The redirection URI used in the initial request.
      *
      * @var ?string
      */
-    private $redirectUri;
+    private ?string $redirectUri;
 
     /**
      * A unique identifier issued to the client to identify itself to the
      * authorization server.
      *
-     * @var string
+     * @var ?string
      */
-    private $clientId;
+    private ?string $clientId;
 
     /**
      * A shared symmetric secret issued by the authorization server, which is
      * used to authenticate the client.
      *
-     * @var string
+     * @var ?string
      */
-    private $clientSecret;
+    private ?string $clientSecret;
 
     /**
      * The resource owner's username.
      *
      * @var ?string
      */
-    private $username;
+    private ?string $username;
 
     /**
      * The resource owner's password.
      *
      * @var ?string
      */
-    private $password;
+    private ?string $password;
 
     /**
      * The scope of the access request, expressed either as an Array or as a
@@ -127,14 +127,14 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @var ?array<string>
      */
-    private $scope;
+    private ?array $scope;
 
     /**
      * An arbitrary string designed to allow the client to maintain state.
      *
-     * @var string
+     * @var ?string
      */
-    private $state;
+    private ?string $state;
 
     /**
      * The authorization code issued to this client.
@@ -143,84 +143,84 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @var ?string
      */
-    private $code;
+    private ?string $code = null;
 
     /**
      * The issuer ID when using assertion profile.
      *
      * @var ?string
      */
-    private $issuer;
+    private ?string $issuer;
 
     /**
      * The target audience for assertions.
      *
-     * @var string
+     * @var ?string
      */
-    private $audience;
+    private ?string $audience;
 
     /**
      * The target sub when issuing assertions.
      *
-     * @var string
+     * @var ?string
      */
-    private $sub;
+    private ?string $sub;
 
     /**
      * The number of seconds assertions are valid for.
      *
      * @var int
      */
-    private $expiry;
+    private int $expiry;
 
     /**
      * The signing key when using assertion profile.
      *
      * @var ?string
      */
-    private $signingKey;
+    private ?string $signingKey;
 
     /**
      * The signing key id when using assertion profile. Param kid in jwt header
      *
-     * @var string
+     * @var ?string
      */
-    private $signingKeyId;
+    private ?string $signingKeyId;
 
     /**
      * The signing algorithm when using an assertion profile.
      *
      * @var ?string
      */
-    private $signingAlgorithm;
+    private ?string $signingAlgorithm;
 
     /**
      * The refresh token associated with the access token to be refreshed.
      *
      * @var ?string
      */
-    private $refreshToken;
+    private ?string $refreshToken = null;
 
     /**
      * The current access token.
      *
-     * @var string
+     * @var ?string
      */
-    private $accessToken;
+    private ?string $accessToken;
 
     /**
      * The current ID token.
      *
-     * @var string
+     * @var ?string
      */
-    private $idToken;
+    private ?string $idToken;
 
     /**
      * The lifetime in seconds of the current access token.
      *
      * @var ?int
      */
-    private $expiresIn;
+    private ?int $expiresIn;
 
     /**
      * The expiration time of the access token as a number of seconds since the
@@ -228,7 +228,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @var ?int
      */
-    private $expiresAt;
+    private ?int $expiresAt;
 
     /**
      * The issue time of the access token as a number of seconds since the unix
@@ -236,14 +236,14 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @var ?int
      */
-    private $issuedAt;
+    private ?int $issuedAt;
 
     /**
      * The current grant type.
      *
      * @var ?string
      */
-    private $grantType;
+    private ?string $grantType = null;
 
     /**
      * When using an extension grant type, this is the set of parameters used by
@@ -251,7 +251,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @var array<mixed>
      */
-    private $extensionParams;
+    private array $extensionParams;
 
     /**
      * When using the toJwt function, these claims will be added to the JWT
@@ -259,7 +259,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @var array<mixed>
      */
-    private $additionalClaims;
+    private array $additionalClaims;
 
     /**
      * Create a new OAuthCredentials.

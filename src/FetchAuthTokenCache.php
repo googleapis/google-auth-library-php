@@ -35,12 +35,12 @@ class FetchAuthTokenCache implements
     /**
      * @var FetchAuthTokenInterface
      */
-    private $fetcher;
+    private FetchAuthTokenInterface $fetcher;
 
     /**
      * @var int
      */
-    private $eagerRefreshThresholdSeconds = 10;
+    private int $eagerRefreshThresholdSeconds = 10;
 
     /**
      * @param FetchAuthTokenInterface $fetcher A credentials fetcher

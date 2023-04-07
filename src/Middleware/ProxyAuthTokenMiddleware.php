@@ -42,7 +42,7 @@ class ProxyAuthTokenMiddleware
     /**
      * @var FetchAuthTokenInterface
      */
-    private $fetcher;
+    private ?FetchAuthTokenInterface $fetcher;
 
     /**
      * @var ?callable

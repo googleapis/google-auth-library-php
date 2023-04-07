@@ -28,12 +28,12 @@ class IAMCredentials
     /**
      * @var string
      */
-    private $selector;
+    private string $selector;
 
     /**
      * @var string
      */
-    private $token;
+    private string $token;
 
     /**
      * @param string $selector the IAM selector

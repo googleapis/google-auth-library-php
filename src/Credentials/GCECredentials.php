@@ -118,51 +118,51 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @var bool
      */
-    private $hasCheckedOnGce = false;
+    private bool $hasCheckedOnGce = false;
 
     /**
      * Flag that stores the value of the onGCE check.
      *
      * @var bool
      */
-    private $isOnGce = false;
+    private bool $isOnGce = false;
 
     /**
      * Result of fetchAuthToken.
      *
      * @var array<mixed>
      */
-    protected $lastReceivedToken;
+    protected array $lastReceivedToken;
 
     /**
      * @var string|null
      */
-    private $clientName;
+    private ?string $clientName;
 
     /**
      * @var string|null
      */
-    private $projectId;
+    private ?string $projectId;
 
     /**
      * @var string
      */
-    private $tokenUri;
+    private string $tokenUri;
 
     /**
      * @var string
      */
-    private $targetAudience;
+    private ?string $targetAudience = null;
 
     /**
      * @var string|null
      */
-    private $quotaProject;
+    private ?string $quotaProject;
 
     /**
      * @var string|null
      */
-    private $serviceAccountIdentity;
+    private ?string $serviceAccountIdentity;
 
     /**
      * @param Iam $iam [optional] An IAM instance.

@@ -26,15 +26,8 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
 {
     use IamSignerTrait;
 
-    /**
-     * @var string
-     */
-    protected $impersonatedServiceAccountName;
-
-    /**
-     * @var UserRefreshCredentials
-     */
-    protected $sourceCredentials;
+    protected string $impersonatedServiceAccountName;
+    protected UserRefreshCredentials $sourceCredentials;
 
     /**
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that has be created with

@@ -65,19 +65,16 @@ class AppIdentityCredentials extends CredentialsLoader implements
      *
      * @var array<mixed>
      */
-    protected $lastReceivedToken;
+    protected array $lastReceivedToken;
 
     /**
      * Array of OAuth2 scopes to be requested.
      *
      * @var string[]
      */
-    private $scope;
+    private array $scope;
 
-    /**
-     * @var string
-     */
-    private $clientName;
+    private string $clientName;
 
     /**
      * @param string|string[] $scope One or more scopes.

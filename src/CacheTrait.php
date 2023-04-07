@@ -24,17 +24,17 @@ trait CacheTrait
     /**
      * @var int
      */
-    private $maxKeyLength = 64;
+    private int $maxKeyLength = 64;
 
     /**
      * @var array<mixed>
      */
-    private $cacheConfig;
+    private array $cacheConfig = [];
 
     /**
      * @var ?CacheItemPoolInterface
      */
-    private $cache;
+    private ?CacheItemPoolInterface $cache = null;
 
     /**
      * Gets the cached value if it is present in the cache when that is

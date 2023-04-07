@@ -39,14 +39,14 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      *
      * @var OAuth2
      */
-    protected $auth;
+    protected OAuth2 $auth;
 
     /**
      * The quota project associated with the JSON credentials
      *
      * @var string
      */
-    protected $quotaProject;
+    protected string $quotaProject;
 
     /**
      * Create a new UserRefreshCredentials.

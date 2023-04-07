@@ -27,7 +27,7 @@ class HttpClientCache
     /**
      * @var ClientInterface|null
      */
-    private static $httpClient;
+    private static ?ClientInterface $httpClient = null;
 
     /**
      * Cache an HTTP Client for later calls.

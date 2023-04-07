@@ -45,19 +45,19 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
      *
      * @var OAuth2
      */
-    protected $auth;
+    protected OAuth2 $auth;
 
     /**
      * The quota project associated with the JSON credentials
      *
      * @var string
      */
-    protected $quotaProject;
+    protected string $quotaProject;
 
     /**
      * @var string
      */
-    public $projectId;
+    public string $projectId;
 
     /**
      * Create a new ServiceAccountJwtAccessCredentials.
