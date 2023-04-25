@@ -656,6 +656,54 @@ class ADCGetCredentialsWithQuotaProjectTest extends TestCase
         );
     }
 
+    public function testGetCredentialsUtilizesQuotaProjectEnvVar()
+    {
+        $quotaProject = 'quota-project-from-env-var';
+        putenv(ServiceAccountCredentials::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
+
+        $credentials = ApplicationDefaultCredentials::getCredentials();
+
+        $this->assertEquals(
+            $quotaProject,
+            $credentials->getQuotaProject()
+        );
+    }
+
+    public function testGetCredentialsUtilizesQuotaProjectParameterOverEnvVar()
+    {
+        $quotaProject = 'quota-project-from-parameter';
+        putenv(ServiceAccountCredentials::QUOTA_PROJECT_ENV_VAR . '=quota-project-from-env-var');
+
+        $credentials = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            null, // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            $quotaProject, // $quotaProject
+            null  // $defaultScope
+        );
+
+        $this->assertEquals(
+            $quotaProject,
+            $credentials->getQuotaProject()
+        );
+    }
+
+    public function testGetCredentialsUtilizesQuotaProjectEnvVarOverKeyFile()
+    {
+        $quotaProject = 'quota-project-from-env-var';
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(ServiceAccountCredentials::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+
+        $credentials = ApplicationDefaultCredentials::getCredentials();
+
+        $this->assertEquals(
+            $quotaProject,
+            $credentials->getQuotaProject()
+        );
+    }
+
     public function testWithFetchAuthTokenCacheAndExplicitQuotaProject()
     {
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
