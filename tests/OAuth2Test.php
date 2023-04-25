@@ -757,6 +757,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
             'access_token' => 'an_access_token',
             'id_token' => 'an_id_token',
             'refresh_token' => 'a_refresh_token',
+            'scope' => 'scope1 scope2',
         ];
         $json = json_encode($wanted_updates);
         $httpHandler = getHandler([
@@ -776,6 +777,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         $this->assertEquals('an_access_token', $o->getAccessToken());
         $this->assertEquals('an_id_token', $o->getIdToken());
         $this->assertEquals('a_refresh_token', $o->getRefreshToken());
+        $this->assertEquals('scope1 scope2', $o->getGrantedScope());
     }
 
     public function testUpdatesTokenFieldsOnFetchMissingRefreshToken()

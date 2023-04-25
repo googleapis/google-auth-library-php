@@ -5,7 +5,8 @@ on:
             - main
         tags:
             - "*"
-
+permissions:
+  contents: read
 jobs:
     docs:
         name: "Generate Project Documentation"
