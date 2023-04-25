@@ -17,17 +17,13 @@
 
 namespace Google\Auth\Tests\Credentials;
 
-use DomainException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\CredentialsLoader;
-use Google\Auth\OAuth2;
-use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use LogicException;
 use PHPUnit\Framework\TestCase;
