@@ -656,6 +656,7 @@ class ADCGetCredentialsWithQuotaProjectTest extends TestCase
         );
     }
 
+    /** @runInSeparateProcess */
     public function testGetCredentialsUtilizesQuotaProjectEnvVar()
     {
         $quotaProject = 'quota-project-from-env-var';
@@ -669,6 +670,7 @@ class ADCGetCredentialsWithQuotaProjectTest extends TestCase
         );
     }
 
+    /** @runInSeparateProcess */
     public function testGetCredentialsUtilizesQuotaProjectParameterOverEnvVar()
     {
         $quotaProject = 'quota-project-from-parameter';
