@@ -259,7 +259,7 @@ class URCFetchAuthTokenTest extends TestCase
     {
         $responseJson = json_encode(['scope' => 'scope/1 scope/2']);
         $httpHandler = getHandler([
-            buildResponse(200, [], Utils::streamFor($responseJson)),
+            new Response(200, [], Utils::streamFor($responseJson)),
         ]);
         $sa = new UserRefreshCredentials(
             '',
