@@ -2,6 +2,14 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.26.0](https://github.com/googleapis/google-auth-library-php/compare/v1.25.0...v1.26.0) (2023-03-30)
+
+
+### Features
+
+* Access granted scopes  ([#441](https://github.com/googleapis/google-auth-library-php/issues/441)) ([3e5c9f1](https://github.com/googleapis/google-auth-library-php/commit/3e5c9f163b6e45c88afc437d41ecb106d8a9951f))
+* Add support for phpseclib3 ([#425](https://github.com/googleapis/google-auth-library-php/issues/425)) ([623acee](https://github.com/googleapis/google-auth-library-php/commit/623acee9b290f14c7402d2b02a2240c6ae37edb2))
+
 ## [1.25.0](https://github.com/googleapis/google-auth-library-php/compare/v1.24.0...v1.25.0) (2023-01-26)
 
 
