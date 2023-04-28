@@ -20,9 +20,12 @@ namespace Google\Auth\Tests;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class GCECacheTest extends BaseTest
 {
+    use ProphecyTrait;
+
     private $mockCacheItem;
     private $mockCache;
 
