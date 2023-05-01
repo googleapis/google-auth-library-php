@@ -595,6 +595,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $quotaProject = 'quota-project-from-env-var';
         putenv(ServiceAccountCredentials::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
+        putenv('HOME=' . __DIR__ . '/fixtures');
 
         $credentials = ApplicationDefaultCredentials::getCredentials();
 
@@ -609,6 +610,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $quotaProject = 'quota-project-from-parameter';
         putenv(ServiceAccountCredentials::QUOTA_PROJECT_ENV_VAR . '=quota-project-from-env-var');
+        putenv('HOME=' . __DIR__ . '/fixtures');
 
         $credentials = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
