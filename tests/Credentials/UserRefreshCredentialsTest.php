@@ -21,6 +21,7 @@ use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\OAuth2;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use LogicException;
@@ -214,7 +215,7 @@ class URCFetchAuthTokenTest extends TestCase
         $testJson = createURCTestJson();
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
-            buildResponse(400),
+            new Response(400),
         ]);
         $sa = new UserRefreshCredentials(
             $scope,
@@ -229,7 +230,7 @@ class URCFetchAuthTokenTest extends TestCase
         $testJson = createURCTestJson();
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
-            buildResponse(500),
+            new Response(500),
         ]);
         $sa = new UserRefreshCredentials(
             $scope,
@@ -244,7 +245,7 @@ class URCFetchAuthTokenTest extends TestCase
         $testJsonText = json_encode($testJson);
         $scope = ['scope/1', 'scope/2'];
         $httpHandler = getHandler([
-            buildResponse(200, [], Utils::streamFor($testJsonText)),
+            new Response(200, [], Utils::streamFor($testJsonText)),
         ]);
         $sa = new UserRefreshCredentials(
             $scope,
@@ -258,7 +259,7 @@ class URCFetchAuthTokenTest extends TestCase
     {
         $responseJson = json_encode(['scope' => 'scope/1 scope/2']);
         $httpHandler = getHandler([
-            buildResponse(200, [], Utils::streamFor($responseJson)),
+            new Response(200, [], Utils::streamFor($responseJson)),
         ]);
         $sa = new UserRefreshCredentials(
             '',

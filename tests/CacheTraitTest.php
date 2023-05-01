@@ -20,9 +20,12 @@ namespace Google\Auth\Tests;
 use Google\Auth\CacheTrait;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class CacheTraitTest extends TestCase
 {
+    use ProphecyTrait;
+
     private $mockFetcher;
     private $mockCacheItem;
     private $mockCache;
@@ -51,7 +54,7 @@ class CacheTraitTest extends TestCase
             'cache' => $this->mockCache->reveal(),
         ]);
 
-        $cachedValue = $implementation->gCachedValue();
+        $cachedValue = $implementation->getCachedValue('key');
         $this->assertEquals($expectedValue, $cachedValue);
     }
 
@@ -72,10 +75,9 @@ class CacheTraitTest extends TestCase
 
         $implementation = new CacheTraitImplementation([
             'cache' => $this->mockCache->reveal(),
-            'key' => $key,
         ]);
 
-        $cachedValue = $implementation->gCachedValue();
+        $cachedValue = $implementation->getCachedValue($key);
         $this->assertEquals($expectedValue, $cachedValue);
     }
 
@@ -98,10 +100,9 @@ class CacheTraitTest extends TestCase
 
         $implementation = new CacheTraitImplementation([
             'cache' => $this->mockCache->reveal(),
-            'key' => $key
         ]);
 
-        $cachedValue = $implementation->gCachedValue();
+        $cachedValue = $implementation->getCachedValue($key);
         $this->assertEquals($expectedValue, $cachedValue);
     }
 
@@ -109,7 +110,7 @@ class CacheTraitTest extends TestCase
     {
         $implementation = new CacheTraitImplementation();
 
-        $cachedValue = $implementation->gCachedValue();
+        $cachedValue = $implementation->getCachedValue('key');
         $this->assertEquals(null, $cachedValue);
     }
 
@@ -117,10 +118,9 @@ class CacheTraitTest extends TestCase
     {
         $implementation = new CacheTraitImplementation([
             'cache' => $this->mockCache->reveal(),
-            'key'   => null,
         ]);
 
-        $cachedValue = $implementation->gCachedValue();
+        $cachedValue = $implementation->getCachedValue(null);
         $this->assertEquals(null, $cachedValue);
     }
 
@@ -142,53 +142,44 @@ class CacheTraitTest extends TestCase
             'cache' => $this->mockCache->reveal(),
         ]);
 
-        $implementation->sCachedValue($value);
+        $implementation->setCachedValue('key', $value);
     }
 
     public function testFailsSetToCacheWithNoCache()
     {
         $implementation = new CacheTraitImplementation();
 
-        $implementation->sCachedValue('1234');
+        $implementation->setCachedValue('key', '1234');
 
-        $cachedValue = $implementation->sCachedValue('1234');
+        $cachedValue = $implementation->getCachedValue('key', '1234');
         $this->assertNull($cachedValue);
     }
 
     public function testFailsSetToCacheWithoutKey()
     {
         $implementation = new CacheTraitImplementation([
-            'cache' => $this->mockCache,
+            'cache' => $this->mockCache->reveal(),
             'key'   => null,
         ]);
 
-        $cachedValue = $implementation->sCachedValue('1234');
+        $cachedValue = $implementation->setCachedValue(null, '1234');
         $this->assertNull($cachedValue);
     }
 }
 
 class CacheTraitImplementation
 {
-    use CacheTrait;
+    use CacheTrait {
+        getCachedValue as public;
+        setCachedValue as public;
+    }
 
     public function __construct(array $config = [])
     {
-        $this->key = array_key_exists('key', $config) ? $config['key'] : 'key';
-        $this->cache = isset($config['cache']) ? $config['cache'] : null;
+        $this->cache = $config['cache'] ?? null;
         $this->cacheConfig = [
             'prefix' => '',
             'lifetime' => 1000,
         ];
-    }
-
-    // allows us to keep trait methods private
-    public function gCachedValue()
-    {
-        return $this->getCachedValue($this->key);
-    }
-
-    public function sCachedValue($v)
-    {
-        $this->setCachedValue($this->key, $v);
     }
 }
