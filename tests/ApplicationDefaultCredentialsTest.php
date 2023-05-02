@@ -628,6 +628,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         );
     }
 
+    /** @runInSeparateProcess */
     public function testGetCredentialsUtilizesQuotaProjectEnvVarOverKeyFile()
     {
         $quotaProject = 'quota-project-from-env-var';
