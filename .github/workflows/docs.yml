@@ -5,8 +5,11 @@ on:
             - main
         tags:
             - "*"
+        workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
     docs:
         name: "Generate Project Documentation"
