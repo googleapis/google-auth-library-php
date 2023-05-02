@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="robots" content="index, follow, all" />
-    <title>Google\Auth\HttpHandler\Guzzle5HttpHandler | Google Auth Library for PHP API Reference</title>
+    <title>Google\Auth\Middleware\AuthTokenMiddleware | Google Auth Library for PHP API Reference</title>
 
             <link rel="stylesheet" type="text/css" href="../../../css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="../../../css/bootstrap-theme.min.css">
@@ -19,7 +19,7 @@
     
     </head>
 
-    <body id="class" data-name="class:Google_Auth_HttpHandler_Guzzle5HttpHandler" data-root-path="../../../">
+    <body id="class" data-name="class:Google_Auth_Middleware_AuthTokenMiddleware" data-root-path="../../../">
             <div id="content">
         <div id="left-column">
                 <div id="control-panel">
@@ -72,6 +72,7 @@
                                             <option value="../../../../v1.24.0/index.html" data-version="v1.24.0">v1.24.0</option>
                                             <option value="../../../../v1.25.0/index.html" data-version="v1.25.0">v1.25.0</option>
                                             <option value="../../../../v1.26.0/index.html" data-version="v1.26.0">v1.26.0</option>
+                                            <option value="../../../../v1.27.0/index.html" data-version="v1.27.0">v1.27.0</option>
                                             <option value="../../../../main/index.html" data-version="main">main branch</option>
                                     </select>
             </form>
@@ -118,32 +119,33 @@
                         <div class="namespace-breadcrumbs">
             <ol class="breadcrumb">
                 <li><span class="label label-default">class</span></li>
-                        <li><a href="../../../Google.html">Google</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth.html">Auth</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth/HttpHandler.html">HttpHandler</a></li><li class="backslash">\</li><li>Guzzle5HttpHandler</li>
+                        <li><a href="../../../Google.html">Google</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth.html">Auth</a></li><li class="backslash">\</li><li><a href="../../../Google/Auth/Middleware.html">Middleware</a></li><li class="backslash">\</li><li>AuthTokenMiddleware</li>
             </ol>
         </div>
                 <div id="page-content">
                 
     <div class="page-header">
         <h1>
-            Guzzle5HttpHandler
-                <small><sup><span class="label label-danger">deprecated</span></sup></small>
+            AuthTokenMiddleware
+                
         </h1>
     </div>
 
     <p>    class
-    <strong>Guzzle5HttpHandler</strong>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/HttpHandler/Guzzle5HttpHandler.php">View source</a>)
+    <strong>AuthTokenMiddleware</strong>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/Middleware/AuthTokenMiddleware.php">View source</a>)
 </p>
 
         
-            <p>
-                <small><sup><span class="label label-danger">deprecated</span></sup></small>
-                            <tr>
-                    <td></td>
-                    <td></td>
-                </tr>
-                    </p>
     
 
+            <div class="description">
+            <p>AuthTokenMiddleware is a Guzzle Middleware that adds an Authorization header
+provided by an object implementing FetchAuthTokenInterface.</p>            <p>The FetchAuthTokenInterface#fetchAuthToken is used to obtain a hash; one of
+the values value in that hash is added as the authorization header.</p>
+
+<p>Requests will be accessed with the authorization header:</p>
+
+<p>'authorization' 'Bearer <value of auth_token>'</p>                    </div>
     
     
     
@@ -156,30 +158,19 @@
                     
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method___construct">__construct</a>(<abbr title="GuzzleHttp\ClientInterface">ClientInterface</abbr> $client)
+                    <a href="#method___construct">__construct</a>(<a href="../../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a> $fetcher, callable $httpHandler = null, callable $tokenCallback = null)
         
-                                            <p class="no-description">No description</p>
-                                    </div>
+                                            <p>Creates a new AuthTokenMiddleware.</p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    <abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr>
+                    <a target="_blank" href="http://php.net/Closure">Closure</a>
                 </div>
                 <div class="col-md-8 type">
-                    <a href="#method___invoke">__invoke</a>(<abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr> $request, array $options = [])
+                    <a href="#method___invoke">__invoke</a>(callable $handler)
         
-                                            <p>Accepts a PSR-7 Request and an array of options and returns a PSR-7 response.</p>                </div>
-                <div class="col-md-2"></div>
-            </div>
-                    <div class="row">
-                <div class="col-md-2 type">
-                    <abbr title="GuzzleHttp\Promise\Promise">Promise</abbr>
-                </div>
-                <div class="col-md-8 type">
-                    <a href="#method_async">async</a>(<abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr> $request, array $options = [])
-        
-                                            <p>Accepts a PSR-7 request and an array of options and returns a PromiseInterface</p>                </div>
+                                            <p>Updates the request with an Authorization header when auth is 'google_auth'.</p>                </div>
                 <div class="col-md-2"></div>
             </div>
             </div>
@@ -190,23 +181,35 @@
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/HttpHandler/Guzzle5HttpHandler.php#L41">line 41</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/Middleware/AuthTokenMiddleware.php#L59">line 59</a></div>
         <code>                    
-    <strong>__construct</strong>(<abbr title="GuzzleHttp\ClientInterface">ClientInterface</abbr> $client)
+    <strong>__construct</strong>(<a href="../../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a> $fetcher, callable $httpHandler = null, callable $tokenCallback = null)
         </code>
     </h3>
     <div class="details">
             
     
 
+                    <div class="method-description">
+                                    <p>Creates a new AuthTokenMiddleware.</p>                                                </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
-                <td><abbr title="GuzzleHttp\ClientInterface">ClientInterface</abbr></td>
-                <td>$client</td>
-                <td></td>
+                <td><a href="../../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a></td>
+                <td>$fetcher</td>
+                <td>is used to fetch the auth token</td>
+            </tr>
+                    <tr>
+                <td>callable</td>
+                <td>$httpHandler</td>
+                <td>(optional) callback which delivers psr7 request</td>
+            </tr>
+                    <tr>
+                <td>callable</td>
+                <td>$tokenCallback</td>
+                <td>(optional) function to be called when a new token is fetched.</td>
             </tr>
             </table>
 
@@ -219,9 +222,9 @@
             </div>
                     <div class="method-item">
                     <h3 id="method___invoke">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/HttpHandler/Guzzle5HttpHandler.php#L53">line 53</a></div>
-        <code>                    <abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr>
-    <strong>__invoke</strong>(<abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr> $request, array $options = [])
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/Middleware/AuthTokenMiddleware.php#L94">line 94</a></div>
+        <code>                    <a target="_blank" href="http://php.net/Closure">Closure</a>
+    <strong>__invoke</strong>(callable $handler)
         </code>
     </h3>
     <div class="details">
@@ -229,19 +232,31 @@
     
 
                     <div class="method-description">
-                                    <p>Accepts a PSR-7 Request and an array of options and returns a PSR-7 response.</p>                                                </div>
+                                    <p>Updates the request with an Authorization header when auth is 'google_auth'.</p>                    <p>use Google\Auth\Middleware\AuthTokenMiddleware;
+  use Google\Auth\OAuth2;
+  use GuzzleHttp\Client;
+  use GuzzleHttp\HandlerStack;</p>
+
+<p>$config = [..<oauth config param>.];
+  $oauth2 = new OAuth2($config)
+  $middleware = new AuthTokenMiddleware($oauth2);
+  $stack = HandlerStack::create();
+  $stack->push($middleware);</p>
+
+<p>$client = new Client([
+      'handler' => $stack,
+      'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
+      'auth' => 'google_auth' // authorize all requests
+  ]);</p>
+
+<p>$res = $client->get('myproject/taskqueues/myqueue');</p>                            </div>
                 <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
-                <td><abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr></td>
-                <td>$request</td>
-                <td></td>
-            </tr>
-                    <tr>
-                <td>array</td>
-                <td>$options</td>
+                <td>callable</td>
+                <td>$handler</td>
                 <td></td>
             </tr>
             </table>
@@ -251,52 +266,7 @@
 
                     <table class="table table-condensed">
         <tr>
-            <td><abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr></td>
-            <td></td>
-        </tr>
-    </table>
-
-            
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_async">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/HttpHandler/Guzzle5HttpHandler.php#L69">line 69</a></div>
-        <code>                    <abbr title="GuzzleHttp\Promise\Promise">Promise</abbr>
-    <strong>async</strong>(<abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr> $request, array $options = [])
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                    <div class="method-description">
-                                    <p>Accepts a PSR-7 request and an array of options and returns a PromiseInterface</p>                                                </div>
-                <div class="tags">
-                            <h4>Parameters</h4>
-
-                    <table class="table table-condensed">
-                    <tr>
-                <td><abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr></td>
-                <td>$request</td>
-                <td></td>
-            </tr>
-                    <tr>
-                <td>array</td>
-                <td>$options</td>
-                <td></td>
-            </tr>
-            </table>
-
-            
-                            <h4>Return Value</h4>
-
-                    <table class="table table-condensed">
-        <tr>
-            <td><abbr title="GuzzleHttp\Promise\Promise">Promise</abbr></td>
+            <td><a target="_blank" href="http://php.net/Closure">Closure</a></td>
             <td></td>
         </tr>
     </table>
