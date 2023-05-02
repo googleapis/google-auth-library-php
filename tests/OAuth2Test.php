@@ -22,6 +22,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Query;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -685,7 +686,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
 
         $testConfig = $this->fetchAuthTokenMinimal;
         $httpHandler = getHandler([
-            buildResponse(400),
+            new Response(400),
         ]);
         $o = new OAuth2($testConfig);
         $o->fetchAuthToken($httpHandler);
@@ -697,7 +698,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
 
         $testConfig = $this->fetchAuthTokenMinimal;
         $httpHandler = getHandler([
-            buildResponse(500),
+            new Response(500),
         ]);
         $o = new OAuth2($testConfig);
         $o->fetchAuthToken($httpHandler);
@@ -711,7 +712,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         $testConfig = $this->fetchAuthTokenMinimal;
         $notJson = '{"foo": , this is cannot be passed as json" "bar"}';
         $httpHandler = getHandler([
-            buildResponse(200, [], Utils::streamFor($notJson)),
+            new Response(200, [], Utils::streamFor($notJson)),
         ]);
         $o = new OAuth2($testConfig);
         $o->fetchAuthToken($httpHandler);
@@ -722,7 +723,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         $testConfig = $this->fetchAuthTokenMinimal;
         $json = '{"foo": "bar"}';
         $httpHandler = getHandler([
-            buildResponse(200, [], Utils::streamFor($json)),
+            new Response(200, [], Utils::streamFor($json)),
         ]);
         $o = new OAuth2($testConfig);
         $tokens = $o->fetchAuthToken($httpHandler);
@@ -734,7 +735,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         $testConfig = $this->fetchAuthTokenMinimal;
         $json = 'foo=bar&spice=nice';
         $httpHandler = getHandler([
-            buildResponse(
+            new Response(
                 200,
                 ['Content-Type' => 'application/x-www-form-urlencoded'],
                 Utils::streamFor($json)
@@ -760,7 +761,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         ];
         $json = json_encode($wanted_updates);
         $httpHandler = getHandler([
-            buildResponse(200, [], Utils::streamFor($json)),
+            new Response(200, [], Utils::streamFor($json)),
         ]);
         $o = new OAuth2($testConfig);
         $this->assertNull($o->getExpiresAt());
@@ -792,7 +793,7 @@ class OAuth2FetchAuthTokenTest extends TestCase
         ];
         $json = json_encode($wanted_updates);
         $httpHandler = getHandler([
-            buildResponse(200, [], Utils::streamFor($json)),
+            new Response(200, [], Utils::streamFor($json)),
         ]);
         $o = new OAuth2($testConfig);
         $this->assertNull($o->getExpiresAt());

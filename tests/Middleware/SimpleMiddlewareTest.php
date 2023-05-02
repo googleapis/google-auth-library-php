@@ -23,10 +23,13 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\UriInterface;
 
 class SimpleMiddlewareTest extends BaseTest
 {
+    use ProphecyTrait;
+
     private $mockRequest;
 
     /**

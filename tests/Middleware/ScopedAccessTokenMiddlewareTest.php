@@ -23,9 +23,12 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class ScopedAccessTokenMiddlewareTest extends BaseTest
 {
+    use ProphecyTrait;
+
     const TEST_SCOPE = 'https://www.googleapis.com/auth/cloud-taskqueue';
 
     private $mockCacheItem;

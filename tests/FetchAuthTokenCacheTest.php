@@ -22,10 +22,13 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenCache;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use RuntimeException;
 
 class FetchAuthTokenCacheTest extends BaseTest
 {
+    use ProphecyTrait;
+
     private $mockFetcher;
     private $mockCacheItem;
     private $mockCache;

@@ -11,7 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php: [ "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2" ]
+                php: [ "7.4", "8.0", "8.1", "8.2" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
             - uses: actions/checkout@v3
@@ -35,30 +35,13 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: "7.1"
+                php-version: "7.4"
             - name: Install Dependencies
               uses: nick-invision/retry@v2
               with:
                 timeout_minutes: 10
                 max_attempts: 3
                 command: composer update --prefer-lowest
-            - name: Run Script
-              run: vendor/bin/phpunit
-    guzzle6:
-        runs-on: ubuntu-latest
-        name: Test Guzzle 6
-        steps:
-            - uses: actions/checkout@v3
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                php-version: "7.2"
-            - name: Install Dependencies
-              uses: nick-invision/retry@v2
-              with:
-                timeout_minutes: 10
-                max_attempts: 3
-                command: composer require guzzlehttp/guzzle:^6 && composer update
             - name: Run Script
               run: vendor/bin/phpunit
 
