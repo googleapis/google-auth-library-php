@@ -21,6 +21,7 @@ use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\CredentialsLoader;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
@@ -594,7 +595,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     public function testGetCredentialsUtilizesQuotaProjectEnvVar()
     {
         $quotaProject = 'quota-project-from-env-var';
-        putenv(ServiceAccountCredentials::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
+        putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
         putenv('HOME=' . __DIR__ . '/fixtures');
 
         $credentials = ApplicationDefaultCredentials::getCredentials();
@@ -609,7 +610,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     public function testGetCredentialsUtilizesQuotaProjectParameterOverEnvVar()
     {
         $quotaProject = 'quota-project-from-parameter';
-        putenv(ServiceAccountCredentials::QUOTA_PROJECT_ENV_VAR . '=quota-project-from-env-var');
+        putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=quota-project-from-env-var');
         putenv('HOME=' . __DIR__ . '/fixtures');
 
         $credentials = ApplicationDefaultCredentials::getCredentials(
@@ -631,8 +632,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $quotaProject = 'quota-project-from-env-var';
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
-        putenv(ServiceAccountCredentials::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
+        putenv(CredentialsLoader::ENV_VAR . '=' . $keyFile);
 
         $credentials = ApplicationDefaultCredentials::getCredentials();
 
