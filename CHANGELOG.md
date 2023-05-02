@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.27.0](https://github.com/googleapis/google-auth-library-php/compare/v1.26.0...v1.27.0) (2023-05-02)
+
+
+### Features
+
+* **deps:** Add support for psr/http-message 2.0 ([#449](https://github.com/googleapis/google-auth-library-php/issues/449)) ([bc71f90](https://github.com/googleapis/google-auth-library-php/commit/bc71f90ef75681fdcd36cf826c130bfb44435806))
+
 ## [1.26.0](https://github.com/googleapis/google-auth-library-php/compare/v1.25.0...v1.26.0) (2023-03-30)
 
 
