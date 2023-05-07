@@ -36,10 +36,10 @@ class AccessTokenTest extends TestCase
 
     private $cache;
     private $payload;
-
     private $token;
     private $publicKey;
     private $allowedAlgs;
+    private $jwt;
 
     public function setUp(): void
     {
