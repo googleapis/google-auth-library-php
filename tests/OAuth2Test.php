@@ -180,7 +180,12 @@ class OAuth2AuthorizationUriTest extends TestCase
         $o = new OAuth2($this->minimal);
         $codeVerifier = $o->generateCodeVerifier();
         $this->assertEquals(128, strlen($codeVerifier));
+        // The generated code verifier is set on the object
+        $this->assertEquals($o->getCodeVerifier(), $codeVerifier);
+        // When it's called again, it generates a new one
         $this->assertNotEquals($codeVerifier, $o->generateCodeVerifier());
+        // The new code verifier is set on the object
+        $this->assertNotEquals($codeVerifier, $o->getCodeVerifier());
     }
 
     public function testIncludesTheScope()

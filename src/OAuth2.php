@@ -778,11 +778,13 @@ class OAuth2 implements FetchAuthTokenInterface
      * determined using random_int, hashed using "hash" and sha256, and base64
      * encoded.
      *
+     * When this method is called, the code verifier is set on the object.
+     *
      * @return string
      */
     public function generateCodeVerifier(): string
     {
-        return $this->generateRandomString(128);
+        return $this->codeVerifier = $this->generateRandomString(128);
     }
 
     private function getCodeChallenge(string $randomString): string
