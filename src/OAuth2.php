@@ -774,6 +774,14 @@ class OAuth2 implements FetchAuthTokenInterface
         $this->codeVerifier = $codeVerifier;
     }
 
+    /**
+     * Generates a random 128-character string for the "code_verifier" parameter
+     * in PKCE for OAuth 2.0. This is a cryptographically random string that is
+     * determined using random_int, hashed using "hash" and sha256, and base64
+     * encoded.
+     *
+     * @return string
+     */
     public function generateCodeVerifier(): string
     {
         return $this->generateRandomString(128);
