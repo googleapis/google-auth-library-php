@@ -726,7 +726,6 @@ class OAuth2 implements FetchAuthTokenInterface
             );
         }
         if ($this->codeVerifier) {
-            // throw new \Exception('here');
             $params['code_challenge'] = $this->getCodeChallenge(
                 $params['code_verifier'] ?? $this->codeVerifier
             );
