@@ -175,6 +175,14 @@ class OAuth2AuthorizationUriTest extends TestCase
         $this->assertEquals('S256', $q['code_challenge_method']);
     }
 
+    public function testGenerateCodeVerifier()
+    {
+        $o = new OAuth2($this->minimal);
+        $codeVerifier = $o->generateCodeVerifier();
+        $this->assertEquals(128, strlen($codeVerifier));
+        $this->assertNotEquals($codeVerifier, $o->generateCodeVerifier());
+    }
+
     public function testIncludesTheScope()
     {
         $with_strings = array_merge($this->minimal, ['scope' => 'scope1 scope2']);
@@ -704,7 +712,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $req = $o->generateCredentialsRequest();
         $fields = Query::parse((string) $req->getBody());
         $this->assertArrayHasKey('code_verifier', $fields);
-        $this->assertEquals($codeVerifier, $fields['code_verifier']);;
+        $this->assertEquals($codeVerifier, $fields['code_verifier']);
 
         // test in settter
         $o = new OAuth2($this->tokenRequestMinimal);
@@ -713,7 +721,7 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $req = $o->generateCredentialsRequest();
         $q = Query::parse((string) $req->getBody());
         $this->assertArrayHasKey('code_verifier', $q);
-        $this->assertEquals($codeVerifier, $q['code_verifier']);;
+        $this->assertEquals($codeVerifier, $q['code_verifier']);
     }
 }
 

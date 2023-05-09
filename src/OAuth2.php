@@ -690,7 +690,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Builds the authorization Uri that the user should be redirected to.
      *
-     * @param array<mixed> Configuration options that customize the return url.
+     * @param array<mixed> $config Configuration options that customize the return url.
      * @return UriInterface the authorization Url.
      * @throws InvalidArgumentException
      */
@@ -792,9 +792,10 @@ class OAuth2 implements FetchAuthTokenInterface
 
     private function generateRandomString(int $length): string
     {
-        $validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
+        $validChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~';
         $validCharsLen = strlen($validChars);
         $str = '';
+        $i = 0;
         while ($i++ < $length) {
             $str .= $validChars[random_int(0, $validCharsLen - 1)];
         }
