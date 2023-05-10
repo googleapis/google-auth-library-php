@@ -690,7 +690,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Builds the authorization Uri that the user should be redirected to.
      *
-     * @param array<mixed> $config Configuration options that customize the return url.
+     * @param array<mixed> $config configuration options that customize the return url.
      * @return UriInterface the authorization Url.
      * @throws InvalidArgumentException
      */
@@ -726,9 +726,7 @@ class OAuth2 implements FetchAuthTokenInterface
             );
         }
         if ($this->codeVerifier) {
-            $params['code_challenge'] = $this->getCodeChallenge(
-                $params['code_verifier'] ?? $this->codeVerifier
-            );
+            $params['code_challenge'] = $this->getCodeChallenge($this->codeVerifier);
             $params['code_challenge_method'] = $this->getCodeChallengeMethod();
         }
 
