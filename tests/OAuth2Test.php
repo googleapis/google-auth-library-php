@@ -151,6 +151,43 @@ class OAuth2AuthorizationUriTest extends TestCase
         $this->assertEquals('o_state', $q['state']);
     }
 
+    public function testAuthorizationUriWithCodeVerifier()
+    {
+        $codeVerifier = 'my_code_verifier';
+        $expectedCodeChallenge = 'DLIjHQaEUYlb3dD1s35ERX1uDg0eu3_9ggFsQayed5c';
+
+        // test in constructor
+        $config = array_merge($this->minimal, ['codeVerifier' => $codeVerifier]);
+        $o = new OAuth2($config);
+        $q = Query::parse($o->buildFullAuthorizationUri()->getQuery());
+        $this->assertArrayNotHasKey('code_verifier', $q);
+        $this->assertArrayHasKey('code_challenge', $q);
+        $this->assertEquals($expectedCodeChallenge, $q['code_challenge']);
+        $this->assertEquals('S256', $q['code_challenge_method']);
+
+        // test in settter
+        $o = new OAuth2($this->minimal);
+        $o->setCodeVerifier($codeVerifier);
+        $q = Query::parse($o->buildFullAuthorizationUri()->getQuery());
+        $this->assertArrayNotHasKey('code_verifier', $q);
+        $this->assertArrayHasKey('code_challenge', $q);
+        $this->assertEquals($expectedCodeChallenge, $q['code_challenge']);
+        $this->assertEquals('S256', $q['code_challenge_method']);
+    }
+
+    public function testGenerateCodeVerifier()
+    {
+        $o = new OAuth2($this->minimal);
+        $codeVerifier = $o->generateCodeVerifier();
+        $this->assertEquals(128, strlen($codeVerifier));
+        // The generated code verifier is set on the object
+        $this->assertEquals($o->getCodeVerifier(), $codeVerifier);
+        // When it's called again, it generates a new one
+        $this->assertNotEquals($codeVerifier, $o->generateCodeVerifier());
+        // The new code verifier is set on the object
+        $this->assertNotEquals($codeVerifier, $o->getCodeVerifier());
+    }
+
     public function testIncludesTheScope()
     {
         $with_strings = array_merge($this->minimal, ['scope' => 'scope1 scope2']);
@@ -665,6 +702,31 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $fields = Query::parse((string)$req->getBody());
         $this->assertEquals('my_value', $fields['my_param']);
         $this->assertEquals('urn:my_test_grant_type', $fields['grant_type']);
+    }
+
+    public function testTokenUriWithCodeVerifier()
+    {
+        $codeVerifier = 'my_code_verifier';
+
+        // test in constructor
+        $config = array_merge($this->tokenRequestMinimal, [
+            'codeVerifier' => $codeVerifier,
+        ]);
+        $o = new OAuth2($config);
+        $o->setCode('abc123');
+        $req = $o->generateCredentialsRequest();
+        $fields = Query::parse((string) $req->getBody());
+        $this->assertArrayHasKey('code_verifier', $fields);
+        $this->assertEquals($codeVerifier, $fields['code_verifier']);
+
+        // test in settter
+        $o = new OAuth2($this->tokenRequestMinimal);
+        $o->setCode('abc123');
+        $o->setCodeVerifier($codeVerifier);
+        $req = $o->generateCredentialsRequest();
+        $q = Query::parse((string) $req->getBody());
+        $this->assertArrayHasKey('code_verifier', $q);
+        $this->assertEquals($codeVerifier, $q['code_verifier']);
     }
 }
 
