@@ -2,6 +2,14 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.28.0](https://github.com/googleapis/google-auth-library-php/compare/v1.27.0...v1.28.0) (2023-05-11)
+
+
+### Features
+
+* Add pkce support ([#454](https://github.com/googleapis/google-auth-library-php/issues/454)) ([1326c81](https://github.com/googleapis/google-auth-library-php/commit/1326c81c759b8f4694297b3d0686727f56bc9937))
+* Implement quota project from env var in google/auth ([#452](https://github.com/googleapis/google-auth-library-php/issues/452)) ([a9e8ae3](https://github.com/googleapis/google-auth-library-php/commit/a9e8ae3939e2069437ac998201755784b3c54d98))
+
 ## [1.27.0](https://github.com/googleapis/google-auth-library-php/compare/v1.26.0...v1.27.0) (2023-05-02)
 
 
