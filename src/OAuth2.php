@@ -748,7 +748,7 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getCodeVerifier(): ?string
     {
@@ -765,7 +765,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @see https://datatracker.ietf.org/doc/html/rfc7636
      *
-     * @param string $codeVerifier
+     * @param string|null $codeVerifier
      */
     public function setCodeVerifier(?string $codeVerifier): void
     {
