@@ -21,6 +21,7 @@ use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\CredentialsLoader;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
@@ -586,6 +587,59 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         $this->assertEquals(
             'test_quota_project',
+            $credentials->getQuotaProject()
+        );
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetCredentialsUtilizesQuotaProjectEnvVar()
+    {
+        $quotaProject = 'quota-project-from-env-var';
+        putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
+        putenv('HOME=' . __DIR__ . '/fixtures');
+
+        $credentials = ApplicationDefaultCredentials::getCredentials();
+
+        $this->assertEquals(
+            $quotaProject,
+            $credentials->getQuotaProject()
+        );
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetCredentialsUtilizesQuotaProjectParameterOverEnvVar()
+    {
+        $quotaProject = 'quota-project-from-parameter';
+        putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=quota-project-from-env-var');
+        putenv('HOME=' . __DIR__ . '/fixtures');
+
+        $credentials = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            null, // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            $quotaProject, // $quotaProject
+            null  // $defaultScope
+        );
+
+        $this->assertEquals(
+            $quotaProject,
+            $credentials->getQuotaProject()
+        );
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetCredentialsUtilizesQuotaProjectEnvVarOverKeyFile()
+    {
+        $quotaProject = 'quota-project-from-env-var';
+        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
+        putenv(CredentialsLoader::ENV_VAR . '=' . $keyFile);
+
+        $credentials = ApplicationDefaultCredentials::getCredentials();
+
+        $this->assertEquals(
+            $quotaProject,
             $credentials->getQuotaProject()
         );
     }

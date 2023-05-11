@@ -1429,7 +1429,8 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
-     * Get the granted scopes (if they exist) for the last fetched token.
+     * Get the granted space-separated scopes (if they exist) for the last
+     * fetched token.
      *
      * @return string|null
      */
