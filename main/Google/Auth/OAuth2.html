@@ -289,6 +289,41 @@
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
+                    string|null
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_getCodeVerifier">getCodeVerifier</a>()
+        
+                                            <p class="no-description">No description</p>
+                                    </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    void
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_setCodeVerifier">setCodeVerifier</a>(string|null $codeVerifier)
+        
+                                            <p>A cryptographically random string that is used to correlate the
+authorization request to the token request.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
+                    string
+                </div>
+                <div class="col-md-8 type">
+                    <a href="#method_generateCodeVerifier">generateCodeVerifier</a>()
+        
+                                            <p>Generates a random 128-character string for the "code_verifier" parameter
+in PKCE for OAuth 2.0. This is a cryptographically random string that is
+determined using random_int, hashed using "hash" and sha256, and base64
+encoded.</p>                </div>
+                <div class="col-md-2"></div>
+            </div>
+                    <div class="row">
+                <div class="col-md-2 type">
                     void
                 </div>
                 <div class="col-md-8 type">
@@ -877,7 +912,7 @@ fetched token.</p>                </div>
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L339">line 339</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L349">line 349</a></div>
         <code>                    
     <strong>__construct</strong>(array $config)
         </code>
@@ -955,7 +990,7 @@ by that extension.</p></li>
             </div>
                     <div class="method-item">
                     <h3 id="method_verifyIdToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L408">line 408</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L420">line 420</a></div>
         <code>                    null|object
     <strong>verifyIdToken</strong>(string|<abbr title="Firebase\JWT\Key">Key</abbr>|<abbr title="Firebase\JWT\Key">Key</abbr>[] $publicKey = null, string|<abbr title="Google\Auth\array<string>">array<string></abbr> $allowed_algs = [])
         </code>
@@ -1044,7 +1079,7 @@ objects as the $publicKey.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_toJwt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L432">line 432</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L444">line 444</a></div>
         <code>                    string
     <strong>toJwt</strong>(array $config = [])
         </code>
@@ -1084,7 +1119,7 @@ objects as the $publicKey.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_generateCredentialsRequest">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L486">line 486</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L498">line 498</a></div>
         <code>                    <abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr>
     <strong>generateCredentialsRequest</strong>()
         </code>
@@ -1114,7 +1149,7 @@ objects as the $publicKey.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_fetchAuthToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L545">line 545</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L560">line 560</a></div>
         <code>                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>
     <strong>fetchAuthToken</strong>(callable $httpHandler = null)
         </code>
@@ -1154,7 +1189,7 @@ objects as the $publicKey.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getCacheKey">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L568">line 568</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L583">line 583</a></div>
         <code>                    string
     <strong>getCacheKey</strong>()
         </code>
@@ -1184,7 +1219,7 @@ objects as the $publicKey.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_parseTokenResponse">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L589">line 589</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L604">line 604</a></div>
         <code>                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>
     <strong>parseTokenResponse</strong>(<abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr> $resp)
         </code>
@@ -1233,7 +1268,7 @@ objects as the $publicKey.</p>                            </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_updateToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L644">line 644</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L659">line 659</a></div>
         <code>                    void
     <strong>updateToken</strong>(array $config)
         </code>
@@ -1298,7 +1333,7 @@ The timestamp that the token was issued at.</p></li>
             </div>
                     <div class="method-item">
                     <h3 id="method_buildFullAuthorizationUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L682">line 682</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L697">line 697</a></div>
         <code>                    <abbr title="Psr\Http\Message\UriInterface">UriInterface</abbr>
     <strong>buildFullAuthorizationUri</strong>(array $config = [])
         </code>
@@ -1316,7 +1351,7 @@ The timestamp that the token was issued at.</p></li>
                     <tr>
                 <td>array</td>
                 <td>$config</td>
-                <td>configuration options that customize the return url</td>
+                <td>configuration options that customize the return url.</td>
             </tr>
             </table>
 
@@ -1346,8 +1381,123 @@ The timestamp that the token was issued at.</p></li>
 
             </div>
                     <div class="method-item">
+                    <h3 id="method_getCodeVerifier">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L753">line 753</a></div>
+        <code>                    string|null
+    <strong>getCodeVerifier</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string|null</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_setCodeVerifier">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L770">line 770</a></div>
+        <code>                    void
+    <strong>setCodeVerifier</strong>(string|null $codeVerifier)
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>A cryptographically random string that is used to correlate the
+authorization request to the token request.</p>                    <p>The code verifier for PKCE for OAuth 2.0. When set, the authorization
+URI will contain the Code Challenge and Code Challenge Method querystring
+parameters, and the token URI will contain the Code Verifier parameter.</p>                            </div>
+                <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>string|null</td>
+                <td>$codeVerifier</td>
+                <td></td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>void</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                            <h4>See also</h4>
+
+                    <table class="table table-condensed">
+                    <tr>
+                <td>
+                                            <a href="https://datatracker.ietf.org/doc/html/rfc7636">https://datatracker.ietf.org/doc/html/rfc7636</a>
+                                    </td>
+                <td></td>
+            </tr>
+            </table>
+
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
+                    <h3 id="method_generateCodeVerifier">
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L785">line 785</a></div>
+        <code>                    string
+    <strong>generateCodeVerifier</strong>()
+        </code>
+    </h3>
+    <div class="details">
+            
+    
+
+                    <div class="method-description">
+                                    <p>Generates a random 128-character string for the "code_verifier" parameter
+in PKCE for OAuth 2.0. This is a cryptographically random string that is
+determined using random_int, hashed using "hash" and sha256, and base64
+encoded.</p>                    <p>When this method is called, the code verifier is set on the object.</p>                            </div>
+                <div class="tags">
+            
+                            <h4>Return Value</h4>
+
+                    <table class="table table-condensed">
+        <tr>
+            <td>string</td>
+            <td></td>
+        </tr>
+    </table>
+
+            
+            
+                    </div>
+    </div>
+
+            </div>
+                    <div class="method-item">
                     <h3 id="method_setAuthorizationUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L738">line 738</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L819">line 819</a></div>
         <code>                    void
     <strong>setAuthorizationUri</strong>(string $uri)
         </code>
@@ -1388,7 +1538,7 @@ the end-user and obtaining authorization.</p>                                   
             </div>
                     <div class="method-item">
                     <h3 id="method_getAuthorizationUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L749">line 749</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L830">line 830</a></div>
         <code>                    <abbr title="Google\Auth\?UriInterface">?UriInterface</abbr>
     <strong>getAuthorizationUri</strong>()
         </code>
@@ -1419,7 +1569,7 @@ the end-user and obtaining authorization.</p>                                   
             </div>
                     <div class="method-item">
                     <h3 id="method_getTokenCredentialUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L760">line 760</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L841">line 841</a></div>
         <code>                    <abbr title="Google\Auth\?UriInterface">?UriInterface</abbr>
     <strong>getTokenCredentialUri</strong>()
         </code>
@@ -1450,7 +1600,7 @@ and refreshing expired tokens.</p>                                              
             </div>
                     <div class="method-item">
                     <h3 id="method_setTokenCredentialUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L772">line 772</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L853">line 853</a></div>
         <code>                    void
     <strong>setTokenCredentialUri</strong>(string $uri)
         </code>
@@ -1491,7 +1641,7 @@ and refreshing expired tokens.</p>                                              
             </div>
                     <div class="method-item">
                     <h3 id="method_getRedirectUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L782">line 782</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L863">line 863</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getRedirectUri</strong>()
         </code>
@@ -1521,7 +1671,7 @@ and refreshing expired tokens.</p>                                              
             </div>
                     <div class="method-item">
                     <h3 id="method_setRedirectUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L793">line 793</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L874">line 874</a></div>
         <code>                    void
     <strong>setRedirectUri</strong>(<abbr title="Google\Auth\?string">?string</abbr> $uri)
         </code>
@@ -1561,7 +1711,7 @@ and refreshing expired tokens.</p>                                              
             </div>
                     <div class="method-item">
                     <h3 id="method_getScope">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L818">line 818</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L899">line 899</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getScope</strong>()
         </code>
@@ -1591,7 +1741,7 @@ and refreshing expired tokens.</p>                                              
             </div>
                     <div class="method-item">
                     <h3 id="method_setScope">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L835">line 835</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L916">line 916</a></div>
         <code>                    void
     <strong>setScope</strong>(string|<abbr title="Google\Auth\array<string>">array<string></abbr>|null $scope)
         </code>
@@ -1641,7 +1791,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_getGrantType">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L863">line 863</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L944">line 944</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getGrantType</strong>()
         </code>
@@ -1671,7 +1821,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_setGrantType">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L897">line 897</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L978">line 978</a></div>
         <code>                    void
     <strong>setGrantType</strong>(string $grantType)
         </code>
@@ -1720,7 +1870,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_getState">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L917">line 917</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L998">line 998</a></div>
         <code>                    string
     <strong>getState</strong>()
         </code>
@@ -1750,7 +1900,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_setState">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L928">line 928</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1009">line 1009</a></div>
         <code>                    void
     <strong>setState</strong>(string $state)
         </code>
@@ -1790,7 +1940,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_getCode">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L938">line 938</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1019">line 1019</a></div>
         <code>                    string
     <strong>getCode</strong>()
         </code>
@@ -1820,7 +1970,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_setCode">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L949">line 949</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1030">line 1030</a></div>
         <code>                    void
     <strong>setCode</strong>(string $code)
         </code>
@@ -1860,7 +2010,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_getUsername">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L959">line 959</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1040">line 1040</a></div>
         <code>                    string
     <strong>getUsername</strong>()
         </code>
@@ -1890,7 +2040,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_setUsername">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L970">line 970</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1051">line 1051</a></div>
         <code>                    void
     <strong>setUsername</strong>(string $username)
         </code>
@@ -1930,7 +2080,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_getPassword">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L980">line 980</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1061">line 1061</a></div>
         <code>                    string
     <strong>getPassword</strong>()
         </code>
@@ -1960,7 +2110,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_setPassword">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L991">line 991</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1072">line 1072</a></div>
         <code>                    void
     <strong>setPassword</strong>(string $password)
         </code>
@@ -2000,7 +2150,7 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_getClientId">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1002">line 1002</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1083">line 1083</a></div>
         <code>                    string
     <strong>getClientId</strong>()
         </code>
@@ -2031,7 +2181,7 @@ authorization server.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setClientId">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1014">line 1014</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1095">line 1095</a></div>
         <code>                    void
     <strong>setClientId</strong>(string $clientId)
         </code>
@@ -2072,7 +2222,7 @@ authorization server.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getClientSecret">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1025">line 1025</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1106">line 1106</a></div>
         <code>                    string
     <strong>getClientSecret</strong>()
         </code>
@@ -2103,7 +2253,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setClientSecret">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1037">line 1037</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1118">line 1118</a></div>
         <code>                    void
     <strong>setClientSecret</strong>(string $clientSecret)
         </code>
@@ -2144,7 +2294,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_getIssuer">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1047">line 1047</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1128">line 1128</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getIssuer</strong>()
         </code>
@@ -2174,7 +2324,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setIssuer">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1058">line 1058</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1139">line 1139</a></div>
         <code>                    void
     <strong>setIssuer</strong>(string $issuer)
         </code>
@@ -2214,7 +2364,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_getSub">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1068">line 1068</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1149">line 1149</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getSub</strong>()
         </code>
@@ -2244,7 +2394,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setSub">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1079">line 1079</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1160">line 1160</a></div>
         <code>                    void
     <strong>setSub</strong>(string $sub)
         </code>
@@ -2284,7 +2434,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_getAudience">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1089">line 1089</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1170">line 1170</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getAudience</strong>()
         </code>
@@ -2314,7 +2464,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setAudience">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1100">line 1100</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1181">line 1181</a></div>
         <code>                    void
     <strong>setAudience</strong>(string $audience)
         </code>
@@ -2354,7 +2504,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_getSigningKey">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1110">line 1110</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1191">line 1191</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getSigningKey</strong>()
         </code>
@@ -2384,7 +2534,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setSigningKey">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1121">line 1121</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1202">line 1202</a></div>
         <code>                    void
     <strong>setSigningKey</strong>(string $signingKey)
         </code>
@@ -2424,7 +2574,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_getSigningKeyId">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1131">line 1131</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1212">line 1212</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getSigningKeyId</strong>()
         </code>
@@ -2454,7 +2604,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setSigningKeyId">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1142">line 1142</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1223">line 1223</a></div>
         <code>                    void
     <strong>setSigningKeyId</strong>(string $signingKeyId)
         </code>
@@ -2494,7 +2644,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_getSigningAlgorithm">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1152">line 1152</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1233">line 1233</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getSigningAlgorithm</strong>()
         </code>
@@ -2524,7 +2674,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setSigningAlgorithm">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1163">line 1163</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1244">line 1244</a></div>
         <code>                    void
     <strong>setSigningAlgorithm</strong>(<abbr title="Google\Auth\?string">?string</abbr> $signingAlgorithm)
         </code>
@@ -2564,7 +2714,7 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_getExtensionParams">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1180">line 1180</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1261">line 1261</a></div>
         <code>                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>
     <strong>getExtensionParams</strong>()
         </code>
@@ -2595,7 +2745,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setExtensionParams">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1192">line 1192</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1273">line 1273</a></div>
         <code>                    void
     <strong>setExtensionParams</strong>(<abbr title="Google\Auth\array<mixed>">array<mixed></abbr> $extensionParams)
         </code>
@@ -2636,7 +2786,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getExpiry">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1202">line 1202</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1283">line 1283</a></div>
         <code>                    int
     <strong>getExpiry</strong>()
         </code>
@@ -2666,7 +2816,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setExpiry">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1213">line 1213</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1294">line 1294</a></div>
         <code>                    void
     <strong>setExpiry</strong>(int $expiry)
         </code>
@@ -2706,7 +2856,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getExpiresIn">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1223">line 1223</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1304">line 1304</a></div>
         <code>                    int
     <strong>getExpiresIn</strong>()
         </code>
@@ -2736,7 +2886,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setExpiresIn">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1234">line 1234</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1315">line 1315</a></div>
         <code>                    void
     <strong>setExpiresIn</strong>(<abbr title="Google\Auth\?int">?int</abbr> $expiresIn)
         </code>
@@ -2776,7 +2926,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getExpiresAt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1250">line 1250</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1331">line 1331</a></div>
         <code>                    <abbr title="Google\Auth\?int">?int</abbr>
     <strong>getExpiresAt</strong>()
         </code>
@@ -2806,7 +2956,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_isExpired">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1268">line 1268</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1349">line 1349</a></div>
         <code>                    bool
     <strong>isExpired</strong>()
         </code>
@@ -2836,7 +2986,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setExpiresAt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1282">line 1282</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1363">line 1363</a></div>
         <code>                    void
     <strong>setExpiresAt</strong>(int $expiresAt)
         </code>
@@ -2876,7 +3026,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getIssuedAt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1292">line 1292</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1373">line 1373</a></div>
         <code>                    <abbr title="Google\Auth\?int">?int</abbr>
     <strong>getIssuedAt</strong>()
         </code>
@@ -2906,7 +3056,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setIssuedAt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1303">line 1303</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1384">line 1384</a></div>
         <code>                    void
     <strong>setIssuedAt</strong>(int $issuedAt)
         </code>
@@ -2946,7 +3096,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getAccessToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1313">line 1313</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1394">line 1394</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getAccessToken</strong>()
         </code>
@@ -2976,7 +3126,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setAccessToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1324">line 1324</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1405">line 1405</a></div>
         <code>                    void
     <strong>setAccessToken</strong>(string $accessToken)
         </code>
@@ -3016,7 +3166,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getIdToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1334">line 1334</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1415">line 1415</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getIdToken</strong>()
         </code>
@@ -3046,7 +3196,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setIdToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1345">line 1345</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1426">line 1426</a></div>
         <code>                    void
     <strong>setIdToken</strong>(string $idToken)
         </code>
@@ -3086,7 +3236,7 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getGrantedScope">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1356">line 1356</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1437">line 1437</a></div>
         <code>                    string|null
     <strong>getGrantedScope</strong>()
         </code>
@@ -3117,7 +3267,7 @@ fetched token.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setGrantedScope">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1367">line 1367</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1448">line 1448</a></div>
         <code>                    void
     <strong>setGrantedScope</strong>(string $grantedScope)
         </code>
@@ -3157,7 +3307,7 @@ fetched token.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getRefreshToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1377">line 1377</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1458">line 1458</a></div>
         <code>                    <abbr title="Google\Auth\?string">?string</abbr>
     <strong>getRefreshToken</strong>()
         </code>
@@ -3187,7 +3337,7 @@ fetched token.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setRefreshToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1388">line 1388</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1469">line 1469</a></div>
         <code>                    void
     <strong>setRefreshToken</strong>(string $refreshToken)
         </code>
@@ -3227,7 +3377,7 @@ fetched token.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setAdditionalClaims">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1399">line 1399</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1480">line 1480</a></div>
         <code>                    void
     <strong>setAdditionalClaims</strong>(array $additionalClaims)
         </code>
@@ -3267,7 +3417,7 @@ fetched token.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getAdditionalClaims">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1409">line 1409</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1490">line 1490</a></div>
         <code>                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>
     <strong>getAdditionalClaims</strong>()
         </code>
@@ -3297,7 +3447,7 @@ fetched token.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getLastReceivedToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1419">line 1419</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1500">line 1500</a></div>
         <code>                    null|<abbr title="Google\Auth\array<mixed>">array<mixed></abbr>
     <strong>getLastReceivedToken</strong>()
         </code>
@@ -3334,7 +3484,7 @@ fetched token.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_getClientName">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1458">line 1458</a></div>
+        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/main/src/OAuth2.php#L1539">line 1539</a></div>
         <code>                    string
     <strong>getClientName</strong>(callable $httpHandler = null)
         </code>
