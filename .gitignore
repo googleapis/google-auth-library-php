@@ -1,6 +1,5 @@
 *~
 vendor
-composer.lock
 .cache
 .docs
 .gitmodules
@@ -9,3 +8,9 @@ composer.lock
 .idea
 *.iml
 .php-cs-fixer.cache
+
+.env.local
+.env.local.php
+.env.*.local
+phpunit.xml
+.phpunit.result.cache
