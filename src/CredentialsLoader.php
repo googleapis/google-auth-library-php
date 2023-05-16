@@ -72,7 +72,7 @@ abstract class CredentialsLoader implements
      */
     public static function fromEnv()
     {
-        $path = getenv(self::ENV_VAR);
+        $path = $_ENV[self::ENV_VAR];
         if (empty($path)) {
             return null;
         }
