@@ -28,12 +28,46 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
 
-class OAuth2AuthorizationUriTest extends TestCase
+class OAuth2Test extends TestCase
 {
     private $minimal = [
         'authorizationUri' => 'https://accounts.test.org/insecure/url',
         'redirectUri' => 'https://accounts.test.org/redirect/url',
         'clientId' => 'aClientID',
+    ];
+
+    private $signingMinimal = [
+        'signingKey' => 'example_key',
+        'signingAlgorithm' => 'HS256',
+        'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+        'issuer' => 'app@example.com',
+        'audience' => 'accounts.google.com',
+        'clientId' => 'aClientID',
+    ];
+
+    private $tokenRequestMinimal = [
+        'tokenCredentialUri' => 'https://tokens_r_us/test',
+        'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+        'issuer' => 'app@example.com',
+        'audience' => 'accounts.google.com',
+        'clientId' => 'aClientID',
+    ];
+
+    private $fetchAuthTokenMinimal = [
+        'tokenCredentialUri' => 'https://tokens_r_us/test',
+        'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+        'signingKey' => 'example_key',
+        'signingAlgorithm' => 'HS256',
+        'issuer' => 'app@example.com',
+        'audience' => 'accounts.google.com',
+        'clientId' => 'aClientID',
+    ];
+
+    private $verifyIdTokenMinimal = [
+        'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
+        'audience' => 'myaccount.on.host.issuer.com',
+        'issuer' => 'an.issuer.com',
+        'clientId' => 'myaccount.on.host.issuer.com',
     ];
 
     public function testIsNullIfAuthorizationUriIsNull()
@@ -217,15 +251,6 @@ class OAuth2AuthorizationUriTest extends TestCase
         $this->assertArrayHasKey('redirect_uri', $query);
         $this->assertEquals('postmessage', $query['redirect_uri']);
     }
-}
-
-class OAuth2GrantTypeTest extends TestCase
-{
-    private $minimal = [
-        'authorizationUri' => 'https://accounts.test.org/insecure/url',
-        'redirectUri' => 'https://accounts.test.org/redirect/url',
-        'clientId' => 'aClientID',
-    ];
 
     public function testReturnsNullIfCannotBeInferred()
     {
@@ -281,13 +306,6 @@ class OAuth2GrantTypeTest extends TestCase
         $o->setGrantType('http://a/grant/url');
         $this->assertEquals('http://a/grant/url', $o->getGrantType());
     }
-}
-
-class OAuth2GetCacheKeyTest extends TestCase
-{
-    private $minimal = [
-        'clientID' => 'aClientID',
-    ];
 
     public function testIsNullWithNoScopesOrAudience()
     {
@@ -316,15 +334,6 @@ class OAuth2GetCacheKeyTest extends TestCase
         $o->setAudience($aud);
         $this->assertEquals($aud, $o->getCacheKey());
     }
-}
-
-class OAuth2TimingTest extends TestCase
-{
-    private $minimal = [
-        'authorizationUri' => 'https://accounts.test.org/insecure/url',
-        'redirectUri' => 'https://accounts.test.org/redirect/url',
-        'clientId' => 'aClientID',
-    ];
 
     public function testIssuedAtDefaultsToNull()
     {
@@ -376,15 +385,6 @@ class OAuth2TimingTest extends TestCase
         $o->setExpiresAt(time() - 2);
         $this->assertTrue($o->isExpired());
     }
-}
-
-class OAuth2GeneralTest extends TestCase
-{
-    private $minimal = [
-        'authorizationUri' => 'https://accounts.test.org/insecure/url',
-        'redirectUri' => 'https://accounts.test.org/redirect/url',
-        'clientId' => 'aClientID',
-    ];
 
     public function testFailsOnUnknownSigningAlgorithm()
     {
@@ -418,18 +418,6 @@ class OAuth2GeneralTest extends TestCase
         $o->setRedirectUri($urn);
         $this->assertEquals($urn, $o->getRedirectUri());
     }
-}
-
-class OAuth2JwtTest extends TestCase
-{
-    private $signingMinimal = [
-        'signingKey' => 'example_key',
-        'signingAlgorithm' => 'HS256',
-        'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
-        'issuer' => 'app@example.com',
-        'audience' => 'accounts.google.com',
-        'clientId' => 'aClientID',
-    ];
 
     public function testFailsWithMissingAudience()
     {
@@ -559,17 +547,6 @@ class OAuth2JwtTest extends TestCase
         $roundTrip = JWT::decode($payload, new Key($publicKey, 'RS256'));
         $this->assertEquals($roundTrip->target_audience, $targetAud);
     }
-}
-
-class OAuth2GenerateAccessTokenRequestTest extends TestCase
-{
-    private $tokenRequestMinimal = [
-        'tokenCredentialUri' => 'https://tokens_r_us/test',
-        'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
-        'issuer' => 'app@example.com',
-        'audience' => 'accounts.google.com',
-        'clientId' => 'aClientID',
-    ];
 
     public function testFailsIfNoTokenCredentialUri()
     {
@@ -728,19 +705,6 @@ class OAuth2GenerateAccessTokenRequestTest extends TestCase
         $this->assertArrayHasKey('code_verifier', $q);
         $this->assertEquals($codeVerifier, $q['code_verifier']);
     }
-}
-
-class OAuth2FetchAuthTokenTest extends TestCase
-{
-    private $fetchAuthTokenMinimal = [
-        'tokenCredentialUri' => 'https://tokens_r_us/test',
-        'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
-        'signingKey' => 'example_key',
-        'signingAlgorithm' => 'HS256',
-        'issuer' => 'app@example.com',
-        'audience' => 'accounts.google.com',
-        'clientId' => 'aClientID',
-    ];
 
     public function testFailsOn400()
     {
@@ -944,41 +908,33 @@ class OAuth2FetchAuthTokenTest extends TestCase
             ],
         ];
     }
-}
 
-class OAuth2VerifyIdTokenTest extends TestCase
-{
-    private $publicKey;
-    private $privateKey;
-    private $verifyIdTokenMinimal = [
-        'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
-        'audience' => 'myaccount.on.host.issuer.com',
-        'issuer' => 'an.issuer.com',
-        'clientId' => 'myaccount.on.host.issuer.com',
-    ];
-
-    public function setUp(): void
-    {
-        $this->publicKey =
-            file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
-        $this->privateKey =
-            file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
-    }
+    // public function setUp(): void
+    // {
+    //     $this->publicKey =
+    //         file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+    //     $this->privateKey =
+    //         file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+    // }
 
     public function testFailsIfIdTokenIsInvalid()
     {
         $this->expectException(UnexpectedValueException::class);
 
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
         $o->setIdToken($not_a_jwt);
-        $o->verifyIdToken($this->publicKey, ['RS256']);
+        $o->verifyIdToken($publicKey, ['RS256']);
     }
 
     public function testFailsIfAudienceIsMissing()
     {
         $this->expectException(DomainException::class);
+
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $now = time();
         $origIdToken = [
@@ -987,14 +943,17 @@ class OAuth2VerifyIdTokenTest extends TestCase
             'iat' => $now,
         ];
         $o = new OAuth2($testConfig);
-        $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+        $jwtIdToken = JWT::encode($origIdToken, $privateKey, 'RS256');
         $o->setIdToken($jwtIdToken);
-        $o->verifyIdToken($this->publicKey, ['RS256']);
+        $o->verifyIdToken($publicKey, ['RS256']);
     }
 
     public function testFailsIfAudienceIsWrong()
     {
         $this->expectException(DomainException::class);
+
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
         $now = time();
         $testConfig = $this->verifyIdTokenMinimal;
         $origIdToken = [
@@ -1004,9 +963,9 @@ class OAuth2VerifyIdTokenTest extends TestCase
             'iat' => $now,
         ];
         $o = new OAuth2($testConfig);
-        $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, 'RS256');
+        $jwtIdToken = JWT::encode($origIdToken, $privateKey, 'RS256');
         $o->setIdToken($jwtIdToken);
-        $o->verifyIdToken($this->publicKey, ['RS256']);
+        $o->verifyIdToken($publicKey, ['RS256']);
     }
 
     public function testFailsWithStringPublicKeyAndAllowedAlgsGreaterThanOne()
@@ -1014,11 +973,12 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('To have multiple allowed algorithms');
 
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
         $o->setIdToken($not_a_jwt);
-        $o->verifyIdToken($this->publicKey, ['RS256', 'ES256']);
+        $o->verifyIdToken($publicKey, ['RS256', 'ES256']);
     }
 
     public function testFailsWithStringPublicKeyAndNoAllowedAlgs()
@@ -1026,11 +986,12 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('When allowed algorithms is empty');
 
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
         $o->setIdToken($not_a_jwt);
-        $o->verifyIdToken($this->publicKey, []);
+        $o->verifyIdToken($publicKey, []);
     }
 
     public function testFailsWithStringInPublicKeyArrayAndNoAllowedAlgs()
@@ -1038,13 +999,14 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('When allowed algorithms is empty');
 
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
         $o->setIdToken($not_a_jwt);
         $o->verifyIdToken([
-            new Key($this->publicKey, 'RS256'),
-            $this->publicKey,
+            new Key($publicKey, 'RS256'),
+            $publicKey,
         ], []);
     }
 
@@ -1053,15 +1015,18 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('allowed algorithms must be a string or array');
 
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
         $o->setIdToken($not_a_jwt);
-        $o->verifyIdToken($this->publicKey, 123);
+        $o->verifyIdToken($publicKey, 123);
     }
 
     public function testShouldReturnAValidIdToken()
     {
+        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $now = time();
         $origIdToken = [
@@ -1072,9 +1037,9 @@ class OAuth2VerifyIdTokenTest extends TestCase
         ];
         $o = new OAuth2($testConfig);
         $alg = 'RS256';
-        $jwtIdToken = JWT::encode($origIdToken, $this->privateKey, $alg);
+        $jwtIdToken = JWT::encode($origIdToken, $privateKey, $alg);
         $o->setIdToken($jwtIdToken);
-        $roundTrip = $o->verifyIdToken($this->publicKey, [$alg]);
+        $roundTrip = $o->verifyIdToken($publicKey, [$alg]);
         $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
     }
 }
