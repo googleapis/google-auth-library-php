@@ -297,7 +297,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * A security token that represents the identity of the party on behalf of
      * whom the request is being made.
      */
-    private ?string $subjectToken;
+    private ?FetchAuthTokenInterface $subjectTokenFetcher;
 
     /**
      * For STS requests.
@@ -420,7 +420,7 @@ class OAuth2 implements FetchAuthTokenInterface
             'codeVerifier' => null,
             'resource' => null,
             'requestedTokenType' => null,
-            'subjectToken' => null,
+            'subjectTokenFetcher' => null,
             'subjectTokenType' => null,
             'actorToken' => null,
             'actorTokenType' => null,
@@ -449,7 +449,7 @@ class OAuth2 implements FetchAuthTokenInterface
         // for STS
         $this->resource = $opts['resource'];
         $this->requestedTokenType = $opts['requestedTokenType'];
-        $this->subjectToken = $opts['subjectToken'];
+        $this->subjectTokenFetcher = $opts['subjectTokenFetcher'];
         $this->subjectTokenType = $opts['subjectTokenType'];
         $this->actorToken = $opts['actorToken'];
         $this->actorTokenType = $opts['actorTokenType'];
@@ -558,9 +558,10 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Generates a request for token credentials.
      *
+     * @param callable $httpHandler callback which delivers psr7 request
      * @return RequestInterface the authorization Url.
      */
-    public function generateCredentialsRequest()
+    public function generateCredentialsRequest(callable $httpHandler = null)
     {
         $uri = $this->getTokenCredentialUri();
         if (is_null($uri)) {
@@ -591,7 +592,8 @@ class OAuth2 implements FetchAuthTokenInterface
                 $params['assertion'] = $this->toJwt();
                 break;
             case self::STS_URN:
-                $params['subject_token'] = $this->subjectToken;
+                $token = $this->subjectTokenFetcher->fetchAuthToken($httpHandler);
+                $params['subject_token'] = $token['access_token'];
                 $params['subject_token_type'] = $this->subjectTokenType;
                 $params += array_filter([
                     'resource'             => $this->resource,
@@ -640,7 +642,7 @@ class OAuth2 implements FetchAuthTokenInterface
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
-        $response = $httpHandler($this->generateCredentialsRequest());
+        $response = $httpHandler($this->generateCredentialsRequest($httpHandler));
         $credentials = $this->parseTokenResponse($response);
         $this->updateToken($credentials);
         if (isset($credentials['scope'])) {
@@ -1048,7 +1050,7 @@ class OAuth2 implements FetchAuthTokenInterface
             return self::JWT_URN;
         }
 
-        if (!is_null($this->subjectToken) && !is_null($this->subjectTokenType)) {
+        if (!is_null($this->subjectTokenFetcher) && !is_null($this->subjectTokenType)) {
             return self::STS_URN;
         }
 

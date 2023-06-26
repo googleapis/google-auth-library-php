@@ -20,12 +20,14 @@ namespace Google\Auth\Tests;
 use DomainException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use UnexpectedValueException;
 
 class OAuth2AuthorizationUriTest extends TestCase
@@ -1081,23 +1083,29 @@ class OAuth2VerifyIdTokenTest extends TestCase
 
 class OAuth2StsTest extends TestCase
 {
+    use ProphecyTrait;
+
     private $publicKey;
     private $privateKey;
     private $stsMinimal = [
         'tokenCredentialUri' => 'https://tokens_r_us/test',
-        'subjectToken' => 'xyz',
         'subjectTokenType' => 'urn:ietf:params:oauth:token-type:access_token',
     ];
 
     public function testStsGrantType()
     {
-        $o = new OAuth2($this->stsMinimal);
+        $fetcher = $this->prophesize(FetchAuthTokenInterface::class);
+        $o = new OAuth2($this->stsMinimal + ['subjectTokenFetcher' => $fetcher->reveal()]);
         $this->assertEquals(OAuth2::STS_URN, $o->getGrantType());
     }
 
     public function testStsCredentialsRequestMinimal()
     {
-        $o = new OAuth2($this->stsMinimal);
+        $fetcher = $this->prophesize(FetchAuthTokenInterface::class);
+        $fetcher->fetchAuthToken(null)
+            ->shouldBeCalledOnce()
+            ->willReturn(['access_token' => 'xyz']);
+        $o = new OAuth2($this->stsMinimal + ['subjectTokenFetcher' => $fetcher->reveal()]);
         $request = $o->generateCredentialsRequest();
         $this->assertEquals('POST', $request->getMethod());
         $this->assertEquals($this->stsMinimal['tokenCredentialUri'], (string) $request->getUri());
@@ -1105,13 +1113,18 @@ class OAuth2StsTest extends TestCase
 
         $this->assertCount(3, $requestParams);
         $this->assertEquals(OAuth2::STS_URN, $requestParams['grant_type']);
-        $this->assertEquals($this->stsMinimal['subjectToken'], $requestParams['subject_token']);
+        $this->assertEquals('xyz', $requestParams['subject_token']);
         $this->assertEquals($this->stsMinimal['subjectTokenType'], $requestParams['subject_token_type']);
     }
 
     public function testStsCredentialsRequestFull()
     {
+        $fetcher = $this->prophesize(FetchAuthTokenInterface::class);
+        $fetcher->fetchAuthToken(null)
+            ->shouldBeCalledOnce()
+            ->willReturn(['access_token' => 'xyz']);
         $stsMinimal = $this->stsMinimal + [
+            'subjectTokenFetcher' => $fetcher->reveal(),
             'resource' => 'abc',
             'scope' => ['scope1', 'scope2'],
             'audience' => 'def',
@@ -1126,7 +1139,7 @@ class OAuth2StsTest extends TestCase
 
         $this->assertCount(8, $requestParams);
         $this->assertEquals(OAuth2::STS_URN, $requestParams['grant_type']);
-        $this->assertEquals($stsMinimal['subjectToken'], $requestParams['subject_token']);
+        $this->assertEquals('xyz', $requestParams['subject_token']);
         $this->assertEquals($stsMinimal['subjectTokenType'], $requestParams['subject_token_type']);
         $this->assertEquals($stsMinimal['resource'], $requestParams['resource']);
         $this->assertEquals('scope1 scope2', $requestParams['scope']);
