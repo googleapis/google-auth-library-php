@@ -18,7 +18,6 @@
 namespace Google\Auth;
 
 use DateTime;
-use Exception;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
