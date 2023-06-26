@@ -1468,7 +1468,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * @param int $issuedAt
      * @return void
      */
-    public function setIssuedTokenTypeAt($issuedAt)
+    public function setIssuedAt($issuedAt)
     {
         $this->issuedAt = $issuedAt;
     }
