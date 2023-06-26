@@ -1078,3 +1078,60 @@ class OAuth2VerifyIdTokenTest extends TestCase
         $this->assertEquals($origIdToken['aud'], $roundTrip->aud);
     }
 }
+
+class OAuth2StsTest extends TestCase
+{
+    private $publicKey;
+    private $privateKey;
+    private $stsMinimal = [
+        'tokenCredentialUri' => 'https://tokens_r_us/test',
+        'subjectToken' => 'xyz',
+        'subjectTokenType' => 'urn:ietf:params:oauth:token-type:access_token',
+    ];
+
+    public function testStsGrantType()
+    {
+        $o = new OAuth2($this->stsMinimal);
+        $this->assertEquals(OAuth2::STS_URN, $o->getGrantType());
+    }
+
+    public function testStsCredentialsRequestMinimal()
+    {
+        $o = new OAuth2($this->stsMinimal);
+        $request = $o->generateCredentialsRequest();
+        $this->assertEquals('POST', $request->getMethod());
+        $this->assertEquals($this->stsMinimal['tokenCredentialUri'], (string) $request->getUri());
+        parse_str((string)$request->getBody(), $requestParams);
+
+        $this->assertCount(3, $requestParams);
+        $this->assertEquals(OAuth2::STS_URN, $requestParams['grant_type']);
+        $this->assertEquals($this->stsMinimal['subjectToken'], $requestParams['subject_token']);
+        $this->assertEquals($this->stsMinimal['subjectTokenType'], $requestParams['subject_token_type']);
+    }
+
+    public function testStsCredentialsRequestFull()
+    {
+        $stsMinimal = $this->stsMinimal + [
+            'resource' => 'abc',
+            'scope' => ['scope1', 'scope2'],
+            'audience' => 'def',
+            'actorToken' => '123',
+            'actorTokenType' => 'urn:ietf:params:oauth:token-type:access_token',
+        ];
+        $o = new OAuth2($stsMinimal);
+        $request = $o->generateCredentialsRequest();
+        $this->assertEquals('POST', $request->getMethod());
+        $this->assertEquals($this->stsMinimal['tokenCredentialUri'], (string) $request->getUri());
+        parse_str((string)$request->getBody(), $requestParams);
+
+        $this->assertCount(8, $requestParams);
+        $this->assertEquals(OAuth2::STS_URN, $requestParams['grant_type']);
+        $this->assertEquals($stsMinimal['subjectToken'], $requestParams['subject_token']);
+        $this->assertEquals($stsMinimal['subjectTokenType'], $requestParams['subject_token_type']);
+        $this->assertEquals($stsMinimal['resource'], $requestParams['resource']);
+        $this->assertEquals('scope1 scope2', $requestParams['scope']);
+        $this->assertEquals($stsMinimal['audience'], $requestParams['audience']);
+        $this->assertEquals($stsMinimal['actorToken'], $requestParams['actor_token']);
+        $this->assertEquals($stsMinimal['actorTokenType'], $requestParams['actor_token_type']);
+    }
+}
