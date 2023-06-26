@@ -596,7 +596,7 @@ class OAuth2 implements FetchAuthTokenInterface
                 $params += array_filter([
                     'resource'             => $this->resource,
                     'audience'             => $this->audience,
-                    'scope'                => $this->scope,
+                    'scope'                => $this->getScope(),
                     'requested_token_type' => $this->requestedTokenType,
                     'actor_token'          => $this->actorToken,
                     'actor_token_type'     => $this->actorTokenType,
