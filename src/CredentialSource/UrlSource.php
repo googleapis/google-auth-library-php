@@ -82,6 +82,6 @@ class UrlSource implements FetchAuthTokenInterface
 
     public function getLastReceivedToken()
     {
-        return '';
+        return null;
     }
 }

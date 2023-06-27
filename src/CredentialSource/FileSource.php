@@ -64,6 +64,6 @@ class FileSource implements FetchAuthTokenInterface
 
     public function getLastReceivedToken()
     {
-        return '';
+        return null;
     }
 }
