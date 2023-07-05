@@ -102,15 +102,6 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
             );
         }
 
-        if (isset($credentialSource['url'])) {
-            return new UrlSource(
-                $credentialSource['url'],
-                $credentialSource['headers'] ?? [],
-                $credentialSource['format']['type'] ?? null,
-                $credentialSource['format']['subject_token_field_name'] ?? null
-            );
-        }
-
         if (
             isset($credentialSource['environment_id'])
             && 1 === preg_match('/^aws(\d+)$/', $credentialSource['environment_id'], $matches)
@@ -124,6 +115,15 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
                 $credentialSource['region_url'],
                 $credentialSource['regional_cred_verification_url'],
                 $credentialSource['url'] ?? null // $securityCredentialsUrl
+            );
+        }
+
+        if (isset($credentialSource['url'])) {
+            return new UrlSource(
+                $credentialSource['url'],
+                $credentialSource['headers'] ?? [],
+                $credentialSource['format']['type'] ?? null,
+                $credentialSource['format']['subject_token_field_name'] ?? null
             );
         }
 
