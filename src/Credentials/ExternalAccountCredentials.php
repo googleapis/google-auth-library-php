@@ -18,13 +18,13 @@
 
 namespace Google\Auth\Credentials;
 
+use Google\Auth\CredentialSource\AwsNativeSource;
+use Google\Auth\CredentialSource\FileSource;
+use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\OAuth2;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
-use Google\Auth\CredentialSource\AwsNativeSource;
-use Google\Auth\CredentialSource\FileSource;
-use Google\Auth\CredentialSource\UrlSource;
 use InvalidArgumentException;
 use LogicException;
 

@@ -22,7 +22,6 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
-use Exception;
 
 /**
  * Authenticates requests using IAM credentials.
@@ -98,7 +97,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
         # low to high. Note that there is a trailing \n.
         $canonicalHeaders = sprintf("host:%s\nx-amz-date:%s\n", $host, $amzdate);
         if ($securityToken) {
-             $canonicalHeaders .= sprintf("x-amz-security-token:%s\n", $securityToken);
+            $canonicalHeaders .= sprintf("x-amz-security-token:%s\n", $securityToken);
         }
 
         # Step 5: Create the list of signed headers. This lists the headers
