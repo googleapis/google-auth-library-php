@@ -21,6 +21,7 @@ use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\InsecureCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
+use Google\Auth\Credentials\ExternalAccountCredentials;
 use RuntimeException;
 use UnexpectedValueException;
 
@@ -124,7 +125,7 @@ abstract class CredentialsLoader implements
      *   user-defined scopes exist, expressed either as an Array or as a
      *   space-delimited string.
      *
-     * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials
+     * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials
      */
     public static function makeCredentials(
         $scope,

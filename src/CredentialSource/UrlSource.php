@@ -21,6 +21,7 @@ use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
+use InvalidArgumentException;
 
 /**
  * Retrieve a token from a URL.
@@ -30,10 +31,16 @@ use GuzzleHttp\Psr7\Request;
 class UrlSource implements FetchAuthTokenInterface
 {
     private string $url;
+    /**
+     * @var array<string, string|string[]>
+     */
     private array $headers;
     private ?string $format;
     private ?string $subjectTokenFieldName;
 
+    /**
+     * @param array<string, string|string[]> $headers Request headers
+     */
     public function __construct(
         string $url,
         array $headers = [],
@@ -53,7 +60,7 @@ class UrlSource implements FetchAuthTokenInterface
         $this->subjectTokenFieldName = $subjectTokenFieldName;
     }
 
-    public function fetchToken(callable $httpHandler = null): string
+    public function fetchAuthToken(callable $httpHandler = null): array
     {
         if (is_null($httpHandler)) {
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());

@@ -19,16 +19,22 @@
 namespace Google\Auth\Credentials;
 
 use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\OAuth2;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
+use Google\Auth\CredentialSource\AwsNativeSource;
+use Google\Auth\CredentialSource\FileSource;
+use Google\Auth\CredentialSource\UrlSource;
 use InvalidArgumentException;
 use LogicException;
 
-abstract class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface
+class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface
 {
-    use UpdateMetadataInterface;
+    use UpdateMetadataTrait;
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
+
+    private OAuth2 $auth;
 
     /**
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
@@ -42,11 +48,11 @@ abstract class ExternalAccountCredentials implements FetchAuthTokenInterface, Up
         if (!array_key_exists('type', $jsonKey)) {
             throw new InvalidArgumentException('json key is missing the type field');
         }
-        if ($jsonkey['type'] !== self::EXTERNAL_ACCOUNT_TYPE) {
+        if ($jsonKey['type'] !== self::EXTERNAL_ACCOUNT_TYPE) {
             throw new InvalidArgumentException(sprintf(
                 'expected "%s" type but received "%s"',
                 self::EXTERNAL_ACCOUNT_TYPE,
-                $jsonkey['type']
+                $jsonKey['type']
             ));
         }
 
@@ -77,14 +83,18 @@ abstract class ExternalAccountCredentials implements FetchAuthTokenInterface, Up
         $this->auth = new OAuth2([
             'tokenCredentialUri' => $jsonKey['token_url'],
             'audience' => $jsonKey['audience'],
+            'scope' => $scope,
             'subjectTokenType' => $jsonKey['subject_token_type'],
             'subjectTokenFetcher' => self::buildCredentialSource($jsonKey['credential_source']),
         ]);
     }
 
-    private static function buildCredentialSource(array $credentialSource)
+    /**
+     * @param array<mixed> $credentialSource
+     */
+    private static function buildCredentialSource(array $credentialSource): FetchAuthTokenInterface
     {
-        if (isset($credentialsSource['file'])) {
+        if (isset($credentialSource['file'])) {
             return new FileSource(
                 $credentialSource['file'],
                 $credentialSource['format']['type'] ?? null,
@@ -92,7 +102,7 @@ abstract class ExternalAccountCredentials implements FetchAuthTokenInterface, Up
             );
         }
 
-        if (isset($credentialsSource['url'])) {
+        if (isset($credentialSource['url'])) {
             return new UrlSource(
                 $credentialSource['url'],
                 $credentialSource['headers'] ?? [],
@@ -102,8 +112,8 @@ abstract class ExternalAccountCredentials implements FetchAuthTokenInterface, Up
         }
 
         if (
-            isset($credentialsSource['environment_id'])
-            && 1 === preg_match('/^aws(\d+)$/', $credentialsSource['environment_id'], $matches)
+            isset($credentialSource['environment_id'])
+            && 1 === preg_match('/^aws(\d+)$/', $credentialSource['environment_id'], $matches)
         ) {
             if ($matches[1] !== '1') {
                 throw new LogicException(
@@ -118,5 +128,33 @@ abstract class ExternalAccountCredentials implements FetchAuthTokenInterface, Up
         }
 
         throw new LogicException('Unable to determine credential source from json key.');
+    }
+
+    /**
+     * @param callable $httpHandler
+     *
+     * @return array<mixed> {
+     *     A set of auth related metadata, containing the following
+     *
+     *     @type string $access_token
+     *     @type int $expires_in
+     *     @type string $scope
+     *     @type string $token_type
+     *     @type string $id_token
+     * }
+     */
+    public function fetchAuthToken(callable $httpHandler = null)
+    {
+        return $this->auth->fetchAuthToken($httpHandler);
+    }
+
+    public function getCacheKey()
+    {
+        return '';
+    }
+
+    public function getLastReceivedToken()
+    {
+        return null;
     }
 }

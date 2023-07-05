@@ -21,6 +21,7 @@ use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Uri;
 use Exception;
 
 /**
@@ -28,13 +29,15 @@ use Exception;
  */
 class AwsNativeSource implements FetchAuthTokenInterface
 {
+    private const CRED_VERIFICATION_QUERY = 'Action=GetCallerIdentity&Version=2011-06-15';
+
     private string $regionUrl;
     private string $regionalCredVerificationUrl;
     private ?string $securityCredentialsUrl;
 
     public function __construct(
         string $regionUrl,
-        string $regionalCredVerificationUrl = null,
+        string $regionalCredVerificationUrl,
         string $securityCredentialsUrl = null
     ) {
         $this->regionUrl = $regionUrl;
@@ -57,65 +60,77 @@ class AwsNativeSource implements FetchAuthTokenInterface
             throw new \LogicException('Unable to get credentials from ENV, and no security credentials URL provided');
         }
 
+        // From here we use the signing vars to create the signed request to receive a token
         [$accessKeyId, $secretAccessKey, $securityToken] = $signingVars;
+        $headers = $this->getSignedRequestHeaders($region, $accessKeyId, $secretAccessKey, $securityToken);
 
-        $method = 'GET';
+        $url = new Uri($this->regionalCredVerificationUrl);
+        $url = $url->withQuery(self::CRED_VERIFICATION_QUERY);
+
+        $request = new Request('GET', $url, $headers);
+        $response = $httpHandler($request);
+
+        $json = json_decode((string) $response->getBody(), true);
+
+        return ['access_token' => $json['access_token']];
+    }
+
+    /**
+     * @see http://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+     *
+     * @return array<string, string>
+     */
+    public function getSignedRequestHeaders(
+        string $region,
+        string $accessKeyId,
+        string $secretAccessKey,
+        ?string $securityToken
+    ): array {
         $service = 'sts';
         $host = 'sts.amazonaws.com';
-        $endpoint = 'https://sts.amazonaws.com';
-        $request_parameters = 'Action=GetCallerIdentity&Version=2011-06-15';
-        // From here we use the signing vars to create the signed request to receive a token
+
         # Create a date for headers and the credential string
         $amzdate = date('%Y%m%dT%H%M%SZ');
         $datestamp = date('%Y%m%d'); # Date w/o time, used in credential scope
 
-        # ************* TASK 1: CREATE A CANONICAL REQUEST *************
-        # http://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
-
-        # Step 1 is to define the verb (GET, POST, etc.)--already done.
-
-        # Step 2: Create canonical URI--the part of the URI from domain to query
-        # string (use '/' if no path)
-        $canonical_uri = '/';
-
-        # Step 3: Create the canonical query string. In this example (a GET request),
-        # request parameters are in the query string. Query string values must
-        # be URL-encoded (space=%20). The parameters must be sorted by name.
-        # For this example, the query string is pre-formatted in the request_parameters variable.
-        $canonical_querystring = $request_parameters;
-
-        # Step 4: Create the canonical headers and signed headers. Header names
+        # Create the canonical headers and signed headers. Header names
         # must be trimmed and lowercase, and sorted in code point order from
         # low to high. Note that there is a trailing \n.
-        $canonical_headers = sprintf("host:%s\nx-amz-date:%s\n", $host, $amzdate);
+        $canonicalHeaders = sprintf("host:%s\nx-amz-date:%s\n", $host, $amzdate);
         if ($securityToken) {
-             $canonical_headers .= sprintf("x-amz-security-token:%s\n", $securityToken);
+             $canonicalHeaders .= sprintf("x-amz-security-token:%s\n", $securityToken);
         }
 
         # Step 5: Create the list of signed headers. This lists the headers
-        # in the canonical_headers list, delimited with ";" and in alpha order.
-        # Note: The request can include any headers; canonical_headers and
-        # signed_headers lists those that you want to be included in the
+        # in the canonicalHeaders list, delimited with ";" and in alpha order.
+        # Note: The request can include any headers; $canonicalHeaders and
+        # $signedHeaders lists those that you want to be included in the
         # hash of the request. "Host" and "x-amz-date" are always required.
-        #signed_headers = 'host;x-amz-date;x-amz-security-token'
-        $signed_headers = 'host;x-amz-date';
+        $signedHeaders = 'host;x-amz-date';
         if ($securityToken) {
-            $signed_headers .= ';x-amz-security-token';
+            $signedHeaders .= ';x-amz-security-token';
         }
 
         # Step 6: Create payload hash (hash of the request body content). For GET
         # requests, the payload is an empty string ("").
-        $payload_hash = hash('sha256', '');
+        $payloadHash = hash('sha256', '');
 
         # Step 7: Combine elements to create canonical request
-        $canonical_request = $method + "\n" . $canonical_uri + "\n" . $canonical_querystring + "\n" . $canonical_headers + "\n" . $signed_headers + "\n" . $payload_hash;
+        $canonicalRequest = implode("\n", [
+            'GET', // method
+            '/',   // canonical URL
+            self::CRED_VERIFICATION_QUERY, // query string
+            $canonicalHeaders,
+            $signedHeaders,
+            $payloadHash
+        ]);
 
         # ************* TASK 2: CREATE THE STRING TO SIGN*************
         # Match the algorithm to the hashing algorithm you use, either SHA-1 or
         # SHA-256 (recommended)
         $algorithm = 'AWS4-HMAC-SHA256';
-        $credential_scope = $datestamp + '/' . $region + '/' . $service + '/' + 'aws4_request';
-        $string_to_sign = $algorithm + "\n" +  $amzdate + "\n" +  $credential_scope + "\n" +  hash('sha256', $canonical_request);
+        $scope = implode('/', [$datestamp, $region, $service, 'aws4_request']);
+        $stringToSign = implode("\n", [$algorithm, $amzdate, $scope, hash('sha256', $canonicalRequest)]);
 
         # ************* TASK 3: CALCULATE THE SIGNATURE *************
         # Create the signing key using the function defined above.
@@ -123,18 +138,18 @@ class AwsNativeSource implements FetchAuthTokenInterface
         $signingKey = $this->getSignatureKey($secretAccessKey, $datestamp, $region, $service);
 
         # Sign the string_to_sign using the signing_key
-        $signature = $this->hmacSign($signingKey, $string_to_sign);
+        $signature = $this->hmacSign($signingKey, $stringToSign);
 
         # ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST *************
         # The signing information can be either in a query string value or in
         # a header named Authorization. This code shows how to use a header.
         # Create authorization header and add to request headers
-        $authorization_header = sprintf(
+        $authorizationHeader = sprintf(
             '%s Credential=%s/%s, SignedHeaders=%s, Signature=%s',
             $algorithm,
             $accessKeyId,
-            $credential_scope,
-            $signed_headers,
+            $scope,
+            $signedHeaders,
             $signature
         );
 
@@ -142,14 +157,15 @@ class AwsNativeSource implements FetchAuthTokenInterface
         # and (for this scenario) "Authorization". "host" and "x-amz-date" must
         # be included in the canonical_headers and signed_headers, as noted
         # earlier. Order here is not significant.
-        # Python note: The 'host' header is added automatically by the Python 'requests' library.
         $headers = [
             'x-amz-date' => $amzdate,
-            'Authorization' => $authorization_header,
+            'Authorization' => $authorizationHeader,
         ];
         if ($securityToken) {
             $headers['x-amz-security-token'] = $securityToken;
         }
+
+        return $headers;
     }
 
     private function getRegion(callable $httpHandler): string
@@ -164,18 +180,18 @@ class AwsNativeSource implements FetchAuthTokenInterface
     }
 
     /**
-     * @return [string, string, string]
+     * @return array{string, string, ?string}
      */
-    private function getSigningVarsFromUrl(callable $httpHandler, string $url): array
+    private function getSigningVarsFromUrl(callable $httpHandler, string $securityCredentialsUrl): array
     {
         // Get the AWS role name
-        $roleRequest = new Request($this->securityCredentialsUrl, 'GET');
+        $roleRequest = new Request($securityCredentialsUrl, 'GET');
         $roleResponse = $httpHandler($roleRequest);
         $roleName = (string) $roleResponse->getBody();
 
         // Get the AWS credentials
         $credsRequest = new Request(
-            $this->securityCredentialsUrl . '/' . $roleName,
+            $securityCredentialsUrl . '/' . $roleName,
             'GET'
         );
         $credsResponse = $httpHandler($credsRequest);
@@ -187,6 +203,9 @@ class AwsNativeSource implements FetchAuthTokenInterface
         ];
     }
 
+    /**
+     * @return array{string, string, ?string}
+     */
     private function getSigningVarsFromEnv(): ?array
     {
         if (isset($_ENV['AWS_ACCESS_KEY_ID'])
