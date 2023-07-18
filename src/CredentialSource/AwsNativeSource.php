@@ -50,28 +50,46 @@ class AwsNativeSource implements FetchAuthTokenInterface
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
-        $region = $this->getRegion($httpHandler);
         $signingVars = $this->securityCredentialsUrl
-            ? $this->getSigningVarsFromUrl($httpHandler, $this->securityCredentialsUrl)
-            : $this->getSigningVarsFromEnv();
+            ? self::getSigningVarsFromUrl(
+                $httpHandler,
+                $this->securityCredentialsUrl,
+                self::getRoleName($httpHandler, $this->securityCredentialsUrl)
+            )
+            : self::getSigningVarsFromEnv();
 
         if (is_null($signingVars)) {
             throw new \LogicException('Unable to get credentials from ENV, and no security credentials URL provided');
         }
 
+        $region = self::getRegion($httpHandler, $this->regionUrl);
+
         // From here we use the signing vars to create the signed request to receive a token
         [$accessKeyId, $secretAccessKey, $securityToken] = $signingVars;
-        $headers = $this->getSignedRequestHeaders($region, $accessKeyId, $secretAccessKey, $securityToken);
+        $headers = self::getSignedRequestHeaders($region, $accessKeyId, $secretAccessKey, $securityToken);
 
-        $url = new Uri($this->regionalCredVerificationUrl);
+        return [
+            'access_token' => self::fetchAccessTokenFromCredVerificationUrl(
+                $httpHandler,
+                $this->regionalCredVerificationUrl,
+                $headers,
+            )
+        ];
+    }
+
+    public static function fetchAccessTokenFromCredVerificationUrl(
+        callable $httpHandler,
+        string $regionalCredVerificationUrl,
+        array $signedHeaders,
+    ): string {
+        $url = new Uri($regionalCredVerificationUrl);
         $url = $url->withQuery(self::CRED_VERIFICATION_QUERY);
 
-        $request = new Request('GET', $url, $headers);
+        $request = new Request('GET', $url, $signedHeaders);
         $response = $httpHandler($request);
-
         $json = json_decode((string) $response->getBody(), true);
 
-        return ['access_token' => $json['access_token']];
+        return $json['access_token'];
     }
 
     /**
@@ -79,7 +97,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
      *
      * @return array<string, string>
      */
-    public function getSignedRequestHeaders(
+    public static function getSignedRequestHeaders(
         string $region,
         string $accessKeyId,
         string $secretAccessKey,
@@ -134,10 +152,10 @@ class AwsNativeSource implements FetchAuthTokenInterface
         # ************* TASK 3: CALCULATE THE SIGNATURE *************
         # Create the signing key using the function defined above.
         // (done above)
-        $signingKey = $this->getSignatureKey($secretAccessKey, $datestamp, $region, $service);
+        $signingKey = self::getSignatureKey($secretAccessKey, $datestamp, $region, $service);
 
         # Sign the string_to_sign using the signing_key
-        $signature = $this->hmacSign($signingKey, $stringToSign);
+        $signature = self::hmacSign($signingKey, $stringToSign);
 
         # ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST *************
         # The signing information can be either in a query string value or in
@@ -167,10 +185,10 @@ class AwsNativeSource implements FetchAuthTokenInterface
         return $headers;
     }
 
-    private function getRegion(callable $httpHandler): string
+    public static function getRegion(callable $httpHandler, string $regionUrl): string
     {
         // get the region/zone from the region URL
-        $regionRequest = new Request($this->regionUrl, 'GET');
+        $regionRequest = new Request('GET', $regionUrl);
         $regionResponse = $httpHandler($regionRequest);
 
         // Remove last character. For example, if us-east-2b is returned,
@@ -178,20 +196,28 @@ class AwsNativeSource implements FetchAuthTokenInterface
         return substr((string) $regionResponse->getBody(), 0, -1);
     }
 
-    /**
-     * @return array{string, string, ?string}
-     */
-    private function getSigningVarsFromUrl(callable $httpHandler, string $securityCredentialsUrl): array
+    public static function getRoleName(callable $httpHandler, string $securityCredentialsUrl): string
     {
         // Get the AWS role name
-        $roleRequest = new Request($securityCredentialsUrl, 'GET');
+        $roleRequest = new Request('GET', $securityCredentialsUrl);
         $roleResponse = $httpHandler($roleRequest);
         $roleName = (string) $roleResponse->getBody();
 
+        return $roleName;
+    }
+
+    /**
+     * @return array{string, string, ?string}
+     */
+    public static function getSigningVarsFromUrl(
+        callable $httpHandler,
+        string $securityCredentialsUrl,
+        string $roleName
+    ): array {
         // Get the AWS credentials
         $credsRequest = new Request(
+            'GET',
             $securityCredentialsUrl . '/' . $roleName,
-            'GET'
         );
         $credsResponse = $httpHandler($credsRequest);
         $awsCreds = json_decode((string) $credsResponse->getBody(), true);
@@ -205,7 +231,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
     /**
      * @return array{string, string, ?string}
      */
-    private function getSigningVarsFromEnv(): ?array
+    public static function getSigningVarsFromEnv(): ?array
     {
         if (isset($_ENV['AWS_ACCESS_KEY_ID'])
             && isset($_ENV['AWS_SECRET_ACCESS_KEY'])
@@ -213,37 +239,43 @@ class AwsNativeSource implements FetchAuthTokenInterface
             return [
                 $_ENV['AWS_ACCESS_KEY_ID'], // accessKeyId
                 $_ENV['AWS_SECRET_ACCESS_KEY'], // secretAccessKey
-                $_ENV['AWS_SESSION_TOKEN'], // token (can be null)
+                $_ENV['AWS_SESSION_TOKEN'] ?? null, // token (can be null)
             ];
         }
 
         return null;
     }
 
-    private function hmacSign(string $key, string $msg): string
+    private static function hmacSign(string $key, string $msg): string
     {
         return hash_hmac('sha256', utf8_encode($msg), $key);
     }
 
-    private function getSignatureKey(
+    private static function getSignatureKey(
         string $key,
         string $dateStamp,
         string $regionName,
         string $serviceName
     ): string {
-        $kDate = $this->hmacSign(utf8_encode('AWS4' . $key), $dateStamp);
-        $kRegion = $this->hmacSign($kDate, $regionName);
-        $kService = $this->hmacSign($kRegion, $serviceName);
-        $kSigning = $this->hmacSign($kService, 'aws4_request');
+        $kDate = self::hmacSign(utf8_encode('AWS4' . $key), $dateStamp);
+        $kRegion = self::hmacSign($kDate, $regionName);
+        $kService = self::hmacSign($kRegion, $serviceName);
+        $kSigning = self::hmacSign($kService, 'aws4_request');
 
         return $kSigning;
     }
 
+    /**
+     * Not used
+     */
     public function getCacheKey()
     {
         return '';
     }
 
+    /**
+     * Not used
+     */
     public function getLastReceivedToken()
     {
         return null;
