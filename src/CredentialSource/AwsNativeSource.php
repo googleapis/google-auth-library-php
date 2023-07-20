@@ -80,7 +80,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
     public static function fetchAccessTokenFromCredVerificationUrl(
         callable $httpHandler,
         string $regionalCredVerificationUrl,
-        array $signedHeaders,
+        array $signedHeaders
     ): string {
         $url = new Uri($regionalCredVerificationUrl);
         $url = $url->withQuery(self::CRED_VERIFICATION_QUERY);
