@@ -251,7 +251,15 @@ class AwsNativeSource implements FetchAuthTokenInterface
 
     private static function hmacSign(string $key, string $msg): string
     {
-        return hash_hmac('sha256', utf8_encode($msg), $key);
+        return hash_hmac('sha256', self::utf8Encode($msg), $key);
+    }
+
+    /**
+     * @TODO add a fallback when mbstring is not available
+     */
+    private static function utf8Encode(string $string): string
+    {
+        return mb_convert_encoding($string, 'UTF-8', 'ISO-8859-1');
     }
 
     private static function getSignatureKey(
@@ -260,7 +268,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
         string $regionName,
         string $serviceName
     ): string {
-        $kDate = self::hmacSign(utf8_encode('AWS4' . $key), $dateStamp);
+        $kDate = self::hmacSign(self::utf8Encode('AWS4' . $key), $dateStamp);
         $kRegion = self::hmacSign($kDate, $regionName);
         $kService = self::hmacSign($kRegion, $serviceName);
         $kSigning = self::hmacSign($kService, 'aws4_request');
