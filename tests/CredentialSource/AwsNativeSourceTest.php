@@ -18,12 +18,12 @@
 namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\CredentialSource\AwsNativeSource;
+use LogicException;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Prophecy\PhpUnit\ProphecyTrait;
-use LogicException;
 
 /**
  * @group credentials

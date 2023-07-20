@@ -77,6 +77,9 @@ class AwsNativeSource implements FetchAuthTokenInterface
         ];
     }
 
+    /**
+     * @param array<string, string> $signedHeaders
+     */
     public static function fetchAccessTokenFromCredVerificationUrl(
         callable $httpHandler,
         string $regionalCredVerificationUrl,
