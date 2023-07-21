@@ -26,8 +26,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 /**
- * @group credentials
- * @group credentials-iam
+ * @group credentialsource
+ * @group credentialsource-aws
  */
 class AwsNativeSourceTest extends TestCase
 {
@@ -341,4 +341,17 @@ class AwsNativeSourceTest extends TestCase
         $this->assertArrayHasKey('access_token', $accessToken);
         $this->assertEquals('abc', $accessToken['access_token']);
     }
+
+    // public function testIntegrationWithAws()
+    // {
+    //     if ('1' !== getenv('RUN_AWS_TESTS')) {
+    //         $this->markTestSkipped('Skipping AWS tests. Set RUN_AWS_TEST=1 to run them.');
+    //     }
+
+    //     $aws = new AwsNativeSource(
+    //         'https://sts.us-east-2.amazonaws.com',
+    //         'https://sts.us-east-2.amazonaws.com',
+    //         'https://sts.us-east-2.amazonaws.com'
+    //     );
+    // }
 }

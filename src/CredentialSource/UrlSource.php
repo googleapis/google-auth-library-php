@@ -22,6 +22,7 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
+use UnexpectedValueException;
 
 /**
  * Retrieve a token from a URL.
@@ -31,24 +32,23 @@ use InvalidArgumentException;
 class UrlSource implements FetchAuthTokenInterface
 {
     private string $url;
+    private ?string $format;
+    private ?string $subjectTokenFieldName;
     /**
      * @var array<string, string|string[]>
      */
-    private array $headers;
-    private ?string $format;
-    private ?string $subjectTokenFieldName;
+    private ?array $headers;
 
     /**
      * @param array<string, string|string[]> $headers Request headers
      */
     public function __construct(
         string $url,
-        array $headers = [],
         string $format = null,
-        string $subjectTokenFieldName = null
+        string $subjectTokenFieldName = null,
+        array $headers = null
     ) {
         $this->url = $url;
-        $this->headers = $headers;
 
         if ($format === 'json' && is_null($subjectTokenFieldName)) {
             throw new InvalidArgumentException(
@@ -58,6 +58,7 @@ class UrlSource implements FetchAuthTokenInterface
 
         $this->format = $format;
         $this->subjectTokenFieldName = $subjectTokenFieldName;
+        $this->headers = $headers;
     }
 
     public function fetchAuthToken(callable $httpHandler = null): array
@@ -67,15 +68,24 @@ class UrlSource implements FetchAuthTokenInterface
         }
 
         $request = new Request(
-            $this->url,
             'GET',
-            $this->headers
+            $this->url,
+            $this->headers ?: []
         );
 
         $response = $httpHandler($request);
         $body = (string) $response->getBody();
         if ($this->format === 'json') {
-            $json = json_decode((string) $body, true);
+            if (!$json = json_decode((string) $body, true)) {
+                throw new UnexpectedValueException(
+                    'Unable to decode JSON response'
+                );
+            }
+            if (!isset($json[$this->subjectTokenFieldName])) {
+                throw new UnexpectedValueException(
+                    'subject_token_field_name not found in JSON file'
+                );
+            }
             $body = $json[$this->subjectTokenFieldName];
         }
 

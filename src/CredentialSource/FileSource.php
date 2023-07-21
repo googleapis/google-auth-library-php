@@ -19,6 +19,7 @@ namespace Google\Auth\CredentialSource;
 
 use Google\Auth\FetchAuthTokenInterface;
 use InvalidArgumentException;
+use UnexpectedValueException;
 
 /**
  * Retrieve a token from a file.
@@ -50,7 +51,16 @@ class FileSource implements FetchAuthTokenInterface
     {
         $contents = file_get_contents($this->file);
         if ($this->format === 'json') {
-            $json = json_decode((string) $contents, true);
+            if (!$json = json_decode((string) $contents, true)) {
+                throw new UnexpectedValueException(
+                    'Unable to decode JSON file'
+                );
+            }
+            if (!isset($json[$this->subjectTokenFieldName])) {
+                throw new UnexpectedValueException(
+                    'subject_token_field_name not found in JSON file'
+                );
+            }
             $contents = $json[$this->subjectTokenFieldName];
         }
 
