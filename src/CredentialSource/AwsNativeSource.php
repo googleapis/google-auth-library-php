@@ -78,6 +78,8 @@ class AwsNativeSource implements FetchAuthTokenInterface
     }
 
     /**
+     * @internal
+     *
      * @param array<string, string> $signedHeaders
      */
     public static function fetchAccessTokenFromCredVerificationUrl(
@@ -97,6 +99,8 @@ class AwsNativeSource implements FetchAuthTokenInterface
 
     /**
      * @see http://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+     *
+     * @internal
      *
      * @return array<string, string>
      */
@@ -188,6 +192,9 @@ class AwsNativeSource implements FetchAuthTokenInterface
         return $headers;
     }
 
+    /**
+     * @internal
+     */
     public static function getRegion(callable $httpHandler, string $regionUrl): string
     {
         // get the region/zone from the region URL
@@ -199,6 +206,9 @@ class AwsNativeSource implements FetchAuthTokenInterface
         return substr((string) $regionResponse->getBody(), 0, -1);
     }
 
+    /**
+     * @internal
+     */
     public static function getRoleName(callable $httpHandler, string $securityCredentialsUrl): string
     {
         // Get the AWS role name
@@ -210,6 +220,8 @@ class AwsNativeSource implements FetchAuthTokenInterface
     }
 
     /**
+     * @internal
+     *
      * @return array{string, string, ?string}
      */
     public static function getSigningVarsFromUrl(
@@ -232,6 +244,8 @@ class AwsNativeSource implements FetchAuthTokenInterface
     }
 
     /**
+     * @internal
+     *
      * @return array{string, string, ?string}
      */
     public static function getSigningVarsFromEnv(): ?array
