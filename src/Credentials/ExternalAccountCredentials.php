@@ -26,7 +26,6 @@ use Google\Auth\OAuth2;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
 use InvalidArgumentException;
-use LogicException;
 
 class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface
 {
@@ -57,25 +56,25 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
         }
 
         if (!array_key_exists('token_url', $jsonKey)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'json key is missing the token_url field'
             );
         }
 
         if (!array_key_exists('audience', $jsonKey)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'json key is missing the audience field'
             );
         }
 
         if (!array_key_exists('subject_token_type', $jsonKey)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'json key is missing the subject_token_type field'
             );
         }
 
         if (!array_key_exists('credential_source', $jsonKey)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'json key is missing the credential_source field'
             );
         }
@@ -107,10 +106,21 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
             && 1 === preg_match('/^aws(\d+)$/', $credentialSource['environment_id'], $matches)
         ) {
             if ($matches[1] !== '1') {
-                throw new LogicException(
+                throw new InvalidArgumentException(
                     "aws version \"$matches[1]\" is not supported in the current build."
                 );
             }
+            if (!array_key_exists('region_url', $credentialSource)) {
+                throw new InvalidArgumentException(
+                    'The region_url field is required for aws1 credential source.'
+                );
+            }
+            if (!array_key_exists('regional_cred_verification_url', $credentialSource)) {
+                throw new InvalidArgumentException(
+                    'The regional_cred_verification_url field is required for aws1 credential source.'
+                );
+            }
+
             return new AwsNativeSource(
                 $credentialSource['region_url'],
                 $credentialSource['regional_cred_verification_url'],
@@ -121,13 +131,13 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
         if (isset($credentialSource['url'])) {
             return new UrlSource(
                 $credentialSource['url'],
-                $credentialSource['headers'] ?? [],
                 $credentialSource['format']['type'] ?? null,
-                $credentialSource['format']['subject_token_field_name'] ?? null
+                $credentialSource['format']['subject_token_field_name'] ?? null,
+                $credentialSource['headers'] ?? null,
             );
         }
 
-        throw new LogicException('Unable to determine credential source from json key.');
+        throw new InvalidArgumentException('Unable to determine credential source from json key.');
     }
 
     /**

@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests\Credentials;
+namespace Google\Auth\Tests\CredentialSource;
 
 use Google\Auth\CredentialSource\FileSource;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
 use InvalidArgumentException;
 use UnexpectedValueException;
 
@@ -29,8 +28,6 @@ use UnexpectedValueException;
  */
 class FileSourceTest extends TestCase
 {
-    use ProphecyTrait;
-
     /** @dataProvider provideFetchAccessToken */
     public function testFetchAccessToken(
         string $filename,

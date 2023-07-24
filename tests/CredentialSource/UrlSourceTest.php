@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests\Credentials;
+namespace Google\Auth\Tests\CredentialSource;
 
 use Google\Auth\CredentialSource\UrlSource;
 use PHPUnit\Framework\TestCase;
