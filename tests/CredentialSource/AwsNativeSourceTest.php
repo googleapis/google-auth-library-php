@@ -34,7 +34,7 @@ class AwsNativeSourceTest extends TestCase
     use ProphecyTrait;
 
     private string $regionUrl = 'https://test.regional.url';
-    private string $regionalCredVerificationUrl = 'https://test.regional.cred.verification.url';
+    private string $regionalCredVerificationUrl = 'https://{region}.regional.cred.verification.url';
     private string $securityCredentialsUrl = 'https://test.security.credentials.url';
 
     public function testGetRegion()
@@ -380,7 +380,13 @@ class AwsNativeSourceTest extends TestCase
                 case 2: return $roleResponse->reveal();
                 case 3: return $securityCredentialsResponse->reveal();
                 case 4: return $regionResponse->reveal();
-                case 5: return $credVerificationResponse->reveal();
+                case 5:
+                    $this->assertStringStartsWith(
+                        // test region was substituted in the URL
+                        'https://us-east-2.regional.cred.verification.url',
+                        (string) $request->getUri()
+                    );
+                    return $credVerificationResponse->reveal();
             }
             throw new \Exception('Unexpected request');
         };

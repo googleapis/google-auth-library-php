@@ -74,7 +74,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
         return [
             'access_token' => self::fetchAccessTokenFromCredVerificationUrl(
                 $httpHandler,
-                $this->regionalCredVerificationUrl,
+                str_replace('{region}', $region, $this->regionalCredVerificationUrl),
                 $headers,
             )
         ];
