@@ -50,11 +50,14 @@ class AwsNativeSource implements FetchAuthTokenInterface
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
+        $awsToken = self::fetchAwsTokenFromMetadata($httpHandler);
+
         $signingVars = $this->securityCredentialsUrl
             ? self::getSigningVarsFromUrl(
                 $httpHandler,
                 $this->securityCredentialsUrl,
-                self::getRoleName($httpHandler, $this->securityCredentialsUrl)
+                self::getRoleName($httpHandler, $this->securityCredentialsUrl, $awsToken),
+                $awsToken
             )
             : self::getSigningVarsFromEnv();
 
@@ -62,7 +65,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
             throw new \LogicException('Unable to get credentials from ENV, and no security credentials URL provided');
         }
 
-        $region = self::getRegion($httpHandler, $this->regionUrl);
+        $region = self::getRegion($httpHandler, $this->regionUrl, $awsToken);
 
         // From here we use the signing vars to create the signed request to receive a token
         [$accessKeyId, $secretAccessKey, $securityToken] = $signingVars;
@@ -75,6 +78,25 @@ class AwsNativeSource implements FetchAuthTokenInterface
                 $headers,
             )
         ];
+    }
+
+    /**
+     * @internal
+     */
+    public static function fetchAwsTokenFromMetadata(callable $httpHandler): string
+    {
+        $url = 'http://169.254.169.254/latest/api/token';
+        $headers = [
+            'X-aws-ec2-metadata-token-ttl-seconds' => '21600'
+        ];
+        $request = new Request(
+            'PUT',
+            $url,
+            $headers
+        );
+
+        $response = $httpHandler($request);
+        return (string) $response->getBody();
     }
 
     /**
@@ -195,10 +217,10 @@ class AwsNativeSource implements FetchAuthTokenInterface
     /**
      * @internal
      */
-    public static function getRegion(callable $httpHandler, string $regionUrl): string
+    public static function getRegion(callable $httpHandler, string $regionUrl, string $awsToken): string
     {
         // get the region/zone from the region URL
-        $regionRequest = new Request('GET', $regionUrl);
+        $regionRequest = new Request('GET', $regionUrl, ['X-aws-ec2-metadata-token' => $awsToken]);
         $regionResponse = $httpHandler($regionRequest);
 
         // Remove last character. For example, if us-east-2b is returned,
@@ -209,10 +231,10 @@ class AwsNativeSource implements FetchAuthTokenInterface
     /**
      * @internal
      */
-    public static function getRoleName(callable $httpHandler, string $securityCredentialsUrl): string
+    public static function getRoleName(callable $httpHandler, string $securityCredentialsUrl, string $awsToken): string
     {
         // Get the AWS role name
-        $roleRequest = new Request('GET', $securityCredentialsUrl);
+        $roleRequest = new Request('GET', $securityCredentialsUrl, ['X-aws-ec2-metadata-token' => $awsToken]);
         $roleResponse = $httpHandler($roleRequest);
         $roleName = (string) $roleResponse->getBody();
 
@@ -227,12 +249,14 @@ class AwsNativeSource implements FetchAuthTokenInterface
     public static function getSigningVarsFromUrl(
         callable $httpHandler,
         string $securityCredentialsUrl,
-        string $roleName
+        string $roleName,
+        string $awsToken
     ): array {
         // Get the AWS credentials
         $credsRequest = new Request(
             'GET',
             $securityCredentialsUrl . '/' . $roleName,
+            ['X-aws-ec2-metadata-token' => $awsToken]
         );
         $credsResponse = $httpHandler($credsRequest);
         $awsCreds = json_decode((string) $credsResponse->getBody(), true);

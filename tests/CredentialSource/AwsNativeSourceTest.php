@@ -39,7 +39,7 @@ class AwsNativeSourceTest extends TestCase
 
     public function testGetRegion()
     {
-        $handler = function (RequestInterface $request): ResponseInterface {
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
             $this->assertEquals('GET', $request->getMethod());
             $this->assertEquals($this->regionUrl, (string) $request->getUri());
 
@@ -51,13 +51,13 @@ class AwsNativeSourceTest extends TestCase
             return $response->reveal();
         };
 
-        $region = AwsNativeSource::getRegion($handler, $this->regionUrl);
+        $region = AwsNativeSource::getRegion($httpHandler, $this->regionUrl, 'aws-token');
         $this->assertEquals('us-east-2', $region);
     }
 
     public function testGetRoleName()
     {
-        $handler = function (RequestInterface $request): ResponseInterface {
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
             $this->assertEquals('GET', $request->getMethod());
             $this->assertEquals($this->securityCredentialsUrl, (string) $request->getUri());
 
@@ -69,14 +69,34 @@ class AwsNativeSourceTest extends TestCase
             return $response->reveal();
         };
 
-        $roleName = AwsNativeSource::getRoleName($handler, $this->securityCredentialsUrl);
+        $roleName = AwsNativeSource::getRoleName($httpHandler, $this->securityCredentialsUrl, 'aws-token');
 
         $this->assertEquals('expected-role-name', $roleName);
     }
 
+    public function testFetchAwsTokenFromMetadata()
+    {
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            $this->assertEquals('PUT', $request->getMethod());
+            $this->assertEquals('http://169.254.169.254/latest/api/token', (string) $request->getUri());
+            $this->assertEquals('21600', $request->getHeaderLine('X-aws-ec2-metadata-token-ttl-seconds'));
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn('expected-aws-token');
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+
+            return $response->reveal();
+        };
+
+        $roleName = AwsNativeSource::fetchAwsTokenFromMetadata($httpHandler);
+
+        $this->assertEquals('expected-aws-token', $roleName);
+    }
+
     public function testGetSigningVarsFromUrl()
     {
-        $handler = function (RequestInterface $request): ResponseInterface {
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
             $this->assertEquals('GET', $request->getMethod());
             $this->assertEquals(
                 $this->securityCredentialsUrl . '/test-role-name',
@@ -96,9 +116,10 @@ class AwsNativeSourceTest extends TestCase
         };
 
         $signingVars = AwsNativeSource::getSigningVarsFromUrl(
-            $handler,
+            $httpHandler,
             $this->securityCredentialsUrl,
-            'test-role-name'
+            'test-role-name',
+            'aws-token'
         );
 
         $this->assertEquals('expected-access-key-id', $signingVars[0]);
@@ -190,7 +211,7 @@ class AwsNativeSourceTest extends TestCase
 
     public function testFetchAccessTokenFromCredVerificationUrl()
     {
-        $handler = function (RequestInterface $request): ResponseInterface {
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
             $this->assertEquals('GET', $request->getMethod());
             $this->assertEquals(
                 'Action=GetCallerIdentity&Version=2011-06-15',
@@ -218,9 +239,10 @@ class AwsNativeSourceTest extends TestCase
         $headers = ['test-header' => 'test-value'];
 
         $accessToken = AwsNativeSource::fetchAccessTokenFromCredVerificationUrl(
-            $handler,
+            $httpHandler,
             $this->regionalCredVerificationUrl,
-            $headers
+            $headers,
+            'aws-token'
         );
 
         $this->assertEquals('abc', $accessToken);
@@ -237,7 +259,15 @@ class AwsNativeSourceTest extends TestCase
             $this->regionUrl,
             $this->regionalCredVerificationUrl,
         );
-        $aws->fetchAuthToken();
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            // Mock response from AWS Metadata Server
+            $awsTokenBody = $this->prophesize(StreamInterface::class);
+            $awsTokenBody->__toString()->willReturn('aws-token');
+            $awsTokenResponse = $this->prophesize(ResponseInterface::class);
+            $awsTokenResponse->getBody()->willReturn($awsTokenBody->reveal());
+            return $awsTokenResponse->reveal();
+        };
+        $aws->fetchAuthToken($httpHandler);
     }
 
     /**
@@ -254,6 +284,12 @@ class AwsNativeSourceTest extends TestCase
         $_ENV['AWS_ACCESS_KEY_ID'] = 'expected-access-key-id';
         $_ENV['AWS_SECRET_ACCESS_KEY'] = 'expected-secret-access-key';
 
+        // Mock response from AWS Metadata Server
+        $awsTokenBody = $this->prophesize(StreamInterface::class);
+        $awsTokenBody->__toString()->willReturn('aws-token');
+        $awsTokenResponse = $this->prophesize(ResponseInterface::class);
+        $awsTokenResponse->getBody()->willReturn($awsTokenBody->reveal());
+
         // Mock response from Region URL
         $regionBody = $this->prophesize(StreamInterface::class);
         $regionBody->__toString()->willReturn('us-east-2b');
@@ -267,19 +303,22 @@ class AwsNativeSourceTest extends TestCase
         $credVerificationResponse->getBody()->willReturn($credVerificationBody->reveal());
 
         $requestCount = 0;
-        $handler = function (RequestInterface $request) use (
+        $httpHandler = function (RequestInterface $request) use (
+            $awsTokenResponse,
             $regionResponse,
             $credVerificationResponse,
             &$requestCount
         ): ResponseInterface {
             $requestCount++;
             switch ($requestCount) {
-                case 1: return $regionResponse->reveal();
-                case 2: return $credVerificationResponse->reveal();
+                case 1: return $awsTokenResponse->reveal();
+                case 2: return $regionResponse->reveal();
+                case 3: return $credVerificationResponse->reveal();
             }
+            throw new \Exception('Unexpected request');
         };
 
-        $accessToken = $aws->fetchAuthToken($handler);
+        $accessToken = $aws->fetchAuthToken($httpHandler);
         $this->assertArrayHasKey('access_token', $accessToken);
         $this->assertEquals('abc', $accessToken['access_token']);
     }
@@ -291,6 +330,12 @@ class AwsNativeSourceTest extends TestCase
             $this->regionalCredVerificationUrl,
             $this->securityCredentialsUrl
         );
+
+        // Mock response from AWS Metadata Server
+        $awsTokenBody = $this->prophesize(StreamInterface::class);
+        $awsTokenBody->__toString()->willReturn('aws-token');
+        $awsTokenResponse = $this->prophesize(ResponseInterface::class);
+        $awsTokenResponse->getBody()->willReturn($awsTokenBody->reveal());
 
         // Mock response from Role Name request
         $roleBody = $this->prophesize(StreamInterface::class);
@@ -321,7 +366,8 @@ class AwsNativeSourceTest extends TestCase
         $credVerificationResponse->getBody()->willReturn($credVerificationBody->reveal());
 
         $requestCount = 0;
-        $handler = function (RequestInterface $request) use (
+        $httpHandler = function (RequestInterface $request) use (
+            $awsTokenResponse,
             $roleResponse,
             $securityCredentialsResponse,
             $regionResponse,
@@ -330,28 +376,17 @@ class AwsNativeSourceTest extends TestCase
         ): ResponseInterface {
             $requestCount++;
             switch ($requestCount) {
-                case 1: return $roleResponse->reveal();
-                case 2: return $securityCredentialsResponse->reveal();
-                case 3: return $regionResponse->reveal();
-                case 4: return $credVerificationResponse->reveal();
+                case 1: return $awsTokenResponse->reveal();
+                case 2: return $roleResponse->reveal();
+                case 3: return $securityCredentialsResponse->reveal();
+                case 4: return $regionResponse->reveal();
+                case 5: return $credVerificationResponse->reveal();
             }
+            throw new \Exception('Unexpected request');
         };
 
-        $accessToken = $aws->fetchAuthToken($handler);
+        $accessToken = $aws->fetchAuthToken($httpHandler);
         $this->assertArrayHasKey('access_token', $accessToken);
         $this->assertEquals('abc', $accessToken['access_token']);
     }
-
-    // public function testIntegrationWithAws()
-    // {
-    //     if ('1' !== getenv('RUN_AWS_TESTS')) {
-    //         $this->markTestSkipped('Skipping AWS tests. Set RUN_AWS_TEST=1 to run them.');
-    //     }
-
-    //     $aws = new AwsNativeSource(
-    //         'https://sts.us-east-2.amazonaws.com',
-    //         'https://sts.us-east-2.amazonaws.com',
-    //         'https://sts.us-east-2.amazonaws.com'
-    //     );
-    // }
 }
