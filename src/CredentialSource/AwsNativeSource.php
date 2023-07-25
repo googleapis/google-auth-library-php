@@ -112,7 +112,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
         $url = new Uri($regionalCredVerificationUrl);
         $url = $url->withQuery(self::CRED_VERIFICATION_QUERY);
 
-        $request = new Request('GET', $url, $signedHeaders);
+        $request = new Request('POST', $url, $signedHeaders);
         $response = $httpHandler($request);
         $json = json_decode((string) $response->getBody(), true);
 
@@ -136,8 +136,8 @@ class AwsNativeSource implements FetchAuthTokenInterface
         $host = 'sts.amazonaws.com';
 
         # Create a date for headers and the credential string in ISO-8601 format
-        $amzdate = date('c');
-        $datestamp = date('Y-m-d'); # Date w/o time, used in credential scope
+        $amzdate = date('Ymd\THis\Z');
+        $datestamp = date('Ymd'); # Date w/o time, used in credential scope
 
         # Create the canonical headers and signed headers. Header names
         # must be trimmed and lowercase, and sorted in code point order from
@@ -163,7 +163,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
 
         # Step 7: Combine elements to create canonical request
         $canonicalRequest = implode("\n", [
-            'GET', // method
+            'POST', // method
             '/',   // canonical URL
             self::CRED_VERIFICATION_QUERY, // query string
             $canonicalHeaders,
@@ -184,7 +184,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
         $signingKey = self::getSignatureKey($secretAccessKey, $datestamp, $region, $service);
 
         # Sign the string_to_sign using the signing_key
-        $signature = self::hmacSign($signingKey, $stringToSign);
+        $signature = bin2hex(self::hmacSign($signingKey, $stringToSign));
 
         # ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST *************
         # The signing information can be either in a query string value or in
@@ -274,22 +274,25 @@ class AwsNativeSource implements FetchAuthTokenInterface
      */
     public static function getSigningVarsFromEnv(): ?array
     {
-        if (isset($_ENV['AWS_ACCESS_KEY_ID'])
-            && isset($_ENV['AWS_SECRET_ACCESS_KEY'])
-        ) {
+        $accessKeyId = getenv('AWS_ACCESS_KEY_ID');
+        $secretAccessKey = getenv('AWS_SECRET_ACCESS_KEY');
+        if ($accessKeyId && $secretAccessKey) {
             return [
-                $_ENV['AWS_ACCESS_KEY_ID'], // accessKeyId
-                $_ENV['AWS_SECRET_ACCESS_KEY'], // secretAccessKey
-                $_ENV['AWS_SESSION_TOKEN'] ?? null, // token (can be null)
+                $accessKeyId,
+                $secretAccessKey,
+                getenv('AWS_SESSION_TOKEN'), // session token (can be null)
             ];
         }
 
         return null;
     }
 
+    /**
+     * Return HMAC hash in binary string
+     */
     private static function hmacSign(string $key, string $msg): string
     {
-        return hash_hmac('sha256', self::utf8Encode($msg), $key);
+        return hash_hmac('sha256', self::utf8Encode($msg), $key, true);
     }
 
     /**
