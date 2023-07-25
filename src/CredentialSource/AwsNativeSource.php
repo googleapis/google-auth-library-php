@@ -135,9 +135,9 @@ class AwsNativeSource implements FetchAuthTokenInterface
         $service = 'sts';
         $host = 'sts.amazonaws.com';
 
-        # Create a date for headers and the credential string
-        $amzdate = date('%Y%m%dT%H%M%SZ');
-        $datestamp = date('%Y%m%d'); # Date w/o time, used in credential scope
+        # Create a date for headers and the credential string in ISO-8601 format
+        $amzdate = date('c');
+        $datestamp = date('Y-m-d'); # Date w/o time, used in credential scope
 
         # Create the canonical headers and signed headers. Header names
         # must be trimmed and lowercase, and sorted in code point order from
