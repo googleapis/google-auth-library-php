@@ -112,7 +112,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
         $url = new Uri($regionalCredVerificationUrl);
         $url = $url->withQuery(self::CRED_VERIFICATION_QUERY);
 
-        $request = new Request('POST', $url, $signedHeaders);
+        $request = new Request('POST', $url, $signedHeaders + ['accept' => 'application/json']);
         $response = $httpHandler($request);
         $json = json_decode((string) $response->getBody(), true);
 
