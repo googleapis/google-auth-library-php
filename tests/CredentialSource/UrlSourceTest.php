@@ -18,12 +18,12 @@
 namespace Google\Auth\Tests\CredentialSource;
 
 use Google\Auth\CredentialSource\UrlSource;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use InvalidArgumentException;
 use UnexpectedValueException;
 
 /**

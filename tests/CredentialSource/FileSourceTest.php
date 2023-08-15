@@ -18,8 +18,8 @@
 namespace Google\Auth\Tests\CredentialSource;
 
 use Google\Auth\CredentialSource\FileSource;
-use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
 
 /**

@@ -24,8 +24,6 @@ use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\OAuth2;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use UnexpectedValueException;
-use ReflectionClass;
 
 /**
  * @group credentials
