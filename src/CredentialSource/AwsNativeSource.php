@@ -280,7 +280,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
             return [
                 $accessKeyId,
                 $secretAccessKey,
-                getenv('AWS_SESSION_TOKEN'), // session token (can be null)
+                getenv('AWS_SESSION_TOKEN') ?: null, // session token (can be null)
             ];
         }
 

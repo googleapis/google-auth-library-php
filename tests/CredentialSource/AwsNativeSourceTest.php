@@ -136,16 +136,17 @@ class AwsNativeSourceTest extends TestCase
         $this->assertNull($signingVars);
 
         // Requires AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to be set
-        $_ENV['AWS_ACCESS_KEY_ID'] = 'expected-access-key-id';
-        $_ENV['AWS_SECRET_ACCESS_KEY'] = 'expected-secret-access-key';
+        putenv('AWS_ACCESS_KEY_ID=expected-access-key-id');
+        putenv('AWS_SECRET_ACCESS_KEY=expected-secret-access-key');
 
         $signingVars = AwsNativeSource::getSigningVarsFromEnv();
+
         $this->assertEquals('expected-access-key-id', $signingVars[0]);
         $this->assertEquals('expected-secret-access-key', $signingVars[1]);
         $this->assertNull($signingVars[2]);
 
         // AWS_SESSION_TOKEN is optional
-        $_ENV['AWS_SESSION_TOKEN'] = 'expected-session-token';
+        putenv('AWS_SESSION_TOKEN=expected-session-token');
 
         $signingVars = AwsNativeSource::getSigningVarsFromEnv();
         $this->assertEquals('expected-access-key-id', $signingVars[0]);
@@ -212,7 +213,7 @@ class AwsNativeSourceTest extends TestCase
     public function testFetchAccessTokenFromCredVerificationUrl()
     {
         $httpHandler = function (RequestInterface $request): ResponseInterface {
-            $this->assertEquals('GET', $request->getMethod());
+            $this->assertEquals('POST', $request->getMethod());
             $this->assertEquals(
                 'Action=GetCallerIdentity&Version=2011-06-15',
                 (string) $request->getUri()->getQuery()
@@ -281,8 +282,8 @@ class AwsNativeSourceTest extends TestCase
         );
 
         // Set minimum number of environment variables required
-        $_ENV['AWS_ACCESS_KEY_ID'] = 'expected-access-key-id';
-        $_ENV['AWS_SECRET_ACCESS_KEY'] = 'expected-secret-access-key';
+        putenv('AWS_ACCESS_KEY_ID=expected-access-key-id');
+        putenv('AWS_SECRET_ACCESS_KEY=expected-secret-access-key');
 
         // Mock response from AWS Metadata Server
         $awsTokenBody = $this->prophesize(StreamInterface::class);
