@@ -73,6 +73,23 @@ class GCECredentialsTest extends BaseTest
         $this->assertFalse(GCECredentials::onGCE($httpHandler));
     }
 
+    public function testCheckProductNameFile()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'gce-test-product-name');
+
+        $method = (new \ReflectionClass(GCECredentials::class))
+            ->getMethod('detectResidencyLinux');
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke(null, '/nonexistant/file'));
+
+        file_put_contents($tmpFile, 'Google');
+        $this->assertTrue($method->invoke(null, $tmpFile));
+
+        file_put_contents($tmpFile, 'Not Google');
+        $this->assertFalse($method->invoke(null, $tmpFile));
+    }
+
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()
     {
         $httpHandler = getHandler([
