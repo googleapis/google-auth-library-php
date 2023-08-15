@@ -358,7 +358,7 @@ class GCECredentials extends CredentialsLoader implements
     private static function detectResidencyLinux(string $productNameFile): bool
     {
         if (file_exists($productNameFile)) {
-            $productName = trim(file_get_contents($productNameFile));
+            $productName = trim((string) file_get_contents($productNameFile));
             return 0 === strpos($productName, 'Google');
         }
         return false;
