@@ -98,7 +98,8 @@ class GCECredentialsTest extends BaseTest
 
         // If calling metadata server fails, this will check the residency file.
         $httpHandler = function () {
-            throw new ClientException('Mock exception, such as a ping timeout');
+            // Mock an exception, such as a ping timeout
+            throw $this->prophesize(ClientException::class)->reveal();
         };
 
         $this->assertTrue(GCECredentials::onGCE($httpHandler));
