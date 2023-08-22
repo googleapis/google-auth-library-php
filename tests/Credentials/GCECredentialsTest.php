@@ -90,6 +90,20 @@ class GCECredentialsTest extends BaseTest
         $this->assertFalse($method->invoke(null, $tmpFile));
     }
 
+    public function testOnGceWithResidency()
+    {
+        if (!GCECredentials::onGCE()) {
+            $this->markTestSkipped('This test only works while running on GCE');
+        }
+
+        // If calling metadata server fails, this will check the residency file.
+        $httpHandler = function () {
+            throw new ClientException('Mock exception, such as a ping timeout');
+        };
+
+        $this->assertTrue(GCECredentials::onGCE($httpHandler));
+    }
+
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()
     {
         $httpHandler = getHandler([
