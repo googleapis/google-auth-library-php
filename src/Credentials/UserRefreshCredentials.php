@@ -55,6 +55,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      *   either as an Array or as a space-delimited String.
      * @param string|array<mixed> $jsonKey JSON credential file path or JSON credentials
      *   as an associative array
+     * @param string $targetAudience The audience for the ID token.
      */
     public function __construct(
         $scope,
