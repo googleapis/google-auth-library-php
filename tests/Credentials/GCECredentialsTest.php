@@ -73,6 +73,38 @@ class GCECredentialsTest extends BaseTest
         $this->assertFalse(GCECredentials::onGCE($httpHandler));
     }
 
+    public function testCheckProductNameFile()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'gce-test-product-name');
+
+        $method = (new \ReflectionClass(GCECredentials::class))
+            ->getMethod('detectResidencyLinux');
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke(null, '/nonexistant/file'));
+
+        file_put_contents($tmpFile, 'Google');
+        $this->assertTrue($method->invoke(null, $tmpFile));
+
+        file_put_contents($tmpFile, 'Not Google');
+        $this->assertFalse($method->invoke(null, $tmpFile));
+    }
+
+    public function testOnGceWithResidency()
+    {
+        if (!GCECredentials::onGCE()) {
+            $this->markTestSkipped('This test only works while running on GCE');
+        }
+
+        // If calling metadata server fails, this will check the residency file.
+        $httpHandler = function () {
+            // Mock an exception, such as a ping timeout
+            throw $this->prophesize(ClientException::class)->reveal();
+        };
+
+        $this->assertTrue(GCECredentials::onGCE($httpHandler));
+    }
+
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()
     {
         $httpHandler = getHandler([
