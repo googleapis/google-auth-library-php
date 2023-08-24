@@ -30,15 +30,18 @@ class AwsNativeSource implements CredentialSourceInterface
 {
     private const CRED_VERIFICATION_QUERY = 'Action=GetCallerIdentity&Version=2011-06-15';
 
+    private string $audience;
     private string $regionUrl;
     private string $regionalCredVerificationUrl;
     private ?string $securityCredentialsUrl;
 
     public function __construct(
+        string $audience,
         string $regionUrl,
         string $regionalCredVerificationUrl,
         string $securityCredentialsUrl = null
     ) {
+        $this->audience = $audience;
         $this->regionUrl = $regionUrl;
         $this->regionalCredVerificationUrl = $regionalCredVerificationUrl;
         $this->securityCredentialsUrl = $securityCredentialsUrl;
@@ -70,9 +73,11 @@ class AwsNativeSource implements CredentialSourceInterface
         // From here we use the signing vars to create the signed request to receive a token
         [$accessKeyId, $secretAccessKey, $securityToken] = $signingVars;
         $headers = self::getSignedRequestHeaders($region, $accessKeyId, $secretAccessKey, $securityToken);
+        // Inject x-goog-cloud-target-resource into header
+        $headers['x-goog-cloud-target-resource'] = $this->audience;
 
         $request = [
-            'headers' => $headers,
+            'headers' => array_map(fn ($k) => ['key' => $k, 'value' => $headers[$k]], array_keys($headers)),
             'method' => 'POST',
             'url' => str_replace('{region}', $region, $this->regionalCredVerificationUrl),
         ];

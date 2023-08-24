@@ -33,6 +33,7 @@ class AwsNativeSourceTest extends TestCase
 {
     use ProphecyTrait;
 
+    private string $audience = '"//iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/byoid-pool-php/providers/PROJECT_ID';
     private string $regionUrl = 'https://test.regional.url';
     private string $regionalCredVerificationUrl = 'https://{region}.regional.cred.verification.url';
     private string $securityCredentialsUrl = 'https://test.security.credentials.url';
@@ -218,6 +219,7 @@ class AwsNativeSourceTest extends TestCase
         );
 
         $aws = new AwsNativeSource(
+            $this->audience,
             $this->regionUrl,
             $this->regionalCredVerificationUrl,
         );
@@ -238,6 +240,7 @@ class AwsNativeSourceTest extends TestCase
     public function testFetchSubjectTokenFromEnv()
     {
         $aws = new AwsNativeSource(
+            $this->audience,
             $this->regionUrl,
             $this->regionalCredVerificationUrl,
         );
@@ -282,6 +285,7 @@ class AwsNativeSourceTest extends TestCase
     public function testFetchSubjectTokenFromUrl()
     {
         $aws = new AwsNativeSource(
+            $this->audience,
             $this->regionUrl,
             $this->regionalCredVerificationUrl,
             $this->securityCredentialsUrl

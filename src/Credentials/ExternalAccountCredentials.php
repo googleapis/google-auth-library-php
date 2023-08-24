@@ -85,15 +85,16 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
             'audience' => $jsonKey['audience'],
             'scope' => $scope,
             'subjectTokenType' => $jsonKey['subject_token_type'],
-            'subjectTokenFetcher' => self::buildCredentialSource($jsonKey['credential_source']),
+            'subjectTokenFetcher' => self::buildCredentialSource($jsonKey),
         ]);
     }
 
     /**
-     * @param array<mixed> $credentialSource
+     * @param array<mixed> $jsonKey
      */
-    private static function buildCredentialSource(array $credentialSource): CredentialSourceInterface
+    private static function buildCredentialSource(array $jsonKey): CredentialSourceInterface
     {
+        $credentialSource = $jsonKey['credential_source'];
         if (isset($credentialSource['file'])) {
             return new FileSource(
                 $credentialSource['file'],
@@ -121,8 +122,14 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
                     'The regional_cred_verification_url field is required for aws1 credential source.'
                 );
             }
+            if (!array_key_exists('audience', $jsonKey)) {
+                throw new InvalidArgumentException(
+                    'aws1 credential source requires an audience to be set in the JSON file.'
+                );
+            }
 
             return new AwsNativeSource(
+                $jsonKey['audience'],
                 $credentialSource['region_url'],
                 $credentialSource['regional_cred_verification_url'],
                 $credentialSource['url'] ?? null // $securityCredentialsUrl

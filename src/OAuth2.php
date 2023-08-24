@@ -42,6 +42,7 @@ class OAuth2 implements FetchAuthTokenInterface
     const DEFAULT_SKEW_SECONDS = 60; // 1 minute
     const JWT_URN = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
     const STS_URN = 'urn:ietf:params:oauth:grant-type:token-exchange';
+    private const STS_REQUESTED_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:access_token';
 
     /**
      * TODO: determine known methods from the keys of JWT::methods.
@@ -288,12 +289,6 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * For STS requests.
-     * An identifier for the type of the requested security token.
-     */
-    private ?string $requestedTokenType;
-
-    /**
-     * For STS requests.
      * A security token that represents the identity of the party on behalf of
      * whom the request is being made.
      */
@@ -419,7 +414,6 @@ class OAuth2 implements FetchAuthTokenInterface
             'additionalClaims' => [],
             'codeVerifier' => null,
             'resource' => null,
-            'requestedTokenType' => null,
             'subjectTokenFetcher' => null,
             'subjectTokenType' => null,
             'actorToken' => null,
@@ -448,7 +442,6 @@ class OAuth2 implements FetchAuthTokenInterface
 
         // for STS
         $this->resource = $opts['resource'];
-        $this->requestedTokenType = $opts['requestedTokenType'];
         $this->subjectTokenFetcher = $opts['subjectTokenFetcher'];
         $this->subjectTokenType = $opts['subjectTokenType'];
         $this->actorToken = $opts['actorToken'];
@@ -593,13 +586,13 @@ class OAuth2 implements FetchAuthTokenInterface
                 break;
             case self::STS_URN:
                 $token = $this->subjectTokenFetcher->fetchSubjectToken($httpHandler);
-                $params['subject_token'] = $token['access_token'];
+                $params['subject_token'] = $token;
                 $params['subject_token_type'] = $this->subjectTokenType;
                 $params += array_filter([
                     'resource'             => $this->resource,
                     'audience'             => $this->audience,
                     'scope'                => $this->getScope(),
-                    'requested_token_type' => $this->requestedTokenType,
+                    'requested_token_type' => self::STS_REQUESTED_TOKEN_TYPE,
                     'actor_token'          => $this->actorToken,
                     'actor_token_type'     => $this->actorTokenType,
                 ]);
