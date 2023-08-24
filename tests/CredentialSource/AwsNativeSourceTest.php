@@ -158,10 +158,12 @@ class AwsNativeSourceTest extends TestCase
     public function testGetSignedRequestHeaders()
     {
         $region = 'us-east-2';
+        $host = 'sts.us-east-2.amazonaws.com';
         $accessKeyId = 'expected-access-key-id';
         $secretAccessKey = 'expected-secret-access-key';
         $securityToken = null;
         $headers = AwsNativeSource::getSignedRequestHeaders(
+            $host,
             $region,
             $accessKeyId,
             $secretAccessKey,
@@ -177,7 +179,7 @@ class AwsNativeSourceTest extends TestCase
             $headers['Authorization']
         );
         $this->assertStringContainsString(
-            '/us-east-2/sts/aws4_request, SignedHeaders=host;x-amz-date, ',
+            '/sts/aws4_request, SignedHeaders=host;x-amz-date, ',
             $headers['Authorization']
         );
         $this->assertStringContainsString(
@@ -188,6 +190,7 @@ class AwsNativeSourceTest extends TestCase
         $securityToken = 'extected-security-token';
         $headers = AwsNativeSource::getSignedRequestHeaders(
             $region,
+            $host,
             $accessKeyId,
             $secretAccessKey,
             $securityToken
@@ -202,7 +205,7 @@ class AwsNativeSourceTest extends TestCase
             $headers['Authorization']
         );
         $this->assertStringContainsString(
-            '/us-east-2/sts/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, ',
+            '/sts/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, ',
             $headers['Authorization']
         );
         $this->assertStringContainsString(
