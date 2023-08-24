@@ -69,17 +69,19 @@ class AwsNativeSource implements CredentialSourceInterface
         }
 
         $region = self::getRegion($httpHandler, $this->regionUrl, $awsToken);
+        $url = str_replace('{region}', $region, $this->regionalCredVerificationUrl);
+        $parts = parse_url($url);
 
         // From here we use the signing vars to create the signed request to receive a token
         [$accessKeyId, $secretAccessKey, $securityToken] = $signingVars;
-        $headers = self::getSignedRequestHeaders($region, $accessKeyId, $secretAccessKey, $securityToken);
+        $headers = self::getSignedRequestHeaders($region, $parts['hsot'], $accessKeyId, $secretAccessKey, $securityToken);
         // Inject x-goog-cloud-target-resource into header
         $headers['x-goog-cloud-target-resource'] = $this->audience;
 
         $request = [
             'headers' => array_map(fn ($k) => ['key' => $k, 'value' => $headers[$k]], array_keys($headers)),
             'method' => 'POST',
-            'url' => str_replace('{region}', $region, $this->regionalCredVerificationUrl),
+            'url' => $url,
         ];
 
         return urlencode(json_encode($request));
@@ -113,12 +115,12 @@ class AwsNativeSource implements CredentialSourceInterface
      */
     public static function getSignedRequestHeaders(
         string $region,
+        string $host,
         string $accessKeyId,
         string $secretAccessKey,
         ?string $securityToken
     ): array {
         $service = 'sts';
-        $host = 'sts.amazonaws.com';
 
         # Create a date for headers and the credential string in ISO-8601 format
         $amzdate = date('Ymd\THis\Z');
@@ -189,6 +191,7 @@ class AwsNativeSource implements CredentialSourceInterface
         # be included in the canonical_headers and signed_headers, as noted
         # earlier. Order here is not significant.
         $headers = [
+            'host' => $host,
             'x-amz-date' => $amzdate,
             'Authorization' => $authorizationHeader,
         ];
