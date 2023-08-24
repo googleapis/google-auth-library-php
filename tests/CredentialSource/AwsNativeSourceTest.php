@@ -210,46 +210,7 @@ class AwsNativeSourceTest extends TestCase
         );
     }
 
-    public function testFetchAccessTokenFromCredVerificationUrl()
-    {
-        $httpHandler = function (RequestInterface $request): ResponseInterface {
-            $this->assertEquals('POST', $request->getMethod());
-            $this->assertEquals(
-                'Action=GetCallerIdentity&Version=2011-06-15',
-                (string) $request->getUri()->getQuery()
-            );
-            $this->assertEquals(
-                $this->regionalCredVerificationUrl,
-                'https://' . $request->getUri()->getHost()
-            );
-
-            $this->assertEquals(
-                'test-value',
-                $request->getHeaderLine('test-header')
-            );
-
-            // Mock response from Regional Credential Verification URL
-            $body = $this->prophesize(StreamInterface::class);
-            $body->__toString()->willReturn(json_encode(['access_token' => 'abc']));
-            $response = $this->prophesize(ResponseInterface::class);
-            $response->getBody()->willReturn($body->reveal());
-
-            return $response->reveal();
-        };
-
-        $headers = ['test-header' => 'test-value'];
-
-        $accessToken = AwsNativeSource::fetchAccessTokenFromCredVerificationUrl(
-            $httpHandler,
-            $this->regionalCredVerificationUrl,
-            $headers,
-            'aws-token'
-        );
-
-        $this->assertEquals('abc', $accessToken);
-    }
-
-    public function testFetchAccessTokenWithoutSecurityCredentialsUrlOrEnvThrowsException()
+    public function testFetchSubjectTokenWithoutSecurityCredentialsUrlOrEnvThrowsException()
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage(
@@ -268,13 +229,13 @@ class AwsNativeSourceTest extends TestCase
             $awsTokenResponse->getBody()->willReturn($awsTokenBody->reveal());
             return $awsTokenResponse->reveal();
         };
-        $aws->fetchAuthToken($httpHandler);
+        $aws->fetchSubjectToken($httpHandler);
     }
 
     /**
      * @runInSeparateProcess
      */
-    public function testFetchAccessTokenFromEnv()
+    public function testFetchSubjectTokenFromEnv()
     {
         $aws = new AwsNativeSource(
             $this->regionUrl,
@@ -297,34 +258,28 @@ class AwsNativeSourceTest extends TestCase
         $regionResponse = $this->prophesize(ResponseInterface::class);
         $regionResponse->getBody()->willReturn($regionBody->reveal());
 
-        // Mock response from Regional Credential Verification URL
-        $credVerificationBody = $this->prophesize(StreamInterface::class);
-        $credVerificationBody->__toString()->willReturn(json_encode(['access_token' => 'abc']));
-        $credVerificationResponse = $this->prophesize(ResponseInterface::class);
-        $credVerificationResponse->getBody()->willReturn($credVerificationBody->reveal());
-
         $requestCount = 0;
         $httpHandler = function (RequestInterface $request) use (
             $awsTokenResponse,
             $regionResponse,
-            $credVerificationResponse,
             &$requestCount
         ): ResponseInterface {
             $requestCount++;
             switch ($requestCount) {
                 case 1: return $awsTokenResponse->reveal();
                 case 2: return $regionResponse->reveal();
-                case 3: return $credVerificationResponse->reveal();
             }
             throw new \Exception('Unexpected request');
         };
 
-        $accessToken = $aws->fetchAuthToken($httpHandler);
-        $this->assertArrayHasKey('access_token', $accessToken);
-        $this->assertEquals('abc', $accessToken['access_token']);
+        $subjectToken = $aws->fetchSubjectToken($httpHandler);
+        $unserializedToken = json_decode(urldecode($subjectToken), true);
+        $this->assertArrayHasKey('headers', $unserializedToken);
+        $this->assertArrayHasKey('method', $unserializedToken);
+        $this->assertArrayHasKey('url', $unserializedToken);
     }
 
-    public function testFetchAccessTokenFromUrl()
+    public function testFetchSubjectTokenFromUrl()
     {
         $aws = new AwsNativeSource(
             $this->regionUrl,
@@ -360,19 +315,12 @@ class AwsNativeSourceTest extends TestCase
         $regionResponse = $this->prophesize(ResponseInterface::class);
         $regionResponse->getBody()->willReturn($regionBody->reveal());
 
-        // Mock response from Regional Credential Verification URL
-        $credVerificationBody = $this->prophesize(StreamInterface::class);
-        $credVerificationBody->__toString()->willReturn(json_encode(['access_token' => 'abc']));
-        $credVerificationResponse = $this->prophesize(ResponseInterface::class);
-        $credVerificationResponse->getBody()->willReturn($credVerificationBody->reveal());
-
         $requestCount = 0;
         $httpHandler = function (RequestInterface $request) use (
             $awsTokenResponse,
             $roleResponse,
             $securityCredentialsResponse,
             $regionResponse,
-            $credVerificationResponse,
             &$requestCount
         ): ResponseInterface {
             $requestCount++;
@@ -381,19 +329,14 @@ class AwsNativeSourceTest extends TestCase
                 case 2: return $roleResponse->reveal();
                 case 3: return $securityCredentialsResponse->reveal();
                 case 4: return $regionResponse->reveal();
-                case 5:
-                    $this->assertStringStartsWith(
-                        // test region was substituted in the URL
-                        'https://us-east-2.regional.cred.verification.url',
-                        (string) $request->getUri()
-                    );
-                    return $credVerificationResponse->reveal();
             }
             throw new \Exception('Unexpected request');
         };
 
-        $accessToken = $aws->fetchAuthToken($httpHandler);
-        $this->assertArrayHasKey('access_token', $accessToken);
-        $this->assertEquals('abc', $accessToken['access_token']);
+        $subjectToken = $aws->fetchSubjectToken($httpHandler);
+        $unserializedToken = json_decode(urldecode($subjectToken), true);
+        $this->assertArrayHasKey('headers', $unserializedToken);
+        $this->assertArrayHasKey('method', $unserializedToken);
+        $this->assertArrayHasKey('url', $unserializedToken);
     }
 }

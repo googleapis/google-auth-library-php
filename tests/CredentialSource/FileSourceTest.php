@@ -28,19 +28,19 @@ use UnexpectedValueException;
  */
 class FileSourceTest extends TestCase
 {
-    /** @dataProvider provideFetchAccessToken */
-    public function testFetchAccessToken(
+    /** @dataProvider provideFetchSubjectToken */
+    public function testFetchSubjectToken(
         string $filename,
         string $expectedToken,
         string $format = null,
         string $subjectTokenFieldName = null
     ) {
         $source = new FileSource($filename, $format, $subjectTokenFieldName);
-        $token = $source->fetchAuthToken();
-        $this->assertEquals($expectedToken, $token['access_token']);
+        $subjectToken = $source->fetchSubjectToken();
+        $this->assertEquals($expectedToken, $subjectToken);
     }
 
-    public function provideFetchAccessToken()
+    public function provideFetchSubjectToken()
     {
         $file1 = tempnam(sys_get_temp_dir(), 'test1');
         file_put_contents($file1, 'abc');
@@ -72,7 +72,7 @@ class FileSourceTest extends TestCase
         file_put_contents($file1, json_encode(['good_field_name' => 'abc']));
 
         (new FileSource($file1, 'json', 'bad_field_name'))
-            ->fetchAuthToken();
+            ->fetchSubjectToken();
     }
 
     public function testFormatJsonWithInvalidJsonFileThrowsException()
@@ -84,6 +84,6 @@ class FileSourceTest extends TestCase
         file_put_contents($file1, '{not-json}');
 
         (new FileSource($file1, 'json', 'bad_field_name'))
-            ->fetchAuthToken();
+            ->fetchSubjectToken();
     }
 }

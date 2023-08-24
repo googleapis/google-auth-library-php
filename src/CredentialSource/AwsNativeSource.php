@@ -17,7 +17,7 @@
 
 namespace Google\Auth\CredentialSource;
 
-use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\CredentialSourceInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
@@ -26,7 +26,7 @@ use GuzzleHttp\Psr7\Uri;
 /**
  * Authenticates requests using IAM credentials.
  */
-class AwsNativeSource implements FetchAuthTokenInterface
+class AwsNativeSource implements CredentialSourceInterface
 {
     private const CRED_VERIFICATION_QUERY = 'Action=GetCallerIdentity&Version=2011-06-15';
 
@@ -44,7 +44,7 @@ class AwsNativeSource implements FetchAuthTokenInterface
         $this->securityCredentialsUrl = $securityCredentialsUrl;
     }
 
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchSubjectToken(callable $httpHandler = null): string
     {
         if (is_null($httpHandler)) {
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
@@ -71,13 +71,13 @@ class AwsNativeSource implements FetchAuthTokenInterface
         [$accessKeyId, $secretAccessKey, $securityToken] = $signingVars;
         $headers = self::getSignedRequestHeaders($region, $accessKeyId, $secretAccessKey, $securityToken);
 
-        return [
-            'access_token' => self::fetchAccessTokenFromCredVerificationUrl(
-                $httpHandler,
-                str_replace('{region}', $region, $this->regionalCredVerificationUrl),
-                $headers,
-            )
+        $request = [
+            'headers' => $headers,
+            'method' => 'POST',
+            'url' => str_replace('{region}', $region, $this->regionalCredVerificationUrl),
         ];
+
+        return urlencode(json_encode($request));
     }
 
     /**
@@ -97,26 +97,6 @@ class AwsNativeSource implements FetchAuthTokenInterface
 
         $response = $httpHandler($request);
         return (string) $response->getBody();
-    }
-
-    /**
-     * @internal
-     *
-     * @param array<string, string> $signedHeaders
-     */
-    public static function fetchAccessTokenFromCredVerificationUrl(
-        callable $httpHandler,
-        string $regionalCredVerificationUrl,
-        array $signedHeaders
-    ): string {
-        $url = new Uri($regionalCredVerificationUrl);
-        $url = $url->withQuery(self::CRED_VERIFICATION_QUERY);
-
-        $request = new Request('POST', $url, $signedHeaders + ['accept' => 'application/json']);
-        $response = $httpHandler($request);
-        $json = json_decode((string) $response->getBody(), true);
-
-        return $json['access_token'];
     }
 
     /**
@@ -315,21 +295,5 @@ class AwsNativeSource implements FetchAuthTokenInterface
         $kSigning = self::hmacSign($kService, 'aws4_request');
 
         return $kSigning;
-    }
-
-    /**
-     * Not used
-     */
-    public function getCacheKey()
-    {
-        return '';
-    }
-
-    /**
-     * Not used
-     */
-    public function getLastReceivedToken()
-    {
-        return null;
     }
 }

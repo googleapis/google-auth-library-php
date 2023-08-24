@@ -34,8 +34,8 @@ class UrlSourceTest extends TestCase
 {
     use ProphecyTrait;
 
-    /** @dataProvider provideFetchAccessToken */
-    public function testFetchAccessToken(
+    /** @dataProvider provideFetchSubjectToken */
+    public function testFetchSubjectToken(
         string $responseBody,
         string $expectedToken,
         string $format = null,
@@ -54,11 +54,11 @@ class UrlSourceTest extends TestCase
         };
 
         $source = new UrlSource('test.url', $format, $subjectTokenFieldName);
-        $token = $source->fetchAuthToken($handler);
-        $this->assertEquals($expectedToken, $token['access_token']);
+        $subjectToken = $source->fetchSubjectToken($handler);
+        $this->assertEquals($expectedToken, $subjectToken);
     }
 
-    public function provideFetchAccessToken()
+    public function provideFetchSubjectToken()
     {
         return [
             ['abc', 'abc', null],
@@ -88,8 +88,8 @@ class UrlSourceTest extends TestCase
         ];
 
         $source = new UrlSource('test.url', null, null, $headers);
-        $token = $source->fetchAuthToken($handler);
-        $this->assertEquals('xyz', $token['access_token']);
+        $subjectToken = $source->fetchSubjectToken($handler);
+        $this->assertEquals('xyz', $subjectToken);
     }
 
     public function testFormatJsonWithNoSubjectTokenFieldNameThrowsException()
@@ -118,7 +118,7 @@ class UrlSourceTest extends TestCase
         };
 
         (new UrlSource('test.url', 'json', 'bad_field_name'))
-            ->fetchAuthToken($handler);
+            ->fetchSubjectToken($handler);
     }
 
     public function testFormatJsonWithInvalidJsonResponseThrowsException()
@@ -139,6 +139,6 @@ class UrlSourceTest extends TestCase
         };
 
         (new UrlSource('test.url', 'json', 'bad_field_name'))
-            ->fetchAuthToken($handler);
+            ->fetchSubjectToken($handler);
     }
 }

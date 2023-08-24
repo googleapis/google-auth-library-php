@@ -297,7 +297,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * A security token that represents the identity of the party on behalf of
      * whom the request is being made.
      */
-    private ?FetchAuthTokenInterface $subjectTokenFetcher;
+    private ?CredentialSourceInterface $subjectTokenFetcher;
 
     /**
      * For STS requests.
@@ -592,7 +592,7 @@ class OAuth2 implements FetchAuthTokenInterface
                 $params['assertion'] = $this->toJwt();
                 break;
             case self::STS_URN:
-                $token = $this->subjectTokenFetcher->fetchAuthToken($httpHandler);
+                $token = $this->subjectTokenFetcher->fetchSubjectToken($httpHandler);
                 $params['subject_token'] = $token['access_token'];
                 $params['subject_token_type'] = $this->subjectTokenType;
                 $params += array_filter([

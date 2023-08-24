@@ -17,7 +17,7 @@
 
 namespace Google\Auth\CredentialSource;
 
-use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\CredentialSourceInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
@@ -29,7 +29,7 @@ use UnexpectedValueException;
  *
  * @internal
  */
-class UrlSource implements FetchAuthTokenInterface
+class UrlSource implements CredentialSourceInterface
 {
     private string $url;
     private ?string $format;
@@ -61,7 +61,7 @@ class UrlSource implements FetchAuthTokenInterface
         $this->headers = $headers;
     }
 
-    public function fetchAuthToken(callable $httpHandler = null): array
+    public function fetchSubjectToken(callable $httpHandler = null): string
     {
         if (is_null($httpHandler)) {
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
@@ -89,16 +89,6 @@ class UrlSource implements FetchAuthTokenInterface
             $body = $json[$this->subjectTokenFieldName];
         }
 
-        return ['access_token' => $body];
-    }
-
-    public function getCacheKey()
-    {
-        return '';
-    }
-
-    public function getLastReceivedToken()
-    {
-        return null;
+        return $body;
     }
 }

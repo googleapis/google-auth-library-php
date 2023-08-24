@@ -17,14 +17,14 @@
 
 namespace Google\Auth\CredentialSource;
 
-use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\CredentialSourceInterface;
 use InvalidArgumentException;
 use UnexpectedValueException;
 
 /**
  * Retrieve a token from a file.
  */
-class FileSource implements FetchAuthTokenInterface
+class FileSource implements CredentialSourceInterface
 {
     private string $file;
     private ?string $format;
@@ -47,7 +47,7 @@ class FileSource implements FetchAuthTokenInterface
         $this->subjectTokenFieldName = $subjectTokenFieldName;
     }
 
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchSubjectToken(callable $httpHandler = null): string
     {
         $contents = file_get_contents($this->file);
         if ($this->format === 'json') {
@@ -64,16 +64,6 @@ class FileSource implements FetchAuthTokenInterface
             $contents = $json[$this->subjectTokenFieldName];
         }
 
-        return ['access_token' => $contents];
-    }
-
-    public function getCacheKey()
-    {
-        return '';
-    }
-
-    public function getLastReceivedToken()
-    {
-        return null;
+        return $contents;
     }
 }
