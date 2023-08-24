@@ -74,7 +74,7 @@ class AwsNativeSource implements CredentialSourceInterface
 
         // From here we use the signing vars to create the signed request to receive a token
         [$accessKeyId, $secretAccessKey, $securityToken] = $signingVars;
-        $headers = self::getSignedRequestHeaders($region, $parts['hsot'], $accessKeyId, $secretAccessKey, $securityToken);
+        $headers = self::getSignedRequestHeaders($region, $parts['host'], $accessKeyId, $secretAccessKey, $securityToken);
         // Inject x-goog-cloud-target-resource into header
         $headers['x-goog-cloud-target-resource'] = $this->audience;
 
