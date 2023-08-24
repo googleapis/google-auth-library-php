@@ -4,6 +4,7 @@ composer.lock
 .cache
 .docs
 .gitmodules
+.phpunit.result.cache
 
 # IntelliJ
 .idea
