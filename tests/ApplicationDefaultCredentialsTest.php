@@ -19,11 +19,11 @@ namespace Google\Auth\Tests;
 
 use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
-use Google\Auth\CredentialSource;
 use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
+use Google\Auth\CredentialSource;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;

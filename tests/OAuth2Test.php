@@ -21,7 +21,6 @@ use DomainException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Google\Auth\CredentialSourceInterface;
-use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Response;
