@@ -18,6 +18,7 @@
 
 namespace Google\Auth\Credentials;
 
+use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\CredentialSourceInterface;
@@ -99,6 +100,39 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
                 $credentialSource['file'],
                 $credentialSource['format']['type'] ?? null,
                 $credentialSource['format']['subject_token_field_name'] ?? null
+            );
+        }
+
+        if (
+            isset($credentialSource['environment_id'])
+            && 1 === preg_match('/^aws(\d+)$/', $credentialSource['environment_id'], $matches)
+        ) {
+            if ($matches[1] !== '1') {
+                throw new InvalidArgumentException(
+                    "aws version \"$matches[1]\" is not supported in the current build."
+                );
+            }
+            if (!array_key_exists('region_url', $credentialSource)) {
+                throw new InvalidArgumentException(
+                    'The region_url field is required for aws1 credential source.'
+                );
+            }
+            if (!array_key_exists('regional_cred_verification_url', $credentialSource)) {
+                throw new InvalidArgumentException(
+                    'The regional_cred_verification_url field is required for aws1 credential source.'
+                );
+            }
+            if (!array_key_exists('audience', $jsonKey)) {
+                throw new InvalidArgumentException(
+                    'aws1 credential source requires an audience to be set in the JSON file.'
+                );
+            }
+
+            return new AwsNativeSource(
+                $jsonKey['audience'],
+                $credentialSource['region_url'],
+                $credentialSource['regional_cred_verification_url'],
+                $credentialSource['url'] ?? null // $securityCredentialsUrl
             );
         }
 

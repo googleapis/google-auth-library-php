@@ -18,6 +18,7 @@
 namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\ExternalAccountCredentials;
+use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\OAuth2;
@@ -61,6 +62,10 @@ class ExternalAccountCredentialsTest extends TestCase
     public function provideCredentialSourceFromCredentials()
     {
         return [
+            [
+                ['environment_id' => 'aws1', 'region_url' => '', 'regional_cred_verification_url' => ''],
+                AwsNativeSource::class
+            ],
             [
                 ['file' => 'path/to/credsfile.json'],
                 FileSource::class
@@ -125,6 +130,25 @@ class ExternalAccountCredentialsTest extends TestCase
             [
                 ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => []],
                 'Unable to determine credential source from json key'
+            ],
+            [
+                ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => [
+                    'environment_id' => 'aws2',
+                ]],
+                'aws version "2" is not supported in the current build.'
+            ],
+            [
+                ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => [
+                    'environment_id' => 'aws1',
+                ]],
+                'The region_url field is required for aws1 credential source.'
+            ],
+            [
+                ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => [
+                    'environment_id' => 'aws1',
+                    'region_url' => '',
+                ]],
+                'The regional_cred_verification_url field is required for aws1 credential source.'
             ],
         ];
     }
