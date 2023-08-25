@@ -134,11 +134,11 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
 
     public function getCacheKey()
     {
-        return '';
+        return $this->auth->getCacheKey();
     }
 
     public function getLastReceivedToken()
     {
-        return null;
+        return $this->auth->getLastReceivedToken();
     }
 }
