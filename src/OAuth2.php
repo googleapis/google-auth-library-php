@@ -289,8 +289,9 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * For STS requests.
-     * A security token that represents the identity of the party on behalf of
-     * whom the request is being made.
+     * A fetcher for the "subject_token", which is a security token that
+     * represents the identity of the party on behalf of whom the request is
+     * being made.
      */
     private ?CredentialSourceInterface $subjectTokenFetcher;
 
@@ -388,6 +389,25 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * - codeVerifier
      *   The code verifier for PKCE for OAuth 2.0.
+     *
+     * - resource
+     *   The target service or resource where the client ntends to use the
+     *   requested security token.
+     *
+     * - subjectTokenFetcher
+     *    A fetcher for the "subject_token", which is a security token that
+     *    represents the identity of the party on behalf of whom the request is
+     *    being made.
+     *
+     * - subjectTokenType
+     *   An identifier that indicates the type of the security token in the
+     *   subjectToken parameter.
+     *
+     * - actorToken
+     *   A security token that represents the identity of the acting party.
+     *
+     * - actorTokenType
+     *   An identifier for the representation of the issued security token.
      *
      * @param array<mixed> $config Configuration array
      */
