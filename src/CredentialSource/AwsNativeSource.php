@@ -17,7 +17,7 @@
 
 namespace Google\Auth\CredentialSource;
 
-use Google\Auth\CredentialSourceInterface;
+use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
@@ -25,7 +25,7 @@ use GuzzleHttp\Psr7\Request;
 /**
  * Authenticates requests using IAM credentials.
  */
-class AwsNativeSource implements CredentialSourceInterface
+class AwsNativeSource implements ExternalAccountCredentialSourceInterface
 {
     private const CRED_VERIFICATION_QUERY = 'Action=GetCallerIdentity&Version=2011-06-15';
 
