@@ -2,6 +2,20 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.29.1](https://github.com/googleapis/google-auth-library-php/compare/v1.29.0...v1.29.1) (2023-08-23)
+
+
+### Bug Fixes
+
+* Use PKCS8 by default for ID token verify ([#466](https://github.com/googleapis/google-auth-library-php/issues/466)) ([0c3a1be](https://github.com/googleapis/google-auth-library-php/commit/0c3a1be78f189e602641b97c487b4092ca17a140))
+
+## [1.29.0](https://github.com/googleapis/google-auth-library-php/compare/v1.28.0...v1.29.0) (2023-08-22)
+
+
+### Features
+
+* Check unix residency for gce when ping fails ([#469](https://github.com/googleapis/google-auth-library-php/issues/469)) ([3c672f9](https://github.com/googleapis/google-auth-library-php/commit/3c672f9aff61529f4af836558caa50fa29fb9447))
+
 ## [1.28.0](https://github.com/googleapis/google-auth-library-php/compare/v1.27.0...v1.28.0) (2023-05-11)
 
 
