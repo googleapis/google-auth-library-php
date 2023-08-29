@@ -20,7 +20,7 @@ namespace Google\Auth\Tests;
 use DomainException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Google\Auth\CredentialSourceInterface;
+use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Query;
 use GuzzleHttp\Psr7\Response;
@@ -1094,14 +1094,14 @@ class OAuth2StsTest extends TestCase
 
     public function testStsGrantType()
     {
-        $credentialSource = $this->prophesize(CredentialSourceInterface::class);
+        $credentialSource = $this->prophesize(ExternalAccountCredentialSourceInterface::class);
         $o = new OAuth2($this->stsMinimal + ['subjectTokenFetcher' => $credentialSource->reveal()]);
         $this->assertEquals(OAuth2::STS_URN, $o->getGrantType());
     }
 
     public function testStsCredentialsRequestMinimal()
     {
-        $credentialSource = $this->prophesize(CredentialSourceInterface::class);
+        $credentialSource = $this->prophesize(ExternalAccountCredentialSourceInterface::class);
         $credentialSource->fetchSubjectToken(null)
             ->shouldBeCalledOnce()
             ->willReturn('xyz');
@@ -1118,7 +1118,7 @@ class OAuth2StsTest extends TestCase
 
     public function testStsCredentialsRequestFull()
     {
-        $credentialSource = $this->prophesize(CredentialSourceInterface::class);
+        $credentialSource = $this->prophesize(ExternalAccountCredentialSourceInterface::class);
         $credentialSource->fetchSubjectToken(null)
             ->shouldBeCalledOnce()
             ->willReturn('xyz');

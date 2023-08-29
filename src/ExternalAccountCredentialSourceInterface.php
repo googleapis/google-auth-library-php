@@ -17,7 +17,7 @@
 
 namespace Google\Auth;
 
-interface CredentialSourceInterface
+interface ExternalAccountCredentialSourceInterface
 {
     public function fetchSubjectToken(callable $httpHandler = null): string;
 }
