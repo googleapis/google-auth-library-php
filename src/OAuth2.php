@@ -293,7 +293,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * represents the identity of the party on behalf of whom the request is
      * being made.
      */
-    private ?CredentialSourceInterface $subjectTokenFetcher;
+    private ?ExternalAccountCredentialSourceInterface $subjectTokenFetcher;
 
     /**
      * For STS requests.

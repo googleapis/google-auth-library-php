@@ -20,7 +20,7 @@ namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
-use Google\Auth\CredentialSourceInterface;
+use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\OAuth2;
 use Google\Auth\UpdateMetadataInterface;
@@ -91,7 +91,7 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
     /**
      * @param array<mixed> $jsonKey
      */
-    private static function buildCredentialSource(array $jsonKey): CredentialSourceInterface
+    private static function buildCredentialSource(array $jsonKey): ExternalAccountCredentialSourceInterface
     {
         $credentialSource = $jsonKey['credential_source'];
         if (isset($credentialSource['file'])) {

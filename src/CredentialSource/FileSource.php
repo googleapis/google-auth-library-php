@@ -17,14 +17,14 @@
 
 namespace Google\Auth\CredentialSource;
 
-use Google\Auth\CredentialSourceInterface;
+use Google\Auth\ExternalAccountCredentialSourceInterface;
 use InvalidArgumentException;
 use UnexpectedValueException;
 
 /**
  * Retrieve a token from a file.
  */
-class FileSource implements CredentialSourceInterface
+class FileSource implements ExternalAccountCredentialSourceInterface
 {
     private string $file;
     private ?string $format;

@@ -17,7 +17,7 @@
 
 namespace Google\Auth\CredentialSource;
 
-use Google\Auth\CredentialSourceInterface;
+use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
@@ -29,7 +29,7 @@ use UnexpectedValueException;
  *
  * @internal
  */
-class UrlSource implements CredentialSourceInterface
+class UrlSource implements ExternalAccountCredentialSourceInterface
 {
     private string $url;
     private ?string $format;
