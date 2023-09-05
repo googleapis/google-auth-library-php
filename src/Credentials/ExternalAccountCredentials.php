@@ -112,11 +112,6 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
                     "aws version \"$matches[1]\" is not supported in the current build."
                 );
             }
-            if (!array_key_exists('region_url', $credentialSource)) {
-                throw new InvalidArgumentException(
-                    'The region_url field is required for aws1 credential source.'
-                );
-            }
             if (!array_key_exists('regional_cred_verification_url', $credentialSource)) {
                 throw new InvalidArgumentException(
                     'The regional_cred_verification_url field is required for aws1 credential source.'
@@ -130,8 +125,8 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
 
             return new AwsNativeSource(
                 $jsonKey['audience'],
-                $credentialSource['region_url'],
                 $credentialSource['regional_cred_verification_url'],
+                $credentialSource['region_url'] ?? null,
                 $credentialSource['url'] ?? null // $securityCredentialsUrl
             );
         }

@@ -141,7 +141,7 @@ class ExternalAccountCredentialsTest extends TestCase
                 ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => [
                     'environment_id' => 'aws1',
                 ]],
-                'The region_url field is required for aws1 credential source.'
+                'The regional_cred_verification_url field is required for aws1 credential source.'
             ],
             [
                 ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => [

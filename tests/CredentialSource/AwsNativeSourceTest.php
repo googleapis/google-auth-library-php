@@ -38,7 +38,7 @@ class AwsNativeSourceTest extends TestCase
     private string $regionalCredVerificationUrl = 'https://{region}.regional.cred.verification.url';
     private string $securityCredentialsUrl = 'https://test.security.credentials.url';
 
-    public function testGetRegion()
+    public function testGetRegionFromUrl()
     {
         $httpHandler = function (RequestInterface $request): ResponseInterface {
             $this->assertEquals('GET', $request->getMethod());
@@ -52,8 +52,27 @@ class AwsNativeSourceTest extends TestCase
             return $response->reveal();
         };
 
-        $region = AwsNativeSource::getRegion($httpHandler, $this->regionUrl, 'aws-token');
+        $region = AwsNativeSource::getRegionFromUrl($httpHandler, $this->regionUrl, 'aws-token');
         $this->assertEquals('us-east-2', $region);
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetRegionFromEnv()
+    {
+        // Without any environment variables set, getRegionFromEnv should return null
+        $this->assertNull(AwsNativeSource::getRegionFromEnv());
+
+        // Requires AWS_REGION or AWS_DEFAULT_REGION to be set
+        putenv('AWS_REGION=aws-region');
+        $this->assertEquals('aws-region', AwsNativeSource::getRegionFromEnv());
+
+        // Setting the default region does not hvae an effect
+        putenv('AWS_DEFAULT_REGION=aws-default-region');
+        $this->assertEquals('aws-region', AwsNativeSource::getRegionFromEnv());
+
+        // Unsetting the AWS_REGION uses AWS_DEFAULT_REGION instead
+        putenv('AWS_REGION=');
+        $this->assertEquals('aws-default-region', AwsNativeSource::getRegionFromEnv());
     }
 
     public function testGetRoleName()

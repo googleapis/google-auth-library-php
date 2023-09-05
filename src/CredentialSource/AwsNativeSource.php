@@ -30,19 +30,19 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     private const CRED_VERIFICATION_QUERY = 'Action=GetCallerIdentity&Version=2011-06-15';
 
     private string $audience;
-    private string $regionUrl;
     private string $regionalCredVerificationUrl;
+    private ?string $regionUrl;
     private ?string $securityCredentialsUrl;
 
     public function __construct(
         string $audience,
-        string $regionUrl,
         string $regionalCredVerificationUrl,
+        string $regionUrl = null,
         string $securityCredentialsUrl = null
     ) {
         $this->audience = $audience;
-        $this->regionUrl = $regionUrl;
         $this->regionalCredVerificationUrl = $regionalCredVerificationUrl;
+        $this->regionUrl = $regionUrl;
         $this->securityCredentialsUrl = $securityCredentialsUrl;
     }
 
@@ -54,20 +54,24 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
 
         $awsToken = self::fetchAwsTokenFromMetadata($httpHandler);
 
-        $signingVars = $this->securityCredentialsUrl
-            ? self::getSigningVarsFromUrl(
+        if (!$signingVars = self::getSigningVarsFromEnv()) {
+            if (!$this->securityCredentialsUrl) {
+                throw new \LogicException('Unable to get credentials from ENV, and no security credentials URL provided');
+            }
+            $signingVars = self::getSigningVarsFromUrl(
                 $httpHandler,
                 $this->securityCredentialsUrl,
                 self::getRoleName($httpHandler, $this->securityCredentialsUrl, $awsToken),
                 $awsToken
-            )
-            : self::getSigningVarsFromEnv();
-
-        if (is_null($signingVars)) {
-            throw new \LogicException('Unable to get credentials from ENV, and no security credentials URL provided');
+            );
         }
 
-        $region = self::getRegion($httpHandler, $this->regionUrl, $awsToken);
+        if (!$region = self::getRegionFromEnv()) {
+            if (!$this->regionUrl) {
+                throw new \LogicException('Unable to get region from ENV, and no region URL provided');
+            }
+            $region = self::getRegionFromUrl($httpHandler, $this->regionUrl, $awsToken);
+        }
         $url = str_replace('{region}', $region, $this->regionalCredVerificationUrl);
         $host = parse_url($url)['host'] ?? '';
 
@@ -212,7 +216,19 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     /**
      * @internal
      */
-    public static function getRegion(callable $httpHandler, string $regionUrl, string $awsToken): string
+    public static function getRegionFromEnv(): ?string
+    {
+        $region = getenv('AWS_REGION');
+        if (empty($region)) {
+            $region = getenv('AWS_DEFAULT_REGION');
+        }
+        return $region ?: null;
+    }
+
+    /**
+     * @internal
+     */
+    public static function getRegionFromUrl(callable $httpHandler, string $regionUrl, string $awsToken): string
     {
         // get the region/zone from the region URL
         $regionRequest = new Request('GET', $regionUrl, ['X-aws-ec2-metadata-token' => $awsToken]);
