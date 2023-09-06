@@ -125,9 +125,10 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
 
             return new AwsNativeSource(
                 $jsonKey['audience'],
-                $credentialSource['regional_cred_verification_url'],
-                $credentialSource['region_url'] ?? null,
-                $credentialSource['url'] ?? null // $securityCredentialsUrl
+                $credentialSource['regional_cred_verification_url'],   // $regionalCredVerificationUrl
+                $credentialSource['region_url'] ?? null,               // $regionUrl
+                $credentialSource['url'] ?? null,                      // $securityCredentialsUrl
+                $credentialSource['imdsv2_session_token_url'] ?? null, // $imdsV2TokenUrl
             );
         }
 

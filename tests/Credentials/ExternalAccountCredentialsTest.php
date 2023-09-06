@@ -34,8 +34,11 @@ class ExternalAccountCredentialsTest extends TestCase
     /**
      * @dataProvider provideCredentialSourceFromCredentials
      */
-    public function testCredentialSourceFromCredentials(array $credentialSource, string $expectedSourceClass)
-    {
+    public function testCredentialSourceFromCredentials(
+        array $credentialSource,
+        string $expectedSourceClass,
+        array $expectedProperties = []
+    ) {
         $jsonCreds = [
             'type' => 'external_account',
             'token_url' => '',
@@ -57,14 +60,33 @@ class ExternalAccountCredentialsTest extends TestCase
         $subjectTokenFetcher = $oauthProp->getValue($oauth);
 
         $this->assertInstanceOf($expectedSourceClass, $subjectTokenFetcher);
+
+        $sourceReflection = new \ReflectionClass($subjectTokenFetcher);
+        foreach ($expectedProperties as $propName => $expectedPropValue) {
+            $sourceProp = $sourceReflection->getProperty($propName);
+            $sourceProp->setAccessible(true);
+            $this->assertEquals($expectedPropValue, $sourceProp->getValue($subjectTokenFetcher));
+        }
     }
 
     public function provideCredentialSourceFromCredentials()
     {
         return [
             [
-                ['environment_id' => 'aws1', 'region_url' => '', 'regional_cred_verification_url' => ''],
-                AwsNativeSource::class
+                [
+                    'environment_id' => 'aws1',
+                    'regional_cred_verification_url' => 'abc',
+                    'region_url' => 'def',
+                    'url' => 'ghi',
+                    'imdsv2_session_token_url' => 'jkl'
+                ],
+                AwsNativeSource::class,
+                [
+                    'regionalCredVerificationUrl' => 'abc',
+                    'regionUrl' => 'def',
+                    'securityCredentialsUrl' => 'ghi',
+                    'imdsv2SessionTokenUrl' => 'jkl',
+                ],
             ],
             [
                 ['file' => 'path/to/credsfile.json'],
@@ -72,7 +94,11 @@ class ExternalAccountCredentialsTest extends TestCase
             ],
             [
                 ['file' => 'path/to/credsfile.json', 'format' => ['type' => 'json', 'subject_token_field_name' => 'token']],
-                FileSource::class
+                FileSource::class,
+                [
+                    'format' => 'json',
+                    'subjectTokenFieldName' => 'token',
+                ]
             ],
             [
                 ['url' => 'https://test.com'],
@@ -83,8 +109,20 @@ class ExternalAccountCredentialsTest extends TestCase
                 UrlSource::class
             ],
             [
-                ['url' => 'https://test.com', 'format' => ['type' => 'json', 'subject_token_field_name' => 'token', 'headers' => []]],
-                UrlSource::class
+                [
+                    'url' => 'https://test.com',
+                    'format' => [
+                        'type' => 'json',
+                        'subject_token_field_name' => 'token',
+                    ],
+                    'headers' => ['foo' => 'bar'],
+                ],
+                UrlSource::class,
+                [
+                    'format' => 'json',
+                    'subjectTokenFieldName' => 'token',
+                    'headers' => ['foo' => 'bar'],
+                ]
             ],
         ];
     }

@@ -33,17 +33,32 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     private string $regionalCredVerificationUrl;
     private ?string $regionUrl;
     private ?string $securityCredentialsUrl;
+    private ?string $imdsv2SessionTokenUrl;
 
+    /**
+     * @param string $audience The audience for the credential.
+     * @param string $regionalCredVerificationUrl The regional AWS GetCallerIdentity action URL used to determine the
+     *                                            AWS account ID and its roles. This is not called by this library, but
+     *                                            is sent in the subject token to be called by the STS token server.
+     * @param string|null $regionUrl This URL should be used to determine the current AWS region needed for the signed
+     *                               request construction.
+     * @param string|null $securityCredentialsUrl The AWS metadata server URL used to retrieve the access key, secret
+     *                                            key and security token needed to sign the GetCallerIdentity request.
+     * @param string|null $imdsv2SessionTokenUrl Presence of this URL enforces the auth libraries to fetch a Session
+     *                                           Token from AWS. This field is required for EC2 instances using IMDSv2.
+     */
     public function __construct(
         string $audience,
         string $regionalCredVerificationUrl,
         string $regionUrl = null,
-        string $securityCredentialsUrl = null
+        string $securityCredentialsUrl = null,
+        string $imdsv2SessionTokenUrl = null
     ) {
         $this->audience = $audience;
         $this->regionalCredVerificationUrl = $regionalCredVerificationUrl;
         $this->regionUrl = $regionUrl;
         $this->securityCredentialsUrl = $securityCredentialsUrl;
+        $this->imdsv2SessionTokenUrl = $imdsv2SessionTokenUrl;
     }
 
     public function fetchSubjectToken(callable $httpHandler = null): string
@@ -52,7 +67,12 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
-        $awsToken = self::fetchAwsTokenFromMetadata($httpHandler);
+        $headers = [];
+        if ($this->imdsv2SessionTokenUrl) {
+            $headers = [
+                'X-aws-ec2-metadata-token' => self::getImdsV2SessionToken($this->imdsv2SessionTokenUrl, $httpHandler)
+            ];
+        }
 
         if (!$signingVars = self::getSigningVarsFromEnv()) {
             if (!$this->securityCredentialsUrl) {
@@ -61,8 +81,8 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
             $signingVars = self::getSigningVarsFromUrl(
                 $httpHandler,
                 $this->securityCredentialsUrl,
-                self::getRoleName($httpHandler, $this->securityCredentialsUrl, $awsToken),
-                $awsToken
+                self::getRoleName($httpHandler, $this->securityCredentialsUrl, $headers),
+                $headers
             );
         }
 
@@ -70,7 +90,7 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
             if (!$this->regionUrl) {
                 throw new \LogicException('Unable to get region from ENV, and no region URL provided');
             }
-            $region = self::getRegionFromUrl($httpHandler, $this->regionUrl, $awsToken);
+            $region = self::getRegionFromUrl($httpHandler, $this->regionUrl, $headers);
         }
         $url = str_replace('{region}', $region, $this->regionalCredVerificationUrl);
         $host = parse_url($url)['host'] ?? '';
@@ -101,15 +121,14 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     /**
      * @internal
      */
-    public static function fetchAwsTokenFromMetadata(callable $httpHandler): string
+    public static function getImdsV2SessionToken(string $imdsV2Url, callable $httpHandler): string
     {
-        $url = 'http://169.254.169.254/latest/api/token';
         $headers = [
             'X-aws-ec2-metadata-token-ttl-seconds' => '21600'
         ];
         $request = new Request(
             'PUT',
-            $url,
+            $imdsV2Url,
             $headers
         );
 
@@ -228,10 +247,10 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     /**
      * @internal
      */
-    public static function getRegionFromUrl(callable $httpHandler, string $regionUrl, string $awsToken): string
+    public static function getRegionFromUrl(callable $httpHandler, string $regionUrl, array $headers): string
     {
         // get the region/zone from the region URL
-        $regionRequest = new Request('GET', $regionUrl, ['X-aws-ec2-metadata-token' => $awsToken]);
+        $regionRequest = new Request('GET', $regionUrl, $headers);
         $regionResponse = $httpHandler($regionRequest);
 
         // Remove last character. For example, if us-east-2b is returned,
@@ -242,10 +261,10 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     /**
      * @internal
      */
-    public static function getRoleName(callable $httpHandler, string $securityCredentialsUrl, string $awsToken): string
+    public static function getRoleName(callable $httpHandler, string $securityCredentialsUrl, array $headers): string
     {
         // Get the AWS role name
-        $roleRequest = new Request('GET', $securityCredentialsUrl, ['X-aws-ec2-metadata-token' => $awsToken]);
+        $roleRequest = new Request('GET', $securityCredentialsUrl, $headers);
         $roleResponse = $httpHandler($roleRequest);
         $roleName = (string) $roleResponse->getBody();
 
@@ -261,13 +280,13 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
         callable $httpHandler,
         string $securityCredentialsUrl,
         string $roleName,
-        string $awsToken
+        array $headers
     ): array {
         // Get the AWS credentials
         $credsRequest = new Request(
             'GET',
             $securityCredentialsUrl . '/' . $roleName,
-            ['X-aws-ec2-metadata-token' => $awsToken]
+            $headers
         );
         $credsResponse = $httpHandler($credsRequest);
         $awsCreds = json_decode((string) $credsResponse->getBody(), true);

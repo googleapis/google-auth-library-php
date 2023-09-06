@@ -37,6 +37,7 @@ class AwsNativeSourceTest extends TestCase
     private string $regionUrl = 'https://test.regional.url';
     private string $regionalCredVerificationUrl = 'https://{region}.regional.cred.verification.url';
     private string $securityCredentialsUrl = 'https://test.security.credentials.url';
+    private string $imdsv2SessionTokenUrl = 'https://test.imdsv2.session.token.url';
 
     public function testGetRegionFromUrl()
     {
@@ -52,14 +53,14 @@ class AwsNativeSourceTest extends TestCase
             return $response->reveal();
         };
 
-        $region = AwsNativeSource::getRegionFromUrl($httpHandler, $this->regionUrl, 'aws-token');
+        $region = AwsNativeSource::getRegionFromUrl($httpHandler, $this->regionUrl, []);
         $this->assertEquals('us-east-2', $region);
     }
 
     /** @runInSeparateProcess */
     public function testGetRegionFromEnv()
     {
-        // Without any environment variables set, getRegionFromEnv should return null
+    // Without any environment variables set, getRegionFromEnv should return null
         $this->assertNull(AwsNativeSource::getRegionFromEnv());
 
         // Requires AWS_REGION or AWS_DEFAULT_REGION to be set
@@ -89,16 +90,17 @@ class AwsNativeSourceTest extends TestCase
             return $response->reveal();
         };
 
-        $roleName = AwsNativeSource::getRoleName($httpHandler, $this->securityCredentialsUrl, 'aws-token');
+        $roleName = AwsNativeSource::getRoleName($httpHandler, $this->securityCredentialsUrl, []);
 
         $this->assertEquals('expected-role-name', $roleName);
     }
 
-    public function testFetchAwsTokenFromMetadata()
+    public function testGetImdsV2SessionToken()
     {
-        $httpHandler = function (RequestInterface $request): ResponseInterface {
+        $imdsV2Url = 'http://some-metadata-url/latest/api/token';
+        $httpHandler = function (RequestInterface $request) use ($imdsV2Url): ResponseInterface {
             $this->assertEquals('PUT', $request->getMethod());
-            $this->assertEquals('http://169.254.169.254/latest/api/token', (string) $request->getUri());
+            $this->assertEquals($imdsV2Url, (string) $request->getUri());
             $this->assertEquals('21600', $request->getHeaderLine('X-aws-ec2-metadata-token-ttl-seconds'));
 
             $body = $this->prophesize(StreamInterface::class);
@@ -109,7 +111,7 @@ class AwsNativeSourceTest extends TestCase
             return $response->reveal();
         };
 
-        $roleName = AwsNativeSource::fetchAwsTokenFromMetadata($httpHandler);
+        $roleName = AwsNativeSource::getImdsV2SessionToken($imdsV2Url, $httpHandler);
 
         $this->assertEquals('expected-aws-token', $roleName);
     }
@@ -139,7 +141,7 @@ class AwsNativeSourceTest extends TestCase
             $httpHandler,
             $this->securityCredentialsUrl,
             'test-role-name',
-            'aws-token'
+            []
         );
 
         $this->assertEquals('expected-access-key-id', $signingVars[0]);
@@ -310,7 +312,8 @@ class AwsNativeSourceTest extends TestCase
             $this->audience,
             $this->regionUrl,
             $this->regionalCredVerificationUrl,
-            $this->securityCredentialsUrl
+            $this->securityCredentialsUrl,
+            $this->imdsv2SessionTokenUrl,
         );
 
         // Mock response from AWS Metadata Server
