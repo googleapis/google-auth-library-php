@@ -96,6 +96,11 @@ class GCECredentials extends CredentialsLoader implements
     const PROJECT_ID_URI_PATH = 'v1/project/project-id';
 
     /**
+     * The metadata path of the project ID.
+     */
+    const UNIVERSE_DOMAIN_URI_PATH = 'v1/universe';
+
+    /**
      * The header whose presence indicates GCE presence.
      */
     const FLAVOR_HEADER = 'Metadata-Flavor';
@@ -295,6 +300,18 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
+     * The full uri for accessing the default universe domain.
+     *
+     * @return string
+     */
+    private static function getUniverseDomainUri()
+    {
+        $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
+
+        return $base . self::UNIVERSE_DOMAIN_URI_PATH;
+    }
+
+    /**
      * Determines if this an App Engine Flexible instance, by accessing the
      * GAE_INSTANCE environment variable.
      *
@@ -484,6 +501,32 @@ class GCECredentials extends CredentialsLoader implements
             return $this->projectId;
         }
 
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+
+        if (!$this->hasCheckedOnGce) {
+            $this->isOnGce = self::onGce($httpHandler);
+            $this->hasCheckedOnGce = true;
+        }
+
+        if (!$this->isOnGce) {
+            return null;
+        }
+
+        $this->projectId = $this->getFromMetadata($httpHandler, self::getProjectIdUri());
+        return $this->projectId;
+    }
+
+    /**
+     * Fetch the default universe domain from the metadata server.
+     *
+     * Returns null if called outside GCE.
+     *
+     * @param callable $httpHandler Callback which delivers psr7 request
+     * @return string|null
+     */
+    public function getUniverseDomain(): string
+    {
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
