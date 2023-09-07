@@ -49,9 +49,9 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     protected $quotaProject;
 
     /**
-     * @var string
+     * @var string|null
      */
-    private $universeDomain;
+    private ?string $universeDomain;
 
     /**
      * Create a new UserRefreshCredentials.
@@ -99,7 +99,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
         if (array_key_exists('quota_project_id', $jsonKey)) {
             $this->quotaProject = (string) $jsonKey['quota_project_id'];
         }
-        $this->universeDomain = $jsonKey['universedomain'] ?? self::DEFAULT_UNIVERSE_DOMAIN;
+        $this->universeDomain = $jsonKey['universe_domain'] ?? null;
     }
 
     /**
@@ -153,7 +153,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      */
     public function getUniverseDomain(): string
     {
-        return $this->universeDomain;
+        return $this->universeDomain ?: self::DEFAULT_UNIVERSE_DOMAIN;
     }
 
     /**

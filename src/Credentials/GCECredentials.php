@@ -98,7 +98,7 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * The metadata path of the project ID.
      */
-    const UNIVERSE_DOMAIN_URI_PATH = 'v1/universe';
+    const UNIVERSE_DOMAIN_URI_PATH = 'v1/universe/universe_domain';
 
     /**
      * The header whose presence indicates GCE presence.
@@ -175,6 +175,11 @@ class GCECredentials extends CredentialsLoader implements
     private $serviceAccountIdentity;
 
     /**
+     * @var string
+     */
+    private ?string $universeDomain;
+
+    /**
      * @param Iam $iam [optional] An IAM instance.
      * @param string|string[] $scope [optional] the scope of the access request,
      *        expressed either as an array or as a space-delimited string.
@@ -183,13 +188,16 @@ class GCECredentials extends CredentialsLoader implements
      *   charges associated with the request.
      * @param string $serviceAccountIdentity [optional] Specify a service
      *   account identity name to use instead of "default".
+     * @param string $universeDomain [optional] Specify a universe domain to use
+     *   instead of fetching one from the metadata server.
      */
     public function __construct(
         Iam $iam = null,
         $scope = null,
         $targetAudience = null,
         $quotaProject = null,
-        $serviceAccountIdentity = null
+        $serviceAccountIdentity = null,
+        $universeDomain = null
     ) {
         $this->iam = $iam;
 
@@ -217,6 +225,7 @@ class GCECredentials extends CredentialsLoader implements
         $this->tokenUri = $tokenUri;
         $this->quotaProject = $quotaProject;
         $this->serviceAccountIdentity = $serviceAccountIdentity;
+        $this->universeDomain = $universeDomain;
     }
 
     /**
@@ -527,6 +536,10 @@ class GCECredentials extends CredentialsLoader implements
      */
     public function getUniverseDomain(): string
     {
+        if ($this->universeDomain) {
+            return $this->universeDomain;
+        }
+
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
@@ -536,11 +549,11 @@ class GCECredentials extends CredentialsLoader implements
         }
 
         if (!$this->isOnGce) {
-            return null;
+            return self::DEFAULT_UNIVERSE_DOMAIN;
         }
 
-        $this->projectId = $this->getFromMetadata($httpHandler, self::getProjectIdUri());
-        return $this->projectId;
+        $this->universeDomain = $this->getFromMetadata($httpHandler, self::getUniverseDomainUri());
+        return $this->universeDomain;
     }
 
     /**
