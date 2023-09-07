@@ -19,9 +19,11 @@ namespace Google\Auth\Tests;
 
 use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
+use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
+use Google\Auth\CredentialSource;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
@@ -747,5 +749,37 @@ class ApplicationDefaultCredentialsTest extends TestCase
             'Google\Auth\Credentials\GCECredentials',
             $creds
         );
+    }
+
+    /**
+     * @dataProvider provideExternalAccountCredentials
+     */
+    public function testExternalAccountCredentials(string $jsonFile, string $expectedCredSource)
+    {
+        putenv(sprintf('GOOGLE_APPLICATION_CREDENTIALS=%s/fixtures6/%s', __DIR__, $jsonFile));
+
+        $creds = ApplicationDefaultCredentials::getCredentials('a_scope');
+
+        $this->assertInstanceOf(ExternalAccountCredentials::class, $creds);
+
+        $credsReflection = new \ReflectionClass($creds);
+        $credsProp = $credsReflection->getProperty('auth');
+        $credsProp->setAccessible(true);
+
+        $oauth = $credsProp->getValue($creds);
+        $oauthReflection = new \ReflectionClass($oauth);
+        $oauthProp = $oauthReflection->getProperty('subjectTokenFetcher');
+        $oauthProp->setAccessible(true);
+
+        $subjectTokenFetcher = $oauthProp->getValue($oauth);
+        $this->assertInstanceOf($expectedCredSource, $subjectTokenFetcher);
+    }
+
+    public function provideExternalAccountCredentials()
+    {
+        return [
+            ['file_credentials.json', CredentialSource\FileSource::class],
+            ['url_credentials.json', CredentialSource\UrlSource::class],
+        ];
     }
 }
