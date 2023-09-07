@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.30.0](https://github.com/googleapis/google-auth-library-php/compare/v1.29.1...v1.30.0) (2023-09-07)
+
+
+### Features
+
+* Add support for BYOID / STS ([#473](https://github.com/googleapis/google-auth-library-php/issues/473)) ([2938e58](https://github.com/googleapis/google-auth-library-php/commit/2938e58d57ac4ed2c952c930d7ffd6ac69e1abb7))
+
 ## [1.29.1](https://github.com/googleapis/google-auth-library-php/compare/v1.29.0...v1.29.1) (2023-08-23)
 
 
