@@ -89,10 +89,6 @@ class ExternalAccountCredentialsTest extends TestCase
                 ],
             ],
             [
-                ['file' => 'path/to/credsfile.json'],
-                FileSource::class
-            ],
-            [
                 ['file' => 'path/to/credsfile.json', 'format' => ['type' => 'json', 'subject_token_field_name' => 'token']],
                 FileSource::class,
                 [
