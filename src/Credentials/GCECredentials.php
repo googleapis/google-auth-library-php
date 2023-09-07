@@ -197,7 +197,7 @@ class GCECredentials extends CredentialsLoader implements
         $targetAudience = null,
         $quotaProject = null,
         $serviceAccountIdentity = null,
-        $universeDomain = null
+        string $universeDomain = null
     ) {
         $this->iam = $iam;
 
@@ -552,7 +552,16 @@ class GCECredentials extends CredentialsLoader implements
             return self::DEFAULT_UNIVERSE_DOMAIN;
         }
 
-        $this->universeDomain = $this->getFromMetadata($httpHandler, self::getUniverseDomainUri());
+        // In the case of 404, we return the default universe domain.
+        try {
+            $this->universeDomain = $this->getFromMetadata(
+                $httpHandler,
+                self::getUniverseDomainUri()
+            );
+        } catch (ClientException $e) {
+            return self::DEFAULT_UNIVERSE_DOMAIN;
+        }
+
         return $this->universeDomain;
     }
 
