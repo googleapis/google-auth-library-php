@@ -532,9 +532,9 @@ class GCECredentials extends CredentialsLoader implements
      * Returns null if called outside GCE.
      *
      * @param callable $httpHandler Callback which delivers psr7 request
-     * @return string|null
+     * @return string
      */
-    public function getUniverseDomain(): string
+    public function getUniverseDomain(callable $httpHandler = null): string
     {
         if ($this->universeDomain) {
             return $this->universeDomain;
