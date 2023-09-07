@@ -60,7 +60,7 @@ class AwsNativeSourceTest extends TestCase
     /** @runInSeparateProcess */
     public function testGetRegionFromEnv()
     {
-    // Without any environment variables set, getRegionFromEnv should return null
+        // Without any environment variables set, getRegionFromEnv should return null
         $this->assertNull(AwsNativeSource::getRegionFromEnv());
 
         // Requires AWS_REGION or AWS_DEFAULT_REGION to be set
