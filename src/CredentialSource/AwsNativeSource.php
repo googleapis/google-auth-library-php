@@ -23,7 +23,7 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
 
 /**
- * Authenticates requests using IAM credentials.
+ * Authenticates requests using AWS credentials.
  */
 class AwsNativeSource implements ExternalAccountCredentialSourceInterface
 {
