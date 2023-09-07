@@ -247,7 +247,7 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     /**
      * @internal
      *
-     * @param HttpHandlerInterface $httpHandler
+     * @param callable $httpHandler
      * @param string $regionUrl
      * @param array<string, string|string[]> $headers Request headers to send in with the request.
      */
@@ -265,8 +265,8 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     /**
      * @internal
      *
-     * @param HttpHandlerInterface $httpHandler
-     * @param string $regionUrl
+     * @param callable $httpHandler
+     * @param string $securityCredentialsUrl
      * @param array<string, string|string[]> $headers Request headers to send in with the request.
      */
     public static function getRoleName(callable $httpHandler, string $securityCredentialsUrl, array $headers): string
@@ -282,8 +282,8 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     /**
      * @internal
      *
-     * @param HttpHandlerInterface $httpHandler
-     * @param string $regionUrl
+     * @param callable $httpHandler
+     * @param string $securityCredentialsUrl
      * @param array<string, string|string[]> $headers Request headers to send in with the request.
      * @return array{string, string, ?string}
      */
