@@ -436,6 +436,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->will(function ($value) use ($phpunit) {
                 $phpunit->assertEqualsWithDelta(1000, $value[0]->getTimestamp() - time(), 1);
+                return $this;
             });
 
         $this->cache->getItem('google_auth_certs_cache|federated_signon_certs_v3')
