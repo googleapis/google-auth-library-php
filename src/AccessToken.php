@@ -33,6 +33,7 @@ use phpseclib\Math\BigInteger as BigInteger2;
 use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Math\BigInteger as BigInteger3;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 use SimpleJWT\InvalidTokenException;
 use SimpleJWT\JWT as SimpleJWT;
@@ -312,8 +313,19 @@ class AccessToken
         $certs = $cacheItem ? $cacheItem->get() : null;
 
         $gotNewCerts = false;
+        $expireTime = '+1 hour';
         if (!$certs) {
-            $certs = $this->retrieveCertsFromLocation($location, $options);
+            $response = $this->retrieveCertsFromLocation($location, $options);
+            $certs = json_decode((string) $response->getBody(), true);
+
+            if ($cacheControl = $response->getHeaderLine('Cache-Control')) {
+                array_map(function($value) use (&$expireTime) {
+                    list($key, $value) = explode('=', $value) + [null, null];
+                    if ($key == 'max-age') {
+                        $expireTime = '+' . $value . ' seconds';
+                    }
+                }, explode(', ', $cacheControl));
+            }
 
             $gotNewCerts = true;
         }
@@ -332,7 +344,7 @@ class AccessToken
         // Push caching off until after verifying certs are in a valid format.
         // Don't want to cache bad data.
         if ($gotNewCerts) {
-            $cacheItem->expiresAt(new DateTime('+1 hour'));
+            $cacheItem->expiresAt(new DateTime($expireTime));
             $cacheItem->set($certs);
             $this->cache->save($cacheItem);
         }
@@ -345,11 +357,11 @@ class AccessToken
      *
      * @param string $url location
      * @param array<mixed> $options [optional] Configuration options.
-     * @return array<mixed> certificates
+     * @return ResponseInterface
      * @throws InvalidArgumentException If certs could not be retrieved from a local file.
      * @throws RuntimeException If certs could not be retrieved from a remote location.
      */
-    private function retrieveCertsFromLocation($url, array $options = [])
+    private function retrieveCertsFromLocation($url, array $options = []): ResponseInterface
     {
         // If we're retrieving a local file, just grab it.
         if (strpos($url, 'http') !== 0) {
@@ -367,7 +379,7 @@ class AccessToken
         $response = $httpHandler(new Request('GET', $url), $options);
 
         if ($response->getStatusCode() == 200) {
-            return json_decode((string) $response->getBody(), true);
+            return $response;
         }
 
         throw new RuntimeException(sprintf(
