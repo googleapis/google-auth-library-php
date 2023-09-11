@@ -559,7 +559,10 @@ class GCECredentials extends CredentialsLoader implements
                 self::getUniverseDomainUri()
             );
         } catch (ClientException $e) {
-            return self::DEFAULT_UNIVERSE_DOMAIN;
+            if ($e->hasResponse() && 404 == $e->getResponse()->getStatusCode()) {
+                return self::DEFAULT_UNIVERSE_DOMAIN;
+            }
+            throw $e;
         }
 
         return $this->universeDomain;
