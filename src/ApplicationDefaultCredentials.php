@@ -29,6 +29,7 @@ use Google\Auth\Subscriber\AuthTokenSubscriber;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
+use UnexpectedValueException;
 
 /**
  * ApplicationDefaultCredentials obtains the default credentials for
@@ -144,11 +145,14 @@ class ApplicationDefaultCredentials
      * @param string|string[] $defaultScope The default scope to use if no
      *   user-defined scopes exist, expressed either as an Array or as a
      *   space-delimited string.
-     * @param string $universeDomain Specifies a universe domain to use for the
-     *   calling client library
+     * @param string $universeDomain A universe domain to use when none is detected
+     *   from the credentials. If the credentains do contain a universe domain, an
+     *   exception is thrown if it does not match this value.
      *
      * @return FetchAuthTokenInterface
      * @throws DomainException if no implementation can be obtained.
+     * @throws UnexpectedValueException if the configured universe domain differs from
+     *   the credentials
      */
     public static function getCredentials(
         $scope = null,
@@ -183,6 +187,14 @@ class ApplicationDefaultCredentials
                 $jsonKey['quota_project_id'] = $quotaProject;
             }
             if ($universeDomain) {
+                if (
+                    isset($jsonKey['universe_domain'])
+                    && $jsonKey['universe_domain'] != $universeDomain
+                ) {
+                    throw new UnexpectedValueException(
+                        'Universe information from credentials is different from configured'
+                    );
+                }
                 $jsonKey['universe_domain'] = $universeDomain;
             }
             $creds = CredentialsLoader::makeCredentials(

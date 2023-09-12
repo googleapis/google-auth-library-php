@@ -28,6 +28,7 @@ use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use UnexpectedValueException;
 
 /**
  * @group credentials
@@ -537,6 +538,7 @@ class GCECredentialsTest extends BaseTest
             return new Psr7\Response(200, [], Utils::streamFor($expected));
         };
 
+        $creds = new GCECredentials();
         $creds->setIsOnGce(true);
 
         // Assert correct universe domain.
@@ -544,6 +546,12 @@ class GCECredentialsTest extends BaseTest
 
         // Assert the result is cached for subsequent calls.
         $this->assertEquals($expected, $creds->getUniverseDomain($httpHandler));
+
+        // Assert expected universe domain does not throw exception
+        $creds2 = new GCECredentials(null, null, null, null, null, $expected);
+        $creds2->setIsOnGce(true);
+        $timesCalled = 0;
+        $this->assertEquals($expected, $creds2->getUniverseDomain($httpHandler));
     }
 
     public function testGetUniverseDomainEmptyStringReturnsDefault()
@@ -567,10 +575,25 @@ class GCECredentialsTest extends BaseTest
         );
     }
 
-    public function testExplicitUniverseDomain()
+    public function testExpectedUniverseDomainThrowsExceptionOnMismatch()
     {
-        $expected = 'example-universe.com';
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('Universe information from credentials is different from configured');
+
+        $expected = 'example-universe1.com';
+        $actual = 'example-universe2.com';
+
+        // Pretend we are on GCE and mock the MDS returning a different universe domain.
+        $httpHandler = function ($request) use ($actual) {
+            $this->assertEquals(
+                '/computeMetadata/v1/universe/universe_domain',
+                $request->getUri()->getPath()
+            );
+            return new Psr7\Response(200, [], Utils::streamFor($actual));
+        };
+
         $creds = new GCECredentials(null, null, null, null, null, $expected);
-        $this->assertEquals($expected, $creds->getUniverseDomain());
+        $creds->setIsOnGce(true);
+        $this->assertEquals($expected, $creds->getUniverseDomain($httpHandler));
     }
 }
