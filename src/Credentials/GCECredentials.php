@@ -552,19 +552,25 @@ class GCECredentials extends CredentialsLoader implements
             return self::DEFAULT_UNIVERSE_DOMAIN;
         }
 
-        // If we know the metadata server exists, but it returns a 404 for the universe domain, we
-        // can safely assume this is an older metadata server running in GCU, and so we can return
-        // the default universe domain.
         try {
             $this->universeDomain = $this->getFromMetadata(
                 $httpHandler,
                 self::getUniverseDomainUri()
             );
         } catch (ClientException $e) {
-            if ($e->hasResponse() && 404 == $e->getResponse()->getStatusCode()) {
-                return self::DEFAULT_UNIVERSE_DOMAIN;
+            // If the metadata server exists, but returns a 404 for the universe domain, the auth
+            // libraries should safely assume this is an older metadata server running in GCU, and
+            // should return the default universe domain.
+            if (!$e->hasResponse() || 404 != $e->getResponse()->getStatusCode()) {
+                throw $e;
             }
-            throw $e;
+            $this->universeDomain = self::DEFAULT_UNIVERSE_DOMAIN;
+        }
+
+        // We expect in some cases the metadata server will return an empty string for the universe
+        // domain. In this case, the auth library MUST return the default universe domain.
+        if ('' === $this->universeDomain) {
+            $this->universeDomain = self::DEFAULT_UNIVERSE_DOMAIN;
         }
 
         return $this->universeDomain;

@@ -546,6 +546,27 @@ class GCECredentialsTest extends BaseTest
         $this->assertEquals($expected, $creds->getUniverseDomain($httpHandler));
     }
 
+    public function testGetUniverseDomainEmptyStringReturnsDefault()
+    {
+        $creds = new GCECredentials();
+        $creds->setIsOnGce(true);
+
+        // Pretend we are on GCE and mock the MDS returning an empty string for the universe domain.
+        $httpHandler = function ($request) {
+            $this->assertEquals(
+                '/computeMetadata/v1/universe/universe_domain',
+                $request->getUri()->getPath()
+            );
+            return new Psr7\Response(200, [], Utils::streamFor(''));
+        };
+
+        // Assert the default universe domain is returned instead of the empty string.
+        $this->assertEquals(
+            GCECredentials::DEFAULT_UNIVERSE_DOMAIN,
+            $creds->getUniverseDomain($httpHandler)
+        );
+    }
+
     public function testExplicitUniverseDomain()
     {
         $expected = 'example-universe.com';
