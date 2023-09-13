@@ -787,16 +787,16 @@ class ApplicationDefaultCredentialsTest extends TestCase
     public function testUniverseDomainInKeyFile()
     {
         // Test no universe domain in keyfile defaults to "googleapis.com"
-        $keyFile = __DIR__ . '/fixtures/private.json';
+        $keyFile = __DIR__ . '/fixtures3/service_account_credentials.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $creds = ApplicationDefaultCredentials::getCredentials();
         $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds->getUniverseDomain());
 
-        // Test universe domain from keyfile
-        $keyFile = __DIR__ . '/fixtures2/private.json';
+        // Test universe domain in "service_account" keyfile
+        $keyFile = __DIR__ . '/fixtures/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        $creds2 = ApplicationDefaultCredentials::getCredentials();
-        $this->assertEquals('example-universe.com', $creds2->getUniverseDomain());
+        $creds = ApplicationDefaultCredentials::getCredentials();
+        $this->assertEquals('example-universe.com', $creds->getUniverseDomain());
 
         // test passing in a different universe domain overrides keyfile
         $creds3 = ApplicationDefaultCredentials::getCredentials(
@@ -809,6 +809,24 @@ class ApplicationDefaultCredentialsTest extends TestCase
             'example-universe2.com'
         );
         $this->assertEquals('example-universe2.com', $creds3->getUniverseDomain());
+
+        // Test universe domain in "authenticated_user" keyfile is not read.
+        $keyFile = __DIR__ . '/fixtures2/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $creds2 = ApplicationDefaultCredentials::getCredentials();
+        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain());
+
+        // test passing in a different universe domain for "authenticated_user" has no effect.
+        $creds3 = ApplicationDefaultCredentials::getCredentials(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'example-universe2.com'
+        );
+        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds3->getUniverseDomain());
     }
 
     /** @runInSeparateProcess */

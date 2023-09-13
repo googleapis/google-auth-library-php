@@ -49,11 +49,6 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     protected $quotaProject;
 
     /**
-     * @var string|null
-     */
-    private ?string $universeDomain;
-
-    /**
      * Create a new UserRefreshCredentials.
      *
      * @param string|string[] $scope the scope of the access request, expressed
@@ -99,7 +94,6 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
         if (array_key_exists('quota_project_id', $jsonKey)) {
             $this->quotaProject = (string) $jsonKey['quota_project_id'];
         }
-        $this->universeDomain = $jsonKey['universe_domain'] ?? null;
     }
 
     /**
@@ -147,13 +141,14 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     }
 
     /**
-     * Get the universe domain configured in the JSON credential.
+     * Universe domain is not supported in User Refresh credentials - they should
+     * always return the default universe domain.
      *
      * @return string
      */
     public function getUniverseDomain(): string
     {
-        return $this->universeDomain ?: self::DEFAULT_UNIVERSE_DOMAIN;
+        return self::DEFAULT_UNIVERSE_DOMAIN;
     }
 
     /**
