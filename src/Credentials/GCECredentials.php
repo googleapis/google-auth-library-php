@@ -31,7 +31,6 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
-use UnexpectedValueException;
 
 /**
  * GCECredentials supports authorization on Google Compute Engine.
@@ -181,11 +180,6 @@ class GCECredentials extends CredentialsLoader implements
     private ?string $universeDomain;
 
     /**
-     * @var bool
-     */
-    private ?string $expectedUniverseDomain;
-
-    /**
      * @param Iam $iam [optional] An IAM instance.
      * @param string|string[] $scope [optional] the scope of the access request,
      *        expressed either as an array or as a space-delimited string.
@@ -194,9 +188,8 @@ class GCECredentials extends CredentialsLoader implements
      *   charges associated with the request.
      * @param string $serviceAccountIdentity [optional] Specify a service
      *   account identity name to use instead of "default".
-     * @param string $expectedUniverseDomain [optional] Specify a universe
-     *   domain which will be checked against the one returned by the metadata
-     *   server, and throw an exception on mismatch.
+     * @param string $universeDomain [optional] Specify a universe domain to use
+     *   instead of fetching one from the metadata server.
      */
     public function __construct(
         Iam $iam = null,
@@ -204,7 +197,7 @@ class GCECredentials extends CredentialsLoader implements
         $targetAudience = null,
         $quotaProject = null,
         $serviceAccountIdentity = null,
-        string $expectedUniverseDomain = null
+        string $universeDomain = null
     ) {
         $this->iam = $iam;
 
@@ -232,7 +225,7 @@ class GCECredentials extends CredentialsLoader implements
         $this->tokenUri = $tokenUri;
         $this->quotaProject = $quotaProject;
         $this->serviceAccountIdentity = $serviceAccountIdentity;
-        $this->expectedUniverseDomain = $expectedUniverseDomain;
+        $this->universeDomain = $universeDomain;
     }
 
     /**
@@ -540,28 +533,13 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @param callable $httpHandler Callback which delivers psr7 request
      * @return string
-     * @throws UnexpectedValueException if the detected universe domain differs from
-     *   the expected one.
      */
     public function getUniverseDomain(callable $httpHandler = null): string
     {
-        if (isset($this->universeDomain)) {
+        if ($this->universeDomain) {
             return $this->universeDomain;
         }
 
-        $universeDomain = $this->detectUniverseDomain($httpHandler);
-
-        if ($this->expectedUniverseDomain && $this->expectedUniverseDomain != $universeDomain) {
-            throw new UnexpectedValueException(
-                'Universe information from credentials is different from configured'
-            );
-        }
-
-        return $this->universeDomain = $universeDomain;
-    }
-
-    private function detectUniverseDomain(callable $httpHandler = null): string
-    {
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
@@ -575,24 +553,27 @@ class GCECredentials extends CredentialsLoader implements
         }
 
         try {
-            $universeDomain = $this->getFromMetadata($httpHandler, self::getUniverseDomainUri());
+            $this->universeDomain = $this->getFromMetadata(
+                $httpHandler,
+                self::getUniverseDomainUri()
+            );
         } catch (ClientException $e) {
             // If the metadata server exists, but returns a 404 for the universe domain, the auth
             // libraries should safely assume this is an older metadata server running in GCU, and
             // should return the default universe domain.
-            if ($e->hasResponse() && 404 == $e->getResponse()->getStatusCode()) {
-                return self::DEFAULT_UNIVERSE_DOMAIN;;
+            if (!$e->hasResponse() || 404 != $e->getResponse()->getStatusCode()) {
+                throw $e;
             }
-            throw $e;
+            $this->universeDomain = self::DEFAULT_UNIVERSE_DOMAIN;
         }
 
         // We expect in some cases the metadata server will return an empty string for the universe
         // domain. In this case, the auth library MUST return the default universe domain.
-        if ('' === $universeDomain) {
-            return self::DEFAULT_UNIVERSE_DOMAIN;
+        if ('' === $this->universeDomain) {
+            $this->universeDomain = self::DEFAULT_UNIVERSE_DOMAIN;
         }
 
-        return $universeDomain;
+        return $this->universeDomain;
     }
 
     /**

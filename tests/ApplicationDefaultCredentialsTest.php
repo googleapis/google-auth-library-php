@@ -31,7 +31,6 @@ use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use ReflectionClass;
-use UnexpectedValueException;
 
 /**
  * @runTestsInSeparateProcesses
@@ -799,19 +798,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $creds2 = ApplicationDefaultCredentials::getCredentials();
         $this->assertEquals('example-universe.com', $creds2->getUniverseDomain());
 
-    }
-
-    /** @runInSeparateProcess */
-    public function testUserConfiguredUniverseDomain()
-    {
-        // Test no universe domain in keyfile defaults to "googleapis.com"
-        $keyFile = __DIR__ . '/fixtures/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-        $creds = ApplicationDefaultCredentials::getCredentials();
-        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds->getUniverseDomain());
-
         // test passing in a different universe domain overrides keyfile
-        $creds2 = ApplicationDefaultCredentials::getCredentials(
+        $creds3 = ApplicationDefaultCredentials::getCredentials(
             null,
             null,
             null,
@@ -820,29 +808,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             null,
             'example-universe2.com'
         );
-        $this->assertEquals('example-universe2.com', $creds2->getUniverseDomain());
-    }
-
-    /** @runInSeparateProcess */
-    public function testPassingInDifferentUniverseDomainFromKeyFileThrowsException()
-    {
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Universe information from credentials is different from configured');
-
-        // Test universe domain from keyfile
-        $keyFile = __DIR__ . '/fixtures2/private.json';
-        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
-
-        // test passing in a different universe domain overrides keyfile
-        ApplicationDefaultCredentials::getCredentials(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'example-universe2.com'
-        );
+        $this->assertEquals('example-universe2.com', $creds3->getUniverseDomain());
     }
 
     /** @runInSeparateProcess */
@@ -860,6 +826,20 @@ class ApplicationDefaultCredentialsTest extends TestCase
         );
         $this->assertEquals('example-universe.com', $creds->getUniverseDomain($httpHandler));
 
+        // test passing in a different universe domain overrides metadata server
+        $creds2 = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            $httpHandler = getHandler([
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            ]), // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            null, // $defaultScope
+            'example-universe2.com' // $universeDomain
+        );
+        $this->assertEquals('example-universe2.com', $creds2->getUniverseDomain($httpHandler));
+
         // test error response returns default universe domain
         $creds2 = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -869,39 +849,5 @@ class ApplicationDefaultCredentialsTest extends TestCase
             ]), // $httpHandler
         );
         $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain($httpHandler));
-    }
-
-    /** @runInSeparateProcess */
-    public function testPassingInDifferentUniverseDomainInGceCredentialsThrowsException()
-    {
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Universe information from credentials is different from configured');
-
-        putenv('HOME');
-
-        $expectedUniverseDomain = 'example-universe.com';
-        $creds = ApplicationDefaultCredentials::getCredentials(
-            null, // $scope
-            $httpHandler = getHandler([
-                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                new Response(200, [], Utils::streamFor($expectedUniverseDomain)),
-            ]) // $httpHandler
-        );
-        $this->assertEquals('example-universe.com', $creds->getUniverseDomain($httpHandler));
-
-        // test passing in a different universe domain throws exception
-        $creds2 = ApplicationDefaultCredentials::getCredentials(
-            null, // $scope
-            $httpHandler = getHandler([
-                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                new Response(200, [], Utils::streamFor($expectedUniverseDomain)),
-            ]), // $httpHandler
-            null, // $cacheConfig
-            null, // $cache
-            null, // $quotaProject
-            null, // $defaultScope
-            'example-universe2.com' // $universeDomain
-        );
-        $this->assertEquals('example-universe2.com', $creds2->getUniverseDomain($httpHandler));
     }
 }
