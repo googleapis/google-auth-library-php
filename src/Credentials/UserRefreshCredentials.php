@@ -141,17 +141,6 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     }
 
     /**
-     * Universe domain is not supported in User Refresh credentials - they should
-     * always return the default universe domain.
-     *
-     * @return string
-     */
-    public function getUniverseDomain(): string
-    {
-        return self::DEFAULT_UNIVERSE_DOMAIN;
-    }
-
-    /**
      * Get the granted scopes (if they exist) for the last fetched token.
      *
      * @return string|null

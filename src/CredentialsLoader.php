@@ -276,8 +276,8 @@ abstract class CredentialsLoader implements
     }
 
     /**
-     * Get the universe domain from the credential. Defaults to
-     * "googleapis.com" for all credential types.
+     * Get the universe domain from the credential. Defaults to "googleapis.com"
+     * for all credential types which do not support universe domain.
      *
      * @return string
      */
