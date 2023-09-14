@@ -35,9 +35,9 @@ class MetricsTraitTest extends TestCase
         $this->phpAndAuthVersion = 'gl-php/' . PHP_VERSION
             . ' auth/' . self::VERSION;
         $this->defaultForAccessTokenRequest = $this->phpAndAuthVersion
-            . ' ' . $this->impl::REQUEST_TYPE_ACCESS_TOKEN;
+            . ' ' . $this->impl::$requestTypeAccessToken;
         $this->defaultForIdTokenRequest = $this->phpAndAuthVersion
-            . ' ' . $this->impl::REQUEST_TYPE_ID_TOKEN;
+            . ' ' . $this->impl::$requestTypeIdToken;
     }
 
     public function testGetPhpAndAuthLibVersion()
@@ -89,7 +89,7 @@ class MetricsTraitTest extends TestCase
     public function testGetMdsPingHeader()
     {
         $this->assertEquals(
-            $this->phpAndAuthVersion . ' ' . $this->impl::REQUEST_TYPE_MDS_PING,
+            $this->phpAndAuthVersion . ' ' . $this->impl::$requestTypeMdsPing,
             $this->impl->getMdsPingHeader()
         );
     }
@@ -98,14 +98,14 @@ class MetricsTraitTest extends TestCase
     {
         $impl = new MetricsTraitImplementation();
         return [
-            [true, 'Mds', $impl::CRED_TYPE_SA_MDS],
-            [false, 'Mds', $impl::CRED_TYPE_SA_MDS],
-            [true, 'SaAssertion', $impl::CRED_TYPE_SA_ASSERTION],
-            [false, 'SaAssertion', $impl::CRED_TYPE_SA_ASSERTION],
-            [true, 'SaImpersonate', $impl::CRED_TYPE_SA_IMPERSONATE],
-            [false, 'SaImpersonate', $impl::CRED_TYPE_SA_IMPERSONATE],
-            [true, 'User', $impl::CRED_TYPE_USER],
-            [false, 'User', $impl::CRED_TYPE_USER]
+            [true, 'Mds', $impl::$credTypeSaMds],
+            [false, 'Mds', $impl::$credTypeSaMds],
+            [true, 'SaAssertion', $impl::$credTypeSaAssertion],
+            [false, 'SaAssertion', $impl::$credTypeSaAssertion],
+            [true, 'SaImpersonate', $impl::$credTypeSaImpersonate],
+            [false, 'SaImpersonate', $impl::$credTypeSaImpersonate],
+            [true, 'User', $impl::$credTypeUser],
+            [false, 'User', $impl::$credTypeUser]
         ];
     }
 }

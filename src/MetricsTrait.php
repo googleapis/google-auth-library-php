@@ -24,28 +24,27 @@ namespace Google\Auth;
  */
 trait MetricsTrait
 {
-    public const METRICS_HEADER_KEY = 'x-goog-api-client';
+    public static $metricsHeaderKey = 'x-goog-api-client';
 
     // Auth request type
-    public const REQUEST_TYPE_ACCESS_TOKEN = 'auth-request-type/at';
-    public const REQUEST_TYPE_ID_TOKEN = 'auth-request-type/it';
-    public const REQUEST_TYPE_MDS_PING = 'auth-request-type/mds';
-    public const REQUEST_TYPE_REAUTH_START = 'auth-request-type/re-start';
+    public static $requestTypeAccessToken = 'auth-request-type/at';
+    public static $requestTypeIdToken = 'auth-request-type/it';
+    public static $requestTypeMdsPing = 'auth-request-type/mds';
 
     // Credential type
-    public const CRED_TYPE_USER = 'cred-type/u';
-    public const CRED_TYPE_SA_ASSERTION = 'cred-type/sa';
-    public const CRED_TYPE_SA_JWT = 'cred-type/jwt';
-    public const CRED_TYPE_SA_MDS = 'cred-type/mds';
-    public const CRED_TYPE_SA_IMPERSONATE = 'cred-type/imp';
+    public static $credTypeUser = 'cred-type/u';
+    public static $credTypeSaAssertion = 'cred-type/sa';
+    public static $credTypeSaJwt = 'cred-type/jwt';
+    public static $credTypeSaMds = 'cred-type/mds';
+    public static $credTypeSaImpersonate = 'cred-type/imp';
 
     // TODO: Find a way to get the auth version
     // Auth library version
-    public const VERSION = '10.0.0';
+    public static $version = '10.0.0';
 
     public function getPhpAndAuthLibVersion()
     {
-        return 'gl-php/' . PHP_VERSION . ' auth/' . self::VERSION;
+        return 'gl-php/' . PHP_VERSION . ' auth/' . self::$version;
     }
 
     /**
@@ -59,7 +58,7 @@ trait MetricsTrait
      */
     public function getTokenRequestMdsHeader(bool $isAccessTokenRequest)
     {
-        return $this->getDefaults($isAccessTokenRequest) . ' ' . self::CRED_TYPE_SA_MDS;
+        return $this->getDefaults($isAccessTokenRequest) . ' ' . self::$credTypeSaMds;
     }
 
     /**
@@ -72,7 +71,7 @@ trait MetricsTrait
      */
     public function getTokenRequestSaAssertionHeader(bool $isAccessTokenRequest)
     {
-        return $this->getDefaults($isAccessTokenRequest) . ' ' . self::CRED_TYPE_SA_ASSERTION;
+        return $this->getDefaults($isAccessTokenRequest) . ' ' . self::$credTypeSaAssertion;
     }
 
     /**
@@ -85,7 +84,7 @@ trait MetricsTrait
      */
     public function getTokenRequestSaImpersonateHeader(bool $isAccessTokenRequest)
     {
-        return $this->getDefaults($isAccessTokenRequest) . ' ' . self::CRED_TYPE_SA_IMPERSONATE;
+        return $this->getDefaults($isAccessTokenRequest) . ' ' . self::$credTypeSaImpersonate;
     }
 
     /**
@@ -98,7 +97,7 @@ trait MetricsTrait
      */
     public function getTokenRequestUserHeader(bool $isAccessTokenRequest)
     {
-        return $this->getDefaults($isAccessTokenRequest) . ' ' . self::CRED_TYPE_USER;
+        return $this->getDefaults($isAccessTokenRequest) . ' ' . self::$credTypeUser;
     }
 
     /**
@@ -107,7 +106,7 @@ trait MetricsTrait
     public function getMdsPingHeader()
     {
         return $this->getPhpAndAuthLibVersion()
-            . ' ' . self::REQUEST_TYPE_MDS_PING;
+            . ' ' . self::$requestTypeMdsPing;
     }
 
     /**
@@ -122,10 +121,10 @@ trait MetricsTrait
     {
         if ($metricsHeaderToApply == '') {
             return $headers;
-        } else if (isset($headers[self::METRICS_HEADER_KEY])) {
-            $headers[self::METRICS_HEADER_KEY][0] .= ' ' . $metricsHeaderToApply;
+        } else if (isset($headers[self::$metricsHeaderKey])) {
+            $headers[self::$metricsHeaderKey][0] .= ' ' . $metricsHeaderToApply;
         } else {
-            $headers[self::METRICS_HEADER_KEY] = [$metricsHeaderToApply];
+            $headers[self::$metricsHeaderKey] = [$metricsHeaderToApply];
         }
         return $headers;
     }
@@ -134,9 +133,9 @@ trait MetricsTrait
     {
         $result = $this->getPhpAndAuthLibVersion();
         if ($forAccessToken) {
-            $result .= ' ' . self::REQUEST_TYPE_ACCESS_TOKEN;
+            $result .= ' ' . self::$requestTypeAccessToken;
         } else {
-            $result .= ' ' . self::REQUEST_TYPE_ID_TOKEN;
+            $result .= ' ' . self::$requestTypeIdToken;
         }
         return $result;
     }
