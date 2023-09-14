@@ -121,7 +121,7 @@ trait MetricsTrait
     {
         if ($metricsHeaderToApply == '') {
             return $headers;
-        } else if (isset($headers[self::$metricsHeaderKey])) {
+        } elseif (isset($headers[self::$metricsHeaderKey])) {
             $headers[self::$metricsHeaderKey][0] .= ' ' . $metricsHeaderToApply;
         } else {
             $headers[self::$metricsHeaderKey] = [$metricsHeaderToApply];
