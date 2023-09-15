@@ -372,10 +372,10 @@ class AccessToken
             if ($cacheControl = $response->getHeaderLine('Cache-Control')) {
                 array_map(function ($value) use (&$expireTime) {
                     list($key, $value) = explode('=', $value) + [null, null];
-                    if ($key == 'max-age') {
+                    if (trim($key) == 'max-age') {
                         $expireTime = '+' . $value . ' seconds';
                     }
-                }, explode(', ', $cacheControl));
+                }, explode(',', $cacheControl));
             }
             return [
                 json_decode((string) $response->getBody(), true),
