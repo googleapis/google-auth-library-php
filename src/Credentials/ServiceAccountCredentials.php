@@ -341,7 +341,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getUniverseDomain(): string
     {
-        return $this->universeDomain ?: self::DEFAULT_UNIVERSE_DOMAIN;
+        if (null === $this->universeDomain) {
+            return self::DEFAULT_UNIVERSE_DOMAIN;
+        }
+        return $this->universeDomain;
     }
 
     /**

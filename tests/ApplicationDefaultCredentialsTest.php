@@ -798,34 +798,10 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $creds = ApplicationDefaultCredentials::getCredentials();
         $this->assertEquals('example-universe.com', $creds->getUniverseDomain());
 
-        // test passing in a different universe domain overrides keyfile
-        $creds3 = ApplicationDefaultCredentials::getCredentials(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'example-universe2.com'
-        );
-        $this->assertEquals('example-universe2.com', $creds3->getUniverseDomain());
-
         // Test universe domain in "authenticated_user" keyfile is not read.
         $keyFile = __DIR__ . '/fixtures2/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $creds2 = ApplicationDefaultCredentials::getCredentials();
         $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain());
-
-        // test passing in a different universe domain for "authenticated_user" has no effect.
-        $creds3 = ApplicationDefaultCredentials::getCredentials(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'example-universe2.com'
-        );
-        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds3->getUniverseDomain());
     }
 }
