@@ -196,7 +196,8 @@ class GCECredentials extends CredentialsLoader implements
         $scope = null,
         $targetAudience = null,
         $quotaProject = null,
-        $serviceAccountIdentity = null
+        $serviceAccountIdentity = null,
+        string $universeDomain = null
     ) {
         $this->iam = $iam;
 
@@ -305,6 +306,18 @@ class GCECredentials extends CredentialsLoader implements
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
 
         return $base . self::PROJECT_ID_URI_PATH;
+    }
+
+    /**
+     * The full uri for accessing the default universe domain.
+     *
+     * @return string
+     */
+    private static function getUniverseDomainUri()
+    {
+        $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
+
+        return $base . self::UNIVERSE_DOMAIN_URI_PATH;
     }
 
     /**
