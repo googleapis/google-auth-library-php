@@ -527,56 +527,6 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
-     * Fetch the default universe domain from the metadata server.
-     *
-     * Returns null if called outside GCE.
-     *
-     * @param callable $httpHandler Callback which delivers psr7 request
-     * @return string
-     */
-    public function getUniverseDomain(callable $httpHandler = null): string
-    {
-        if ($this->universeDomain) {
-            return $this->universeDomain;
-        }
-
-        $httpHandler = $httpHandler
-            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
-
-        if (!$this->hasCheckedOnGce) {
-            $this->isOnGce = self::onGce($httpHandler);
-            $this->hasCheckedOnGce = true;
-        }
-
-        if (!$this->isOnGce) {
-            return self::DEFAULT_UNIVERSE_DOMAIN;
-        }
-
-        try {
-            $this->universeDomain = $this->getFromMetadata(
-                $httpHandler,
-                self::getUniverseDomainUri()
-            );
-        } catch (ClientException $e) {
-            // If the metadata server exists, but returns a 404 for the universe domain, the auth
-            // libraries should safely assume this is an older metadata server running in GCU, and
-            // should return the default universe domain.
-            if (!$e->hasResponse() || 404 != $e->getResponse()->getStatusCode()) {
-                throw $e;
-            }
-            $this->universeDomain = self::DEFAULT_UNIVERSE_DOMAIN;
-        }
-
-        // We expect in some cases the metadata server will return an empty string for the universe
-        // domain. In this case, the auth library MUST return the default universe domain.
-        if ('' === $this->universeDomain) {
-            $this->universeDomain = self::DEFAULT_UNIVERSE_DOMAIN;
-        }
-
-        return $this->universeDomain;
-    }
-
-    /**
      * Fetch the value of a GCE metadata server URI.
      *
      * @param callable $httpHandler An HTTP Handler to deliver PSR7 requests.

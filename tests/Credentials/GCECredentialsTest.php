@@ -517,60 +517,7 @@ class GCECredentialsTest extends BaseTest
     {
         $creds = new GCECredentials();
 
-        // If we are not on GCE, this should return the default
-        $creds->setIsOnGce(false);
-        $this->assertEquals(
-            GCECredentials::DEFAULT_UNIVERSE_DOMAIN,
-            $creds->getUniverseDomain()
-        );
-
-        // Pretend we are on GCE and mock the http handler.
-        $expected = 'example-universe.com';
-        $timesCalled = 0;
-        $httpHandler = function ($request) use (&$timesCalled, $expected) {
-            $timesCalled++;
-            $this->assertEquals(
-                '/computeMetadata/v1/universe/universe_domain',
-                $request->getUri()->getPath()
-            );
-            $this->assertEquals(1, $timesCalled, 'should only be called once');
-            return new Psr7\Response(200, [], Utils::streamFor($expected));
-        };
-
-        $creds->setIsOnGce(true);
-
-        // Assert correct universe domain.
-        $this->assertEquals($expected, $creds->getUniverseDomain($httpHandler));
-
-        // Assert the result is cached for subsequent calls.
-        $this->assertEquals($expected, $creds->getUniverseDomain($httpHandler));
-    }
-
-    public function testGetUniverseDomainEmptyStringReturnsDefault()
-    {
-        $creds = new GCECredentials();
-        $creds->setIsOnGce(true);
-
-        // Pretend we are on GCE and mock the MDS returning an empty string for the universe domain.
-        $httpHandler = function ($request) {
-            $this->assertEquals(
-                '/computeMetadata/v1/universe/universe_domain',
-                $request->getUri()->getPath()
-            );
-            return new Psr7\Response(200, [], Utils::streamFor(''));
-        };
-
-        // Assert the default universe domain is returned instead of the empty string.
-        $this->assertEquals(
-            GCECredentials::DEFAULT_UNIVERSE_DOMAIN,
-            $creds->getUniverseDomain($httpHandler)
-        );
-    }
-
-    public function testExplicitUniverseDomain()
-    {
-        $expected = 'example-universe.com';
-        $creds = new GCECredentials(null, null, null, null, null, $expected);
-        $this->assertEquals($expected, $creds->getUniverseDomain());
+        // Universe domain should always be the default
+        $this->assertEquals(GCECredentials::DEFAULT_UNIVERSE_DOMAIN, $creds->getUniverseDomain());
     }
 }
