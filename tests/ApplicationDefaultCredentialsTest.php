@@ -804,4 +804,44 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $creds2 = ApplicationDefaultCredentials::getCredentials();
         $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain());
     }
+
+    /** @runInSeparateProcess */
+    public function testUniverseDomainInGceCredentials()
+    {
+        putenv('HOME');
+
+        $expectedUniverseDomain = 'example-universe.com';
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            $httpHandler = getHandler([
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                new Response(200, [], Utils::streamFor($expectedUniverseDomain)),
+            ]) // $httpHandler
+        );
+        $this->assertEquals('example-universe.com', $creds->getUniverseDomain($httpHandler));
+
+        // test passing in a different universe domain overrides metadata server
+        $creds2 = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            $httpHandler = getHandler([
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            ]), // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            null, // $defaultScope
+            'example-universe2.com' // $universeDomain
+        );
+        $this->assertEquals('example-universe2.com', $creds2->getUniverseDomain($httpHandler));
+
+        // test error response returns default universe domain
+        $creds2 = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            $httpHandler = getHandler([
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                new Response(404),
+            ]), // $httpHandler
+        );
+        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain($httpHandler));
+    }
 }
