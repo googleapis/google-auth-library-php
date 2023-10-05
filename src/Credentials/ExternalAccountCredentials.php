@@ -163,7 +163,7 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
      */
     private function getImpersonatedAccessToken(string $stsToken, callable $httpHandler = null): array
     {
-        if (is_null($this->serviceAccountImpersonationUrl)) {
+        if (!isset($this->serviceAccountImpersonationUrl)) {
             throw new InvalidArgumentException(
                 'service_account_impersonation_url must be set in JSON credentials.'
             );
@@ -175,7 +175,7 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . $stsToken,
             ],
-            json_encode([
+            (string) json_encode([
                 'lifetime' => sprintf('%ss', OAuth2::DEFAULT_EXPIRY_SECONDS),
                 'scope' => $this->auth->getScope(),
             ]),
@@ -208,7 +208,7 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
     {
         $stsToken = $this->auth->fetchAuthToken($httpHandler);
 
-        if ($this->serviceAccountImpersonationUrl) {
+        if (isset($this->serviceAccountImpersonationUrl)) {
             return $this->getImpersonatedAccessToken($stsToken['access_token'], $httpHandler);
         }
 

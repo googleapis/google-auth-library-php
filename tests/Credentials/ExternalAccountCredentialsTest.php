@@ -23,7 +23,11 @@ use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\OAuth2;
 use InvalidArgumentException;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * @group credentials
@@ -31,6 +35,8 @@ use PHPUnit\Framework\TestCase;
  */
 class ExternalAccountCredentialsTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @dataProvider provideCredentialSourceFromCredentials
      */
@@ -185,5 +191,136 @@ class ExternalAccountCredentialsTest extends TestCase
                 'The regional_cred_verification_url field is required for aws1 credential source.'
             ],
         ];
+    }
+
+    public function testFetchAuthTokenFileCredentials()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test');
+        file_put_contents($tmpFile, 'abc');
+
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['file' => $tmpFile],
+        ];
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+
+        $httpHandler = function (RequestInterface $request) {
+            $this->assertEquals('token-url.com', (string) $request->getUri());
+            parse_str((string) $request->getBody(), $requestBody);
+            $this->assertEquals('abc', $requestBody['subject_token']);
+
+            $responseBody = $this->prophesize(StreamInterface::class);
+            $responseBody->__toString()->willReturn(json_encode(['access_token' => 'def', 'expires_in' => 1000]));
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($responseBody->reveal());
+            $response->hasHeader('Content-Type')->willReturn(false);
+
+            return $response->reveal();
+        };
+
+        $authToken = $creds->fetchAuthToken($httpHandler);
+        $this->assertArrayHasKey('access_token', $authToken);
+        $this->assertEquals('def', $authToken['access_token']);
+    }
+
+    public function testFetchAuthTokenUrlCredentials()
+    {
+        $url = 'sts-url.com';
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['url' => $url],
+        ];
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+
+        $requestCount = 0;
+        $httpHandler = function (RequestInterface $request) use (&$requestCount) {
+            switch (++$requestCount) {
+                case 1:
+                    $this->assertEquals('sts-url.com', (string) $request->getUri());
+                    $responseBody = 'abc';
+                    break;
+
+                case 2:
+                    $this->assertEquals('token-url.com', (string) $request->getUri());
+                    parse_str((string) $request->getBody(), $requestBody);
+                    $this->assertEquals('abc', $requestBody['subject_token']);
+                    $responseBody = '{"access_token": "def"}';
+                    break;
+            }
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn($responseBody);
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+            if ($requestCount === 2) {
+                $response->hasHeader('Content-Type')->willReturn(false);
+            }
+
+            return $response->reveal();
+        };
+
+        $authToken = $creds->fetchAuthToken($httpHandler);
+        $this->assertArrayHasKey('access_token', $authToken);
+        $this->assertEquals('def', $authToken['access_token']);
+    }
+
+    public function testFetchAuthTokenWithImpersonation()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test');
+        file_put_contents($tmpFile, 'abc');
+
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['file' => $tmpFile],
+            'service_account_impersonation_url' => 'service-account-impersonation-url.com',
+        ];
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+
+        $requestCount = 0;
+        $expiry = '2023-10-05T18:00:01Z';
+        $httpHandler = function (RequestInterface $request) use (&$requestCount, $expiry) {
+            switch (++$requestCount) {
+                case 1:
+                    $this->assertEquals('token-url.com', (string) $request->getUri());
+                    parse_str((string) $request->getBody(), $requestBody);
+                    $this->assertEquals('abc', $requestBody['subject_token']);
+                    $responseBody = '{"access_token": "def"}';
+                    break;
+                case 2:
+                    $this->assertEquals('service-account-impersonation-url.com', (string) $request->getUri());
+                    $responseBody = json_encode(['accessToken' => 'def', 'expireTime' => $expiry]);
+                    break;
+            }
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn($responseBody);
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+            if ($requestCount === 1) {
+                $response->hasHeader('Content-Type')->willReturn(false);
+            }
+
+            return $response->reveal();
+        };
+
+        $authToken = $creds->fetchAuthToken($httpHandler);
+        $this->assertArrayHasKey('access_token', $authToken);
+        $this->assertEquals('def', $authToken['access_token']);
+        $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
     }
 }
