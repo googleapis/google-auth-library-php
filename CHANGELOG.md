@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.31.0](https://github.com/googleapis/google-auth-library-php/compare/v1.30.0...v1.31.0) (2023-10-05)
+
+
+### Features
+
+* Add AWS credential source ([#474](https://github.com/googleapis/google-auth-library-php/issues/474)) ([e5bc897](https://github.com/googleapis/google-auth-library-php/commit/e5bc8979bf87159d9acab1ca8cb7cd7af008b2a6))
+
 ## [1.30.0](https://github.com/googleapis/google-auth-library-php/compare/v1.29.1...v1.30.0) (2023-09-07)
 
 
