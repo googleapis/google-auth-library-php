@@ -22,6 +22,7 @@ use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
@@ -30,13 +31,14 @@ use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 
-class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface
+class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface, GetQuotaProjectInterface
 {
     use UpdateMetadataTrait;
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
 
     private OAuth2 $auth;
+    private ?string $quotaProject;
     private ?string $serviceAccountImpersonationUrl;
 
     /**
@@ -86,6 +88,8 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
         if (array_key_exists('service_account_impersonation_url', $jsonKey)) {
             $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'];
         }
+
+        $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
 
         $this->auth = new OAuth2([
             'tokenCredentialUri' => $jsonKey['token_url'],
@@ -223,5 +227,15 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
     public function getLastReceivedToken()
     {
         return $this->auth->getLastReceivedToken();
+    }
+
+    /**
+     * Get the quota project used for this API request
+     *
+     * @return string|null
+     */
+    public function getQuotaProject()
+    {
+        return $this->quotaProject;
     }
 }

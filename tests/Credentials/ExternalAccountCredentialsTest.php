@@ -230,13 +230,12 @@ class ExternalAccountCredentialsTest extends TestCase
 
     public function testFetchAuthTokenUrlCredentials()
     {
-        $url = 'sts-url.com';
         $jsonCreds = [
             'type' => 'external_account',
             'token_url' => 'token-url.com',
             'audience' => '',
             'subject_token_type' => '',
-            'credential_source' => ['url' => $url],
+            'credential_source' => ['url' => 'sts-url.com'],
         ];
 
         $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
@@ -322,5 +321,20 @@ class ExternalAccountCredentialsTest extends TestCase
         $this->assertArrayHasKey('access_token', $authToken);
         $this->assertEquals('def', $authToken['access_token']);
         $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
+    }
+
+    public function testGetQuotaProject()
+    {
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['url' => 'sts-url.com'],
+            'quota_project_id' => 'test_quota_project',
+        ];
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+        $this->assertEquals('test_quota_project', $creds->getQuotaProject());
     }
 }
