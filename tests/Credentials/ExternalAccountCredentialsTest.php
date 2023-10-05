@@ -18,11 +18,16 @@
 namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\ExternalAccountCredentials;
+use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\OAuth2;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * @group credentials
@@ -30,11 +35,16 @@ use PHPUnit\Framework\TestCase;
  */
 class ExternalAccountCredentialsTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @dataProvider provideCredentialSourceFromCredentials
      */
-    public function testCredentialSourceFromCredentials(array $credentialSource, string $expectedSourceClass)
-    {
+    public function testCredentialSourceFromCredentials(
+        array $credentialSource,
+        string $expectedSourceClass,
+        array $expectedProperties = []
+    ) {
         $jsonCreds = [
             'type' => 'external_account',
             'token_url' => '',
@@ -56,18 +66,41 @@ class ExternalAccountCredentialsTest extends TestCase
         $subjectTokenFetcher = $oauthProp->getValue($oauth);
 
         $this->assertInstanceOf($expectedSourceClass, $subjectTokenFetcher);
+
+        $sourceReflection = new \ReflectionClass($subjectTokenFetcher);
+        foreach ($expectedProperties as $propName => $expectedPropValue) {
+            $sourceProp = $sourceReflection->getProperty($propName);
+            $sourceProp->setAccessible(true);
+            $this->assertEquals($expectedPropValue, $sourceProp->getValue($subjectTokenFetcher));
+        }
     }
 
     public function provideCredentialSourceFromCredentials()
     {
         return [
             [
-                ['file' => 'path/to/credsfile.json'],
-                FileSource::class
+                [
+                    'environment_id' => 'aws1',
+                    'regional_cred_verification_url' => 'abc',
+                    'region_url' => 'def',
+                    'url' => 'ghi',
+                    'imdsv2_session_token_url' => 'jkl'
+                ],
+                AwsNativeSource::class,
+                [
+                    'regionalCredVerificationUrl' => 'abc',
+                    'regionUrl' => 'def',
+                    'securityCredentialsUrl' => 'ghi',
+                    'imdsv2SessionTokenUrl' => 'jkl',
+                ],
             ],
             [
                 ['file' => 'path/to/credsfile.json', 'format' => ['type' => 'json', 'subject_token_field_name' => 'token']],
-                FileSource::class
+                FileSource::class,
+                [
+                    'format' => 'json',
+                    'subjectTokenFieldName' => 'token',
+                ]
             ],
             [
                 ['url' => 'https://test.com'],
@@ -78,8 +111,20 @@ class ExternalAccountCredentialsTest extends TestCase
                 UrlSource::class
             ],
             [
-                ['url' => 'https://test.com', 'format' => ['type' => 'json', 'subject_token_field_name' => 'token', 'headers' => []]],
-                UrlSource::class
+                [
+                    'url' => 'https://test.com',
+                    'format' => [
+                        'type' => 'json',
+                        'subject_token_field_name' => 'token',
+                    ],
+                    'headers' => ['foo' => 'bar'],
+                ],
+                UrlSource::class,
+                [
+                    'format' => 'json',
+                    'subjectTokenFieldName' => 'token',
+                    'headers' => ['foo' => 'bar'],
+                ]
             ],
         ];
     }
@@ -126,6 +171,170 @@ class ExternalAccountCredentialsTest extends TestCase
                 ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => []],
                 'Unable to determine credential source from json key'
             ],
+            [
+                ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => [
+                    'environment_id' => 'aws2',
+                ]],
+                'aws version "2" is not supported in the current build.'
+            ],
+            [
+                ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => [
+                    'environment_id' => 'aws1',
+                ]],
+                'The regional_cred_verification_url field is required for aws1 credential source.'
+            ],
+            [
+                ['type' => 'external_account', 'token_url' => '', 'audience' => '', 'subject_token_type' => '', 'credential_source' => [
+                    'environment_id' => 'aws1',
+                    'region_url' => '',
+                ]],
+                'The regional_cred_verification_url field is required for aws1 credential source.'
+            ],
         ];
+    }
+
+    public function testFetchAuthTokenFileCredentials()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test');
+        file_put_contents($tmpFile, 'abc');
+
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['file' => $tmpFile],
+        ];
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+
+        $httpHandler = function (RequestInterface $request) {
+            $this->assertEquals('token-url.com', (string) $request->getUri());
+            parse_str((string) $request->getBody(), $requestBody);
+            $this->assertEquals('abc', $requestBody['subject_token']);
+
+            $responseBody = $this->prophesize(StreamInterface::class);
+            $responseBody->__toString()->willReturn(json_encode(['access_token' => 'def', 'expires_in' => 1000]));
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($responseBody->reveal());
+            $response->hasHeader('Content-Type')->willReturn(false);
+
+            return $response->reveal();
+        };
+
+        $authToken = $creds->fetchAuthToken($httpHandler);
+        $this->assertArrayHasKey('access_token', $authToken);
+        $this->assertEquals('def', $authToken['access_token']);
+    }
+
+    public function testFetchAuthTokenUrlCredentials()
+    {
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['url' => 'sts-url.com'],
+        ];
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+
+        $requestCount = 0;
+        $httpHandler = function (RequestInterface $request) use (&$requestCount) {
+            switch (++$requestCount) {
+                case 1:
+                    $this->assertEquals('sts-url.com', (string) $request->getUri());
+                    $responseBody = 'abc';
+                    break;
+
+                case 2:
+                    $this->assertEquals('token-url.com', (string) $request->getUri());
+                    parse_str((string) $request->getBody(), $requestBody);
+                    $this->assertEquals('abc', $requestBody['subject_token']);
+                    $responseBody = '{"access_token": "def"}';
+                    break;
+            }
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn($responseBody);
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+            if ($requestCount === 2) {
+                $response->hasHeader('Content-Type')->willReturn(false);
+            }
+
+            return $response->reveal();
+        };
+
+        $authToken = $creds->fetchAuthToken($httpHandler);
+        $this->assertArrayHasKey('access_token', $authToken);
+        $this->assertEquals('def', $authToken['access_token']);
+    }
+
+    public function testFetchAuthTokenWithImpersonation()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test');
+        file_put_contents($tmpFile, 'abc');
+
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['file' => $tmpFile],
+            'service_account_impersonation_url' => 'service-account-impersonation-url.com',
+        ];
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+
+        $requestCount = 0;
+        $expiry = '2023-10-05T18:00:01Z';
+        $httpHandler = function (RequestInterface $request) use (&$requestCount, $expiry) {
+            switch (++$requestCount) {
+                case 1:
+                    $this->assertEquals('token-url.com', (string) $request->getUri());
+                    parse_str((string) $request->getBody(), $requestBody);
+                    $this->assertEquals('abc', $requestBody['subject_token']);
+                    $responseBody = '{"access_token": "def"}';
+                    break;
+                case 2:
+                    $this->assertEquals('service-account-impersonation-url.com', (string) $request->getUri());
+                    $responseBody = json_encode(['accessToken' => 'def', 'expireTime' => $expiry]);
+                    break;
+            }
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn($responseBody);
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+            if ($requestCount === 1) {
+                $response->hasHeader('Content-Type')->willReturn(false);
+            }
+
+            return $response->reveal();
+        };
+
+        $authToken = $creds->fetchAuthToken($httpHandler);
+        $this->assertArrayHasKey('access_token', $authToken);
+        $this->assertEquals('def', $authToken['access_token']);
+        $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
+    }
+
+    public function testGetQuotaProject()
+    {
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['url' => 'sts-url.com'],
+            'quota_project_id' => 'test_quota_project',
+        ];
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+        $this->assertEquals('test_quota_project', $creds->getQuotaProject());
     }
 }

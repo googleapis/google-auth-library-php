@@ -780,6 +780,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         return [
             ['file_credentials.json', CredentialSource\FileSource::class],
             ['url_credentials.json', CredentialSource\UrlSource::class],
+            ['aws_credentials.json', CredentialSource\AwsNativeSource::class],
         ];
     }
 }
