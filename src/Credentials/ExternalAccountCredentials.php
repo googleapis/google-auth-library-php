@@ -23,6 +23,7 @@ use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
@@ -31,15 +32,22 @@ use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 
-class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface, GetQuotaProjectInterface
+class ExternalAccountCredentials implements
+    FetchAuthTokenInterface,
+    UpdateMetadataInterface,
+    GetQuotaProjectInterface,
+    ProjectIdProviderInterface
 {
     use UpdateMetadataTrait;
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
+    private const CLOUD_RESOURCE_MANAGER_URL='https://cloudresourcemanager.googleapis.com/v1/projects/%s';
 
     private OAuth2 $auth;
     private ?string $quotaProject;
     private ?string $serviceAccountImpersonationUrl;
+    private ?string $workforcePoolUserProject;
+    private ?string $projectId;
 
     /**
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
@@ -90,6 +98,7 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
         }
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
+        $this->workforcePoolUserProject = $jsonKey['workforce_pool_user_project'] ?? null;
 
         $this->auth = new OAuth2([
             'tokenCredentialUri' => $jsonKey['token_url'],
@@ -237,5 +246,44 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
     public function getQuotaProject()
     {
         return $this->quotaProject;
+    }
+
+    /**
+     * Get the project ID.
+     *
+     * @param callable $httpHandler Callback which delivers psr7 request
+     * @return string|null
+     */
+    public function getProjectId(callable $httpHandler = null)
+    {
+        if (isset($this->projectId)) {
+            return $this->projectId;
+        }
+
+        $projectNumber = $this->getProjectNumber() ?: $this->workforcePoolUserProject;
+        if (!$projectNumber) {
+            return null;
+        }
+
+        if (is_null($httpHandler)) {
+            $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+        }
+
+        $url = sprintf(self::CLOUD_RESOURCE_MANAGER_URL, $projectNumber);
+        // This is not ideal, as it does not take advantage of caching.
+        // @TOOD: find a way to fix this.
+        $token = $this->fetchAuthToken($httpHandler);
+        $request = new Request('GET', $url, ['authorization' => 'Bearer ' . $token['access_token']]);
+        $response = $httpHandler($request);
+
+        $body = json_decode((string) $response->getBody(), true);
+        return $this->projectId = $body['projectId'];
+    }
+
+    private function getProjectNumber(): ?string
+    {
+        $parts = explode('/', $this->auth->getAudience());
+        $i = array_search('projects', $parts);
+        return $parts[$i + 1] ?? null;
     }
 }
