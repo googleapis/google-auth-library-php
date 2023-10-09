@@ -27,18 +27,21 @@ use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
+use Google\Auth\AuthTokenCache;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 
-class ExternalAccountCredentials implements
+class ExternalAccountCredentials extends AuthTokenCache implements
     FetchAuthTokenInterface,
     UpdateMetadataInterface,
     GetQuotaProjectInterface,
     ProjectIdProviderInterface
 {
-    use UpdateMetadataTrait;
+    use UpdateMetadataTrait {
+        updateMetadata as private traitUpdateMetadata;
+    }
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
     private const CLOUD_RESOURCE_MANAGER_URL='https://cloudresourcemanager.googleapis.com/v1/projects/%s';
@@ -56,7 +59,9 @@ class ExternalAccountCredentials implements
      */
     public function __construct(
         $scope,
-        array $jsonKey
+        array $jsonKey,
+        array $cacheConfig = null,
+        CacheItemPoolInterface $cache = null
     ) {
         if (!array_key_exists('type', $jsonKey)) {
             throw new InvalidArgumentException('json key is missing the type field');
@@ -99,6 +104,11 @@ class ExternalAccountCredentials implements
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
         $this->workforcePoolUserProject = $jsonKey['workforce_pool_user_project'] ?? null;
+        $this->cache = $cache;
+        $this->cacheConfig = array_merge([
+            'lifetime' => 1500,
+            'prefix' => '',
+        ], (array) $cacheConfig);
 
         $this->auth = new OAuth2([
             'tokenCredentialUri' => $jsonKey['token_url'],
@@ -219,14 +229,59 @@ class ExternalAccountCredentials implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
+        if ($cached = $this->fetchAuthTokenFromCache()) {
+            return $cached;
+        }
+
         $stsToken = $this->auth->fetchAuthToken($httpHandler);
 
         if (isset($this->serviceAccountImpersonationUrl)) {
             return $this->getImpersonatedAccessToken($stsToken['access_token'], $httpHandler);
         }
 
+        $this->saveAuthTokenInCache($stsToken);
+
         return $stsToken;
     }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        callable $httpHandler = null
+    ) {
+        $cached = $this->fetchAuthTokenFromCache($authUri);
+        if ($cached) {
+            // Set the access token in the `Authorization` metadata header so
+            // the downstream call to updateMetadata know they don't need to
+            // fetch another token.
+            if (isset($cached['access_token'])) {
+                $metadata[self::AUTH_METADATA_KEY] = [
+                    'Bearer ' . $cached['access_token']
+                ];
+            }
+        }
+
+        $newMetadata = $this->traitUpdateMetadata(
+            $metadata,
+            $authUri,
+            $httpHandler
+        );
+
+        if (!$cached && $token = $this->getLastReceivedToken()) {
+            $this->saveAuthTokenInCache($token, $authUri);
+        }
+
+        return $newMetadata;
+    }
+
 
     public function getCacheKey()
     {
@@ -270,8 +325,8 @@ class ExternalAccountCredentials implements
         }
 
         $url = sprintf(self::CLOUD_RESOURCE_MANAGER_URL, $projectNumber);
-        // This is not ideal, as it does not take advantage of caching.
-        // @TOOD: find a way to fix this.
+
+        // This takes advantate of caching through the AuthTokenCache trait.
         $token = $this->fetchAuthToken($httpHandler);
         $request = new Request('GET', $url, ['authorization' => 'Bearer ' . $token['access_token']]);
         $response = $httpHandler($request);

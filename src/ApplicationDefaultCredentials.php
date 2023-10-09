@@ -182,7 +182,9 @@ class ApplicationDefaultCredentials
             $creds = CredentialsLoader::makeCredentials(
                 $scope,
                 $jsonKey,
-                $defaultScope
+                $defaultScope,
+                $cacheConfig,
+                $cache
             );
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($anyScope);

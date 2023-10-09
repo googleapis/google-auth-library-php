@@ -615,4 +615,76 @@ class FetchAuthTokenCacheTest extends BaseTest
 
         $this->assertSame($mockFetcher, $fetcher->getFetcher());
     }
+
+    public function testCacheIsOnlyCalledOnceWhenWrappedInMultipleFetchers()
+    {
+        $prefix = 'test_prefix_';
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $token];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($prefix . $cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+        $this->mockFetcher->fetchAuthToken()
+            ->shouldNotBeCalled();
+        $this->mockFetcher->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+
+        // Run the test
+        $cachedFetcher = new FetchAuthTokenCache(
+            $this->mockFetcher->reveal(),
+            ['prefix' => $prefix],
+            $this->mockCache->reveal()
+        );
+        // Verify the cache passed to the wrapping Fetcher is never called
+        $mockCache2 = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $mockCache2->getItem(Argument::any())
+            ->shouldNotBeCalled();
+        $cachedFetcher2 = new FetchAuthTokenCache(
+            $cachedFetcher,
+            ['prefix' => $prefix],
+            $mockCache2->reveal()
+        );
+        $accessToken = $cachedFetcher2->fetchAuthToken();
+        $this->assertEquals($accessToken, ['access_token' => $token]);
+    }
+
+    public function testCacheIsCalledWhenWrappedInFetcherWithoutCache()
+    {
+        $prefix = 'test_prefix_';
+        $cacheKey = 'myKey';
+        $token = '2/abcdef1234567890';
+        $cachedValue = ['access_token' => $token];
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $this->mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($cachedValue);
+        $this->mockCache->getItem($prefix . $cacheKey)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+
+        // Create a Fetcher without a cache
+        $authTokenCache = $this->prophesize('Google\Auth\Credentials\ExternalAccountCredentials');
+        $authTokenCache->getCacheKey()
+            ->shouldBeCalled()
+            ->willReturn($cacheKey);
+
+        // Verify the cache passed to the wrapping Fetcher is called instead
+        $cachedFetcher = new FetchAuthTokenCache(
+            $authTokenCache->reveal(),
+            ['prefix' => $prefix],
+            $this->mockCache->reveal()
+        );
+        $accessToken = $cachedFetcher->fetchAuthToken();
+        $this->assertEquals($accessToken, ['access_token' => $token]);
+    }
 }
