@@ -17,21 +17,22 @@
 
 namespace Google\Auth\Credentials;
 
+use Google\Auth\AuthTokenCache;
 use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\GetQuotaProjectInterface;
-use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
-use Google\Auth\AuthTokenCache;
+use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
+use Psr\Cache\CacheItemPoolInterface;
 
 class ExternalAccountCredentials extends AuthTokenCache implements
     FetchAuthTokenInterface,
@@ -56,6 +57,8 @@ class ExternalAccountCredentials extends AuthTokenCache implements
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
      *                                 or as a space-delimited string.
      * @param array<mixed>    $jsonKey JSON credentials as an associative array.
+     * @param array<mixed> $cacheConfig Configuration for the cache
+     * @param CacheItemPoolInterface $cache
      */
     public function __construct(
         $scope,

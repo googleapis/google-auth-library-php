@@ -259,7 +259,7 @@ class FetchAuthTokenCache extends AuthTokenCache implements
         parent::saveAuthTokenInCache($authToken, $authUri);
     }
 
-    protected function getCacheKeyFromAuthUri($authUri = null)
+    protected function getCacheKeyFromAuthUri(string $authUri = null): string
     {
         return $authUri
             ? $this->getFullCacheKey($authUri)

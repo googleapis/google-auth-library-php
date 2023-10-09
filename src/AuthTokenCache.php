@@ -2,8 +2,6 @@
 
 namespace Google\Auth;
 
-use Psr\Cache\CacheItemPoolInterface;
-
 /**
  * @internal
  */
@@ -70,10 +68,12 @@ abstract class AuthTokenCache
         return $this->cache !== null;
     }
 
-    protected function getCacheKeyFromAuthUri($authUri = null)
+    protected function getCacheKeyFromAuthUri(string $authUri = null): string
     {
         return $authUri
             ? $this->getFullCacheKey($authUri)
             : $this->getCacheKey();
     }
+
+    abstract protected function getCacheKey();
 }
