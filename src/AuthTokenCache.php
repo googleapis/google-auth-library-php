@@ -75,5 +75,8 @@ abstract class AuthTokenCache
             : $this->getCacheKey();
     }
 
+    /**
+     * @return string
+     */
     abstract protected function getCacheKey();
 }
