@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.32.0](https://github.com/googleapis/google-auth-library-php/compare/v1.31.0...v1.32.0) (2023-10-10)
+
+
+### Features
+
+* Respect cache control for access token certs ([#479](https://github.com/googleapis/google-auth-library-php/issues/479)) ([6d426b5](https://github.com/googleapis/google-auth-library-php/commit/6d426b5cb9462845d2c2d7d506318c9bee613528))
+
 ## [1.31.0](https://github.com/googleapis/google-auth-library-php/compare/v1.30.0...v1.31.0) (2023-10-05)
 
 
