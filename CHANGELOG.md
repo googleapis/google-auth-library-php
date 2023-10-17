@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.32.1](https://github.com/googleapis/google-auth-library-php/compare/v1.32.0...v1.32.1) (2023-10-17)
+
+
+### Bug Fixes
+
+* Allowed_algs not properly set for string value ([#489](https://github.com/googleapis/google-auth-library-php/issues/489)) ([0042b52](https://github.com/googleapis/google-auth-library-php/commit/0042b522ebbcffc6d6623e322d162d963eada3b5))
+
 ## [1.32.0](https://github.com/googleapis/google-auth-library-php/compare/v1.31.0...v1.32.0) (2023-10-10)
 
 
