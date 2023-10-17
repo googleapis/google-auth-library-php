@@ -1723,7 +1723,7 @@ class OAuth2 implements FetchAuthTokenInterface
 
         $allowedAlg = null;
         if (is_string($allowedAlgs)) {
-            $allowedAlg = $allowedAlg;
+            $allowedAlg = $allowedAlgs;
         } elseif (is_array($allowedAlgs)) {
             if (count($allowedAlgs) > 1) {
                 throw new \InvalidArgumentException(
