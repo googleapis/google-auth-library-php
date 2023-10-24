@@ -145,9 +145,12 @@ class FetchAuthTokenCache implements
             );
         }
 
-        // Pass the access token from cache to GCECredentials for signing a blob.
-        // This saves a call to the metadata server when a cached token exists.
-        if ($this->fetcher instanceof Credentials\GCECredentials) {
+        // Pass the access token from cache for credentials that sign blobs
+        // using the IAM API. This saves a call to fetch an access token when a
+        // cached token exists.
+        if ($this->fetcher instanceof Credentials\GCECredentials
+            || $this->fetcher instanceof Credentials\ImpersonatedServiceAccountCredentials
+        ) {
             $cached = $this->fetchAuthTokenFromCache();
             $accessToken = $cached['access_token'] ?? null;
             return $this->fetcher->signBlob($stringToSign, $forceOpenSsl, $accessToken);
@@ -186,6 +189,15 @@ class FetchAuthTokenCache implements
                 'Credentials fetcher does not implement ' .
                 'Google\Auth\ProvidesProjectIdInterface'
             );
+        }
+
+        // Pass the access token from cache for credentials that reqiore an
+        // access token to fetch the project ID. This saves a call to fetch am
+        // access token when a cached token exists.
+        if ($this->fetcher instanceof Credentials\ExternalAccountCredentials) {
+            $cached = $this->fetchAuthTokenFromCache();
+            $accessToken = $cached['access_token'] ?? null;
+            return $this->fetcher->getProjectId($httpHandler, $accessToken);
         }
 
         return $this->fetcher->getProjectId($httpHandler);

@@ -23,10 +23,10 @@ use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\GetQuotaProjectInterface;
-use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
+use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
@@ -252,9 +252,12 @@ class ExternalAccountCredentials implements
      * Get the project ID.
      *
      * @param callable $httpHandler Callback which delivers psr7 request
+     * @param string $accessToken The access token to use to sign the blob. If
+     *        provided, saves a call to the metadata server for a new access
+     *        token. **Defaults to** `null`.
      * @return string|null
      */
-    public function getProjectId(callable $httpHandler = null)
+    public function getProjectId(callable $httpHandler = null, string $accessToken = null)
     {
         if (isset($this->projectId)) {
             return $this->projectId;
@@ -270,10 +273,11 @@ class ExternalAccountCredentials implements
         }
 
         $url = sprintf(self::CLOUD_RESOURCE_MANAGER_URL, $projectNumber);
-        // This is not ideal, as it does not take advantage of caching.
-        // @TOOD: find a way to fix this.
-        $token = $this->fetchAuthToken($httpHandler);
-        $request = new Request('GET', $url, ['authorization' => 'Bearer ' . $token['access_token']]);
+
+        if (is_null($accessToken)) {
+            $accessToken = $this->fetchAuthToken($httpHandler)['access_token'];
+        }
+        $request = new Request('GET', $url, ['authorization' => 'Bearer ' . $accessToken]);
         $response = $httpHandler($request);
 
         $body = json_decode((string) $response->getBody(), true);

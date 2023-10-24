@@ -21,9 +21,11 @@ use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
+use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\OAuth2;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -36,6 +38,12 @@ use Psr\Http\Message\StreamInterface;
 class ExternalAccountCredentialsTest extends TestCase
 {
     use ProphecyTrait;
+    private $baseCreds = [
+        'type' => 'external_account',
+        'token_url' => 'token-url.com',
+        'audience' => '',
+        'subject_token_type' => '',
+    ];
 
     /**
      * @dataProvider provideCredentialSourceFromCredentials
@@ -45,11 +53,7 @@ class ExternalAccountCredentialsTest extends TestCase
         string $expectedSourceClass,
         array $expectedProperties = []
     ) {
-        $jsonCreds = [
-            'type' => 'external_account',
-            'token_url' => '',
-            'audience' => '',
-            'subject_token_type' => '',
+        $jsonCreds = $this->baseCreds + [
             'credential_source' => $credentialSource,
         ];
 
@@ -198,11 +202,7 @@ class ExternalAccountCredentialsTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmpFile, 'abc');
 
-        $jsonCreds = [
-            'type' => 'external_account',
-            'token_url' => 'token-url.com',
-            'audience' => '',
-            'subject_token_type' => '',
+        $jsonCreds = $this->baseCreds + [
             'credential_source' => ['file' => $tmpFile],
         ];
 
@@ -230,11 +230,7 @@ class ExternalAccountCredentialsTest extends TestCase
 
     public function testFetchAuthTokenUrlCredentials()
     {
-        $jsonCreds = [
-            'type' => 'external_account',
-            'token_url' => 'token-url.com',
-            'audience' => '',
-            'subject_token_type' => '',
+        $jsonCreds = $this->baseCreds + [
             'credential_source' => ['url' => 'sts-url.com'],
         ];
 
@@ -278,11 +274,7 @@ class ExternalAccountCredentialsTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmpFile, 'abc');
 
-        $jsonCreds = [
-            'type' => 'external_account',
-            'token_url' => 'token-url.com',
-            'audience' => '',
-            'subject_token_type' => '',
+        $jsonCreds = $this->baseCreds + [
             'credential_source' => ['file' => $tmpFile],
             'service_account_impersonation_url' => 'service-account-impersonation-url.com',
         ];
@@ -325,16 +317,133 @@ class ExternalAccountCredentialsTest extends TestCase
 
     public function testGetQuotaProject()
     {
-        $jsonCreds = [
-            'type' => 'external_account',
-            'token_url' => 'token-url.com',
-            'audience' => '',
-            'subject_token_type' => '',
+        $jsonCreds = $this->baseCreds + [
             'credential_source' => ['url' => 'sts-url.com'],
             'quota_project_id' => 'test_quota_project',
         ];
 
         $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
         $this->assertEquals('test_quota_project', $creds->getQuotaProject());
+    }
+
+    /**
+     * @dataProvider provideGetProjectId
+     */
+    public function testGetProjectId(array $jsonCreds, string $expectedProjectNumber)
+    {
+        $requestCount = 0;
+        $httpHandler = function (RequestInterface $request) use (&$requestCount, $expectedProjectNumber) {
+            switch (++$requestCount) {
+                case 1:
+                    $this->assertEquals('sts-url.com', (string) $request->getUri());
+                    $responseBody = 'abc';
+                    break;
+                case 2:
+                    $this->assertEquals('token-url.com', (string) $request->getUri());
+                    $responseBody = '{"access_token": "def"}';
+                    break;
+                case 3:
+                    $this->assertEquals(
+                        'https://cloudresourcemanager.googleapis.com/v1/projects/' . $expectedProjectNumber,
+                        (string) $request->getUri()
+                    );
+                    $responseBody = json_encode(['projectId' => 'test-project-id']);
+                    break;
+            }
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn($responseBody);
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+            $response->hasHeader('Content-Type')->willReturn(false);
+
+            return $response->reveal();
+        };
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+        $this->assertEquals('test-project-id', $creds->getProjectId($httpHandler));
+    }
+
+    public function provideGetProjectId()
+    {
+        return [
+            // from audience
+            [
+                [
+                    'audience' => 'https://foo.com/projects/1234/locations/global/workloadIdentityPools/foo/providers/bar',
+                ] + $this->baseCreds + [
+                    'credential_source' => ['url' => 'sts-url.com'],
+                ],
+                '1234'
+            ],
+            // from workforce_pool_user_project
+            [
+                $this->baseCreds + [
+                    'credential_source' => ['url' => 'sts-url.com'],
+                    'workforce_pool_user_project' => '4567',
+                ],
+                '4567'
+            ],
+            // when both are available, use the audience
+            [
+                [
+                    'audience' => 'https://foo.com/projects/1234/locations/global/workloadIdentityPools/foo/providers/bar',
+                ] + $this->baseCreds + [
+                    'credential_source' => ['url' => 'sts-url.com'],
+                    'workforce_pool_user_project' => '4567',
+                ],
+                '1234'
+            ],
+        ];
+    }
+
+    public function testCacheIsCalledForGetProjectIdWithCache()
+    {
+        $jsonCreds = [
+            'audience' => 'https://foo.com/projects/1234/locations/global/workloadIdentityPools/foo/providers/bar',
+        ] + $this->baseCreds + [
+            'credential_source' => ['url' => 'sts-url.com'],
+        ];
+
+        $httpHandler = function (RequestInterface $request) {
+            $this->assertEquals(
+                'https://cloudresourcemanager.googleapis.com/v1/projects/1234',
+                (string) $request->getUri()
+            );
+            $this->assertEquals('Bearer some-token', $request->getHeaderLine('authorization'));
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn(json_encode(['projectId' => 'test-project-id']));
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+            $response->hasHeader('Content-Type')->willReturn(false);
+
+            return $response->reveal();
+        };
+
+        $mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(true);
+        $mockCacheItem->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(['access_token' => 'some-token']);
+        $mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $mockCache->getItem(Argument::any())
+            ->shouldBeCalledTimes(1)
+            ->willReturn($mockCacheItem->reveal());
+
+        // Run the test
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+
+        // Verify the cache passed to the wrapping Fetcher is never called
+        $cachedFetcher = new FetchAuthTokenCache(
+            $creds,
+            [],
+            $mockCache->reveal()
+        );
+
+        $this->assertEquals('test-project-id', $cachedFetcher->getProjectId($httpHandler));
     }
 }
