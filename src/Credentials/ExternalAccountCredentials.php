@@ -17,32 +17,28 @@
 
 namespace Google\Auth\Credentials;
 
-use Google\Auth\AuthTokenCache;
 use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
-use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
-use Psr\Cache\CacheItemPoolInterface;
 
-class ExternalAccountCredentials extends AuthTokenCache implements
+class ExternalAccountCredentials implements
     FetchAuthTokenInterface,
     UpdateMetadataInterface,
     GetQuotaProjectInterface,
     ProjectIdProviderInterface
 {
-    use UpdateMetadataTrait {
-        updateMetadata as private traitUpdateMetadata;
-    }
+    use UpdateMetadataTrait;
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
     private const CLOUD_RESOURCE_MANAGER_URL='https://cloudresourcemanager.googleapis.com/v1/projects/%s';
@@ -57,14 +53,10 @@ class ExternalAccountCredentials extends AuthTokenCache implements
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
      *                                 or as a space-delimited string.
      * @param array<mixed>    $jsonKey JSON credentials as an associative array.
-     * @param array<mixed> $cacheConfig Configuration for the cache
-     * @param CacheItemPoolInterface $cache
      */
     public function __construct(
         $scope,
-        array $jsonKey,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        array $jsonKey
     ) {
         if (!array_key_exists('type', $jsonKey)) {
             throw new InvalidArgumentException('json key is missing the type field');
@@ -107,11 +99,6 @@ class ExternalAccountCredentials extends AuthTokenCache implements
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
         $this->workforcePoolUserProject = $jsonKey['workforce_pool_user_project'] ?? null;
-        $this->cache = $cache;
-        $this->cacheConfig = array_merge([
-            'lifetime' => 1500,
-            'prefix' => '',
-        ], (array) $cacheConfig);
 
         $this->auth = new OAuth2([
             'tokenCredentialUri' => $jsonKey['token_url'],
@@ -232,59 +219,14 @@ class ExternalAccountCredentials extends AuthTokenCache implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        if ($cached = $this->fetchAuthTokenFromCache()) {
-            return $cached;
-        }
-
         $stsToken = $this->auth->fetchAuthToken($httpHandler);
 
         if (isset($this->serviceAccountImpersonationUrl)) {
             return $this->getImpersonatedAccessToken($stsToken['access_token'], $httpHandler);
         }
 
-        $this->saveAuthTokenInCache($stsToken);
-
         return $stsToken;
     }
-
-    /**
-     * Updates metadata with the authorization token.
-     *
-     * @param array<mixed> $metadata metadata hashmap
-     * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @return array<mixed> updated metadata hashmap
-     */
-    public function updateMetadata(
-        $metadata,
-        $authUri = null,
-        callable $httpHandler = null
-    ) {
-        $cached = $this->fetchAuthTokenFromCache($authUri);
-        if ($cached) {
-            // Set the access token in the `Authorization` metadata header so
-            // the downstream call to updateMetadata know they don't need to
-            // fetch another token.
-            if (isset($cached['access_token'])) {
-                $metadata[self::AUTH_METADATA_KEY] = [
-                    'Bearer ' . $cached['access_token']
-                ];
-            }
-        }
-
-        $newMetadata = $this->traitUpdateMetadata(
-            $metadata,
-            $authUri,
-            $httpHandler
-        );
-
-        if (!$cached && $token = $this->getLastReceivedToken()) {
-            $this->saveAuthTokenInCache($token, $authUri);
-        }
-
-        return $newMetadata;
-    }
-
 
     public function getCacheKey()
     {
@@ -328,8 +270,8 @@ class ExternalAccountCredentials extends AuthTokenCache implements
         }
 
         $url = sprintf(self::CLOUD_RESOURCE_MANAGER_URL, $projectNumber);
-
-        // This takes advantate of caching through the AuthTokenCache trait.
+        // This is not ideal, as it does not take advantage of caching.
+        // @TOOD: find a way to fix this.
         $token = $this->fetchAuthToken($httpHandler);
         $request = new Request('GET', $url, ['authorization' => 'Bearer ' . $token['access_token']]);
         $response = $httpHandler($request);

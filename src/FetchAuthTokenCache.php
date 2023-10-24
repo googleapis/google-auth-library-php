@@ -23,17 +23,24 @@ use Psr\Cache\CacheItemPoolInterface;
  * A class to implement caching for any object implementing
  * FetchAuthTokenInterface
  */
-class FetchAuthTokenCache extends AuthTokenCache implements
+class FetchAuthTokenCache implements
     FetchAuthTokenInterface,
     GetQuotaProjectInterface,
     SignBlobInterface,
     ProjectIdProviderInterface,
     UpdateMetadataInterface
 {
+    use CacheTrait;
+
     /**
      * @var FetchAuthTokenInterface
      */
     private $fetcher;
+
+    /**
+     * @var int
+     */
+    private $eagerRefreshThresholdSeconds = 10;
 
     /**
      * @param FetchAuthTokenInterface $fetcher A credentials fetcher
@@ -235,13 +242,34 @@ class FetchAuthTokenCache extends AuthTokenCache implements
      * @param string|null $authUri
      * @return array<mixed>|null
      */
-    protected function fetchAuthTokenFromCache($authUri = null)
+    private function fetchAuthTokenFromCache($authUri = null)
     {
-        if ($this->fetcher instanceof AuthTokenCache && $this->fetcher->hasCache()) {
-            return $this->fetcher->fetchAuthTokenFromCache($authUri);
+        // Use the cached value if its available.
+        //
+        // TODO: correct caching; update the call to setCachedValue to set the expiry
+        // to the value returned with the auth token.
+        //
+        // TODO: correct caching; enable the cache to be cleared.
+
+        // if $authUri is set, use it as the cache key
+        $cacheKey = $authUri
+            ? $this->getFullCacheKey($authUri)
+            : $this->fetcher->getCacheKey();
+
+        $cached = $this->getCachedValue($cacheKey);
+        if (is_array($cached)) {
+            if (empty($cached['expires_at'])) {
+                // If there is no expiration data, assume token is not expired.
+                // (for JwtAccess and ID tokens)
+                return $cached;
+            }
+            if ((time() + $this->eagerRefreshThresholdSeconds) < $cached['expires_at']) {
+                // access token is not expired
+                return $cached;
+            }
         }
 
-        return parent::fetchAuthTokenFromCache($authUri);
+        return null;
     }
 
     /**
@@ -249,20 +277,16 @@ class FetchAuthTokenCache extends AuthTokenCache implements
      * @param string|null  $authUri
      * @return void
      */
-    protected function saveAuthTokenInCache($authToken, $authUri = null)
+    private function saveAuthTokenInCache($authToken, $authUri = null)
     {
-        if ($this->fetcher instanceof AuthTokenCache && $this->fetcher->hasCache()) {
-            $this->fetcher->saveAuthTokenInCache($authToken, $authUri);
-            return;
+        if (isset($authToken['access_token']) ||
+            isset($authToken['id_token'])) {
+            // if $authUri is set, use it as the cache key
+            $cacheKey = $authUri
+                ? $this->getFullCacheKey($authUri)
+                : $this->fetcher->getCacheKey();
+
+            $this->setCachedValue($cacheKey, $authToken);
         }
-
-        parent::saveAuthTokenInCache($authToken, $authUri);
-    }
-
-    protected function getCacheKeyFromAuthUri(string $authUri = null): string
-    {
-        return $authUri
-            ? $this->getFullCacheKey($authUri)
-            : $this->fetcher->getCacheKey();
     }
 }

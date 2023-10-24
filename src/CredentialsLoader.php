@@ -22,7 +22,6 @@ use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\InsecureCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
-use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
 use UnexpectedValueException;
 
@@ -125,17 +124,13 @@ abstract class CredentialsLoader implements
      * @param string|string[] $defaultScope The default scope to use if no
      *   user-defined scopes exist, expressed either as an Array or as a
      *   space-delimited string.
-     * @param array<mixed> $cacheConfig Configuration for the cache
-     * @param CacheItemPoolInterface $cache An instance of a PSR-6 compatible cache
      *
      * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials
      */
     public static function makeCredentials(
         $scope,
         array $jsonKey,
-        $defaultScope = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        $defaultScope = null
     ) {
         if (!array_key_exists('type', $jsonKey)) {
             throw new \InvalidArgumentException('json key is missing the type field');
@@ -158,7 +153,7 @@ abstract class CredentialsLoader implements
 
         if ($jsonKey['type'] == 'external_account') {
             $anyScope = $scope ?: $defaultScope;
-            return new ExternalAccountCredentials($anyScope, $jsonKey, $cacheConfig, $cache);
+            return new ExternalAccountCredentials($anyScope, $jsonKey);
         }
 
         throw new \InvalidArgumentException('invalid value in the type field');

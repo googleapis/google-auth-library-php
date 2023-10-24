@@ -29,12 +29,12 @@ trait CacheTrait
     /**
      * @var array<mixed>
      */
-    protected $cacheConfig;
+    private $cacheConfig;
 
     /**
      * @var ?CacheItemPoolInterface
      */
-    protected $cache;
+    private $cache;
 
     /**
      * Gets the cached value if it is present in the cache when that is
@@ -44,7 +44,7 @@ trait CacheTrait
      *
      * @return mixed
      */
-    protected function getCachedValue($k)
+    private function getCachedValue($k)
     {
         if (is_null($this->cache)) {
             return null;
@@ -68,7 +68,7 @@ trait CacheTrait
      * @param mixed $v
      * @return mixed
      */
-    protected function setCachedValue($k, $v)
+    private function setCachedValue($k, $v)
     {
         if (is_null($this->cache)) {
             return null;
@@ -89,7 +89,7 @@ trait CacheTrait
      * @param null|string $key
      * @return null|string
      */
-    protected function getFullCacheKey($key)
+    private function getFullCacheKey($key)
     {
         if (is_null($key)) {
             return null;
