@@ -191,8 +191,8 @@ class FetchAuthTokenCache implements
             );
         }
 
-        // Pass the access token from cache for credentials that reqiore an
-        // access token to fetch the project ID. This saves a call to fetch am
+        // Pass the access token from cache for credentials that require an
+        // access token to fetch the project ID. This saves a call to fetch an
         // access token when a cached token exists.
         if ($this->fetcher instanceof Credentials\ExternalAccountCredentials) {
             $cached = $this->fetchAuthTokenFromCache();
