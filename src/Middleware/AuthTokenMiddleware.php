@@ -42,7 +42,10 @@ class AuthTokenMiddleware
     private $httpHandler;
 
     /**
-     * @var FetchAuthTokenInterface
+     * It must be an implementation of FetchAuthTokenInterface.
+     * It may also implement UpdateMetadataInterface allowing direct
+     * retrieval of auth related headers
+     * @var FetchAuthTokenInterface|UpdateMetadataInterface
      */
     private $fetcher;
 
@@ -123,7 +126,7 @@ class AuthTokenMiddleware
     /**
      * Fetch auth headers.
      *
-     * @return array
+     * @return array<string, array|string>
      */
     private function fetchAuthHeaders()
     {
