@@ -358,6 +358,12 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         if ($this->useJwtAccessWithScope) {
             return true;
         }
+
+        // If the universe domain is outside the GDU, use JwtAccess for access tokens
+        if ($this->getUniverseDomain() !== self::DEFAULT_UNIVERSE_DOMAIN) {
+            return true;
+        }
+
         return is_null($this->auth->getScope());
     }
 }
