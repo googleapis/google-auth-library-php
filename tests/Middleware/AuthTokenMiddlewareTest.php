@@ -20,6 +20,7 @@ namespace Google\Auth\Tests\Middleware;
 use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\Tests\BaseTest;
+use Google\Auth\UpdateMetadataInterface;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
@@ -279,6 +280,50 @@ class AuthTokenMiddlewareTest extends BaseTest
         $callable = $middleware($mock);
         $callable($this->mockRequest->reveal(), ['auth' => 'google_auth']);
         $this->assertTrue(MiddlewareCallback::$called);
+    }
+
+    public function testAddAuthHeadersFromUpdateMetadata()
+    {
+        $authResult = [
+            'authorization' => 'Bearer 1/abcdef1234567890',
+        ];
+
+        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+        $mockFetcher->willImplement(UpdateMetadataInterface::class);
+        $mockFetcher->updateMetadata(Argument::cetera())
+            ->shouldBeCalledTimes(1)
+            ->willReturn($authResult);
+        $mockFetcher->getLastReceivedToken()
+            ->willReturn(['access_token' => '1/abcdef1234567890']);
+        $this->mockRequest->withHeader('authorization', $authResult['authorization'])
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
+
+        $this->runTestCase($mockFetcher->reveal(), true);
+    }
+
+    public function testOverlappingAddAuthHeadersFromUpdateMetadata()
+    {
+        $authHeaders = [
+            'authorization' => 'Bearer 1/abcdef1234567890',
+            'x-goog-api-client' => 'extra-value'
+        ];
+
+        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+        $mockFetcher->willImplement(UpdateMetadataInterface::class);
+        $mockFetcher->updateMetadata(Argument::cetera())
+            ->shouldBeCalledTimes(1)
+            ->willReturn($authHeaders);
+        $mockFetcher->getLastReceivedToken()
+            ->willReturn(['access_token' => '1/abcdef1234567890']);
+        $this->mockRequest->withHeader('authorization', $authHeaders['authorization'])
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
+        $this->mockRequest->withAddedHeader('x-goog-api-client', $authHeaders['x-goog-api-client'])
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockRequest->reveal());
+
+        $this->runTestCase($mockFetcher->reveal(), true);
     }
 
     private function runTestCase($fetcher, bool $isGoogleAuth)
