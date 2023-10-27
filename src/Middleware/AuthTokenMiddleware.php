@@ -126,7 +126,7 @@ class AuthTokenMiddleware
     /**
      * Fetch auth headers.
      *
-     * @return array<string, array|string>
+     * @return array<string, string[]|string>
      */
     private function fetchAuthHeaders()
     {
