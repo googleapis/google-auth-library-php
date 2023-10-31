@@ -59,14 +59,11 @@ class FetchAuthTokenTest extends BaseTest
             $mockFetcher->updateMetadata(Argument::cetera())
                 ->shouldBeCalledTimes(1)
                 ->willReturn(['authorization' => 'Bearer xyz']);
-            $mockFetcher->getLastReceivedToken()
-                ->shouldBeCalledTimes(1)
-                ->will($httpHandler);
-        } else {
-            $mockFetcher->fetchAuthToken(Argument::any())
+        }
+
+        $mockFetcher->fetchAuthToken(Argument::any())
             ->shouldBeCalledTimes(1)
             ->will($httpHandler);
-        }
         $mockFetcher->getCacheKey()->willReturn('');
 
         $tokenCallbackCalled = false;

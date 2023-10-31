@@ -21,6 +21,7 @@ use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\UpdateMetadataInterface;
+use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -104,11 +105,18 @@ class AuthTokenMiddleware
                 return $handler($request, $options);
             }
 
-            foreach ($this->fetchAuthHeaders() as $key => $value) {
-                if ($key == 'authorization') {
-                    $request = $request->withHeader($key, $value);
-                } else {
-                    $request = $request->withAddedHeader($key, $value);
+            if (!$this->fetcher instanceof UpdateMetadataInterface ||
+                ($this->fetcher instanceof FetchAuthTokenCache && !$this->fetcher->getFetcher() instanceof UpdateMetadataInterface)
+            ) {
+                $request =$request->withHeader('authorization', 'Bearer ' . $this->fetchToken());
+            } else {
+                $headers = $this->fetcher->updateMetadata($request->getHeaders(), null, $this->httpHandler);
+                $request = Utils::modifyRequest($request, ['set_headers' => $headers]);
+                if ($this->tokenCallback) {
+                    $auth_tokens = $this->fetcher->fetchAuthToken($this->httpHandler);
+                    if (array_key_exists('access_token', $auth_tokens)) {
+                        call_user_func($this->tokenCallback, $this->fetcher->getCacheKey(), $auth_tokens['access_token']);
+                    }
                 }
             }
 
@@ -124,54 +132,32 @@ class AuthTokenMiddleware
     }
 
     /**
-     * Fetch auth headers.
+     * Call fetcher to fetch the token.
      *
-     * @return array<string, string[]|string>
+     * @return string|null
      */
-    private function fetchAuthHeaders()
+    private function fetchToken()
     {
-        $authHeaders = [];
-        $authTokens = [];
+        $auth_tokens = (array) $this->fetcher->fetchAuthToken($this->httpHandler);
 
-        // We need to find the actual fetcher incase of a cache wrapper
-        // so that we can avoid the exception case where actual fetcher
-        // does not implements UpdateMetadataInterface with cache wrapper's
-        // `updateMetadata` being called.
-        $actualFetcher = $this->fetcher;
-        if ($actualFetcher instanceof FetchAuthTokenCache) {
-            $actualFetcher = $actualFetcher->getFetcher();
-        }
-
-        if ($actualFetcher instanceof UpdateMetadataInterface) {
-            $headers = $this->fetcher->updateMetadata([], null, $this->httpHandler);
-            if (array_key_exists('authorization', $headers)) {
-                $authHeaders = $headers;
-            }
-        } else {
-            $authTokens = (array) $this->fetcher->fetchAuthToken($this->httpHandler);
-            if (array_key_exists('access_token', $authTokens)) {
-                $authHeaders = ['authorization' => 'Bearer ' . $authTokens['access_token']];
-            } elseif (array_key_exists('id_token', $authTokens)) {
-                $authHeaders = ['authorization' => 'Bearer ' . $authTokens['id_token']];
-            }
-        }
-
-        if (!empty($authHeaders)) {
-            if (empty($authTokens)) {
-                $authTokens = $this->fetcher->getLastReceivedToken();
-            }
-
+        if (array_key_exists('access_token', $auth_tokens)) {
             // notify the callback if applicable
-            if (array_key_exists('access_token', $authTokens) && $this->tokenCallback) {
+            if ($this->tokenCallback) {
                 call_user_func(
                     $this->tokenCallback,
                     $this->fetcher->getCacheKey(),
-                    $authTokens['access_token']
+                    $auth_tokens['access_token']
                 );
             }
+
+            return $auth_tokens['access_token'];
         }
 
-        return $authHeaders;
+        if (array_key_exists('id_token', $auth_tokens)) {
+            return $auth_tokens['id_token'];
+        }
+
+        return null;
     }
 
     /**
