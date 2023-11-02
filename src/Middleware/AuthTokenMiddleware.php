@@ -46,7 +46,7 @@ class AuthTokenMiddleware
      * It must be an implementation of FetchAuthTokenInterface.
      * It may also implement UpdateMetadataInterface allowing direct
      * retrieval of auth related headers
-     * @var FetchAuthTokenInterface|UpdateMetadataInterface
+     * @var FetchAuthTokenInterface
      */
     private $fetcher;
 
