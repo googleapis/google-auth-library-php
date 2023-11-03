@@ -108,7 +108,7 @@ class AuthTokenMiddleware
             if (!$this->fetcher instanceof UpdateMetadataInterface ||
                 ($this->fetcher instanceof FetchAuthTokenCache && !$this->fetcher->getFetcher() instanceof UpdateMetadataInterface)
             ) {
-                $request =$request->withHeader('authorization', 'Bearer ' . $this->fetchToken());
+                $request = $request->withHeader('authorization', 'Bearer ' . $this->fetchToken());
             } else {
                 $headers = $this->fetcher->updateMetadata($request->getHeaders(), null, $this->httpHandler);
                 $request = Utils::modifyRequest($request, ['set_headers' => $headers]);
