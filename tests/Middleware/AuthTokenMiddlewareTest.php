@@ -87,7 +87,7 @@ class AuthTokenMiddlewareTest extends BaseTest
             ->willReturn($authResult);
         $this->mockRequest->withHeader('authorization', 'Bearer ' . $token)
             ->shouldBeCalledTimes(1)
-            ->willReturn($this->mockRequest);
+            ->willReturn($this->mockRequest->reveal());
 
         $this->runTestCase($this->mockFetcher->reveal(), true);
 
@@ -259,6 +259,8 @@ class AuthTokenMiddlewareTest extends BaseTest
         $this->mockFetcher->fetchAuthToken(Argument::any())
             ->shouldBeCalledTimes(1)
             ->willReturn($cachedValue);
+        $this->mockFetcher->getLastReceivedToken()
+            ->willReturn($cachedValue);
         $this->mockRequest->withHeader(Argument::any(), Argument::any())
             ->willReturn($this->mockRequest->reveal());
 
@@ -289,17 +291,16 @@ class AuthTokenMiddlewareTest extends BaseTest
             'authorization' => 'Bearer 1/abcdef1234567890',
         ];
 
-        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
-        $mockFetcher->willImplement(UpdateMetadataInterface::class);
-        $mockFetcher->updateMetadata(Argument::cetera())
+        $this->mockFetcher->willImplement(UpdateMetadataInterface::class);
+        $this->mockFetcher->updateMetadata(Argument::cetera())
             ->shouldBeCalledTimes(1)
             ->willReturn($authResult);
-        $mockFetcher->getLastReceivedToken()
+        $this->mockFetcher->getLastReceivedToken()
             ->willReturn(['access_token' => '1/abcdef1234567890']);
 
         $request = new Request('GET', 'http://foo.com');
 
-        $middleware = new AuthTokenMiddleware($mockFetcher->reveal());
+        $middleware = new AuthTokenMiddleware($this->mockFetcher->reveal());
         $mock = new MockHandler([new Response(200)]);
         $callable = $middleware($mock);
         $callable($request, ['auth' => 'google_auth']);
@@ -315,15 +316,14 @@ class AuthTokenMiddlewareTest extends BaseTest
         $request = new Request('GET', 'http://foo.com');
         $request->withHeader('x-goog-api-client', 'default-value');
 
-        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
-        $mockFetcher->willImplement(UpdateMetadataInterface::class);
-        $mockFetcher->updateMetadata(Argument::cetera())
+        $this->mockFetcher->willImplement(UpdateMetadataInterface::class);
+        $this->mockFetcher->updateMetadata(Argument::cetera())
             ->shouldBeCalledTimes(1)
             ->willReturn($authHeaders);
-        $mockFetcher->getLastReceivedToken()
+        $this->mockFetcher->getLastReceivedToken()
             ->willReturn(['access_token' => '1/abcdef1234567890']);
 
-        $middleware = new AuthTokenMiddleware($mockFetcher->reveal());
+        $middleware = new AuthTokenMiddleware($this->mockFetcher->reveal());
         $mock = new MockHandler([function ($request, $options) use ($authHeaders) {
             $this->assertEquals($authHeaders['authorization'], $request->getHeaderLine('authorization'));
             $this->assertArrayHasKey('x-goog-api-client', $request->getHeaders());

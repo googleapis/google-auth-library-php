@@ -57,14 +57,17 @@ class FetchAuthTokenTest extends BaseTest
 
         if (is_a($fetcherClass, UpdateMetadataInterface::class, true)) {
             $mockFetcher->updateMetadata(Argument::cetera())
+            ->shouldBeCalledTimes(1)->will(function () use (&$httpHandlerCalled) {
+                $httpHandlerCalled = true;
+                return ['authorization' => ['Bearer xyz']];
+            });
+        } else {
+            $mockFetcher->fetchAuthToken(Argument::any())
                 ->shouldBeCalledTimes(1)
-                ->willReturn(['authorization' => 'Bearer xyz']);
+                ->will($httpHandler);
         }
-
-        $mockFetcher->fetchAuthToken(Argument::any())
-            ->shouldBeCalledTimes(1)
-            ->will($httpHandler);
         $mockFetcher->getCacheKey()->willReturn('');
+        $mockFetcher->getLastReceivedToken()->willReturn(['access_token' => 'xyz']);
 
         $tokenCallbackCalled = false;
         $tokenCallback = function ($cacheKey, $accessToken) use (&$tokenCallbackCalled) {
