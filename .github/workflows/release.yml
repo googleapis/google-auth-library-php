@@ -26,7 +26,7 @@ jobs:
       run: |
         cd google-cloud-php
         composer install -q -d dev
-        dev/google-cloud update-deps google/auth 'dev-main as 1.200.0'
+        dev/google-cloud update-deps google/auth 'dev-main as 1.200.0' --add=dev
     - name: Run google/cloud package tests
       run: |
         cd google-cloud-php
