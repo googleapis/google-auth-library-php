@@ -17,22 +17,29 @@
 
 namespace Google\Auth\Credentials;
 
+use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\HttpHandler\HttpClientCache;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
+use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 
-class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface
+class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface, GetQuotaProjectInterface
 {
     use UpdateMetadataTrait;
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
 
     private OAuth2 $auth;
+    private ?string $quotaProject;
+    private ?string $serviceAccountImpersonationUrl;
 
     /**
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
@@ -78,6 +85,12 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
             );
         }
 
+        if (array_key_exists('service_account_impersonation_url', $jsonKey)) {
+            $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'];
+        }
+
+        $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
+
         $this->auth = new OAuth2([
             'tokenCredentialUri' => $jsonKey['token_url'],
             'audience' => $jsonKey['audience'],
@@ -101,6 +114,35 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
             );
         }
 
+        if (
+            isset($credentialSource['environment_id'])
+            && 1 === preg_match('/^aws(\d+)$/', $credentialSource['environment_id'], $matches)
+        ) {
+            if ($matches[1] !== '1') {
+                throw new InvalidArgumentException(
+                    "aws version \"$matches[1]\" is not supported in the current build."
+                );
+            }
+            if (!array_key_exists('regional_cred_verification_url', $credentialSource)) {
+                throw new InvalidArgumentException(
+                    'The regional_cred_verification_url field is required for aws1 credential source.'
+                );
+            }
+            if (!array_key_exists('audience', $jsonKey)) {
+                throw new InvalidArgumentException(
+                    'aws1 credential source requires an audience to be set in the JSON file.'
+                );
+            }
+
+            return new AwsNativeSource(
+                $jsonKey['audience'],
+                $credentialSource['regional_cred_verification_url'],   // $regionalCredVerificationUrl
+                $credentialSource['region_url'] ?? null,               // $regionUrl
+                $credentialSource['url'] ?? null,                      // $securityCredentialsUrl
+                $credentialSource['imdsv2_session_token_url'] ?? null, // $imdsV2TokenUrl
+            );
+        }
+
         if (isset($credentialSource['url'])) {
             return new UrlSource(
                 $credentialSource['url'],
@@ -112,6 +154,46 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
 
         throw new InvalidArgumentException('Unable to determine credential source from json key.');
     }
+    /**
+     * @param string $stsToken
+     * @param callable $httpHandler
+     *
+     * @return array<mixed> {
+     *     A set of auth related metadata, containing the following
+     *
+     *     @type string $access_token
+     *     @type int $expires_at
+     * }
+     */
+    private function getImpersonatedAccessToken(string $stsToken, callable $httpHandler = null): array
+    {
+        if (!isset($this->serviceAccountImpersonationUrl)) {
+            throw new InvalidArgumentException(
+                'service_account_impersonation_url must be set in JSON credentials.'
+            );
+        }
+        $request = new Request(
+            'POST',
+            $this->serviceAccountImpersonationUrl,
+            [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $stsToken,
+            ],
+            (string) json_encode([
+                'lifetime' => sprintf('%ss', OAuth2::DEFAULT_EXPIRY_SECONDS),
+                'scope' => $this->auth->getScope(),
+            ]),
+        );
+        if (is_null($httpHandler)) {
+            $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+        }
+        $response = $httpHandler($request);
+        $body = json_decode((string) $response->getBody(), true);
+        return [
+            'access_token'  => $body['accessToken'],
+            'expires_at'    => strtotime($body['expireTime']),
+        ];
+    }
 
     /**
      * @param callable $httpHandler
@@ -120,15 +202,21 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
      *     A set of auth related metadata, containing the following
      *
      *     @type string $access_token
-     *     @type int $expires_in
-     *     @type string $scope
-     *     @type string $token_type
-     *     @type string $id_token
+     *     @type int $expires_at (impersonated service accounts only)
+     *     @type int $expires_in (identity pool only)
+     *     @type string $issued_token_type (identity pool only)
+     *     @type string $token_type (identity pool only)
      * }
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        return $this->auth->fetchAuthToken($httpHandler);
+        $stsToken = $this->auth->fetchAuthToken($httpHandler);
+
+        if (isset($this->serviceAccountImpersonationUrl)) {
+            return $this->getImpersonatedAccessToken($stsToken['access_token'], $httpHandler);
+        }
+
+        return $stsToken;
     }
 
     public function getCacheKey()
@@ -139,5 +227,15 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
     public function getLastReceivedToken()
     {
         return $this->auth->getLastReceivedToken();
+    }
+
+    /**
+     * Get the quota project used for this API request
+     *
+     * @return string|null
+     */
+    public function getQuotaProject()
+    {
+        return $this->quotaProject;
     }
 }
