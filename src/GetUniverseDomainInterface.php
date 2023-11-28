@@ -18,7 +18,7 @@
 namespace Google\Auth;
 
 /**
- * An interface implemented by objects that can get quota projects.
+ * An interface implemented by objects that can get universe domain for Google Cloud APIs.
  */
 interface GetUniverseDomainInterface
 {
