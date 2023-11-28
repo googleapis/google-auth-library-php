@@ -512,4 +512,12 @@ class GCECredentialsTest extends BaseTest
         $creds = new GCECredentials(null, null, null, null, 'foo');
         $this->assertEquals($expected, $creds->getClientName($httpHandler));
     }
+
+    public function testGetUniverseDomain()
+    {
+        $creds = new GCECredentials();
+
+        // Universe domain should always be the default
+        $this->assertEquals(GCECredentials::DEFAULT_UNIVERSE_DOMAIN, $creds->getUniverseDomain());
+    }
 }

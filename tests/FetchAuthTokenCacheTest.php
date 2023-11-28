@@ -21,6 +21,7 @@ use Google\Auth\Cache\MemoryCacheItemPool;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenCache;
+use Google\Auth\GetUniverseDomainInterface;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use RuntimeException;
@@ -601,6 +602,41 @@ class FetchAuthTokenCacheTest extends BaseTest
         );
 
         $fetcher->getProjectId();
+    }
+
+    public function testGetUniverseDomain()
+    {
+        $universeDomain = 'foobar';
+
+        $mockFetcher = $this->prophesize('Google\Auth\GetUniverseDomainInterface');
+        $mockFetcher->willImplement('Google\Auth\FetchAuthTokenInterface');
+        $mockFetcher->getUniverseDomain()
+            ->shouldBeCalled()
+            ->willReturn($universeDomain);
+
+        $fetcher = new FetchAuthTokenCache(
+            $mockFetcher->reveal(),
+            [],
+            $this->mockCache->reveal()
+        );
+
+        $this->assertEquals($universeDomain, $fetcher->getUniverseDomain());
+    }
+
+    public function testGetUniverseDomainInvalidFetcher()
+    {
+        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+
+        $fetcher = new FetchAuthTokenCache(
+            $mockFetcher->reveal(),
+            [],
+            $this->mockCache->reveal()
+        );
+
+        $this->assertEquals(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            $fetcher->getUniverseDomain()
+        );
     }
 
     public function testGetFetcher()
