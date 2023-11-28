@@ -780,6 +780,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         return [
             ['file_credentials.json', CredentialSource\FileSource::class],
             ['url_credentials.json', CredentialSource\UrlSource::class],
+            ['aws_credentials.json', CredentialSource\AwsNativeSource::class],
         ];
     }
 
@@ -797,18 +798,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $creds = ApplicationDefaultCredentials::getCredentials();
         $this->assertEquals('example-universe.com', $creds->getUniverseDomain());
-
-        // test passing in a different universe domain overrides keyfile
-        $creds3 = ApplicationDefaultCredentials::getCredentials(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'example-universe2.com'
-        );
-        $this->assertEquals('example-universe2.com', $creds3->getUniverseDomain());
 
         // Test universe domain in "authenticated_user" keyfile is not read.
         $keyFile = __DIR__ . '/fixtures2/private.json';

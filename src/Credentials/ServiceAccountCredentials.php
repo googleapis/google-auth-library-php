@@ -100,9 +100,9 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     private $jwtAccessCredentials;
 
     /**
-     * @var string|null
+     * @var string
      */
-    private ?string $universeDomain;
+    private string $universeDomain;
 
     /**
      * Create a new ServiceAccountCredentials.
@@ -164,7 +164,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         ]);
 
         $this->projectId = $jsonKey['project_id'] ?? null;
-        $this->universeDomain = $jsonKey['universe_domain'] ?? null;
+        $this->universeDomain = $jsonKey['universe_domain'] ?? self::DEFAULT_UNIVERSE_DOMAIN;
     }
 
     /**
@@ -341,7 +341,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getUniverseDomain(): string
     {
-        return $this->universeDomain ?: self::DEFAULT_UNIVERSE_DOMAIN;
+        return $this->universeDomain;
     }
 
     /**
