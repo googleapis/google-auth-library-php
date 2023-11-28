@@ -3,5 +3,6 @@
   "client_secret": "clientSecret123",
   "refresh_token": "refreshToken123",
   "type": "authorized_user",
-  "quota_project_id": "test_quota_project"
+  "quota_project_id": "test_quota_project",
+  "universe_domain": "example-universe.com"
 }
