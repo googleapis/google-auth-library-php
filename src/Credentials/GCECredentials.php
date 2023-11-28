@@ -536,7 +536,7 @@ class GCECredentials extends CredentialsLoader implements
      */
     public function getUniverseDomain(callable $httpHandler = null): string
     {
-        if ($this->universeDomain) {
+        if (null !== $this->universeDomain) {
             return $this->universeDomain;
         }
 
