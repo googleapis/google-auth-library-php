@@ -9,6 +9,10 @@
 
 * Add and implement universe domain interface ([#477](https://github.com/googleapis/google-auth-library-php/issues/477)) ([35781ed](https://github.com/googleapis/google-auth-library-php/commit/35781ed573aa9d831d38452eefbac790559dfb97))
 
+### Miscellaneous
+
+* Refactor `AuthTokenMiddleware` ([#492](https://github.com/googleapis/google-auth-library-php/pull/492))
+
 ## [1.32.1](https://github.com/googleapis/google-auth-library-php/compare/v1.32.0...v1.32.1) (2023-10-17)
 
 
