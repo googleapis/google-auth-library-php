@@ -2,6 +2,38 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.33.0](https://github.com/googleapis/google-auth-library-php/compare/v1.32.1...v1.33.0) (2023-11-29)
+
+
+### Features
+
+* Add and implement universe domain interface ([#477](https://github.com/googleapis/google-auth-library-php/issues/477)) ([35781ed](https://github.com/googleapis/google-auth-library-php/commit/35781ed573aa9d831d38452eefbac790559dfb97))
+
+### Miscellaneous
+
+* Refactor `AuthTokenMiddleware` ([#492](https://github.com/googleapis/google-auth-library-php/pull/492))
+
+## [1.32.1](https://github.com/googleapis/google-auth-library-php/compare/v1.32.0...v1.32.1) (2023-10-17)
+
+
+### Bug Fixes
+
+* Allowed_algs not properly set for string value ([#489](https://github.com/googleapis/google-auth-library-php/issues/489)) ([0042b52](https://github.com/googleapis/google-auth-library-php/commit/0042b522ebbcffc6d6623e322d162d963eada3b5))
+
+## [1.32.0](https://github.com/googleapis/google-auth-library-php/compare/v1.31.0...v1.32.0) (2023-10-10)
+
+
+### Features
+
+* Respect cache control for access token certs ([#479](https://github.com/googleapis/google-auth-library-php/issues/479)) ([6d426b5](https://github.com/googleapis/google-auth-library-php/commit/6d426b5cb9462845d2c2d7d506318c9bee613528))
+
+## [1.31.0](https://github.com/googleapis/google-auth-library-php/compare/v1.30.0...v1.31.0) (2023-10-05)
+
+
+### Features
+
+* Add AWS credential source ([#474](https://github.com/googleapis/google-auth-library-php/issues/474)) ([e5bc897](https://github.com/googleapis/google-auth-library-php/commit/e5bc8979bf87159d9acab1ca8cb7cd7af008b2a6))
+
 ## [1.30.0](https://github.com/googleapis/google-auth-library-php/compare/v1.29.1...v1.30.0) (2023-09-07)
 
 

@@ -4,5 +4,6 @@
   "client_email": "hello@youarecool.com",
   "client_id": "client123",
   "type": "service_account",
-  "quota_project_id": "test_quota_project"
+  "quota_project_id": "test_quota_project",
+  "universe_domain": "example-universe.com"
 }

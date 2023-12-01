@@ -25,6 +25,7 @@ use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\OAuth2;
+use Google\Auth\UpdateMetadataInterface;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -53,10 +54,20 @@ class FetchAuthTokenTest extends BaseTest
         )) {
             $mockFetcher->getQuotaProject()->shouldBeCalledTimes(1);
         }
-        $mockFetcher->fetchAuthToken(Argument::any())
-            ->shouldBeCalledTimes(1)
-            ->will($httpHandler);
+
+        if (is_a($fetcherClass, UpdateMetadataInterface::class, true)) {
+            $mockFetcher->updateMetadata(Argument::cetera())
+                ->shouldBeCalledTimes(1)->will(function () use (&$httpHandlerCalled) {
+                    $httpHandlerCalled = true;
+                    return ['authorization' => ['Bearer xyz']];
+                });
+        } else {
+            $mockFetcher->fetchAuthToken(Argument::any())
+                ->shouldBeCalledTimes(1)
+                ->will($httpHandler);
+        }
         $mockFetcher->getCacheKey()->willReturn('');
+        $mockFetcher->getLastReceivedToken()->willReturn(['access_token' => 'xyz']);
 
         $tokenCallbackCalled = false;
         $tokenCallback = function ($cacheKey, $accessToken) use (&$tokenCallbackCalled) {
