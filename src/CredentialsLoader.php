@@ -30,6 +30,7 @@ use UnexpectedValueException;
  * credentials files on the file system.
  */
 abstract class CredentialsLoader implements
+    GetUniverseDomainInterface,
     FetchAuthTokenInterface,
     UpdateMetadataInterface
 {
@@ -272,5 +273,16 @@ abstract class CredentialsLoader implements
             );
         }
         return $clientCertSourceJson;
+    }
+
+    /**
+     * Get the universe domain from the credential. Defaults to "googleapis.com"
+     * for all credential types which do not support universe domain.
+     *
+     * @return string
+     */
+    public function getUniverseDomain(): string
+    {
+        return self::DEFAULT_UNIVERSE_DOMAIN;
     }
 }

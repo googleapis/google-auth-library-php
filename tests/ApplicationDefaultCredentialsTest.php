@@ -783,4 +783,26 @@ class ApplicationDefaultCredentialsTest extends TestCase
             ['aws_credentials.json', CredentialSource\AwsNativeSource::class],
         ];
     }
+
+    /** @runInSeparateProcess */
+    public function testUniverseDomainInKeyFile()
+    {
+        // Test no universe domain in keyfile defaults to "googleapis.com"
+        $keyFile = __DIR__ . '/fixtures3/service_account_credentials.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $creds = ApplicationDefaultCredentials::getCredentials();
+        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds->getUniverseDomain());
+
+        // Test universe domain in "service_account" keyfile
+        $keyFile = __DIR__ . '/fixtures/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $creds = ApplicationDefaultCredentials::getCredentials();
+        $this->assertEquals('example-universe.com', $creds->getUniverseDomain());
+
+        // Test universe domain in "authenticated_user" keyfile is not read.
+        $keyFile = __DIR__ . '/fixtures2/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $creds2 = ApplicationDefaultCredentials::getCredentials();
+        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain());
+    }
 }
