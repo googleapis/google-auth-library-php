@@ -307,6 +307,29 @@ class ServiceAccountCredentialsTest extends TestCase
         $this->assertEquals(1, $timesCalled);
     }
 
+    public function testShouldBeOAuthRequestWhenSubIsSet()
+    {
+        $testJson = $this->createTestJson();
+        $sub = 'sub12345';
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $sub) {
+            $timesCalled++;
+            parse_str($request->getBody(), $post);
+            $this->assertArrayHasKey('assertion', $post);
+            list($header, $payload, $sig) = explode('.', $post['assertion']);
+            $jwtParams = json_decode(base64_decode($payload), true);
+            $this->assertArrayHasKey('sub', $jwtParams);
+            $this->assertEquals($sub, $jwtParams['sub']);
+
+            return new Psr7\Response(200, [], Utils::streamFor(json_encode([
+                'access_token' => 'token123'
+            ])));
+        };
+        $sa = new ServiceAccountCredentials(null, $testJson, $sub);
+        $this->assertEquals('token123', $sa->fetchAuthToken($httpHandler)['access_token']);
+        $this->assertEquals(1, $timesCalled);
+    }
+
     public function testSettingBothScopeAndTargetAudienceThrowsException()
     {
         $this->expectException(InvalidArgumentException::class);
