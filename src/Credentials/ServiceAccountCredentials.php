@@ -349,6 +349,20 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     private function useSelfSignedJwt()
     {
+        // When a sub is supplied, the user is using domain-wide delegation, which not available
+        // with self-signed JWTs
+        if (null !== $this->auth->getSub()) {
+            // If we are outside the GDU, we can't use domain-wide delegation
+            if ($this->getUniverseDomain() !== self::DEFAULT_UNIVERSE_DOMAIN) {
+                throw new \LogicException(sprintf(
+                    'Service Account subject is configured for the credential. Domain-wide ' .
+                    'delegation is not supported in universes other than %s.',
+                    self::DEFAULT_UNIVERSE_DOMAIN
+                ));
+            }
+            return false;
+        }
+
         // If claims are set, this call is for "id_tokens"
         if ($this->auth->getAdditionalClaims()) {
             return false;
