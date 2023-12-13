@@ -352,6 +352,12 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     private function useSelfSignedJwt()
     {
+        // When a sub is supplied, the user is using domain-wide delegation, which not available
+        // with self-signed JWTs
+        if (null !== $this->auth->getSub()) {
+            return false;
+        }
+
         // If claims are set, this call is for "id_tokens"
         if ($this->auth->getAdditionalClaims()) {
             return false;
