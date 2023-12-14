@@ -27,6 +27,13 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     use IamSignerTrait;
 
     /**
+     * Used in observability metric headers
+     *
+     * @var string
+     */
+    private const CRED_TYPE = 'imp';
+
+    /**
      * @var string
      */
     protected $impersonatedServiceAccountName;
@@ -121,7 +128,11 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        return $this->sourceCredentials->fetchAuthToken($httpHandler);
+        // We don't support id token endpoint requests as of now for Impersonated Cred
+        return $this->sourceCredentials->fetchAuthToken(
+            $httpHandler,
+            [self::METRIC_METADATA_KEY => self::getMetricsHeader(self::CRED_TYPE, 'at')]
+        );
     }
 
     /**
@@ -138,5 +149,10 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     public function getLastReceivedToken()
     {
         return $this->sourceCredentials->getLastReceivedToken();
+    }
+
+    public function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 }

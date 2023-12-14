@@ -68,6 +68,13 @@ class GCECredentials extends CredentialsLoader implements
     // phpcs:enable
 
     /**
+     * Used in observability metric headers
+     *
+     * @var string
+     */
+    private const CRED_TYPE = 'mds';
+
+    /**
      * The metadata IP address on appengine instances.
      *
      * The IP is used instead of the domain 'metadata' to avoid slow responses
@@ -143,6 +150,13 @@ class GCECredentials extends CredentialsLoader implements
      * @var array<mixed>
      */
     protected $lastReceivedToken;
+
+    /**
+     * Used in observability metric headers
+     *
+     * @var string
+     */
+    protected $credType = 'cred-type/mds';
 
     /**
      * @var string|null
@@ -309,6 +323,20 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
+     * @return array<mixed>
+     */
+    private static function getMdsPingHeader()
+    {
+        return [
+            self::$metricsHeaderKey => [sprintf(
+                'gl-php/%s auth/%s auth-request-type/mds',
+                PHP_VERSION,
+                self::getVersion()
+            )]
+        ];
+    }
+
+    /**
      * The full uri for accessing the default universe domain.
      *
      * @return string
@@ -359,7 +387,10 @@ class GCECredentials extends CredentialsLoader implements
                     new Request(
                         'GET',
                         $checkUri,
-                        [self::FLAVOR_HEADER => 'Google']
+                        [
+                            self::FLAVOR_HEADER => 'Google',
+                            self::METRIC_METADATA_KEY => self::getMetricsHeader('', 'mds')
+                        ]
                     ),
                     ['timeout' => self::COMPUTE_PING_CONNECTION_TIMEOUT_S]
                 );
@@ -421,7 +452,12 @@ class GCECredentials extends CredentialsLoader implements
             return [];  // return an empty array with no access token
         }
 
-        $response = $this->getFromMetadata($httpHandler, $this->tokenUri);
+        $metricsHeader = self::getMetricsHeader(self::CRED_TYPE, $this->targetAudience ? 'it' : 'at');
+        $response = $this->getFromMetadata(
+            $httpHandler,
+            $this->tokenUri,
+            [self::METRIC_METADATA_KEY => $metricsHeader]
+        );
 
         if ($this->targetAudience) {
             return ['id_token' => $response];
@@ -581,15 +617,18 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @param callable $httpHandler An HTTP Handler to deliver PSR7 requests.
      * @param string $uri The metadata URI.
+     * @param array<mixed> $headers [optional] If present, add these headers to the token
+     *        endpoint request.
+     *
      * @return string
      */
-    private function getFromMetadata(callable $httpHandler, $uri)
+    private function getFromMetadata(callable $httpHandler, $uri, array $headers = [])
     {
         $resp = $httpHandler(
             new Request(
                 'GET',
                 $uri,
-                [self::FLAVOR_HEADER => 'Google']
+                [self::FLAVOR_HEADER => 'Google'] + $headers
             )
         );
 
@@ -620,5 +659,10 @@ class GCECredentials extends CredentialsLoader implements
 
         // Set isOnGce
         $this->isOnGce = $isOnGce;
+    }
+
+    public function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 }

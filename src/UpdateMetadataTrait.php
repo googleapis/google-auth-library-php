@@ -27,6 +27,11 @@ namespace Google\Auth;
 trait UpdateMetadataTrait
 {
     /**
+     * @var string The version of the auth library php.
+     */
+    private static $version;
+
+    /**
      * export a callback function which updates runtime metadata.
      *
      * @return callable updateMetadata function
@@ -35,6 +40,11 @@ trait UpdateMetadataTrait
     public function getUpdateMetadataFunc()
     {
         return [$this, 'updateMetadata'];
+    }
+
+    public function getCredType(): string
+    {
+        return '';
     }
 
     /**
@@ -50,17 +60,69 @@ trait UpdateMetadataTrait
         $authUri = null,
         callable $httpHandler = null
     ) {
-        if (isset($metadata[self::AUTH_METADATA_KEY])) {
+        $metadata_copy = $metadata;
+
+        if ($credType = $this->getCredType()) {
+            // Add service api usage observability metrics info to metadata
+            $metricsHeader = self::getMetricsHeader($credType);
+            if (!isset($metadata_copy[self::METRIC_METADATA_KEY])) {
+                $metadata_copy[self::METRIC_METADATA_KEY] = [$metricsHeader];
+            } elseif (is_array($metadata_copy[self::METRIC_METADATA_KEY])) {
+                $metadata_copy[self::METRIC_METADATA_KEY][0] .= ' ' . $metricsHeader;
+            } else {
+                $metadata_copy[self::METRIC_METADATA_KEY] .= ' ' . $metricsHeader;
+            }
+        }
+
+        if (isset($metadata_copy[self::AUTH_METADATA_KEY])) {
             // Auth metadata has already been set
-            return $metadata;
+            return $metadata_copy;
         }
         $result = $this->fetchAuthToken($httpHandler);
-        $metadata_copy = $metadata;
         if (isset($result['access_token'])) {
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['access_token']];
         } elseif (isset($result['id_token'])) {
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['id_token']];
         }
         return $metadata_copy;
+    }
+
+    /**
+     * @param string $credType [Optional] The credential type.
+     *        Empty value will not add any credential type to the header.
+     *        Should be one of `'sa'`, `'jwt'`, `'imp'`, `'mds'`, `'u'`.
+     * @param string $authRequestType [Optional] The auth request type.
+     *        Empty value will not add any auth request type to the header.
+     *        Should be one of `'at'`, `'it'`, `'mds'`.
+     * @return string The header value for the observability metrics.
+     */
+    protected static function getMetricsHeader(
+        string $credType = '',
+        string $authRequestType = ''
+    ): string {
+        $value = sprintf(
+            'gl-php/%s auth/%s',
+            PHP_VERSION,
+            self::getVersion()
+        );
+
+        if (!empty($authRequestType)) {
+            $value .= ' auth-request-type/' . $authRequestType;
+        }
+
+        if (!empty($credType)) {
+            $value .= ' cred-type/' . $credType;
+        }
+
+        return $value;
+    }
+
+    protected static function getVersion(): string
+    {
+        if (is_null(self::$version)) {
+            $versionFilePath = __DIR__ . '/../VERSION';
+            self::$version = trim((string) file_get_contents($versionFilePath));
+        }
+        return self::$version;
     }
 }
