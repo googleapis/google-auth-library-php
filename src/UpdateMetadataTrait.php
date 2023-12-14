@@ -61,6 +61,11 @@ trait UpdateMetadataTrait
         } elseif (isset($result['id_token'])) {
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['id_token']];
         }
+
+        $metadata_copy = $this->applyMetricsHeaders(
+            $metadata_copy,
+            $this->getServiceApiMetricsHeaderValue()
+        );
         return $metadata_copy;
     }
 }

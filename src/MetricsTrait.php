@@ -27,6 +27,8 @@ trait MetricsTrait
 {
     private static $version = null;
 
+    private static $headerKey = 'x-goog-api-client';
+
     private static array $requestType = [
         'accessToken' => 'auth-request-type/at',
         'idToken' => 'auth-request-type/idt',
@@ -50,5 +52,49 @@ trait MetricsTrait
         return self::$version;
     }
 
+    private function getServiceApiMetricsHeaderValue()
+    {
+        switch (get_class($this)) {
+            case 'Google\Auth\Credentials\UserRefreshCredentials':
+                return '';
+            case 'Google\Auth\Credentials\ServiceAccountCredentials':
+                return '';
+            case 'Google\Auth\Credentials\ServiceAccountJwtAccessCredentials':
+                return '';
+            case 'Google\Auth\Credentials\GCECredentials':
+                return '';
+            case 'Google\Auth\Credentials\ImpersonatedServiceAccountCredentials':
+                return '';
+        }
+        return '';
+    }
 
+    private function getTokenEndpointMetricsHeaderValue(bool $isAccessTokenRequest)
+    {
+        switch (get_class($this)) {
+            case 'Google\Auth\Credentials\UserRefreshCredentials':
+                return '';
+            case 'Google\Auth\Credentials\ServiceAccountCredentials':
+                return '';
+            case 'Google\Auth\Credentials\ServiceAccountJwtAccessCredentials':
+                return '';
+            case 'Google\Auth\Credentials\GCECredentials':
+                return '';
+            case 'Google\Auth\Credentials\ImpersonatedServiceAccountCredentials':
+                return '';
+        }
+        return '';
+    }
+
+    private function applyMetricsHeader($metadata, $headerValue)
+    {
+        if (empty($headerValue)) {
+            return $metadata;
+        } elseif (isset($metadata[self::$headerKey])) {
+            $metadata[self::$headerKey][0] .= ' ' . $headerValue;
+        } else {
+            $metadata[self::$headerKey] = [$headerValue];
+        }
+        return $metadata;
+    }
 }

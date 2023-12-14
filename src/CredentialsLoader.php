@@ -34,6 +34,7 @@ abstract class CredentialsLoader implements
     FetchAuthTokenInterface,
     UpdateMetadataInterface
 {
+    use MetricsTrait;
     use UpdateMetadataTrait;
 
     const TOKEN_CREDENTIAL_URI = 'https://oauth2.googleapis.com/token';
