@@ -395,7 +395,16 @@ class GCECredentials extends CredentialsLoader implements
             return [];  // return an empty array with no access token
         }
 
-        $response = $this->getFromMetadata($httpHandler, $this->tokenUri);
+        $isAccessTokenRequest = true;
+        if (isset($this->targetAudience)) {
+            $isAccessTokenRequest = false;
+        }
+
+        $metricsHeader = $this->applyMetricsHeader(
+            [],
+            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
+        );
+        $response = $this->getFromMetadata($httpHandler, $this->tokenUri, $metricsHeader);
 
         if ($this->targetAudience) {
             return ['id_token' => $response];
@@ -505,15 +514,18 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @param callable $httpHandler An HTTP Handler to deliver PSR7 requests.
      * @param string $uri The metadata URI.
+     * @param array $metricsHeaders [optional] If present, add these headers to the token
+     *        endpoint request.
+     *
      * @return string
      */
-    private function getFromMetadata(callable $httpHandler, $uri)
+    private function getFromMetadata(callable $httpHandler, $uri, array $metricsHeaders = [])
     {
         $resp = $httpHandler(
             new Request(
                 'GET',
                 $uri,
-                [self::FLAVOR_HEADER => 'Google']
+                [self::FLAVOR_HEADER => 'Google'] + $metricsHeaders
             )
         );
 

@@ -206,7 +206,16 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
             return $accessToken;
         }
-        return $this->auth->fetchAuthToken($httpHandler);
+        $isAccessTokenRequest = true;
+        if (isset($this->auth->getAdditionalClaims()['target_audience'])) {
+            $isAccessTokenRequest = false;
+        }
+
+        $metricsHeader = $this->applyMetricsHeader(
+            [],
+            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
+        );
+        return $this->auth->fetchAuthToken($httpHandler, $metricsHeader);
     }
 
     /**
