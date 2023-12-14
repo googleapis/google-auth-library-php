@@ -344,6 +344,24 @@ class ServiceAccountCredentialsTest extends TestCase
         );
     }
 
+    public function testDomainWideDelegationOutsideGduThrowsException()
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(
+            'Service Account subject is configured for the credential. Domain-wide ' .
+            'delegation is not supported in universes other than googleapis.com'
+        );
+        $testJson = $this->createTestJson() + ['universe_domain' => 'abc.xyz'];
+        $sub = 'sub123';
+        $sa = new ServiceAccountCredentials(
+            null,
+            $testJson,
+            $sub
+        );
+
+        $sa->fetchAuthToken();
+    }
+
     public function testReturnsClientEmail()
     {
         $testJson = $this->createTestJson();
