@@ -125,9 +125,29 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         $isAccessTokenRequest = true;
         $metricsHeaders = $this->applyMetricsHeader(
             [],
-            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest = true)
+            $this->getTokenEndpointMetricsHeaderValue('impersonated', $isAccessTokenRequest = true)
         );
         return $this->sourceCredentials->fetchAuthToken($httpHandler, $metricsHeaders);
+    }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @param string $_metricsHeaderValue [INTERNAL] The observability metrics
+     *        header value to be set on the request.
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        callable $httpHandler = null,
+        string $_metricsHeaderValue = ''
+    ): array {
+        $metricsHeaderValue = $this->getServiceApiMetricsHeaderValue('impersonated');
+        return $this->sourceCredentials->updateMetadata($metadata, $authUri, $httpHandler, $metricsHeaderValue);
     }
 
     /**

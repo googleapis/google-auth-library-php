@@ -43,12 +43,15 @@ trait UpdateMetadataTrait
      * @param array<mixed> $metadata metadata hashmap
      * @param string $authUri optional auth uri
      * @param callable $httpHandler callback which delivers psr7 request
+     * @param string $metricsHeaderValue [optional] The observability metrics
+     *        header value to be set on the request.
      * @return array<mixed> updated metadata hashmap
      */
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null
+        callable $httpHandler = null,
+        string $metricsHeaderValue = ''
     ) {
         if (isset($metadata[self::AUTH_METADATA_KEY])) {
             // Auth metadata has already been set
@@ -64,7 +67,7 @@ trait UpdateMetadataTrait
 
         $metadata_copy = $this->applyMetricsHeaders(
             $metadata_copy,
-            $this->getServiceApiMetricsHeaderValue()
+            $metricsHeaderValue
         );
         return $metadata_copy;
     }

@@ -333,7 +333,7 @@ class GCECredentials extends CredentialsLoader implements
                     new Request(
                         'GET',
                         $checkUri,
-                        [self::FLAVOR_HEADER => 'Google']
+                        [self::FLAVOR_HEADER => 'Google'] + self::getMdsPingHeader()
                     ),
                     ['timeout' => self::COMPUTE_PING_CONNECTION_TIMEOUT_S]
                 );
@@ -402,7 +402,7 @@ class GCECredentials extends CredentialsLoader implements
 
         $metricsHeader = $this->applyMetricsHeader(
             [],
-            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
+            $this->getTokenEndpointMetricsHeaderValue('gce', $isAccessTokenRequest)
         );
         $response = $this->getFromMetadata($httpHandler, $this->tokenUri, $metricsHeader);
 
@@ -420,6 +420,26 @@ class GCECredentials extends CredentialsLoader implements
         $this->lastReceivedToken = $json;
 
         return $json;
+    }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @param string $_metricsHeaderValue [INTERNAL] The observability metrics
+     *        header value to be set on the request.
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        callable $httpHandler = null,
+        string $_metricsHeaderValue = ''
+    ): array {
+        $metricsHeaderValue = $this->getServiceApiMetricsHeaderValue('gce');
+        return parent::updateMetadata($metadata, $authUri, $httpHandler, $metricsHeaderValue);
     }
 
     /**

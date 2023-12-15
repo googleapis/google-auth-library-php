@@ -115,15 +115,42 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      */
     public function fetchAuthToken(callable $httpHandler = null, array $metricsHeader = [])
     {
+        // ImersonatedServiceAccountCredentials can propagate it's own header value, hence
+        // the check for empty metricsHeaders
         if (empty($metricsHeaders)) {
             // We don't support id token endpoint requests as of now for User Cred
             $isAccessTokenRequest = true;
             $metricsHeaders = $this->applyMetricsHeader(
                 [],
-                $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
+                $this->getTokenEndpointMetricsHeaderValue('user', $isAccessTokenRequest)
             );
         }
         return $this->auth->fetchAuthToken($httpHandler, $metricsHeaders);
+    }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable $httpHandler callback which delivers psr7 request
+     * @param string $_metricsHeaderValue [INTERNAL] The observability metrics
+     *        header value to be set on the request.
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        callable $httpHandler = null,
+        string $_metricsHeaderValue = ''
+    ): array {
+        // ImersonatedServiceAccountCredentials can propagate it's own header value, hence the check for empty $_metricsHeaderValue
+        if (empty($_metricsHeaderValue)) {
+            $metricsHeaderValue = $this->getServiceApiMetricsHeaderValue('user');
+        } else {
+            $metricsHeaderValue = $_metricsHeaderValue;
+        }
+        return parent::updateMetadata($metadata, $authUri, $httpHandler, $metricsHeaderValue);
     }
 
     /**

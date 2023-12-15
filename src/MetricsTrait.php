@@ -52,41 +52,47 @@ trait MetricsTrait
         return self::$version;
     }
 
-    private function getServiceApiMetricsHeaderValue()
+    protected function getServiceApiMetricsHeaderValue(string $credType)
     {
-        switch (get_class($this)) {
-            case 'Google\Auth\Credentials\UserRefreshCredentials':
+        switch ($credType) {
+            case 'user':
                 return '';
-            case 'Google\Auth\Credentials\ServiceAccountCredentials':
+            case 'sa':
                 return '';
-            case 'Google\Auth\Credentials\ServiceAccountJwtAccessCredentials':
+            case 'jwt':
                 return '';
-            case 'Google\Auth\Credentials\GCECredentials':
+            case 'gce':
                 return '';
-            case 'Google\Auth\Credentials\ImpersonatedServiceAccountCredentials':
+            case 'impersonated':
                 return '';
         }
         return '';
     }
 
-    private function getTokenEndpointMetricsHeaderValue(bool $isAccessTokenRequest)
+    protected function getTokenEndpointMetricsHeaderValue(string $credType, bool $isAccessTokenRequest)
     {
-        switch (get_class($this)) {
-            case 'Google\Auth\Credentials\UserRefreshCredentials':
+        switch ($credType) {
+            case 'user':
                 return '';
-            case 'Google\Auth\Credentials\ServiceAccountCredentials':
+            case 'sa':
                 return '';
-            case 'Google\Auth\Credentials\ServiceAccountJwtAccessCredentials':
+            case 'jwt':
                 return '';
-            case 'Google\Auth\Credentials\GCECredentials':
+            case 'gce':
                 return '';
-            case 'Google\Auth\Credentials\ImpersonatedServiceAccountCredentials':
+            case 'impersonated':
                 return '';
         }
         return '';
     }
 
-    private function applyMetricsHeader($metadata, $headerValue)
+    protected static function getMdsPingHeader()
+    {
+        return [];
+    }
+
+
+    protected function applyMetricsHeader($metadata, $headerValue)
     {
         if (empty($headerValue)) {
             return $metadata;
