@@ -132,7 +132,7 @@ class AuthTokenMiddleware
         ) {
             $token = $this->fetcher->fetchAuthToken();
             $request = $request->withHeader(
-                'authorization', 'Bearer ' . ($token['access_token'] ?? $token['id_token'])
+                'authorization', 'Bearer ' . ($token['access_token'] ?? $token['id_token'] ?? '')
             );
         } else {
             $headers = $this->fetcher->updateMetadata($request->getHeaders(), null, $this->httpHandler);
