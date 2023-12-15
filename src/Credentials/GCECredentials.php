@@ -400,7 +400,7 @@ class GCECredentials extends CredentialsLoader implements
             $isAccessTokenRequest = false;
         }
 
-        $metricsHeader = $this->applyMetricsHeader(
+        $metricsHeader = $this->applyMetricHeaders(
             [],
             $this->getTokenEndpointMetricsHeaderValue('gce', $isAccessTokenRequest)
         );

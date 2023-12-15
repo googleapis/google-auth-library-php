@@ -92,7 +92,7 @@ trait MetricsTrait
     }
 
 
-    protected function applyMetricsHeader($metadata, $headerValue)
+    protected function applyMetricHeaders($metadata, $headerValue)
     {
         if (empty($headerValue)) {
             return $metadata;

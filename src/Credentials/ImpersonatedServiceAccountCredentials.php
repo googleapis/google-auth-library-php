@@ -123,7 +123,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     {
         // We don't support id token endpoint requests as of now for Impersonated Cred
         $isAccessTokenRequest = true;
-        $metricsHeaders = $this->applyMetricsHeader(
+        $metricsHeaders = $this->applyMetricHeaders(
             [],
             $this->getTokenEndpointMetricsHeaderValue('impersonated', $isAccessTokenRequest = true)
         );

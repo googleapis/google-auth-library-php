@@ -120,7 +120,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
         if (empty($metricsHeaders)) {
             // We don't support id token endpoint requests as of now for User Cred
             $isAccessTokenRequest = true;
-            $metricsHeaders = $this->applyMetricsHeader(
+            $metricsHeaders = $this->applyMetricHeaders(
                 [],
                 $this->getTokenEndpointMetricsHeaderValue('user', $isAccessTokenRequest)
             );

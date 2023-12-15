@@ -65,7 +65,7 @@ trait UpdateMetadataTrait
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['id_token']];
         }
 
-        $metadata_copy = $this->applyMetricsHeaders(
+        $metadata_copy = $this->applyMetricHeaders(
             $metadata_copy,
             $metricsHeaderValue
         );

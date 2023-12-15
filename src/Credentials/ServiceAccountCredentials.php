@@ -211,7 +211,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
             $isAccessTokenRequest = false;
         }
 
-        $metricsHeader = $this->applyMetricsHeader(
+        $metricsHeader = $this->applyMetricHeaders(
             [],
             $this->getTokenEndpointMetricsHeaderValue('sa', $isAccessTokenRequest)
         );
