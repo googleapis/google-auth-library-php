@@ -108,6 +108,10 @@ class MetricsTraitTest extends TestCase
         $this->assertUpdateMetadata($sa, $handler, 'sa', $handlerCalled);
     }
 
+    /**
+     * ServiceAccountJwtAccessCredentials creates the jwt token within library hence
+     * they don't have any observability metrics header check for token endpoint requests.
+     */
     public function testServiceAccountJwtAccessCredentials()
     {
         $keyFile = __DIR__ . '/fixtures3/service_account_credentials.json';
@@ -122,6 +126,9 @@ class MetricsTraitTest extends TestCase
         );
     }
 
+    /**
+     * ImpersonatedServiceAccountCredentials haven't enabled identity token support hence
+     * they don't have 'auth-request-type/it' observability metric header check.
     public function testImpersonatedServiceAccountCredentials()
     {
         $keyFile = __DIR__ . '/fixtures5/.config/gcloud/application_default_credentials.json';
@@ -132,6 +139,10 @@ class MetricsTraitTest extends TestCase
         $this->assertUpdateMetadata($impersonatedCred, $handler, 'imp', $handlerCalled);
     }
 
+    /**
+     * UserRefreshCredentials haven't enabled identity token support hence
+     * they don't have 'auth-request-type/it' observability metric header check.
+     */
     public function testUserRefreshCredentials()
     {
         $keyFile = __DIR__ . '/fixtures2/gcloud.json';
@@ -142,6 +153,20 @@ class MetricsTraitTest extends TestCase
         $this->assertUpdateMetadata($userRefreshCred, $handler, 'u', $handlerCalled);
     }
 
+    /**
+     * @dataProvider headerCases
+     */
+    public function testApplyMetricsHeader($existingValue, $expected)
+    {
+        $metadata = [self::$headerKey => $existingValue];
+        $metadata = $this->impl->applyMetricsHeader($metadata, 'bar');
+        $this->assertEquals($expected, $metadata[self::$headerKey]);
+    }
+
+    /**
+     * Invokes the 'updateMetadata' method of cred fetcher with empty metadata argument
+     * and asserts for proper service api usage observability metrics header.
+     */
     private function assertUpdateMetadata($cred, $handler, $credShortform, &$handlerCalled)
     {
         $metadata = $cred->updateMetadata([], null, $handler);
@@ -156,6 +181,15 @@ class MetricsTraitTest extends TestCase
         $this->assertTrue($handlerCalled);
     }
 
+    /**
+     * @param string $credShortform The short form of the credential type
+     *        used in observability metric header value.
+     * @param string $requestTypeHeaderValue Expected header value of the form
+     *        'auth-request-type/<>'
+     * @param bool $handlerCalled Reference to the handlerCalled flag asserted later
+     *        in the test.
+     * @return callable
+     */
     private function getCustomHandler($credShortform, $requestTypeHeaderValue, &$handlerCalled)
     {
         $jsonTokens = $this->jsonTokens;
@@ -177,24 +211,6 @@ class MetricsTraitTest extends TestCase
         ]);
     }
 
-    /**
-     * @dataProvider headerCases
-     */
-    public function testApplyMetricsHeader($existingValue, $expected)
-    {
-        $metadata = [self::$headerKey => $existingValue];
-        $metadata = $this->impl->applyMetricsHeader($metadata, 'bar');
-        $this->assertEquals($expected, $metadata[self::$headerKey]);
-    }
-
-    public function tokenRequestType()
-    {
-        return [
-            ['someScope', null, 'auth-request-type/at'],
-            [null, 'someTargetAudience', 'auth-request-type/it'],
-        ];
-    }
-
     public function headerCases()
     {
         return [
@@ -202,6 +218,14 @@ class MetricsTraitTest extends TestCase
             ['foo', 'foo bar'],
             [[], ['bar']],
             [['foo'], ['foo bar']],
+        ];
+    }
+
+    public function tokenRequestType()
+    {
+        return [
+            ['someScope', null, 'auth-request-type/at'],
+            [null, 'someTargetAudience', 'auth-request-type/it'],
         ];
     }
 }

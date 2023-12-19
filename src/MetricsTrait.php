@@ -73,11 +73,7 @@ trait MetricsTrait
     protected function getTokenEndpointMetricsHeaderValue(bool $isAccessTokenRequest): string
     {
         $value = $this->langAndVersion();
-        if ($isAccessTokenRequest) {
-            $value .= ' ' . self::$requestType['accessToken'];
-        } else {
-            $value .= ' ' . self::$requestType['idToken'];
-        }
+        $value .= ' ' . self::$requestType[($isAccessTokenRequest ? 'accessToken' : 'idToken')];
 
         if (!empty($this->credType)) {
             return $value . ' ' . $this->credType;

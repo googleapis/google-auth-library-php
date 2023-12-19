@@ -122,8 +122,8 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      */
     public function fetchAuthToken(callable $httpHandler = null, array $metricsHeader = [])
     {
-        // ImersonatedServiceAccountCredentials can propagate it's own header value, hence
-        // we'll pass them if present.
+        // ImersonatedServiceAccountCredentials will propagate it's own header value, hence
+        // we'll pass them if present, else create headers for UserCred and pass along.
         if (empty($metricsHeader)) {
             // We don't support id token endpoint requests as of now for User Cred
             $isAccessTokenRequest = true;
