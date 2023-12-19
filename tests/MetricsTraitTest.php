@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- namespace Google\Auth\Tests;
+namespace Google\Auth\Tests;
 
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
@@ -23,11 +23,9 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\MetricsTrait;
-use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 class MetricsTraitTest extends TestCase
@@ -44,10 +42,12 @@ class MetricsTraitTest extends TestCase
 
     public function setUp(): void
     {
-        $this->impl = new class {use MetricsTrait {
-            getVersion as public;
-            applyMetricsHeader as public;
-        }};
+        $this->impl = new class() {
+            use MetricsTrait {
+                getVersion as public;
+                applyMetricsHeader as public;
+            }
+        };
         $this->langAndVersion = sprintf(
             'gl-php/%s auth/%s',
             PHP_VERSION,
@@ -59,7 +59,7 @@ class MetricsTraitTest extends TestCase
     public function testGetVersion()
     {
         $actualVersion = $this->impl::getVersion();
-        $this->assertStringMatchesFormat("%d.%d.%d", $actualVersion);
+        $this->assertStringMatchesFormat('%d.%d.%d', $actualVersion);
     }
 
     /**
