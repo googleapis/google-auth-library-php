@@ -107,7 +107,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      * @param callable $httpHandler
      * @param array $metricsHeader [optional] Metrics headers to be inserted
      *     into the token endpoint request present.
-     *     This is passed from ImersonatedServiceAccountCredentials as it uses
+     *     This could be passed from ImersonatedServiceAccountCredentials as it uses
      *     UserRefreshCredentials as source credentials.
      *
      * @return array<mixed> {
@@ -123,7 +123,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     public function fetchAuthToken(callable $httpHandler = null, array $metricsHeader = [])
     {
         // ImersonatedServiceAccountCredentials can propagate it's own header value, hence
-        // the check for empty metricsHeaders
+        // we'll pass them if present.
         if (empty($metricsHeader)) {
             // We don't support id token endpoint requests as of now for User Cred
             $isAccessTokenRequest = true;
@@ -133,22 +133,6 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
             );
         }
         return $this->auth->fetchAuthToken($httpHandler, $metricsHeader);
-    }
-
-    /**
-     * Updates metadata with the authorization token.
-     *
-     * @param array<mixed> $metadata metadata hashmap
-     * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @return array<mixed> updated metadata hashmap
-     */
-    public function updateMetadata(
-        $metadata,
-        $authUri = null,
-        callable $httpHandler = null,
-    ): array {
-        return parent::updateMetadata($metadata, $authUri, $httpHandler);
     }
 
     /**

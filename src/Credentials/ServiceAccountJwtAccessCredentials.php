@@ -120,7 +120,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null,
+        callable $httpHandler = null
     ) {
         $scope = $this->auth->getScope();
         if (empty($authUri) && empty($scope)) {
@@ -128,6 +128,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
         }
 
         $this->auth->setAudience($authUri);
+
         return parent::updateMetadata($metadata, $authUri, $httpHandler);
     }
 

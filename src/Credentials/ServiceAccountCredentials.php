@@ -274,7 +274,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null,
+        callable $httpHandler = null
     ) {
         // scope exists. use oauth implementation
         if (!$this->useSelfSignedJwt()) {
