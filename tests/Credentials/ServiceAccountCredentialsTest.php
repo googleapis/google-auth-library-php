@@ -307,6 +307,29 @@ class ServiceAccountCredentialsTest extends TestCase
         $this->assertEquals(1, $timesCalled);
     }
 
+    public function testShouldBeOAuthRequestWhenSubIsSet()
+    {
+        $testJson = $this->createTestJson();
+        $sub = 'sub12345';
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $sub) {
+            $timesCalled++;
+            parse_str($request->getBody(), $post);
+            $this->assertArrayHasKey('assertion', $post);
+            list($header, $payload, $sig) = explode('.', $post['assertion']);
+            $jwtParams = json_decode(base64_decode($payload), true);
+            $this->assertArrayHasKey('sub', $jwtParams);
+            $this->assertEquals($sub, $jwtParams['sub']);
+
+            return new Psr7\Response(200, [], Utils::streamFor(json_encode([
+                'access_token' => 'token123'
+            ])));
+        };
+        $sa = new ServiceAccountCredentials(null, $testJson, $sub);
+        $this->assertEquals('token123', $sa->fetchAuthToken($httpHandler)['access_token']);
+        $this->assertEquals(1, $timesCalled);
+    }
+
     public function testSettingBothScopeAndTargetAudienceThrowsException()
     {
         $this->expectException(InvalidArgumentException::class);
@@ -319,6 +342,24 @@ class ServiceAccountCredentialsTest extends TestCase
             null,
             'a-target-audience'
         );
+    }
+
+    public function testDomainWideDelegationOutsideGduThrowsException()
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(
+            'Service Account subject is configured for the credential. Domain-wide ' .
+            'delegation is not supported in universes other than googleapis.com'
+        );
+        $testJson = $this->createTestJson() + ['universe_domain' => 'abc.xyz'];
+        $sub = 'sub123';
+        $sa = new ServiceAccountCredentials(
+            null,
+            $testJson,
+            $sub
+        );
+
+        $sa->fetchAuthToken();
     }
 
     public function testReturnsClientEmail()

@@ -14,7 +14,7 @@ jobs:
                 php: [ "7.4", "8.0", "8.1", "8.2", "8.3" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -31,7 +31,7 @@ jobs:
         runs-on: ubuntu-latest
         name: Test Prefer Lowest
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -49,7 +49,7 @@ jobs:
       runs-on: ubuntu-latest
       name: PHP Style Check
       steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -64,7 +64,7 @@ jobs:
       runs-on: ubuntu-latest
       name: PHPStan Static Analysis
       steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:

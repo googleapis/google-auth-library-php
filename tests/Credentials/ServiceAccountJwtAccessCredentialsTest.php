@@ -503,4 +503,43 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
         $sa = new ServiceAccountJwtAccessCredentials($keyFile);
         $this->assertEquals('test_quota_project', $sa->getQuotaProject());
     }
+
+    public function testUpdateMetadataWithUniverseDomainAlwaysUsesJwtAccess()
+    {
+        $testJson = $this->createTestJson() + ['universe_domain' => 'abc.xyz'];
+        // jwt access should always be used when the universe domain is set,
+        // even if scopes are supplied but useJwtAccessWithScope is false
+        $scope = ['scope1', 'scope2'];
+        $sa = new ServiceAccountCredentials(
+            $scope,
+            $testJson
+        );
+
+        $metadata = $sa->updateMetadata(
+            ['foo' => 'bar'],
+            'https://example.com/service'
+        );
+
+        $this->assertArrayHasKey(
+            CredentialsLoader::AUTH_METADATA_KEY,
+            $metadata
+        );
+
+        $authorization = $metadata[CredentialsLoader::AUTH_METADATA_KEY];
+        $this->assertTrue(is_array($authorization));
+
+        $token = current($authorization);
+        $this->assertTrue(is_string($token));
+        $this->assertEquals(0, strpos($token, 'Bearer '));
+
+        // Ensure token is a self-signed JWT
+        $token = substr($token, strlen('Bearer '));
+        $this->assertEquals(2, substr_count($token, '.'));
+        list($header, $payload, $sig) = explode('.', $token);
+        $json = json_decode(base64_decode($payload), true);
+        $this->assertTrue(is_array($json));
+        // Ensure scopes exist
+        $this->assertArrayHasKey('scope', $json);
+        $this->assertEquals($json['scope'], implode(' ', $scope));
+    }
 }
