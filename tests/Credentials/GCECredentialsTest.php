@@ -51,6 +51,24 @@ class GCECredentialsTest extends BaseTest
         $this->assertTrue($onGce);
     }
 
+    public function testOnGceMetricsHeader()
+    {
+        $handerInvoked = false;
+        $dummyHandler = function ($request) use (&$handerInvoked) {
+            $header = $request->getHeaderLine('x-goog-api-client');
+            $handerInvoked = true;
+            $this->assertStringMatchesFormat(
+                'gl-php/%s auth/%s auth-request-type/mds',
+                $header
+            );
+
+            return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+        };
+
+        GCECredentials::onGce($dummyHandler);
+        $this->assertTrue($handerInvoked);
+    }
+
     public function testOnGCEIsFalseOnClientErrorStatus()
     {
         // simulate retry attempts by returning multiple 400s

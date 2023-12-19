@@ -27,23 +27,63 @@ trait MetricsTrait
 {
     private static $version = null;
 
-    private static $headerKey = 'x-goog-api-client';
+    protected static $metricsHeaderKey = 'x-goog-api-client';
 
     private static array $requestType = [
         'accessToken' => 'auth-request-type/at',
-        'idToken' => 'auth-request-type/idt',
-        'mdsPing' => 'auth-request-type/mds'
+        'idToken' => 'auth-request-type/it',
     ];
 
-    private static array $credType = [
+    private static array $credTypes = [
         'user' => 'cred-type/u',
         'sa' => 'cred-type/sa',
-        'sa-jwt' => 'cred-type/jwt',
+        'jwt' => 'cred-type/jwt',
         'gce' => 'cred-type/mds',
         'impersonate' => 'cred-type/imp'
     ];
 
-    private function getVersion(): string
+    protected string $credType = '';
+    protected function getServiceApiMetricsHeaderValue(): string
+    {
+        if (!empty($this->credType)) {
+            return $this->langAndVersion() . ' ' . $this->credType;
+        }
+        return '';
+    }
+
+    protected function getTokenEndpointMetricsHeaderValue(bool $isAccessTokenRequest): string
+    {
+        $value = $this->langAndVersion();
+        if ($isAccessTokenRequest) {
+            $value .= ' ' . self::$requestType['accessToken'];
+        } else {
+            $value .= ' ' . self::$requestType['idToken'];
+        }
+
+        if (!empty($this->credType)) {
+            return $value . ' ' . $this->credType;
+        }
+
+        return '';
+    }
+
+    protected function applyMetricsHeader($metadata, $headerValue): array
+    {
+        if (empty($headerValue)) {
+            return $metadata;
+        } elseif (!isset($metadata[self::$metricsHeaderKey]) || empty($metadata[self::$metricsHeaderKey])) {
+            $metadata[self::$metricsHeaderKey] = [$headerValue];
+        } elseif (is_array($metadata[self::$metricsHeaderKey])) {
+            $metadata[self::$metricsHeaderKey][0] .= ' ' . $headerValue;
+        } else {
+            // It's a string instead of array
+            $metadata[self::$metricsHeaderKey] .= ' ' . $headerValue;
+        }
+
+        return $metadata;
+    }
+
+    protected static function getVersion(): string
     {
         if (is_null(self::$version)) {
             $versionFilePath = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'VERSION']);
@@ -52,55 +92,8 @@ trait MetricsTrait
         return self::$version;
     }
 
-    protected function getServiceApiMetricsHeaderValue(string $credType)
+    private function langAndVersion(): string
     {
-        switch ($credType) {
-            case 'user':
-                return '';
-            case 'sa':
-                return '';
-            case 'jwt':
-                return '';
-            case 'gce':
-                return '';
-            case 'impersonated':
-                return '';
-        }
-        return '';
-    }
-
-    protected function getTokenEndpointMetricsHeaderValue(string $credType, bool $isAccessTokenRequest)
-    {
-        switch ($credType) {
-            case 'user':
-                return '';
-            case 'sa':
-                return '';
-            case 'jwt':
-                return '';
-            case 'gce':
-                return '';
-            case 'impersonated':
-                return '';
-        }
-        return '';
-    }
-
-    protected static function getMdsPingHeader()
-    {
-        return [];
-    }
-
-
-    protected function applyMetricHeaders($metadata, $headerValue)
-    {
-        if (empty($headerValue)) {
-            return $metadata;
-        } elseif (isset($metadata[self::$headerKey])) {
-            $metadata[self::$headerKey][0] .= ' ' . $headerValue;
-        } else {
-            $metadata[self::$headerKey] = [$headerValue];
-        }
-        return $metadata;
+        return 'gl-php/' . PHP_VERSION . ' auth/' . self::getVersion();
     }
 }

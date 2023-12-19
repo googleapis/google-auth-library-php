@@ -85,6 +85,13 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     protected $projectId;
 
     /**
+     * User in observability metric headers
+     *
+     * @var string
+     */
+    protected string $credType = 'cred-type/sa';
+
+    /**
      * @var array<mixed>|null
      */
     private $lastReceivedJwtAccessToken;
@@ -211,9 +218,9 @@ class ServiceAccountCredentials extends CredentialsLoader implements
             $isAccessTokenRequest = false;
         }
 
-        $metricsHeader = $this->applyMetricHeaders(
+        $metricsHeader = $this->applyMetricsHeader(
             [],
-            $this->getTokenEndpointMetricsHeaderValue('sa', $isAccessTokenRequest)
+            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
         );
         return $this->auth->fetchAuthToken($httpHandler, $metricsHeader);
     }
@@ -262,20 +269,16 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      * @param array<mixed> $metadata metadata hashmap
      * @param string $authUri optional auth uri
      * @param callable $httpHandler callback which delivers psr7 request
-     * @param string $_metricsHeaderValue [INTERNAL] The observability metrics
-     *        header value to be set on the request.
      * @return array<mixed> updated metadata hashmap
      */
     public function updateMetadata(
         $metadata,
         $authUri = null,
         callable $httpHandler = null,
-        string $_metricsHeaderValue = ''
     ) {
         // scope exists. use oauth implementation
         if (!$this->useSelfSignedJwt()) {
-            $metricsHeaderValue = $this->getServiceApiMetricsHeaderValue('sa');
-            return parent::updateMetadata($metadata, $authUri, $httpHandler, $metricsHeaderValue);
+            return parent::updateMetadata($metadata, $authUri, $httpHandler);
         }
 
         $jwtCreds = $this->createJwtAccessCredentials();

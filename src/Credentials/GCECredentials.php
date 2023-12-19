@@ -145,6 +145,13 @@ class GCECredentials extends CredentialsLoader implements
     protected $lastReceivedToken;
 
     /**
+     * User in observability metric headers
+     *
+     * @var string
+     */
+    protected string $credType = 'cred-type/mds';
+
+    /**
      * @var string|null
      */
     private $clientName;
@@ -308,6 +315,17 @@ class GCECredentials extends CredentialsLoader implements
         return $base . self::PROJECT_ID_URI_PATH;
     }
 
+    private static function getMdsPingHeader()
+    {
+        return [
+            self::$metricsHeaderKey => [sprintf(
+                'gl-php/%s auth/%s auth-request-type/mds',
+                PHP_VERSION,
+                self::getVersion()
+            )]
+        ];
+    }
+
     /**
      * The full uri for accessing the default universe domain.
      *
@@ -426,9 +444,9 @@ class GCECredentials extends CredentialsLoader implements
             $isAccessTokenRequest = false;
         }
 
-        $metricsHeader = $this->applyMetricHeaders(
+        $metricsHeader = $this->applyMetricsHeader(
             [],
-            $this->getTokenEndpointMetricsHeaderValue('gce', $isAccessTokenRequest)
+            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
         );
         $response = $this->getFromMetadata($httpHandler, $this->tokenUri, $metricsHeader);
 
@@ -446,26 +464,6 @@ class GCECredentials extends CredentialsLoader implements
         $this->lastReceivedToken = $json;
 
         return $json;
-    }
-
-    /**
-     * Updates metadata with the authorization token.
-     *
-     * @param array<mixed> $metadata metadata hashmap
-     * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param string $_metricsHeaderValue [INTERNAL] The observability metrics
-     *        header value to be set on the request.
-     * @return array<mixed> updated metadata hashmap
-     */
-    public function updateMetadata(
-        $metadata,
-        $authUri = null,
-        callable $httpHandler = null,
-        string $_metricsHeaderValue = ''
-    ): array {
-        $metricsHeaderValue = $this->getServiceApiMetricsHeaderValue('gce');
-        return parent::updateMetadata($metadata, $authUri, $httpHandler, $metricsHeaderValue);
     }
 
     /**
@@ -610,18 +608,18 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @param callable $httpHandler An HTTP Handler to deliver PSR7 requests.
      * @param string $uri The metadata URI.
-     * @param array $metricsHeaders [optional] If present, add these headers to the token
+     * @param array $metricsHeader [optional] If present, add these headers to the token
      *        endpoint request.
      *
      * @return string
      */
-    private function getFromMetadata(callable $httpHandler, $uri, array $metricsHeaders = [])
+    private function getFromMetadata(callable $httpHandler, $uri, array $metricsHeader = [])
     {
         $resp = $httpHandler(
             new Request(
                 'GET',
                 $uri,
-                [self::FLAVOR_HEADER => 'Google'] + $metricsHeaders
+                [self::FLAVOR_HEADER => 'Google'] + $metricsHeader
             )
         );
 

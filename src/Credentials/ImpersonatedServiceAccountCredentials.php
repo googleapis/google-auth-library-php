@@ -37,6 +37,13 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     protected $sourceCredentials;
 
     /**
+     * User in observability metric headers
+     *
+     * @var string
+     */
+    protected string $credType = 'cred-type/imp';
+
+    /**
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that
      * has be created with the --impersonated-service-account flag.
      *
@@ -123,31 +130,11 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     {
         // We don't support id token endpoint requests as of now for Impersonated Cred
         $isAccessTokenRequest = true;
-        $metricsHeaders = $this->applyMetricHeaders(
+        $metricsHeader = $this->applyMetricsHeader(
             [],
-            $this->getTokenEndpointMetricsHeaderValue('impersonated', $isAccessTokenRequest = true)
+            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
         );
-        return $this->sourceCredentials->fetchAuthToken($httpHandler, $metricsHeaders);
-    }
-
-    /**
-     * Updates metadata with the authorization token.
-     *
-     * @param array<mixed> $metadata metadata hashmap
-     * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param string $_metricsHeaderValue [INTERNAL] The observability metrics
-     *        header value to be set on the request.
-     * @return array<mixed> updated metadata hashmap
-     */
-    public function updateMetadata(
-        $metadata,
-        $authUri = null,
-        callable $httpHandler = null,
-        string $_metricsHeaderValue = ''
-    ): array {
-        $metricsHeaderValue = $this->getServiceApiMetricsHeaderValue('impersonated');
-        return $this->sourceCredentials->updateMetadata($metadata, $authUri, $httpHandler, $metricsHeaderValue);
+        return $this->sourceCredentials->fetchAuthToken($httpHandler, $metricsHeader);
     }
 
     /**

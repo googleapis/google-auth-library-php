@@ -49,6 +49,13 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     protected $quotaProject;
 
     /**
+     * User in observability metric headers
+     *
+     * @var string
+     */
+    protected string $credType = 'cred-type/u';
+
+    /**
      * Create a new UserRefreshCredentials.
      *
      * @param string|string[] $scope the scope of the access request, expressed
@@ -98,7 +105,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
 
     /**
      * @param callable $httpHandler
-     * @param array $metricsHeaders [optional] Metrics headers to be inserted
+     * @param array $metricsHeader [optional] Metrics headers to be inserted
      *     into the token endpoint request present.
      *     This is passed from ImersonatedServiceAccountCredentials as it uses
      *     UserRefreshCredentials as source credentials.
@@ -117,15 +124,15 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     {
         // ImersonatedServiceAccountCredentials can propagate it's own header value, hence
         // the check for empty metricsHeaders
-        if (empty($metricsHeaders)) {
+        if (empty($metricsHeader)) {
             // We don't support id token endpoint requests as of now for User Cred
             $isAccessTokenRequest = true;
-            $metricsHeaders = $this->applyMetricHeaders(
+            $metricsHeader = $this->applyMetricsHeader(
                 [],
-                $this->getTokenEndpointMetricsHeaderValue('user', $isAccessTokenRequest)
+                $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
             );
         }
-        return $this->auth->fetchAuthToken($httpHandler, $metricsHeaders);
+        return $this->auth->fetchAuthToken($httpHandler, $metricsHeader);
     }
 
     /**
@@ -134,23 +141,14 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      * @param array<mixed> $metadata metadata hashmap
      * @param string $authUri optional auth uri
      * @param callable $httpHandler callback which delivers psr7 request
-     * @param string $_metricsHeaderValue [INTERNAL] The observability metrics
-     *        header value to be set on the request.
      * @return array<mixed> updated metadata hashmap
      */
     public function updateMetadata(
         $metadata,
         $authUri = null,
         callable $httpHandler = null,
-        string $_metricsHeaderValue = ''
     ): array {
-        // ImersonatedServiceAccountCredentials can propagate it's own header value, hence the check for empty $_metricsHeaderValue
-        if (empty($_metricsHeaderValue)) {
-            $metricsHeaderValue = $this->getServiceApiMetricsHeaderValue('user');
-        } else {
-            $metricsHeaderValue = $_metricsHeaderValue;
-        }
-        return parent::updateMetadata($metadata, $authUri, $httpHandler, $metricsHeaderValue);
+        return parent::updateMetadata($metadata, $authUri, $httpHandler);
     }
 
     /**

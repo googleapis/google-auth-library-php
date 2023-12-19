@@ -55,6 +55,13 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
     protected $quotaProject;
 
     /**
+     * User in observability metric headers
+     *
+     * @var string
+     */
+    protected string $credType = 'cred-type/jwt';
+
+    /**
      * @var string
      */
     public $projectId;
@@ -108,15 +115,12 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
      * @param array<mixed> $metadata metadata hashmap
      * @param string $authUri optional auth uri
      * @param callable $httpHandler callback which delivers psr7 request
-     * @param string $_metricsHeaderValue [INTERNAL] The observability metrics
-     *        header value to be set on the request. It's set internally and is not propagated
      * @return array<mixed> updated metadata hashmap
      */
     public function updateMetadata(
         $metadata,
         $authUri = null,
         callable $httpHandler = null,
-        $_metricsHeaderValue = ''
     ) {
         $scope = $this->auth->getScope();
         if (empty($authUri) && empty($scope)) {
@@ -124,8 +128,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
         }
 
         $this->auth->setAudience($authUri);
-        $metricsHeaderValue = $this->getServiceApiMetricsHeaderValue('jwt');
-        return parent::updateMetadata($metadata, $authUri, $httpHandler, $metricsHeaderValue);
+        return parent::updateMetadata($metadata, $authUri, $httpHandler);
     }
 
     /**
