@@ -49,7 +49,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     protected $quotaProject;
 
     /**
-     * User in observability metric headers
+     * Used in observability metric headers
      *
      * @var string
      */

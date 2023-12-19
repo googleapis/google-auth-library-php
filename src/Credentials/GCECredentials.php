@@ -145,7 +145,7 @@ class GCECredentials extends CredentialsLoader implements
     protected $lastReceivedToken;
 
     /**
-     * User in observability metric headers
+     * Used in observability metric headers
      *
      * @var string
      */

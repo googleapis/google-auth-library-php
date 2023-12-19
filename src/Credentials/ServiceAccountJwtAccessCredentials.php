@@ -55,7 +55,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
     protected $quotaProject;
 
     /**
-     * User in observability metric headers
+     * Used in observability metric headers
      *
      * @var string
      */

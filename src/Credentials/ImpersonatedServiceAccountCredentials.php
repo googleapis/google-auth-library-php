@@ -37,7 +37,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     protected $sourceCredentials;
 
     /**
-     * User in observability metric headers
+     * Used in observability metric headers
      *
      * @var string
      */
