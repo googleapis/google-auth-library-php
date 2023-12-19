@@ -149,7 +149,7 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @var string
      */
-    protected string $credType = 'cred-type/mds';
+    protected $credType = 'cred-type/mds';
 
     /**
      * @var string|null
@@ -315,6 +315,9 @@ class GCECredentials extends CredentialsLoader implements
         return $base . self::PROJECT_ID_URI_PATH;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private static function getMdsPingHeader()
     {
         return [
@@ -440,7 +443,7 @@ class GCECredentials extends CredentialsLoader implements
         }
 
         $isAccessTokenRequest = true;
-        if (isset($this->targetAudience)) {
+        if (!is_null($this->targetAudience)) {
             $isAccessTokenRequest = false;
         }
 
@@ -608,7 +611,7 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @param callable $httpHandler An HTTP Handler to deliver PSR7 requests.
      * @param string $uri The metadata URI.
-     * @param array $metricsHeader [optional] If present, add these headers to the token
+     * @param array<mixed> $metricsHeader [optional] If present, add these headers to the token
      *        endpoint request.
      *
      * @return string

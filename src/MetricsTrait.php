@@ -25,16 +25,30 @@ namespace Google\Auth;
  */
 trait MetricsTrait
 {
-    private static $version = null;
+    /**
+     * @var string The version of the auth library php.
+     */
+    private static $version;
 
+    /**
+     * @var string The header key for the observability metrics.
+     */
     protected static $metricsHeaderKey = 'x-goog-api-client';
 
-    private static array $requestType = [
+    /**
+     * @var array<string, string> The request type header values
+     *      for the observability metrics.
+     */
+    private static $requestType = [
         'accessToken' => 'auth-request-type/at',
         'idToken' => 'auth-request-type/it',
     ];
 
-    private static array $credTypes = [
+    /**
+     * @var array<string, string> The credential type headervalues
+     *      for the observability metrics.
+     */
+    private static $credTypes = [
         'user' => 'cred-type/u',
         'sa' => 'cred-type/sa',
         'jwt' => 'cred-type/jwt',
@@ -42,7 +56,12 @@ trait MetricsTrait
         'impersonate' => 'cred-type/imp'
     ];
 
-    protected string $credType = '';
+    /**
+     * @var string The credential type for the observability metrics.
+     *      This would be overridden by the credential class if applicable.
+     */
+    protected $credType = '';
+
     protected function getServiceApiMetricsHeaderValue(): string
     {
         if (!empty($this->credType)) {
@@ -67,7 +86,13 @@ trait MetricsTrait
         return '';
     }
 
-    protected function applyMetricsHeader($metadata, $headerValue): array
+    /**
+     * @param array<mixed> $metadata The metadata to update and return.
+     * @param string $headerValue The header value to add to the metadata for
+     *        observability metrics.
+     * @return array<mixed> The updated metadata.
+     */
+    protected function applyMetricsHeader($metadata, $headerValue)
     {
         if (empty($headerValue)) {
             return $metadata;

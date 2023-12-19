@@ -59,7 +59,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
      *
      * @var string
      */
-    protected string $credType = 'cred-type/jwt';
+    protected $credType = 'cred-type/jwt';
 
     /**
      * @var string

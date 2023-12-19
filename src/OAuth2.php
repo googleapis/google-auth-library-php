@@ -572,6 +572,8 @@ class OAuth2 implements FetchAuthTokenInterface
      * Generates a request for token credentials.
      *
      * @param callable $httpHandler callback which delivers psr7 request
+     * @param array<mixed> $metricsHeader [optional] Metrics headers to be inserted
+     *     into the token endpoint request present.
      * @return RequestInterface the authorization Url.
      */
     public function generateCredentialsRequest(callable $httpHandler = null, $metricsHeader = [])
@@ -647,7 +649,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * Fetches the auth tokens based on the current state.
      *
      * @param callable $httpHandler callback which delivers psr7 request
-     * @param array $metricsHeader [optional] If present, add these headers to the token
+     * @param array<mixed> $metricsHeader [optional] If present, add these headers to the token
      *        endpoint request.
      * @return array<mixed> the response
      */

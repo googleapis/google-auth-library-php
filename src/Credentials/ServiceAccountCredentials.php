@@ -89,7 +89,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      *
      * @var string
      */
-    protected string $credType = 'cred-type/sa';
+    protected $credType = 'cred-type/sa';
 
     /**
      * @var array<mixed>|null

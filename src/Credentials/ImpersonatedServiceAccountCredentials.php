@@ -41,7 +41,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      *
      * @var string
      */
-    protected string $credType = 'cred-type/imp';
+    protected $credType = 'cred-type/imp';
 
     /**
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that

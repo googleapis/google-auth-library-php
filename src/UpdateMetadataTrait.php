@@ -50,22 +50,22 @@ trait UpdateMetadataTrait
         $authUri = null,
         callable $httpHandler = null
     ) {
-        if (isset($metadata[self::AUTH_METADATA_KEY])) {
+        $metadata_copy = $metadata;
+        $metadata_copy = $this->applyMetricsHeader(
+            $metadata_copy,
+            $this->getServiceApiMetricsHeaderValue()
+        );
+
+        if (isset($metadata_copy[self::AUTH_METADATA_KEY])) {
             // Auth metadata has already been set
-            return $metadata;
+            return $metadata_copy;
         }
         $result = $this->fetchAuthToken($httpHandler);
-        $metadata_copy = $metadata;
         if (isset($result['access_token'])) {
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['access_token']];
         } elseif (isset($result['id_token'])) {
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['id_token']];
         }
-
-        $metadata_copy = $this->applyMetricsHeader(
-            $metadata_copy,
-            $this->getServiceApiMetricsHeaderValue()
-        );
         return $metadata_copy;
     }
 }

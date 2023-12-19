@@ -53,7 +53,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      *
      * @var string
      */
-    protected string $credType = 'cred-type/u';
+    protected $credType = 'cred-type/u';
 
     /**
      * Create a new UserRefreshCredentials.
@@ -105,7 +105,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
 
     /**
      * @param callable $httpHandler
-     * @param array $metricsHeader [optional] Metrics headers to be inserted
+     * @param array<mixed> $metricsHeader [optional] Metrics headers to be inserted
      *     into the token endpoint request present.
      *     This could be passed from ImersonatedServiceAccountCredentials as it uses
      *     UserRefreshCredentials as source credentials.
