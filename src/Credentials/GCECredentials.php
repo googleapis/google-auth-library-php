@@ -529,8 +529,6 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * Fetch the default universe domain from the metadata server.
      *
-     * Returns null if called outside GCE.
-     *
      * @param callable $httpHandler Callback which delivers psr7 request
      * @return string
      */
@@ -546,10 +544,6 @@ class GCECredentials extends CredentialsLoader implements
         if (!$this->hasCheckedOnGce) {
             $this->isOnGce = self::onGce($httpHandler);
             $this->hasCheckedOnGce = true;
-        }
-
-        if (!$this->isOnGce) {
-            return self::DEFAULT_UNIVERSE_DOMAIN;
         }
 
         try {
