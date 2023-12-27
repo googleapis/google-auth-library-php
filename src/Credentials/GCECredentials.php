@@ -424,7 +424,8 @@ class GCECredentials extends CredentialsLoader implements
         $response = $this->getFromMetadata($httpHandler, $this->tokenUri);
 
         if ($this->targetAudience) {
-            return ['id_token' => $response];
+            $this->lastReceivedToken = ['id_token' => $response];
+            return $this->lastReceivedToken;
         }
 
         if (null === $json = json_decode($response, true)) {
@@ -448,14 +449,20 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
-     * @return array{access_token:string,expires_at:int}|null
+     * @return array<mixed>|null
      */
     public function getLastReceivedToken()
     {
         if ($this->lastReceivedToken) {
+            if (array_key_exists('id_token', $this->lastReceivedToken)) {
+                return [
+                    'id_token' => $this->lastReceivedToken['id_token']
+                ];
+            }
+
             return [
                 'access_token' => $this->lastReceivedToken['access_token'],
-                'expires_at' => $this->lastReceivedToken['expires_at'],
+                'expires_at' => $this->lastReceivedToken['expires_at']
             ];
         }
 
