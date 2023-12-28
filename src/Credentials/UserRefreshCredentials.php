@@ -105,7 +105,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
 
     /**
      * @param callable $httpHandler
-     * @param array<mixed> $header [optional] Headers to be passed to the token endpoint request.
+     * @param array<mixed> $headers [optional] Headers to be passed to the token endpoint request.
      *     This is used by ImersonatedServiceAccountCredentials as it uses UserRefreshCredentials
      *     as source credentials.
      *
@@ -119,7 +119,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      *     @type string $id_token
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null, array $header = [])
+    public function fetchAuthToken(callable $httpHandler = null, array $headers = [])
     {
         // ImersonatedServiceAccountCredentials will propagate it's own header value, hence
         // we'll pass them if present, else create headers for UserCred and pass along.

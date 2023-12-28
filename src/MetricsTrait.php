@@ -55,8 +55,8 @@ trait MetricsTrait
     }
 
     /**
-     * @var string The credential type for the observability metrics.
-     *             This will be overridden by the credential class if applicable.
+     * The credential type for the observability metrics.
+     * This will be overridden by the credential class if applicable.
      */
     public function getCredType(): string
     {

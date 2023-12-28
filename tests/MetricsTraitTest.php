@@ -47,7 +47,8 @@ class MetricsTraitTest extends TestCase
             use MetricsTrait {
                 getVersion as public;
             }
-            public function applyMetricsHeader($metadata, $headerValue) {
+            public function applyMetricsHeader($metadata, $headerValue)
+            {
                 $metadata[UpdateMetadataInterface::METRIC_METADATA_KEY] = [$headerValue];
                 return $metadata;
             }

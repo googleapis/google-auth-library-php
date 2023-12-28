@@ -128,10 +128,9 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        // We don't support id token endpoint requests as of now for Impersonated Cred
-        $isAccessTokenRequest = true;
-        $metricHeader = $this->getMetricHeader(self::CRED_TYPE, 'at');
-        return $this->sourceCredentials->fetchAuthToken($httpHandler, $metricHeader);
+        return $this->sourceCredentials->fetchAuthToken($httpHandler, [
+            self::METRIC_METADATA_KEY => $this->getMetricHeader(self::CRED_TYPE, 'at')
+        ]);
     }
 
     /**
