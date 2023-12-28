@@ -48,7 +48,7 @@ trait MetricsTrait
     private static function getVersion(): string
     {
         if (is_null(self::$version)) {
-            $versionFilePath = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'VERSION']);
+            $versionFilePath = __DIR__ . '/../VERSION';
             self::$version = trim((string) file_get_contents($versionFilePath));
         }
         return self::$version;
