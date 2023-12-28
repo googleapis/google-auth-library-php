@@ -352,7 +352,6 @@ class GCECredentials extends CredentialsLoader implements
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         $checkUri = 'http://' . self::METADATA_IP;
-        $metricHeader = [self::METRIC_METADATA_KEY => self::getMetricHeader('', 'mds')];
         for ($i = 1; $i <= self::MAX_COMPUTE_PING_TRIES; $i++) {
             try {
                 // Comment from: oauth2client/client.py
@@ -367,7 +366,10 @@ class GCECredentials extends CredentialsLoader implements
                     new Request(
                         'GET',
                         $checkUri,
-                        [self::FLAVOR_HEADER => 'Google'] + $metricHeader
+                        [
+                            self::FLAVOR_HEADER => 'Google',
+                            self::METRIC_METADATA_KEY => self::getMetricHeader('', 'mds'),
+                        ]
                     ),
                     ['timeout' => self::COMPUTE_PING_CONNECTION_TIMEOUT_S]
                 );

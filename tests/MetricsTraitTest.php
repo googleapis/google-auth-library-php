@@ -47,11 +47,6 @@ class MetricsTraitTest extends TestCase
             use MetricsTrait {
                 getVersion as public;
             }
-            public function applyMetricsHeader($metadata, $headerValue)
-            {
-                $metadata[UpdateMetadataInterface::METRIC_METADATA_KEY] = [$headerValue];
-                return $metadata;
-            }
         };
         $this->langAndVersion = sprintf(
             'gl-php/%s auth/%s',
@@ -159,16 +154,6 @@ class MetricsTraitTest extends TestCase
     }
 
     /**
-     * @dataProvider headerCases
-     */
-    public function testApplyMetricsHeader($existingValue, $expected)
-    {
-        $metadata = [self::$headerKey => $existingValue];
-        $metadata = $this->impl->applyMetricsHeader($metadata, 'bar');
-        $this->assertEquals($expected, $metadata[self::$headerKey]);
-    }
-
-    /**
      * Invokes the 'updateMetadata' method of cred fetcher with empty metadata argument
      * and asserts for proper service api usage observability metrics header.
      */
@@ -214,16 +199,6 @@ class MetricsTraitTest extends TestCase
                 return new Response(200, [], Utils::streamFor($jsonTokens));
             }
         ]);
-    }
-
-    public function headerCases()
-    {
-        return [
-            ['', ['bar']],
-            ['foo', ['bar']],
-            [[], ['bar']],
-            [['foo'], ['bar']],
-        ];
     }
 
     public function tokenRequestType()
