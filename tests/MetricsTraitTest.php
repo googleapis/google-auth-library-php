@@ -23,6 +23,7 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\MetricsTrait;
+use Google\Auth\UpdateMetadataInterface;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
@@ -45,7 +46,10 @@ class MetricsTraitTest extends TestCase
         $this->impl = new class() {
             use MetricsTrait {
                 getVersion as public;
-                applyMetricsHeader as public;
+            }
+            public function applyMetricsHeader($metadata, $headerValue) {
+                $metadata[UpdateMetadataInterface::METRIC_METADATA_KEY] = [$headerValue];
+                return $metadata;
             }
         };
         $this->langAndVersion = sprintf(
@@ -122,7 +126,7 @@ class MetricsTraitTest extends TestCase
         // This confirms that service usage requests have proper observability metric headers
         $this->assertStringContainsString(
             sprintf('%s cred-type/jwt', $this->langAndVersion),
-            $metadata[self::$headerKey][0]
+            $metadata[self::$headerKey]
         );
     }
 
@@ -175,7 +179,7 @@ class MetricsTraitTest extends TestCase
         // This confirms that service usage requests have proper observability metric headers
         $this->assertStringContainsString(
             sprintf('%s cred-type/%s', $this->langAndVersion, $credShortform),
-            $metadata[self::$headerKey][0]
+            $metadata[self::$headerKey]
         );
 
         $this->assertTrue($handlerCalled);
@@ -215,9 +219,9 @@ class MetricsTraitTest extends TestCase
     {
         return [
             ['', ['bar']],
-            ['foo', 'foo bar'],
+            ['foo', ['bar']],
             [[], ['bar']],
-            [['foo'], ['foo bar']],
+            [['foo'], ['bar']],
         ];
     }
 

@@ -32,6 +32,7 @@ class FetchAuthTokenCache implements
     UpdateMetadataInterface
 {
     use CacheTrait;
+    use MetricsTrait;
 
     /**
      * @var FetchAuthTokenInterface
@@ -237,6 +238,10 @@ class FetchAuthTokenCache implements
                 $metadata[self::AUTH_METADATA_KEY] = [
                     'Bearer ' . $cached['access_token']
                 ];
+                // Also set the metrics header.
+                if (!isset($metadata[self::METRIC_METADATA_KEY]) && $credType = $this->fetcher->getCredType()) {
+                    $metadata[self::METRIC_METADATA_KEY] = $this->getMetricHeader($credType);
+                }
             }
         }
 

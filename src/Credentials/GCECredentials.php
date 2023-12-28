@@ -111,6 +111,13 @@ class GCECredentials extends CredentialsLoader implements
     private const GKE_PRODUCT_NAME_FILE = '/sys/class/dmi/id/product_name';
 
     /**
+     * Used in observability metric headers
+     *
+     * @var string
+     */
+    private const CRED_TYPE = 'mds';
+
+    /**
      * Note: the explicit `timeout` and `tries` below is a workaround. The underlying
      * issue is that resolving an unknown host on some networks will take
      * 20-30 seconds; making this timeout short fixes the issue, but
@@ -143,13 +150,6 @@ class GCECredentials extends CredentialsLoader implements
      * @var array<mixed>
      */
     protected $lastReceivedToken;
-
-    /**
-     * Used in observability metric headers
-     *
-     * @var string
-     */
-    protected $credType = 'cred-type/mds';
 
     /**
      * @var string|null
@@ -316,20 +316,6 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
-     * @return array<mixed>
-     */
-    private static function getMdsPingHeader()
-    {
-        return [
-            self::$metricsHeaderKey => [sprintf(
-                'gl-php/%s auth/%s auth-request-type/mds',
-                PHP_VERSION,
-                self::getVersion()
-            )]
-        ];
-    }
-
-    /**
      * The full uri for accessing the default universe domain.
      *
      * @return string
@@ -366,6 +352,7 @@ class GCECredentials extends CredentialsLoader implements
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         $checkUri = 'http://' . self::METADATA_IP;
+        $metricHeader = [self::METRIC_METADATA_KEY => self::getMetricHeader('', 'mds')];
         for ($i = 1; $i <= self::MAX_COMPUTE_PING_TRIES; $i++) {
             try {
                 // Comment from: oauth2client/client.py
@@ -380,7 +367,7 @@ class GCECredentials extends CredentialsLoader implements
                     new Request(
                         'GET',
                         $checkUri,
-                        [self::FLAVOR_HEADER => 'Google'] + self::getMdsPingHeader()
+                        [self::FLAVOR_HEADER => 'Google'] + $metricHeader
                     ),
                     ['timeout' => self::COMPUTE_PING_CONNECTION_TIMEOUT_S]
                 );
@@ -442,16 +429,8 @@ class GCECredentials extends CredentialsLoader implements
             return [];  // return an empty array with no access token
         }
 
-        $isAccessTokenRequest = true;
-        if (!is_null($this->targetAudience)) {
-            $isAccessTokenRequest = false;
-        }
-
-        $metricsHeader = $this->applyMetricsHeader(
-            [],
-            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
-        );
-        $response = $this->getFromMetadata($httpHandler, $this->tokenUri, $metricsHeader);
+        $metricHeader = $this->getMetricHeader(self::CRED_TYPE, $this->targetAudience ? 'it' : 'at');
+        $response = $this->getFromMetadata($httpHandler, $this->tokenUri, [self::METRIC_METADATA_KEY => $metricHeader]);
 
         if ($this->targetAudience) {
             return ['id_token' => $response];
@@ -611,18 +590,17 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @param callable $httpHandler An HTTP Handler to deliver PSR7 requests.
      * @param string $uri The metadata URI.
-     * @param array<mixed> $metricsHeader [optional] If present, add these headers to the token
-     *        endpoint request.
+     * @param array<mixed> $headers [optional] If present, add these headers to the token request.
      *
      * @return string
      */
-    private function getFromMetadata(callable $httpHandler, $uri, array $metricsHeader = [])
+    private function getFromMetadata(callable $httpHandler, $uri, array $headers = [])
     {
         $resp = $httpHandler(
             new Request(
                 'GET',
                 $uri,
-                [self::FLAVOR_HEADER => 'Google'] + $metricsHeader
+                [self::FLAVOR_HEADER => 'Google'] + $headers
             )
         );
 
@@ -653,5 +631,10 @@ class GCECredentials extends CredentialsLoader implements
 
         // Set isOnGce
         $this->isOnGce = $isOnGce;
+    }
+
+    public function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 }

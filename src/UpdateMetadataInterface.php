@@ -24,6 +24,7 @@ namespace Google\Auth;
 interface UpdateMetadataInterface
 {
     const AUTH_METADATA_KEY = 'authorization';
+    const METRIC_METADATA_KEY = 'x-goog-api-client';
 
     /**
      * Updates metadata with the authorization token.
@@ -38,4 +39,6 @@ interface UpdateMetadataInterface
         $authUri = null,
         callable $httpHandler = null
     );
+
+    public function getCredType(): string;
 }

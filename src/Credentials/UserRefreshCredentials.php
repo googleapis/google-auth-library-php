@@ -35,6 +35,13 @@ use Google\Auth\OAuth2;
 class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjectInterface
 {
     /**
+     * Used in observability metric headers
+     *
+     * @var string
+     */
+    private const CRED_TYPE = 'u';
+
+    /**
      * The OAuth2 instance used to conduct authorization.
      *
      * @var OAuth2
@@ -47,13 +54,6 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      * @var string
      */
     protected $quotaProject;
-
-    /**
-     * Used in observability metric headers
-     *
-     * @var string
-     */
-    protected $credType = 'cred-type/u';
 
     /**
      * Create a new UserRefreshCredentials.
@@ -105,10 +105,9 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
 
     /**
      * @param callable $httpHandler
-     * @param array<mixed> $metricsHeader [optional] Metrics headers to be inserted
-     *     into the token endpoint request present.
-     *     This could be passed from ImersonatedServiceAccountCredentials as it uses
-     *     UserRefreshCredentials as source credentials.
+     * @param array<mixed> $header [optional] Headers to be passed to the token endpoint request.
+     *     This is used by ImersonatedServiceAccountCredentials as it uses UserRefreshCredentials
+     *     as source credentials.
      *
      * @return array<mixed> {
      *     A set of auth related metadata, containing the following
@@ -120,19 +119,14 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      *     @type string $id_token
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null, array $metricsHeader = [])
+    public function fetchAuthToken(callable $httpHandler = null, array $header = [])
     {
         // ImersonatedServiceAccountCredentials will propagate it's own header value, hence
         // we'll pass them if present, else create headers for UserCred and pass along.
-        if (empty($metricsHeader)) {
-            // We don't support id token endpoint requests as of now for User Cred
-            $isAccessTokenRequest = true;
-            $metricsHeader = $this->applyMetricsHeader(
-                [],
-                $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
-            );
+        if (!isset($headers[self::METRIC_METADATA_KEY])) {
+            $headers[self::METRIC_METADATA_KEY] = $this->getMetricHeader(self::CRED_TYPE, 'at');
         }
-        return $this->auth->fetchAuthToken($httpHandler, $metricsHeader);
+        return $this->auth->fetchAuthToken($httpHandler, $headers);
     }
 
     /**
@@ -169,5 +163,10 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     public function getGrantedScope()
     {
         return $this->auth->getGrantedScope();
+    }
+
+    public function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 }

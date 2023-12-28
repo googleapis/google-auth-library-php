@@ -35,7 +35,6 @@ use InvalidArgumentException;
 class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface, GetQuotaProjectInterface
 {
     use UpdateMetadataTrait;
-    use MetricsTrait;
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
 

@@ -26,6 +26,8 @@ namespace Google\Auth;
  */
 trait UpdateMetadataTrait
 {
+    use MetricsTrait;
+
     /**
      * export a callback function which updates runtime metadata.
      *
@@ -50,16 +52,15 @@ trait UpdateMetadataTrait
         $authUri = null,
         callable $httpHandler = null
     ) {
-        $metadata_copy = $metadata;
-        $metadata_copy = $this->applyMetricsHeader(
-            $metadata_copy,
-            $this->getServiceApiMetricsHeaderValue()
-        );
-
-        if (isset($metadata_copy[self::AUTH_METADATA_KEY])) {
+        if (isset($metadata[self::AUTH_METADATA_KEY])) {
             // Auth metadata has already been set
-            return $metadata_copy;
+            return $metadata;
         }
+        $metadata_copy = $metadata;
+        if (!isset($metadata_copy[self::METRIC_METADATA_KEY]) && $credType = $this->getCredType()) {
+            $metadata_copy[self::METRIC_METADATA_KEY] = $this->getMetricHeader($credType);
+        }
+
         $result = $this->fetchAuthToken($httpHandler);
         if (isset($result['access_token'])) {
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['access_token']];

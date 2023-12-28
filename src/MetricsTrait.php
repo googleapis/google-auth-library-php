@@ -30,81 +30,22 @@ trait MetricsTrait
      */
     private static $version;
 
-    /**
-     * @var string The header key for the observability metrics.
-     */
-    protected static $metricsHeaderKey = 'x-goog-api-client';
-
-    /**
-     * @var array<string, string> The request type header values
-     *      for the observability metrics.
-     */
-    private static $requestType = [
-        'accessToken' => 'auth-request-type/at',
-        'idToken' => 'auth-request-type/it',
-    ];
-
-    /**
-     * @var array<string, string> The credential type headervalues
-     *      for the observability metrics.
-     */
-    private static $credTypes = [
-        'user' => 'cred-type/u',
-        'sa' => 'cred-type/sa',
-        'jwt' => 'cred-type/jwt',
-        'gce' => 'cred-type/mds',
-        'impersonate' => 'cred-type/imp'
-    ];
-
-    /**
-     * @var string The credential type for the observability metrics.
-     *      This would be overridden by the credential class if applicable.
-     */
-    protected $credType = '';
-
-    protected function getServiceApiMetricsHeaderValue(): string
+    protected static function getMetricHeader(string $credType = '', string $authRequestType = ''): string
     {
-        if (!empty($this->credType)) {
-            return $this->langAndVersion() . ' ' . $this->credType;
-        }
-        return '';
-    }
+        $value = sprintf('gl-php/%s auth/%s', PHP_VERSION, self::getVersion());
 
-    protected function getTokenEndpointMetricsHeaderValue(bool $isAccessTokenRequest): string
-    {
-        $value = $this->langAndVersion();
-        $value .= ' ' . self::$requestType[($isAccessTokenRequest ? 'accessToken' : 'idToken')];
-
-        if (!empty($this->credType)) {
-            return $value . ' ' . $this->credType;
+        if ($authRequestType) {
+            $value .= ' auth-request-type/' . $authRequestType;
         }
 
-        return '';
-    }
-
-    /**
-     * @param array<mixed> $metadata The metadata to update and return.
-     * @param string $headerValue The header value to add to the metadata for
-     *        observability metrics.
-     * @return array<mixed> The updated metadata.
-     */
-    protected function applyMetricsHeader($metadata, $headerValue)
-    {
-        if (empty($headerValue)) {
-            return $metadata;
-        } elseif (!isset($metadata[self::$metricsHeaderKey]) || empty($metadata[self::$metricsHeaderKey])) {
-            $metadata[self::$metricsHeaderKey] = [$headerValue];
-        } elseif (is_array($metadata[self::$metricsHeaderKey])) {
-            $metadata[self::$metricsHeaderKey][0] .= ' ' . $headerValue;
-        } else {
-            // It's a string instead of array
-            $metadata[self::$metricsHeaderKey] .= ' ' . $headerValue;
+        if ($credType) {
+            $value .= ' cred-type/' . $credType;
         }
 
-        return $metadata;
+        return $value;
     }
 
-    protected static function getVersion(): string
+    private static function getVersion(): string
     {
         if (is_null(self::$version)) {
             $versionFilePath = implode(DIRECTORY_SEPARATOR, [__DIR__, '..', 'VERSION']);
@@ -113,8 +54,12 @@ trait MetricsTrait
         return self::$version;
     }
 
-    private function langAndVersion(): string
+    /**
+     * @var string The credential type for the observability metrics.
+     *             This will be overridden by the credential class if applicable.
+     */
+    public function getCredType(): string
     {
-        return 'gl-php/' . PHP_VERSION . ' auth/' . self::getVersion();
+        return '';
     }
 }

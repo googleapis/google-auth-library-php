@@ -124,6 +124,9 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->mockFetcher->getCacheKey()
             ->shouldBeCalled()
             ->willReturn($cacheKey);
+        $this->mockFetcher->getCredType()
+            ->shouldBeCalled()
+            ->willReturn('');
         $this->mockFetcher->updateMetadata(Argument::type('array'), null, null)
             ->shouldBeCalled()
             ->will(function ($args, $fetcher) {
