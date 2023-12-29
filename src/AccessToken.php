@@ -411,7 +411,7 @@ class AccessToken
                     $exponent
                 ]), 256),
             ]);
-            return $key->getPublicKey();
+            return $key->__toString();
         }
         $key = PublicKeyLoader::load([
             'n' => new BigInteger3($this->callJwtStatic('urlsafeB64Decode', [
