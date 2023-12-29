@@ -38,6 +38,7 @@ use SimpleJWT\InvalidTokenException;
 use SimpleJWT\JWT as SimpleJWT;
 use SimpleJWT\Keys\KeyFactory;
 use SimpleJWT\Keys\KeySet;
+use TypeError;
 use UnexpectedValueException;
 
 /**
@@ -400,7 +401,8 @@ class AccessToken
     }
 
     /**
-     * @return string|array
+     * @return string
+     * @throws TypeError If the key cannot be initialized to a string.
      */
     private function loadPhpsecPublicKey(string $modulus, string $exponent)
     {
@@ -414,7 +416,11 @@ class AccessToken
                     $exponent
                 ]), 256),
             ]);
-            return $key->getPublicKey();
+            $formattedPublicKey = $key->getPublicKey();
+            if (is_string($formattedPublicKey)) {
+                return $formattedPublicKey;
+            }
+            throw new TypeError('Failed to initialize the key');
         }
         $key = PublicKeyLoader::load([
             'n' => new BigInteger3($this->callJwtStatic('urlsafeB64Decode', [
@@ -424,7 +430,12 @@ class AccessToken
                 $exponent
             ]), 256),
         ]);
-        return $key->toString('PKCS8');
+        // Ensure the key is correctly initialized
+        $formattedPublicKey = $key->toString('PKCS8');
+        if (is_string($formattedPublicKey)) {
+            return $formattedPublicKey;
+        }
+        throw new TypeError('Failed to initialize the key');
     }
 
     /**
