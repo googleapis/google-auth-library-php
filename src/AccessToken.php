@@ -399,7 +399,10 @@ class AccessToken
         }
     }
 
-    private function loadPhpsecPublicKey(string $modulus, string $exponent): string
+    /**
+     * @return string|array
+     */
+    private function loadPhpsecPublicKey(string $modulus, string $exponent)
     {
         if (class_exists(RSA::class) && class_exists(BigInteger2::class)) {
             $key = new RSA();
@@ -411,7 +414,7 @@ class AccessToken
                     $exponent
                 ]), 256),
             ]);
-            return $key->__toString();
+            return $key->getPublicKey();
         }
         $key = PublicKeyLoader::load([
             'n' => new BigInteger3($this->callJwtStatic('urlsafeB64Decode', [
