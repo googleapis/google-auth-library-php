@@ -431,8 +431,10 @@ class GCECredentials extends CredentialsLoader implements
             return [];  // return an empty array with no access token
         }
 
-        $metricHeader = $this->getMetricHeader(self::CRED_TYPE, $this->targetAudience ? 'it' : 'at');
-        $response = $this->getFromMetadata($httpHandler, $this->tokenUri, [self::METRIC_METADATA_KEY => $metricHeader]);
+        $authRequestType = $this->targetAudience ? 'it' : 'at';
+        $response = $this->getFromMetadata($httpHandler, $this->tokenUri, [
+            self::METRIC_METADATA_KEY => $this->getMetricHeader(self::CRED_TYPE, $authRequestType)
+        ]);
 
         if ($this->targetAudience) {
             return ['id_token' => $response];

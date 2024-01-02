@@ -213,9 +213,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
             return $accessToken;
         }
-        $isAccessTokenRequest = empty($this->auth->getAdditionalClaims()['target_audience']);
-        $metricHeader = $this->getMetricHeader(self::CRED_TYPE, $isAccessTokenRequest ? 'at' : 'it');
-        return $this->auth->fetchAuthToken($httpHandler, [self::METRIC_METADATA_KEY => $metricHeader]);
+        $authRequestType = empty($this->auth->getAdditionalClaims()['target_audience']) ? 'at' : 'it';
+        return $this->auth->fetchAuthToken($httpHandler, [
+            self::METRIC_METADATA_KEY => $this->getMetricHeader(self::CRED_TYPE, $authRequestType),
+        ]);
     }
 
     /**
