@@ -263,6 +263,21 @@ class GCECredentialsTest extends BaseTest
         $this->assertNull($creds->getLastReceivedToken());
     }
 
+    public function testGetLastReceivedTokenShouldWorkWithIdToken()
+    {
+        $idToken = '123asdfghjkl';
+        $httpHandler = getHandler([
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($idToken)),
+        ]);
+        $g = new GCECredentials(null, null, 'https://example.test.com');
+        $g->fetchAuthToken($httpHandler);
+        $this->assertEquals(
+            $idToken,
+            $g->getLastReceivedToken()['id_token']
+        );
+    }
+
     public function testGetClientName()
     {
         $expected = 'foobar';
