@@ -35,6 +35,13 @@ use Google\Auth\OAuth2;
 class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjectInterface
 {
     /**
+     * Used in observability metric headers
+     *
+     * @var string
+     */
+    private const CRED_TYPE = 'u';
+
+    /**
      * The OAuth2 instance used to conduct authorization.
      *
      * @var OAuth2
@@ -47,13 +54,6 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      * @var string
      */
     protected $quotaProject;
-
-    /**
-     * Used in observability metric headers
-     *
-     * @var string
-     */
-    protected $credType = 'cred-type/u';
 
     /**
      * Create a new UserRefreshCredentials.
@@ -122,17 +122,11 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      */
     public function fetchAuthToken(callable $httpHandler = null, array $metricsHeader = [])
     {
-        // ImersonatedServiceAccountCredentials will propagate it's own header value, hence
-        // we'll pass them if present, else create headers for UserCred and pass along.
-        if (empty($metricsHeader)) {
-            // We don't support id token endpoint requests as of now for User Cred
-            $isAccessTokenRequest = true;
-            $metricsHeader = $this->applyMetricsHeader(
-                [],
-                $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
-            );
-        }
-        return $this->auth->fetchAuthToken($httpHandler, $metricsHeader);
+        // We don't support id token endpoint requests as of now for User Cred
+        return $this->auth->fetchAuthToken(
+            $httpHandler,
+            $this->applyTokenEndpointMetrics($metricsHeader, 'at')
+        );
     }
 
     /**
@@ -169,5 +163,10 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     public function getGrantedScope()
     {
         return $this->auth->getGrantedScope();
+    }
+
+    public function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 }

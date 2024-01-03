@@ -572,11 +572,11 @@ class OAuth2 implements FetchAuthTokenInterface
      * Generates a request for token credentials.
      *
      * @param callable $httpHandler callback which delivers psr7 request
-     * @param array<mixed> $metricsHeader [optional] Metrics headers to be inserted
-     *     into the token endpoint request present.
+     * @param array<mixed> $headers [optional] Additional headers to pass to
+     *        the token endpoint request.
      * @return RequestInterface the authorization Url.
      */
-    public function generateCredentialsRequest(callable $httpHandler = null, $metricsHeader = [])
+    public function generateCredentialsRequest(callable $httpHandler = null, $headers = [])
     {
         $uri = $this->getTokenCredentialUri();
         if (is_null($uri)) {
@@ -635,7 +635,7 @@ class OAuth2 implements FetchAuthTokenInterface
         $headers = [
             'Cache-Control' => 'no-store',
             'Content-Type' => 'application/x-www-form-urlencoded',
-        ] + $metricsHeader;
+        ] + $headers;
 
         return new Request(
             'POST',
@@ -649,17 +649,17 @@ class OAuth2 implements FetchAuthTokenInterface
      * Fetches the auth tokens based on the current state.
      *
      * @param callable $httpHandler callback which delivers psr7 request
-     * @param array<mixed> $metricsHeader [optional] If present, add these headers to the token
+     * @param array<mixed> $headers [optional] If present, add these headers to the token
      *        endpoint request.
      * @return array<mixed> the response
      */
-    public function fetchAuthToken(callable $httpHandler = null, $metricsHeader = [])
+    public function fetchAuthToken(callable $httpHandler = null, $headers = [])
     {
         if (is_null($httpHandler)) {
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
-        $response = $httpHandler($this->generateCredentialsRequest($httpHandler, $metricsHeader));
+        $response = $httpHandler($this->generateCredentialsRequest($httpHandler, $headers));
         $credentials = $this->parseTokenResponse($response);
         $this->updateToken($credentials);
         if (isset($credentials['scope'])) {

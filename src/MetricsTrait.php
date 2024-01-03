@@ -33,74 +33,71 @@ trait MetricsTrait
     /**
      * @var string The header key for the observability metrics.
      */
-    protected static $metricsHeaderKey = 'x-goog-api-client';
+    protected static $metricMetadataKey = 'x-goog-api-client';
 
     /**
-     * @var array<string, string> The request type header values
-     *      for the observability metrics.
+     * @param string $credType [Optional] The credential type.
+     *        Empty value will not add any credential type to the header.
+     *        Should be one of `'sa'`, `'jwt'`, `'imp'`, `'mds'`, `'u'`.
+     * @param string $authRequestType [Optional] The auth request type.
+     *        Empty value will not add any auth request type to the header.
+     *        Should be one of `'at'`, `'it'`, `'mds'`.
+     * @return string The header value for the observability metrics.
      */
-    private static $requestType = [
-        'accessToken' => 'auth-request-type/at',
-        'idToken' => 'auth-request-type/it',
-    ];
+    protected static function getMetricsHeader(
+        $credType = '',
+        $authRequestType = ''
+    ): string {
+        $value = sprintf(
+            'gl-php/%s auth/%s',
+            PHP_VERSION,
+            self::getVersion()
+        );
 
-    /**
-     * @var array<string, string> The credential type headervalues
-     *      for the observability metrics.
-     */
-    private static $credTypes = [
-        'user' => 'cred-type/u',
-        'sa' => 'cred-type/sa',
-        'jwt' => 'cred-type/jwt',
-        'gce' => 'cred-type/mds',
-        'impersonate' => 'cred-type/imp'
-    ];
-
-    /**
-     * @var string The credential type for the observability metrics.
-     *      This would be overridden by the credential class if applicable.
-     */
-    protected $credType = '';
-
-    protected function getServiceApiMetricsHeaderValue(): string
-    {
-        if (!empty($this->credType)) {
-            return $this->langAndVersion() . ' ' . $this->credType;
-        }
-        return '';
-    }
-
-    protected function getTokenEndpointMetricsHeaderValue(bool $isAccessTokenRequest): string
-    {
-        $value = $this->langAndVersion();
-        $value .= ' ' . self::$requestType[($isAccessTokenRequest ? 'accessToken' : 'idToken')];
-
-        if (!empty($this->credType)) {
-            return $value . ' ' . $this->credType;
+        if (!empty($authRequestType)) {
+            $value .= ' auth-request-type/' . $authRequestType;
         }
 
-        return '';
+        if (!empty($credType)) {
+            $value .= ' cred-type/' . $credType;
+        }
+
+        return $value;
     }
 
     /**
      * @param array<mixed> $metadata The metadata to update and return.
-     * @param string $headerValue The header value to add to the metadata for
-     *        observability metrics.
      * @return array<mixed> The updated metadata.
      */
-    protected function applyMetricsHeader($metadata, $headerValue)
+    protected function applyServiceApiUsageMetrics($metadata)
     {
-        if (empty($headerValue)) {
-            return $metadata;
-        } elseif (!isset($metadata[self::$metricsHeaderKey]) || empty($metadata[self::$metricsHeaderKey])) {
-            $metadata[self::$metricsHeaderKey] = [$headerValue];
-        } elseif (is_array($metadata[self::$metricsHeaderKey])) {
-            $metadata[self::$metricsHeaderKey][0] .= ' ' . $headerValue;
-        } else {
-            // It's a string instead of array
-            $metadata[self::$metricsHeaderKey] .= ' ' . $headerValue;
+        if ($credType = $this->getCredType()) {
+            // Add service api usage observability metrics info to metadata
+            $metricsHeader = self::getMetricsHeader($credType);
+            if (!isset($metadata[self::$metricMetadataKey])) {
+                $metadata[self::$metricMetadataKey] = [$metricsHeader];
+            } elseif (is_array($metadata[self::$metricMetadataKey])) {
+                $metadata[self::$metricMetadataKey][0] .= ' ' . $metricsHeader;
+            } else {
+                $metadata[self::$metricMetadataKey] .= ' ' . $metricsHeader;
+            }
         }
 
+        return $metadata;
+    }
+
+    /**
+     * @param array<mixed> $metadata The metadata to update and return.
+     * @param string $authRequestType The auth request type. Possible values are
+     *        `'at'`, `'it'`, `'mds'`.
+     * @return array<mixed> The updated metadata.
+     */
+    protected function applyTokenEndpointMetrics($metadata, $authRequestType)
+    {
+        $metricsHeader = $this->getMetricsHeader($this->getCredType(), $authRequestType);
+        if (!isset($metadata[self::$metricMetadataKey])) {
+            $metadata[self::$metricMetadataKey] = $metricsHeader;
+        }
         return $metadata;
     }
 
@@ -113,8 +110,8 @@ trait MetricsTrait
         return self::$version;
     }
 
-    private function langAndVersion(): string
+    public function getCredType(): string
     {
-        return 'gl-php/' . PHP_VERSION . ' auth/' . self::getVersion();
+        return '';
     }
 }

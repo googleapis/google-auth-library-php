@@ -110,6 +110,8 @@ class GCECredentials extends CredentialsLoader implements
      */
     private const GKE_PRODUCT_NAME_FILE = '/sys/class/dmi/id/product_name';
 
+    private const CRED_TYPE = 'mds';
+
     /**
      * Note: the explicit `timeout` and `tries` below is a workaround. The underlying
      * issue is that resolving an unknown host on some networks will take
@@ -143,13 +145,6 @@ class GCECredentials extends CredentialsLoader implements
      * @var array<mixed>
      */
     protected $lastReceivedToken;
-
-    /**
-     * Used in observability metric headers
-     *
-     * @var string
-     */
-    protected $credType = 'cred-type/mds';
 
     /**
      * @var string|null
@@ -316,20 +311,6 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
-     * @return array<mixed>
-     */
-    private static function getMdsPingHeader()
-    {
-        return [
-            self::$metricsHeaderKey => [sprintf(
-                'gl-php/%s auth/%s auth-request-type/mds',
-                PHP_VERSION,
-                self::getVersion()
-            )]
-        ];
-    }
-
-    /**
      * The full uri for accessing the default universe domain.
      *
      * @return string
@@ -380,7 +361,10 @@ class GCECredentials extends CredentialsLoader implements
                     new Request(
                         'GET',
                         $checkUri,
-                        [self::FLAVOR_HEADER => 'Google'] + self::getMdsPingHeader()
+                        [
+                            self::FLAVOR_HEADER => 'Google',
+                            self::$metricMetadataKey => self::getMetricsHeader('', 'mds')
+                        ]
                     ),
                     ['timeout' => self::COMPUTE_PING_CONNECTION_TIMEOUT_S]
                 );
@@ -442,16 +426,11 @@ class GCECredentials extends CredentialsLoader implements
             return [];  // return an empty array with no access token
         }
 
-        $isAccessTokenRequest = true;
-        if (!is_null($this->targetAudience)) {
-            $isAccessTokenRequest = false;
-        }
-
-        $metricsHeader = $this->applyMetricsHeader(
-            [],
-            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
+        $response = $this->getFromMetadata(
+            $httpHandler,
+            $this->tokenUri,
+            $this->applyTokenEndpointMetrics([], $this->targetAudience ? 'it' : 'at')
         );
-        $response = $this->getFromMetadata($httpHandler, $this->tokenUri, $metricsHeader);
 
         if ($this->targetAudience) {
             return ['id_token' => $response];
@@ -611,18 +590,18 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @param callable $httpHandler An HTTP Handler to deliver PSR7 requests.
      * @param string $uri The metadata URI.
-     * @param array<mixed> $metricsHeader [optional] If present, add these headers to the token
+     * @param array<mixed> $headers [optional] If present, add these headers to the token
      *        endpoint request.
      *
      * @return string
      */
-    private function getFromMetadata(callable $httpHandler, $uri, array $metricsHeader = [])
+    private function getFromMetadata(callable $httpHandler, $uri, array $headers = [])
     {
         $resp = $httpHandler(
             new Request(
                 'GET',
                 $uri,
-                [self::FLAVOR_HEADER => 'Google'] + $metricsHeader
+                [self::FLAVOR_HEADER => 'Google'] + $headers
             )
         );
 
@@ -653,5 +632,10 @@ class GCECredentials extends CredentialsLoader implements
 
         // Set isOnGce
         $this->isOnGce = $isOnGce;
+    }
+
+    public function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 }

@@ -66,6 +66,13 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     use ServiceAccountSignerTrait;
 
     /**
+     * Used in observability metric headers
+     *
+     * @var string
+     */
+    private const CRED_TYPE = 'sa';
+
+    /**
      * The OAuth2 instance used to conduct authorization.
      *
      * @var OAuth2
@@ -83,13 +90,6 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      * @var string|null
      */
     protected $projectId;
-
-    /**
-     * Used in observability metric headers
-     *
-     * @var string
-     */
-    protected $credType = 'cred-type/sa';
 
     /**
      * @var array<mixed>|null
@@ -213,16 +213,9 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
             return $accessToken;
         }
-        $isAccessTokenRequest = true;
-        if (isset($this->auth->getAdditionalClaims()['target_audience'])) {
-            $isAccessTokenRequest = false;
-        }
-
-        $metricsHeader = $this->applyMetricsHeader(
-            [],
-            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
-        );
-        return $this->auth->fetchAuthToken($httpHandler, $metricsHeader);
+        $authRequestType = empty($this->auth->getAdditionalClaims()['target_audience'])
+            ? 'at' : 'it';
+        return $this->auth->fetchAuthToken($httpHandler, $this->applyTokenEndpointMetrics([], $authRequestType));
     }
 
     /**
@@ -358,6 +351,11 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     public function getUniverseDomain(): string
     {
         return $this->universeDomain;
+    }
+
+    public function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 
     /**

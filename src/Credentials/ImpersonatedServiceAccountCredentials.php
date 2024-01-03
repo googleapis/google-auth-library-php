@@ -26,6 +26,8 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
 {
     use IamSignerTrait;
 
+    private const CRED_TYPE = 'imp';
+
     /**
      * @var string
      */
@@ -35,13 +37,6 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      * @var UserRefreshCredentials
      */
     protected $sourceCredentials;
-
-    /**
-     * Used in observability metric headers
-     *
-     * @var string
-     */
-    protected $credType = 'cred-type/imp';
 
     /**
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that
@@ -129,12 +124,10 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     public function fetchAuthToken(callable $httpHandler = null)
     {
         // We don't support id token endpoint requests as of now for Impersonated Cred
-        $isAccessTokenRequest = true;
-        $metricsHeader = $this->applyMetricsHeader(
-            [],
-            $this->getTokenEndpointMetricsHeaderValue($isAccessTokenRequest)
+        return $this->sourceCredentials->fetchAuthToken(
+            $httpHandler,
+            $this->applyTokenEndpointMetrics([], 'at')
         );
-        return $this->sourceCredentials->fetchAuthToken($httpHandler, $metricsHeader);
     }
 
     /**
@@ -151,5 +144,10 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     public function getLastReceivedToken()
     {
         return $this->sourceCredentials->getLastReceivedToken();
+    }
+
+    public function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 }
