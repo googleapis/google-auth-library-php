@@ -2,6 +2,19 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.34.0](https://github.com/googleapis/google-auth-library-php/compare/v1.33.0...v1.34.0) (2024-01-03)
+
+
+### Features
+
+* Respect sub for domain-wide delegation in service account creds ([#505](https://github.com/googleapis/google-auth-library-php/issues/505)) ([821d4f3](https://github.com/googleapis/google-auth-library-php/commit/821d4f3e5e496c4dfd5e68e58daaa81484f8af99))
+* Support universe domain in service account and metadata credentials ([#482](https://github.com/googleapis/google-auth-library-php/issues/482)) ([e4aa874](https://github.com/googleapis/google-auth-library-php/commit/e4aa874e2e1dd321f811b09a80f58d42986bf418))
+
+
+### Bug Fixes
+
+* ID Token Caching for GCECredentials ([#510](https://github.com/googleapis/google-auth-library-php/issues/510)) ([3222f9e](https://github.com/googleapis/google-auth-library-php/commit/3222f9e5c8d836e21d062ff861b32d3ac867930a))
+
 ## [1.33.0](https://github.com/googleapis/google-auth-library-php/compare/v1.32.1...v1.33.0) (2023-11-29)
 
 
