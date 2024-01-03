@@ -29,8 +29,8 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use phpseclib3\Crypt\PublicKeyLoader;
-use phpseclib3\Math\BigInteger as BigInteger3;
 use phpseclib3\Crypt\RSA;
+use phpseclib3\Math\BigInteger;
 use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
 use SimpleJWT\InvalidTokenException;
@@ -419,10 +419,10 @@ class AccessToken
     private function loadPhpsecPublicKey(string $modulus, string $exponent): string
     {
         $key = PublicKeyLoader::load([
-            'n' => new BigInteger3($this->callJwtStatic('urlsafeB64Decode', [
+            'n' => new BigInteger($this->callJwtStatic('urlsafeB64Decode', [
                 $modulus,
             ]), 256),
-            'e' => new BigInteger3($this->callJwtStatic('urlsafeB64Decode', [
+            'e' => new BigInteger($this->callJwtStatic('urlsafeB64Decode', [
                 $exponent
             ]), 256),
         ]);
