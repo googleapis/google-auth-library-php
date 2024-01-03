@@ -30,6 +30,7 @@ use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Math\BigInteger as BigInteger3;
+use phpseclib3\Crypt\RSA;
 use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
 use SimpleJWT\InvalidTokenException;
@@ -392,8 +393,26 @@ class AccessToken
      */
     private function checkAndInitializePhpsec()
     {
-        if (!$this->checkPhpsec3()) {
+        if (!class_exists(RSA::class)) {
             throw new RuntimeException('Please require phpseclib/phpseclib v2 or v3 to use this utility.');
+        }
+
+        /**
+         * phpseclib calls "phpinfo" by default, which requires special
+         * whitelisting in the AppEngine VM environment. This function
+         * sets constants to bypass the need for phpseclib to check phpinfo
+         *
+         * @see phpseclib/Math/BigInteger
+         * @see https://github.com/GoogleCloudPlatform/getting-started-php/issues/85
+         * @codeCoverageIgnore
+         */
+        if (filter_var(getenv('GAE_VM'), FILTER_VALIDATE_BOOLEAN)) {
+            if (!defined('MATH_BIGINTEGER_OPENSSL_ENABLED')) {
+                define('MATH_BIGINTEGER_OPENSSL_ENABLED', true);
+            }
+            if (!defined('CRYPT_RSA_MODE')) {
+                define('CRYPT_RSA_MODE', RSA::MODE_OPENSSL);
+            }
         }
     }
 
@@ -408,14 +427,6 @@ class AccessToken
             ]), 256),
         ]);
         return $key->toString('PKCS8');
-    }
-
-    /**
-     * @return bool
-     */
-    private function checkPhpsec3(): bool
-    {
-        return class_exists(phpseclib3\Crypt\RSA::class);
     }
 
     /**
