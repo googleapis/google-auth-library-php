@@ -32,7 +32,7 @@ class ObservabilityMetricsTest extends TestCase
 {
     use ProphecyTrait;
 
-    private static $headerKey = 'x-goog-api-client';
+    private const METRIC_METADATA_KEY = 'x-goog-api-client';
 
     private $langAndVersion;
 
@@ -71,7 +71,7 @@ class ObservabilityMetricsTest extends TestCase
                 // This confirms that token endpoint requests have proper observability metric headers
                 $this->assertStringContainsString(
                     sprintf('%s %s cred-type/mds', $this->langAndVersion, $requestTypeHeaderValue),
-                    $request->getHeaderLine(self::$headerKey)
+                    $request->getHeaderLine(self::METRIC_METADATA_KEY)
                 );
                 return new Response(200, [], Utils::streamFor($jsonTokens));
             }
@@ -108,12 +108,12 @@ class ObservabilityMetricsTest extends TestCase
         $keyFile = __DIR__ . '/fixtures3/service_account_credentials.json';
         $saJwt = new ServiceAccountJwtAccessCredentials($keyFile, 'exampleScope');
         $metadata = $saJwt->updateMetadata([], null, null);
-        $this->assertArrayHasKey(self::$headerKey, $metadata);
+        $this->assertArrayHasKey(self::METRIC_METADATA_KEY, $metadata);
 
         // This confirms that service usage requests have proper observability metric headers
         $this->assertStringContainsString(
             sprintf('%s cred-type/jwt', $this->langAndVersion),
-            $metadata[self::$headerKey][0]
+            $metadata[self::METRIC_METADATA_KEY][0]
         );
     }
 
@@ -152,12 +152,12 @@ class ObservabilityMetricsTest extends TestCase
     private function assertUpdateMetadata($cred, $handler, $credShortform, &$handlerCalled)
     {
         $metadata = $cred->updateMetadata([], null, $handler);
-        $this->assertArrayHasKey(self::$headerKey, $metadata);
+        $this->assertArrayHasKey(self::METRIC_METADATA_KEY, $metadata);
 
         // This confirms that service usage requests have proper observability metric headers
         $this->assertStringContainsString(
             sprintf('%s cred-type/%s', $this->langAndVersion, $credShortform),
-            $metadata[self::$headerKey][0]
+            $metadata[self::METRIC_METADATA_KEY][0]
         );
 
         $this->assertTrue($handlerCalled);
@@ -186,7 +186,7 @@ class ObservabilityMetricsTest extends TestCase
                 // This confirms that token endpoint requests have proper observability metric headers
                 $this->assertStringContainsString(
                     sprintf('%s %s cred-type/%s', $this->langAndVersion, $requestTypeHeaderValue, $credShortform),
-                    $request->getHeaderLine(self::$headerKey)
+                    $request->getHeaderLine(self::METRIC_METADATA_KEY)
                 );
                 return new Response(200, [], Utils::streamFor($jsonTokens));
             }

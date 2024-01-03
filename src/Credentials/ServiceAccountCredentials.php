@@ -92,13 +92,6 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     protected $projectId;
 
     /**
-     * Used in observability metric headers
-     *
-     * @var string
-     */
-    protected $credType = 'cred-type/sa';
-
-    /**
      * @var array<mixed>|null
      */
     private $lastReceivedJwtAccessToken;

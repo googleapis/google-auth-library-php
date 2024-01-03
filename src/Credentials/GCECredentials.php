@@ -152,13 +152,6 @@ class GCECredentials extends CredentialsLoader implements
     protected $lastReceivedToken;
 
     /**
-     * Used in observability metric headers
-     *
-     * @var string
-     */
-    protected $credType = 'cred-type/mds';
-
-    /**
      * @var string|null
      */
     private $clientName;
@@ -320,20 +313,6 @@ class GCECredentials extends CredentialsLoader implements
         $base = 'http://' . self::METADATA_IP . '/computeMetadata/';
 
         return $base . self::PROJECT_ID_URI_PATH;
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    private static function getMdsPingHeader()
-    {
-        return [
-            self::$metricsHeaderKey => [sprintf(
-                'gl-php/%s auth/%s auth-request-type/mds',
-                PHP_VERSION,
-                self::getVersion()
-            )]
-        ];
     }
 
     /**
