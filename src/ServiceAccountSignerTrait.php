@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Crypt\RSA;
 
 /**
