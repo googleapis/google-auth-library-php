@@ -32,6 +32,7 @@ class FetchAuthTokenCache implements
     UpdateMetadataInterface
 {
     use CacheTrait;
+    use UpdateMetadataTrait;
 
     /**
      * @var FetchAuthTokenInterface
