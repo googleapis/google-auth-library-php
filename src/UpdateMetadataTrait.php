@@ -54,6 +54,9 @@ trait UpdateMetadataTrait
     ) {
         $metadata_copy = $metadata;
 
+        // We do need to set the service api usage metrics irrespective even if
+        // the auth token is set because invoking this method with auth tokens
+        // would mean the intention is to just explicitly set the metrics metadata.
         $metadata_copy = $this->applyServiceApiUsageMetrics($metadata_copy);
 
         if (isset($metadata_copy[self::AUTH_METADATA_KEY])) {

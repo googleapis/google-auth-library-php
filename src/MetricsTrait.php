@@ -76,15 +76,12 @@ trait MetricsTrait
             // We expect upstream libries to have the metadata key populated already
             $value = 'cred-type/' . $credType;
             if (!isset($metadata[self::$metricMetadataKey])) {
-                // Unlikely case if upstream google php libraries are using
-                // this auth library. Still someone can invoke updateMetadata
-                // directly, that's why just adding the cred-type header.
+                // This case will happen only when someone invokes the updateMetadata
+                // method on the credentials fetcher themselves.
                 $metadata[self::$metricMetadataKey] = [$value];
             } elseif (is_array($metadata[self::$metricMetadataKey])) {
-                // Append to the existing value.
                 $metadata[self::$metricMetadataKey][0] .= ' ' . $value;
             } else {
-                // Append to the existing value.
                 $metadata[self::$metricMetadataKey] .= ' ' . $value;
             }
         }
