@@ -395,7 +395,7 @@ class AccessToken
     private function checkAndInitializePhpsec()
     {
         if (!class_exists(RSA::class)) {
-            throw new RuntimeException('Please require phpseclib/phpseclib v2 or v3 to use this utility.');
+            throw new RuntimeException('Please require phpseclib/phpseclib v3 to use this utility.');
         }
     }
 
