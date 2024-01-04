@@ -439,7 +439,7 @@ class GCECredentials extends CredentialsLoader implements
         );
 
         if ($this->targetAudience) {
-            return ['id_token' => $response];
+            return $this->lastReceivedToken = ['id_token' => $response];
         }
 
         if (null === $json = json_decode($response, true)) {
@@ -463,14 +463,18 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
-     * @return array{access_token:string,expires_at:int}|null
+     * @return array<mixed>|null
      */
     public function getLastReceivedToken()
     {
         if ($this->lastReceivedToken) {
+            if (array_key_exists('id_token', $this->lastReceivedToken)) {
+                return $this->lastReceivedToken;
+            }
+
             return [
                 'access_token' => $this->lastReceivedToken['access_token'],
-                'expires_at' => $this->lastReceivedToken['expires_at'],
+                'expires_at' => $this->lastReceivedToken['expires_at']
             ];
         }
 
@@ -544,8 +548,6 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * Fetch the default universe domain from the metadata server.
      *
-     * Returns null if called outside GCE.
-     *
      * @param callable $httpHandler Callback which delivers psr7 request
      * @return string
      */
@@ -561,10 +563,6 @@ class GCECredentials extends CredentialsLoader implements
         if (!$this->hasCheckedOnGce) {
             $this->isOnGce = self::onGce($httpHandler);
             $this->hasCheckedOnGce = true;
-        }
-
-        if (!$this->isOnGce) {
-            return self::DEFAULT_UNIVERSE_DOMAIN;
         }
 
         try {
