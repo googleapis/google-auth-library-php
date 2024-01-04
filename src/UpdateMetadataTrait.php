@@ -63,14 +63,20 @@ trait UpdateMetadataTrait
         $metadata_copy = $metadata;
 
         if ($credType = $this->getCredType()) {
-            // Add service api usage observability metrics info to metadata
-            $metricsHeader = self::getMetricsHeader($credType);
+            // Add service api usage observability metrics info into metadata
+            // We expect upstream libries to have the metadata key populated already
+            $value = 'cred-type/' . $credType;
             if (!isset($metadata_copy[self::METRIC_METADATA_KEY])) {
-                $metadata_copy[self::METRIC_METADATA_KEY] = [$metricsHeader];
+                // Unlikely case if upstream google php libraries are using
+                // this auth library. Still someone can invoke updateMetadata
+                // directly, that's why just adding the cred-type header.
+                $metadata_copy[self::METRIC_METADATA_KEY] = [$value];
             } elseif (is_array($metadata_copy[self::METRIC_METADATA_KEY])) {
-                $metadata_copy[self::METRIC_METADATA_KEY][0] .= ' ' . $metricsHeader;
+                // Append to the existing value.
+                $metadata_copy[self::METRIC_METADATA_KEY][0] .= ' ' . $value;
             } else {
-                $metadata_copy[self::METRIC_METADATA_KEY] .= ' ' . $metricsHeader;
+                // Append to the existing value.
+                $metadata_copy[self::METRIC_METADATA_KEY] .= ' ' . $value;
             }
         }
 

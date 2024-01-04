@@ -107,12 +107,12 @@ class ObservabilityMetricsTest extends TestCase
     {
         $keyFile = __DIR__ . '/fixtures3/service_account_credentials.json';
         $saJwt = new ServiceAccountJwtAccessCredentials($keyFile, 'exampleScope');
-        $metadata = $saJwt->updateMetadata([], null, null);
+        $metadata = $saJwt->updateMetadata([self::METRIC_METADATA_KEY => ['foo']], null, null);
         $this->assertArrayHasKey(self::METRIC_METADATA_KEY, $metadata);
 
         // This confirms that service usage requests have proper observability metric headers
         $this->assertStringContainsString(
-            sprintf('%s cred-type/jwt', $this->langAndVersion),
+            sprintf('foo cred-type/jwt'),
             $metadata[self::METRIC_METADATA_KEY][0]
         );
     }
@@ -151,12 +151,12 @@ class ObservabilityMetricsTest extends TestCase
      */
     private function assertUpdateMetadata($cred, $handler, $credShortform, &$handlerCalled)
     {
-        $metadata = $cred->updateMetadata([], null, $handler);
+        $metadata = $cred->updateMetadata([self::METRIC_METADATA_KEY => ['foo']], null, $handler);
         $this->assertArrayHasKey(self::METRIC_METADATA_KEY, $metadata);
 
         // This confirms that service usage requests have proper observability metric headers
         $this->assertStringContainsString(
-            sprintf('%s cred-type/%s', $this->langAndVersion, $credShortform),
+            sprintf('foo cred-type/%s', $credShortform),
             $metadata[self::METRIC_METADATA_KEY][0]
         );
 
