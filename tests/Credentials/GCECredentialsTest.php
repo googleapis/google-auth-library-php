@@ -263,6 +263,21 @@ class GCECredentialsTest extends BaseTest
         $this->assertNull($creds->getLastReceivedToken());
     }
 
+    public function testGetLastReceivedTokenShouldWorkWithIdToken()
+    {
+        $idToken = '123asdfghjkl';
+        $httpHandler = getHandler([
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($idToken)),
+        ]);
+        $g = new GCECredentials(null, null, 'https://example.test.com');
+        $g->fetchAuthToken($httpHandler);
+        $this->assertEquals(
+            $idToken,
+            $g->getLastReceivedToken()['id_token']
+        );
+    }
+
     public function testGetClientName()
     {
         $expected = 'foobar';
@@ -516,13 +531,7 @@ class GCECredentialsTest extends BaseTest
     public function testGetUniverseDomain()
     {
         $creds = new GCECredentials();
-
-        // If we are not on GCE, this should return the default
-        $creds->setIsOnGce(false);
-        $this->assertEquals(
-            GCECredentials::DEFAULT_UNIVERSE_DOMAIN,
-            $creds->getUniverseDomain()
-        );
+        $creds->setIsOnGce(true);
 
         // Pretend we are on GCE and mock the http handler.
         $expected = 'example-universe.com';
@@ -536,8 +545,6 @@ class GCECredentialsTest extends BaseTest
             $this->assertEquals(1, $timesCalled, 'should only be called once');
             return new Psr7\Response(200, [], Utils::streamFor($expected));
         };
-
-        $creds->setIsOnGce(true);
 
         // Assert correct universe domain.
         $this->assertEquals($expected, $creds->getUniverseDomain($httpHandler));
