@@ -72,14 +72,20 @@ trait MetricsTrait
     protected function applyServiceApiUsageMetrics($metadata)
     {
         if ($credType = $this->getCredType()) {
-            // Add service api usage observability metrics info to metadata
-            $metricsHeader = self::getMetricsHeader($credType);
+            // Add service api usage observability metrics info into metadata
+            // We expect upstream libries to have the metadata key populated already
+            $value = 'cred-type/' . $credType;
             if (!isset($metadata[self::$metricMetadataKey])) {
-                $metadata[self::$metricMetadataKey] = [$metricsHeader];
+                // Unlikely case if upstream google php libraries are using
+                // this auth library. Still someone can invoke updateMetadata
+                // directly, that's why just adding the cred-type header.
+                $metadata[self::$metricMetadataKey] = [$value];
             } elseif (is_array($metadata[self::$metricMetadataKey])) {
-                $metadata[self::$metricMetadataKey][0] .= ' ' . $metricsHeader;
+                // Append to the existing value.
+                $metadata[self::$metricMetadataKey][0] .= ' ' . $value;
             } else {
-                $metadata[self::$metricMetadataKey] .= ' ' . $metricsHeader;
+                // Append to the existing value.
+                $metadata[self::$metricMetadataKey] .= ' ' . $value;
             }
         }
 
