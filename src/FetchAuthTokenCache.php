@@ -237,6 +237,10 @@ class FetchAuthTokenCache implements
                 $metadata[self::AUTH_METADATA_KEY] = [
                     'Bearer ' . $cached['access_token']
                 ];
+            } elseif (isset($cached['id_token'])) {
+                $metadata[self::AUTH_METADATA_KEY] = [
+                    'Bearer ' . $cached['id_token']
+                ];
             }
         }
 
