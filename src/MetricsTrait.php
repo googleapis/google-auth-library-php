@@ -107,7 +107,7 @@ trait MetricsTrait
     protected static function getVersion(): string
     {
         if (is_null(self::$version)) {
-            $versionFilePath = __DIR__ .'/../VERSION';
+            $versionFilePath = __DIR__ . '/../VERSION';
             self::$version = trim((string) file_get_contents($versionFilePath));
         }
         return self::$version;
