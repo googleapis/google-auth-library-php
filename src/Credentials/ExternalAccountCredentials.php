@@ -45,6 +45,7 @@ class ExternalAccountCredentials implements
     private OAuth2 $auth;
     private ?string $quotaProject;
     private ?string $serviceAccountImpersonationUrl;
+    private string $universeDomain;
 
     /**
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
