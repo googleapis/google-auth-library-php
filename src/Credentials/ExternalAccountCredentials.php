@@ -23,6 +23,7 @@ use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
@@ -31,7 +32,11 @@ use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 
-class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetadataInterface, GetQuotaProjectInterface
+class ExternalAccountCredentials implements
+    FetchAuthTokenInterface,
+    UpdateMetadataInterface,
+    GetQuotaProjectInterface,
+    GetUniverseDomainInterface
 {
     use UpdateMetadataTrait;
 
@@ -237,5 +242,15 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
     public function getQuotaProject()
     {
         return $this->quotaProject;
+    }
+
+    /**
+     * Get the universe domain used for this API request
+     *
+     * @return string
+     */
+    public function getUniverseDomain(): string
+    {
+        return $this->universeDomain;
     }
 }
