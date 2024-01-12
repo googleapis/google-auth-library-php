@@ -23,6 +23,7 @@ use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
@@ -36,18 +37,20 @@ class ExternalAccountCredentials implements
     FetchAuthTokenInterface,
     UpdateMetadataInterface,
     GetQuotaProjectInterface,
+    GetUniverseDomainInterface,
     ProjectIdProviderInterface
 {
     use UpdateMetadataTrait;
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
-    private const CLOUD_RESOURCE_MANAGER_URL='https://cloudresourcemanager.googleapis.com/v1/projects/%s';
+    private const CLOUD_RESOURCE_MANAGER_URL='https://cloudresourcemanager.UNIVERSE_DOMAIN/v1/projects/%s';
 
     private OAuth2 $auth;
     private ?string $quotaProject;
     private ?string $serviceAccountImpersonationUrl;
     private ?string $workforcePoolUserProject;
     private ?string $projectId;
+    private string $universeDomain;
 
     /**
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
@@ -99,6 +102,7 @@ class ExternalAccountCredentials implements
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
         $this->workforcePoolUserProject = $jsonKey['workforce_pool_user_project'] ?? null;
+        $this->universeDomain = $jsonKey['universe_domain'] ?? GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN;
 
         $this->auth = new OAuth2([
             'tokenCredentialUri' => $jsonKey['token_url'],
@@ -249,6 +253,16 @@ class ExternalAccountCredentials implements
     }
 
     /**
+     * Get the universe domain used for this API request
+     *
+     * @return string
+     */
+    public function getUniverseDomain(): string
+    {
+        return $this->universeDomain;
+    }
+
+    /**
      * Get the project ID.
      *
      * @param callable $httpHandler Callback which delivers psr7 request
@@ -272,11 +286,16 @@ class ExternalAccountCredentials implements
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
-        $url = sprintf(self::CLOUD_RESOURCE_MANAGER_URL, $projectNumber);
+        $url = str_replace(
+            'UNIVERSE_DOMAIN',
+            $this->getUniverseDomain(),
+            sprintf(self::CLOUD_RESOURCE_MANAGER_URL, $projectNumber)
+        );
 
         if (is_null($accessToken)) {
             $accessToken = $this->fetchAuthToken($httpHandler)['access_token'];
         }
+
         $request = new Request('GET', $url, ['authorization' => 'Bearer ' . $accessToken]);
         $response = $httpHandler($request);
 
