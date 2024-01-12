@@ -95,6 +95,7 @@ class ExternalAccountCredentials implements
         }
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
+        $this->universeDomain = $jsonKey['universe_domain'] ?? GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN;
 
         $this->auth = new OAuth2([
             'tokenCredentialUri' => $jsonKey['token_url'],
