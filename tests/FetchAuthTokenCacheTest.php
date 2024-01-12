@@ -18,9 +18,13 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\Cache\MemoryCacheItemPool;
+use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenCache;
+use Google\Auth\GetUniverseDomainInterface;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Utils;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use RuntimeException;
@@ -224,6 +228,52 @@ class FetchAuthTokenCacheTest extends BaseTest
         $lastReceivedToken = $cachedFetcher->getLastReceivedToken();
         $this->assertArrayHasKey('access_token', $lastReceivedToken);
         $this->assertEquals($token, $lastReceivedToken['access_token']);
+
+        // Ensure token is cached
+        $metadata2 = $cachedFetcher->updateMetadata([], 'http://test-auth-uri');
+        $this->assertEquals($metadata, $metadata2);
+
+        // Ensure token for different URI is NOT cached
+        $metadata3 = $cachedFetcher->updateMetadata([], 'http://test-auth-uri-2');
+        $this->assertNotEquals($metadata, $metadata3);
+    }
+
+    public function testUpdateMetadataWithGceCredForIdToken()
+    {
+        $idToken = '123asdfghjkl';
+        $httpHandler = getHandler([
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($idToken)),
+        ]);
+        $fetcher = new GCECredentials(null, null, 'https://example.test.com');
+        $cache = new MemoryCacheItemPool();
+
+        $cachedFetcher = new FetchAuthTokenCache(
+            $fetcher,
+            null,
+            $cache
+        );
+        $metadata = $cachedFetcher->updateMetadata(
+            [],
+            'http://test-auth-uri',
+            $httpHandler
+        );
+        $this->assertArrayHasKey(
+            CredentialsLoader::AUTH_METADATA_KEY,
+            $metadata
+        );
+
+        $authorization = $metadata[CredentialsLoader::AUTH_METADATA_KEY];
+        $this->assertTrue(is_array($authorization));
+
+        $bearerToken = current($authorization);
+        $this->assertTrue(is_string($bearerToken));
+        $this->assertEquals(0, strpos($bearerToken, 'Bearer '));
+        $token = str_replace('Bearer ', '', $bearerToken);
+
+        $lastReceivedToken = $cachedFetcher->getLastReceivedToken();
+        $this->assertArrayHasKey('id_token', $lastReceivedToken);
+        $this->assertEquals($idToken, $lastReceivedToken['id_token']);
 
         // Ensure token is cached
         $metadata2 = $cachedFetcher->updateMetadata([], 'http://test-auth-uri');
@@ -601,6 +651,41 @@ class FetchAuthTokenCacheTest extends BaseTest
         );
 
         $fetcher->getProjectId();
+    }
+
+    public function testGetUniverseDomain()
+    {
+        $universeDomain = 'foobar';
+
+        $mockFetcher = $this->prophesize('Google\Auth\GetUniverseDomainInterface');
+        $mockFetcher->willImplement('Google\Auth\FetchAuthTokenInterface');
+        $mockFetcher->getUniverseDomain()
+            ->shouldBeCalled()
+            ->willReturn($universeDomain);
+
+        $fetcher = new FetchAuthTokenCache(
+            $mockFetcher->reveal(),
+            [],
+            $this->mockCache->reveal()
+        );
+
+        $this->assertEquals($universeDomain, $fetcher->getUniverseDomain());
+    }
+
+    public function testGetUniverseDomainInvalidFetcher()
+    {
+        $mockFetcher = $this->prophesize('Google\Auth\FetchAuthTokenInterface');
+
+        $fetcher = new FetchAuthTokenCache(
+            $mockFetcher->reveal(),
+            [],
+            $this->mockCache->reveal()
+        );
+
+        $this->assertEquals(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            $fetcher->getUniverseDomain()
+        );
     }
 
     public function testGetFetcher()

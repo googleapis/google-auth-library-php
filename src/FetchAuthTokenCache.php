@@ -26,6 +26,7 @@ use Psr\Cache\CacheItemPoolInterface;
 class FetchAuthTokenCache implements
     FetchAuthTokenInterface,
     GetQuotaProjectInterface,
+    GetUniverseDomainInterface,
     SignBlobInterface,
     ProjectIdProviderInterface,
     UpdateMetadataInterface
@@ -203,6 +204,20 @@ class FetchAuthTokenCache implements
         return $this->fetcher->getProjectId($httpHandler);
     }
 
+    /*
+     * Get the Universe Domain from the fetcher.
+     *
+     * @return string
+     */
+    public function getUniverseDomain(): string
+    {
+        if ($this->fetcher instanceof GetUniverseDomainInterface) {
+            return $this->fetcher->getUniverseDomain();
+        }
+
+        return GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN;
+    }
+
     /**
      * Updates metadata with the authorization token.
      *
@@ -233,6 +248,10 @@ class FetchAuthTokenCache implements
             if (isset($cached['access_token'])) {
                 $metadata[self::AUTH_METADATA_KEY] = [
                     'Bearer ' . $cached['access_token']
+                ];
+            } elseif (isset($cached['id_token'])) {
+                $metadata[self::AUTH_METADATA_KEY] = [
+                    'Bearer ' . $cached['id_token']
                 ];
             }
         }
