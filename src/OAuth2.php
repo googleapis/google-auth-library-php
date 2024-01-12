@@ -322,6 +322,12 @@ class OAuth2 implements FetchAuthTokenInterface
     private ?string $issuedTokenType = null;
 
     /**
+     * From STS response.
+     * An identifier for the representation of the issued security token.
+     */
+    private array $additionalOption;
+
+    /**
      * Create a new OAuthCredentials.
      *
      * The configuration array accepts various options
@@ -438,6 +444,7 @@ class OAuth2 implements FetchAuthTokenInterface
             'subjectTokenType' => null,
             'actorToken' => null,
             'actorTokenType' => null,
+            'additionalOptions' => [],
         ], $config);
 
         $this->setAuthorizationUri($opts['authorizationUri']);
@@ -466,6 +473,7 @@ class OAuth2 implements FetchAuthTokenInterface
         $this->subjectTokenType = $opts['subjectTokenType'];
         $this->actorToken = $opts['actorToken'];
         $this->actorTokenType = $opts['actorTokenType'];
+        $this->additionalOptions = $opts['additionalOptions'];
 
         $this->updateToken($opts);
     }
@@ -616,6 +624,9 @@ class OAuth2 implements FetchAuthTokenInterface
                     'actor_token'          => $this->actorToken,
                     'actor_token_type'     => $this->actorTokenType,
                 ]);
+                if ($this->additionalOptions) {
+                    $params['options'] = json_encode($this->additionalOptions);
+                }
                 break;
             default:
                 if (!is_null($this->getRedirectUri())) {

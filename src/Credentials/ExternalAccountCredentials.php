@@ -110,6 +110,9 @@ class ExternalAccountCredentials implements
             'scope' => $scope,
             'subjectTokenType' => $jsonKey['subject_token_type'],
             'subjectTokenFetcher' => self::buildCredentialSource($jsonKey),
+            'additionalOptions' => $this->workforcePoolUserProject
+                ? ['userProject' => $this->workforcePoolUserProject]
+                : [],
         ]);
     }
 
