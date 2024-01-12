@@ -21,6 +21,7 @@ use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\OAuth2;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -336,5 +337,36 @@ class ExternalAccountCredentialsTest extends TestCase
 
         $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
         $this->assertEquals('test_quota_project', $creds->getQuotaProject());
+    }
+
+    public function testGetUniverseDomain()
+    {
+        // no universe domain is the default "googleapis.com"
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['url' => 'sts-url.com'],
+        ];
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+        $this->assertEquals(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            $creds->getUniverseDomain()
+        );
+
+        // universe domain in credentials is used if supplied
+        $universeDomain = 'example-universe.com';
+        $jsonCreds = [
+            'type' => 'external_account',
+            'token_url' => 'token-url.com',
+            'audience' => '',
+            'subject_token_type' => '',
+            'credential_source' => ['url' => 'sts-url.com'],
+            'universe_domain' => $universeDomain,
+        ];
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+        $this->assertEquals($universeDomain, $creds->getUniverseDomain());
     }
 }
