@@ -325,7 +325,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * From STS response.
      * An identifier for the representation of the issued security token.
      */
-    private array $additionalOption;
+    private array $additionalOptions;
 
     /**
      * Create a new OAuthCredentials.
