@@ -322,7 +322,7 @@ class ExternalAccountCredentials implements
 
     private function isWorkforcePool(): bool
     {
-       $regex = '#//iam\.googleapis\.com/locations/[^/]+/workforcePools/#';
-       return preg_match($regex, $this->auth->getAudience()) === 1;
+        $regex = '#//iam\.googleapis\.com/locations/[^/]+/workforcePools/#';
+        return preg_match($regex, $this->auth->getAudience()) === 1;
     }
 }
