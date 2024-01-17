@@ -170,6 +170,7 @@ class ExternalAccountCredentials implements
 
         throw new InvalidArgumentException('Unable to determine credential source from json key.');
     }
+
     /**
      * @param string $stsToken
      * @param callable $httpHandler
