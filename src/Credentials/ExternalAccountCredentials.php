@@ -114,6 +114,12 @@ class ExternalAccountCredentials implements
                 ? ['userProject' => $this->workforcePoolUserProject]
                 : [],
         ]);
+
+        if (!$this->isWorkforcePool() && $this->workforcePoolUserProject) {
+            throw new InvalidArgumentException(
+                'workforce_pool_user_project should not be set for non-workforce pool credentials.'
+            );
+        }
     }
 
     /**
@@ -207,8 +213,8 @@ class ExternalAccountCredentials implements
         $response = $httpHandler($request);
         $body = json_decode((string) $response->getBody(), true);
         return [
-            'access_token'  => $body['accessToken'],
-            'expires_at'    => strtotime($body['expireTime']),
+            'access_token' => $body['accessToken'],
+            'expires_at' => strtotime($body['expireTime']),
         ];
     }
 
@@ -312,5 +318,11 @@ class ExternalAccountCredentials implements
         $parts = explode('/', $this->auth->getAudience());
         $i = array_search('projects', $parts);
         return $parts[$i + 1] ?? null;
+    }
+
+    private function isWorkforcePool(): bool
+    {
+       $regex = '#//iam\.googleapis\.com/locations/[^/]+/workforcePools/#';
+       return preg_match($regex, $this->auth->getAudience()) === 1;
     }
 }

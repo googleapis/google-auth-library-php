@@ -44,6 +44,7 @@ class ExternalAccountCredentialsTest extends TestCase
         'token_url' => 'token-url.com',
         'audience' => '',
         'subject_token_type' => '',
+        'credential_source' => ['url' => 'sts-url.com'],
     ];
 
     /**
@@ -54,9 +55,9 @@ class ExternalAccountCredentialsTest extends TestCase
         string $expectedSourceClass,
         array $expectedProperties = []
     ) {
-        $jsonCreds = $this->baseCreds + [
+        $jsonCreds = [
             'credential_source' => $credentialSource,
-        ];
+        ] + $this->baseCreds;
 
         $credsReflection = new \ReflectionClass(ExternalAccountCredentials::class);
         $credsProp = $credsReflection->getProperty('auth');
@@ -203,9 +204,9 @@ class ExternalAccountCredentialsTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmpFile, 'abc');
 
-        $jsonCreds = $this->baseCreds + [
+        $jsonCreds = [
             'credential_source' => ['file' => $tmpFile],
-        ];
+        ] + $this->baseCreds;
 
         $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
 
@@ -231,11 +232,7 @@ class ExternalAccountCredentialsTest extends TestCase
 
     public function testFetchAuthTokenUrlCredentials()
     {
-        $jsonCreds = $this->baseCreds + [
-            'credential_source' => ['url' => 'sts-url.com'],
-        ];
-
-        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+        $creds = new ExternalAccountCredentials('a-scope', $this->baseCreds);
 
         $requestCount = 0;
         $httpHandler = function (RequestInterface $request) use (&$requestCount) {
@@ -275,10 +272,10 @@ class ExternalAccountCredentialsTest extends TestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'test');
         file_put_contents($tmpFile, 'abc');
 
-        $jsonCreds = $this->baseCreds + [
+        $jsonCreds = [
             'credential_source' => ['file' => $tmpFile],
             'service_account_impersonation_url' => 'service-account-impersonation-url.com',
-        ];
+        ] + $this->baseCreds;
 
         $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
 
@@ -318,10 +315,10 @@ class ExternalAccountCredentialsTest extends TestCase
 
     public function testGetQuotaProject()
     {
-        $jsonCreds = $this->baseCreds + [
-            'credential_source' => ['url' => 'sts-url.com'],
+        $jsonCreds = [
+
             'quota_project_id' => 'test_quota_project',
-        ];
+        ] + $this->baseCreds;
 
         $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
         $this->assertEquals('test_quota_project', $creds->getQuotaProject());
@@ -372,29 +369,17 @@ class ExternalAccountCredentialsTest extends TestCase
             // from audience
             [
                 [
-                    'audience' => 'https://foo.com/projects/1234/locations/global/workloadIdentityPools/foo/providers/bar',
-                ] + $this->baseCreds + [
-                    'credential_source' => ['url' => 'sts-url.com'],
-                ],
+                    'audience' => '//iam.googleapis.com/projects/1234/locations/global/workloadIdentityPools/foo/providers/bar',
+                ] + $this->baseCreds,
                 '1234'
             ],
             // from workforce_pool_user_project
             [
-                $this->baseCreds + [
-                    'credential_source' => ['url' => 'sts-url.com'],
-                    'workforce_pool_user_project' => '4567',
-                ],
-                '4567'
-            ],
-            // when both are available, use the audience
-            [
                 [
-                    'audience' => 'https://foo.com/projects/1234/locations/global/workloadIdentityPools/foo/providers/bar',
-                ] + $this->baseCreds + [
-                    'credential_source' => ['url' => 'sts-url.com'],
+                    'audience' => '//iam.googleapis.com/locations/global/workforcePools/foo/providers/bar',
                     'workforce_pool_user_project' => '4567',
-                ],
-                '1234'
+                ] + $this->baseCreds,
+                '4567'
             ],
         ];
     }
@@ -402,10 +387,8 @@ class ExternalAccountCredentialsTest extends TestCase
     public function testCacheIsCalledForGetProjectIdWithCache()
     {
         $jsonCreds = [
-            'audience' => 'https://foo.com/projects/1234/locations/global/workloadIdentityPools/foo/providers/bar',
-        ] + $this->baseCreds + [
-            'credential_source' => ['url' => 'sts-url.com'],
-        ];
+            'audience' => '//iam.googleapis.com/projects/1234/locations/global/workloadIdentityPools/foo/providers/bar',
+        ] + $this->baseCreds;
 
         $httpHandler = function (RequestInterface $request) {
             $this->assertEquals(
@@ -451,14 +434,7 @@ class ExternalAccountCredentialsTest extends TestCase
     public function testGetUniverseDomain()
     {
         // no universe domain is the default "googleapis.com"
-        $jsonCreds = [
-            'type' => 'external_account',
-            'token_url' => 'token-url.com',
-            'audience' => '',
-            'subject_token_type' => '',
-            'credential_source' => ['url' => 'sts-url.com'],
-        ];
-        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+        $creds = new ExternalAccountCredentials('a-scope', $this->baseCreds);
         $this->assertEquals(
             GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
             $creds->getUniverseDomain()
@@ -467,15 +443,71 @@ class ExternalAccountCredentialsTest extends TestCase
         // universe domain in credentials is used if supplied
         $universeDomain = 'example-universe.com';
         $jsonCreds = [
-            'type' => 'external_account',
-            'token_url' => 'token-url.com',
-            'audience' => '',
-            'subject_token_type' => '',
-            'credential_source' => ['url' => 'sts-url.com'],
             'universe_domain' => $universeDomain,
-        ];
+        ] + $this->baseCreds;
 
         $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
         $this->assertEquals($universeDomain, $creds->getUniverseDomain());
+    }
+
+    public function testWorkforcePoolWithNonWorkforceAudienceThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('workforce_pool_user_project should not be set for non-workforce pool credentials.');
+
+        $jsonCreds = [
+            'audience' => '//iam.googleapis.com/projects/1234/locations/global/workloadIdentityPools/foo/providers/bar',
+            'workforce_pool_user_project' => '4567',
+        ] + $this->baseCreds;
+        new ExternalAccountCredentials('a-scope', $jsonCreds);
+    }
+
+    public function testFetchAuthTokenWithWorkforcePoolCredentials()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test');
+        file_put_contents($tmpFile, 'abc');
+
+        $jsonCreds = [
+            'credential_source' => ['file' => $tmpFile],
+            'audience' => '//iam.googleapis.com/locations/global/workforcePools/foo/providers/bar',
+            'workforce_pool_user_project' => '4567',
+            'service_account_impersonation_url' => 'service-account-impersonation-url.com',
+        ] + $this->baseCreds;
+
+        $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
+
+        $requestCount = 0;
+        $expiry = '2023-10-05T18:00:01Z';
+        $httpHandler = function (RequestInterface $request) use (&$requestCount, $expiry) {
+            switch (++$requestCount) {
+                case 1:
+                    $this->assertEquals('token-url.com', (string) $request->getUri());
+                    parse_str((string) $request->getBody(), $requestBody);
+                    $this->assertEquals('abc', $requestBody['subject_token']);
+                    $this->assertEquals('{"userProject":"4567"}', $requestBody['options']);
+                    $responseBody = '{"access_token": "def"}';
+                    break;
+                case 2:
+                    $this->assertEquals('service-account-impersonation-url.com', (string) $request->getUri());
+                    $responseBody = json_encode(['accessToken' => 'def', 'expireTime' => $expiry]);
+                    break;
+            }
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn($responseBody);
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+            if ($requestCount === 1) {
+                $response->hasHeader('Content-Type')->willReturn(false);
+            }
+
+            return $response->reveal();
+        };
+
+        $authToken = $creds->fetchAuthToken($httpHandler);
+        $this->assertArrayHasKey('access_token', $authToken);
+        $this->assertEquals('def', $authToken['access_token']);
+        $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
     }
 }
