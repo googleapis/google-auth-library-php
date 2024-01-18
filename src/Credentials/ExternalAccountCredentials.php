@@ -152,6 +152,23 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
             );
         }
 
+        if (isset($credentialSource['executable'])) {
+            if (!array_key_exists('command', $credentialSource)) {
+                throw new InvalidArgumentException(
+                    'executable source requires a command to be set in the JSON file.'
+                );
+            }
+
+            return new ExecutableSource(
+                $credentialSource['command'],
+                $credentialSource['timeout_millis'] ?? null,
+                $credentialSource['output_file'] ?? null,
+                $jsonKey['audience'],
+                $jsonKey['subject_token_type'],
+                $this->getServiceAccountEmail(),
+            );
+        }
+
         throw new InvalidArgumentException('Unable to determine credential source from json key.');
     }
     /**
@@ -217,6 +234,17 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
         }
 
         return $stsToken;
+    }
+
+    private function getServiceAccountEmail(): ?string
+    {
+        if ($this->serviceAccountImpersonationUrl) {
+            // Parse email from URL. The formal looks as follows:
+            // https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/name@project-id.iam.gserviceaccount.com:generateAccessToken
+            $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
+            preg_match($regex, $this->serviceAccountImpersonationUrl, $matches);
+            return $matches['email'] ?? null;
+        }
     }
 
     public function getCacheKey()
