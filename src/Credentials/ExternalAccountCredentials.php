@@ -18,6 +18,7 @@
 namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialSource\AwsNativeSource;
+use Google\Auth\CredentialSource\ExecutableSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
@@ -128,11 +129,6 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
                     'The regional_cred_verification_url field is required for aws1 credential source.'
                 );
             }
-            if (!array_key_exists('audience', $jsonKey)) {
-                throw new InvalidArgumentException(
-                    'aws1 credential source requires an audience to be set in the JSON file.'
-                );
-            }
 
             return new AwsNativeSource(
                 $jsonKey['audience'],
@@ -161,11 +157,14 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
 
             return new ExecutableSource(
                 $credentialSource['command'],
+                self::getExecutableEnvironmentVariables(
+                    $jsonKey['audience'],
+                    $jsonKey['subject_token_type'],
+                    $jsonKey['service_account_impersonation_url'] ?? null,
+                    $credentialSource['output_file'] ?? null,
+                ),
                 $credentialSource['timeout_millis'] ?? null,
                 $credentialSource['output_file'] ?? null,
-                $jsonKey['audience'],
-                $jsonKey['subject_token_type'],
-                $this->getServiceAccountEmail(),
             );
         }
 
@@ -236,15 +235,35 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
         return $stsToken;
     }
 
-    private function getServiceAccountEmail(): ?string
+
+    /**
+     * @return array<string, string>
+     */
+    private static function getExecutableEnvironmentVariables(
+        string $audience,
+        string $subjectTokenType,
+        ?string $serviceAccountImpersonationUrl,
+        ?string $outputFile,
+    ): array
     {
-        if ($this->serviceAccountImpersonationUrl) {
+        $env = [
+            'GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE' => $audience,
+            'GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE' => $subjectTokenType,
+            // Always set to 0 because interactive mode is not supported.
+            'GOOGLE_EXTERNAL_ACCOUNT_INTERACTIVE' => '0'
+        ];
+        if ($outputFile) {
+            $env['GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE'] = $outputFile;
+        }
+        if ($serviceAccountImpersonationUrl) {
             // Parse email from URL. The formal looks as follows:
             // https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/name@project-id.iam.gserviceaccount.com:generateAccessToken
             $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
-            preg_match($regex, $this->serviceAccountImpersonationUrl, $matches);
-            return $matches['email'] ?? null;
+            if (preg_match($regex, $serviceAccountImpersonationUrl, $matches)) {
+                $env['GOOGLE_EXTERNAL_ACCOUNT_IMPERSONATED_EMAIL'] = $matches['email'];
+            }
         }
+        return $env;
     }
 
     public function getCacheKey()

@@ -18,8 +18,6 @@
 namespace Google\Auth\CredentialSource;
 
 use Google\Auth\ExternalAccountCredentialSourceInterface;
-use InvalidArgumentException;
-use UnexpectedValueException;
 use RuntimeException;
 
 /**
@@ -39,11 +37,9 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
     private const GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = 'GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES';
 
     private string $executable;
-    private string $audience;
-    private string $subjectTokenType;
+    private array $environmentVariables;
     private int $timeoutMillis;
     private ?string $outputFile;
-    private ?string $serviceAccountEmail;
 
     /**
      * @param string $executable    The string executable to run to get the subject token.
@@ -52,18 +48,14 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      */
     public function __construct(
         string $executable,
-        string $audience,
-        string $subjectTokenType,
-        int $timeoutMillis = null,
-        string $outputFile = null,
-        string $serviceAccountEmail = null
+        array $environmentVariabes,
+        ?int $timeoutMillis,
+        ?string $outputFile,
     ) {
         $this->executable = $executable;
-        $this->timeoutMillis = $timeoutMillis ?? self::DEFAULT_EXECUTABLE_TIMEOUT_MILLIS;
+        $this->environmentVariables = $environmentVariables;
+        $this->timeoutMillis = $timeoutMillis ?: self::DEFAULT_EXECUTABLE_TIMEOUT_MILLIS;
         $this->outputFile = $outputFile;
-        $this->audience = $audience;
-        $this->subjectTokenType = $subjectTokenType;
-        $this->serviceAccountEmail = $serviceAccountEmail;
     }
 
     public function fetchSubjectToken(callable $httpHandler = null): string
@@ -76,35 +68,46 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
                 . 'Variable to 1.'
             );
         }
-        $contents = file_get_contents($this->file);
-        if ($this->format === 'json') {
-            if (!$json = json_decode((string) $contents, true)) {
-                throw new UnexpectedValueException(
-                    'Unable to decode JSON file'
-                );
+
+        if ($this->outputFile && file_exists($this->outputFile)) {
+            $cachedToken = json_decode(file_get_contents($this->outputFile), true);
+            if (time() < ($cachedToken['expiration_time'] ?? 0)) {
+                return $cachedToken;
             }
-            if (!isset($json[$this->subjectTokenFieldName])) {
-                throw new UnexpectedValueException(
-                    'subject_token_field_name not found in JSON file'
-                );
-            }
-            $contents = $json[$this->subjectTokenFieldName];
         }
 
-        return $contents;
-    }
+        $environmentVariables = array_map(
+            fn ($key, $value) => "$key=$value",
+            array_keys($this->environmentVariables),
+            $this->environmentVariables
+        );
+        $command = escapeshellcmd($environmentVariables . ' ' . $this->executable);
+        exec($command, $output, $exitCode);
 
-    private function setExecutableEnvironmentVariables()
-    {
-        putenv('GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE=' . $this->audience);
-        putenv('GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE=' . $this->subjectTokenType);
-        // Always set to 0 because interactive mode is not supported.
-        putenv('GOOGLE_EXTERNAL_ACCOUNT_INTERACTIVE=0');
-        if ($this->outputFile) {
-            putenv('GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE=' . $this->outputFile);
+        // If the exit code is not 0, throw an exception with the output as the error details
+        if ($exitCode !== 0) {
+            throw new RuntimeException(
+                'The executable failed to run'
+                . ($output ? ' with the following error: ' . $output : '.')
+            );
         }
-        if ($this->serviceAccountEmail) {
-            putenv('GOOGLE_EXTERNAL_ACCOUNT_IMPERSONATED_EMAIL=' . $this->serviceAccountEmail);
+
+        // If the exit code is 0 and there's a response, return the output as the subject token.
+        if ($cmdOutput) {
+            json_decode($cmdOutput);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $cmdOutput;
+            }
         }
+
+        if ($this->outputFile && $fileContents = file_get_contents($this->outputFile)) {
+            json_decode($fileContents);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $string;
+            }
+            return $fileContents;
+        }
+
+        throw new RuntimeException('Unable to retrieve a token from the executable.');
     }
 }
