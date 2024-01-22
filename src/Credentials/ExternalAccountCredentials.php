@@ -149,22 +149,37 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
         }
 
         if (isset($credentialSource['executable'])) {
-            if (!array_key_exists('command', $credentialSource)) {
+            if (!array_key_exists('command', $credentialSource['executable'])) {
                 throw new InvalidArgumentException(
                     'executable source requires a command to be set in the JSON file.'
                 );
             }
 
+            // Build command environment variables
+            $envVars = [
+                'GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE' => $audience,
+                'GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE' => $subjectTokenType,
+                // Always set to 0 because interactive mode is not supported.
+                'GOOGLE_EXTERNAL_ACCOUNT_INTERACTIVE' => '0',
+
+            ];
+            if ($outputFile) {
+                $envVars['GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE'] = $outputFile;
+            }
+            if ($serviceAccountImpersonationUrl) {
+                // Parse email from URL. The formal looks as follows:
+                // https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/name@project-id.iam.gserviceaccount.com:generateAccessToken
+                $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
+                if (preg_match($regex, $serviceAccountImpersonationUrl, $matches)) {
+                    $envVars['GOOGLE_EXTERNAL_ACCOUNT_IMPERSONATED_EMAIL'] = $matches['email'];
+                }
+            }
+
             return new ExecutableSource(
-                $credentialSource['command'],
-                self::getExecutableEnvironmentVariables(
-                    $jsonKey['audience'],
-                    $jsonKey['subject_token_type'],
-                    $jsonKey['service_account_impersonation_url'] ?? null,
-                    $credentialSource['output_file'] ?? null,
-                ),
-                $credentialSource['timeout_millis'] ?? null,
-                $credentialSource['output_file'] ?? null,
+                $credentialSource['executable']['command'],
+                $credentialSource['executable']['timeout_millis'] ?? null,
+                $credentialSource['executable']['output_file'] ?? null,
+                $envVars,
             );
         }
 
@@ -233,37 +248,6 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
         }
 
         return $stsToken;
-    }
-
-
-    /**
-     * @return array<string, string>
-     */
-    private static function getExecutableEnvironmentVariables(
-        string $audience,
-        string $subjectTokenType,
-        ?string $serviceAccountImpersonationUrl,
-        ?string $outputFile,
-    ): array
-    {
-        $env = [
-            'GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE' => $audience,
-            'GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE' => $subjectTokenType,
-            // Always set to 0 because interactive mode is not supported.
-            'GOOGLE_EXTERNAL_ACCOUNT_INTERACTIVE' => '0'
-        ];
-        if ($outputFile) {
-            $env['GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE'] = $outputFile;
-        }
-        if ($serviceAccountImpersonationUrl) {
-            // Parse email from URL. The formal looks as follows:
-            // https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/name@project-id.iam.gserviceaccount.com:generateAccessToken
-            $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
-            if (preg_match($regex, $serviceAccountImpersonationUrl, $matches)) {
-                $env['GOOGLE_EXTERNAL_ACCOUNT_IMPERSONATED_EMAIL'] = $matches['email'];
-            }
-        }
-        return $env;
     }
 
     public function getCacheKey()

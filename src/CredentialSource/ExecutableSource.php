@@ -37,9 +37,9 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
     private const GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = 'GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES';
 
     private string $executable;
-    private array $environmentVariables;
     private int $timeoutMillis;
     private ?string $outputFile;
+    private array $environmentVariables;
 
     /**
      * @param string $executable    The string executable to run to get the subject token.
@@ -48,17 +48,22 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      */
     public function __construct(
         string $executable,
-        array $environmentVariabes,
         ?int $timeoutMillis,
         ?string $outputFile,
+        array $environmentVariables = [],
     ) {
         $this->executable = $executable;
-        $this->environmentVariables = $environmentVariables;
         $this->timeoutMillis = $timeoutMillis ?: self::DEFAULT_EXECUTABLE_TIMEOUT_MILLIS;
         $this->outputFile = $outputFile;
+        $this->environmentVariables = $environmentVariables;
     }
 
-    public function fetchSubjectToken(callable $httpHandler = null): string
+    /**
+     * @param callable $executableHandler   A function which returns the output of the command with
+     *                                      the following function signature:
+     *                                      function (string $command, array $envVars, int &$returnVar): string
+     */
+    public function fetchSubjectToken(callable $executableHandler = null): string
     {
         // Check if the executable is allowed to run.
         if (getenv(self::GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES) !== '1') {
@@ -76,16 +81,23 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             }
         }
 
-        $environmentVariables = array_map(
-            fn ($key, $value) => "$key=$value",
-            array_keys($this->environmentVariables),
-            $this->environmentVariables
-        );
-        $command = escapeshellcmd($environmentVariables . ' ' . $this->executable);
-        exec($command, $output, $exitCode);
+        $executableHandler ??= function (string $command, array $envVars, int &$returnVar): string {
+            $envVarString = array_map(
+                fn ($key, $value) => "$key=$value",
+                array_keys($envVars),
+                $envVars
+            );
+            $command = escapeshellcmd($envVarString . ' ' . $command);
+            exec($command, $output, $returnVar);
+
+            return $output;
+        };
+
+        // Run the executable.
+        $cmdOutput = $executableHandler($this->executable, $this->environmentVariables, $returnVar);
 
         // If the exit code is not 0, throw an exception with the output as the error details
-        if ($exitCode !== 0) {
+        if ($returnVar !== 0) {
             throw new RuntimeException(
                 'The executable failed to run'
                 . ($output ? ' with the following error: ' . $output : '.')
