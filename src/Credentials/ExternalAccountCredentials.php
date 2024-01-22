@@ -157,16 +157,16 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
 
             // Build command environment variables
             $envVars = [
-                'GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE' => $audience,
-                'GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE' => $subjectTokenType,
+                'GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE' => $jsonKey['audience'],
+                'GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE' => $jsonKey['subject_token_type'],
                 // Always set to 0 because interactive mode is not supported.
                 'GOOGLE_EXTERNAL_ACCOUNT_INTERACTIVE' => '0',
 
             ];
-            if ($outputFile) {
+            if ($outputFile = $credentialSource['executable']['output_file'] ?? null) {
                 $envVars['GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE'] = $outputFile;
             }
-            if ($serviceAccountImpersonationUrl) {
+            if ($serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'] ?? null) {
                 // Parse email from URL. The formal looks as follows:
                 // https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/name@project-id.iam.gserviceaccount.com:generateAccessToken
                 $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
@@ -178,7 +178,7 @@ class ExternalAccountCredentials implements FetchAuthTokenInterface, UpdateMetad
             return new ExecutableSource(
                 $credentialSource['executable']['command'],
                 $credentialSource['executable']['timeout_millis'] ?? null,
-                $credentialSource['executable']['output_file'] ?? null,
+                $outputFile,
                 $envVars,
             );
         }
