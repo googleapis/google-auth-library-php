@@ -100,7 +100,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
         if ($returnVar !== 0) {
             throw new RuntimeException(
                 'The executable failed to run'
-                . ($output ? ' with the following error: ' . $output : '.')
+                . ($cmdOutput ? ' with the following error: ' . $cmdOutput : '.')
             );
         }
 

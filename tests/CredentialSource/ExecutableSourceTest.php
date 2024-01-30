@@ -25,6 +25,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use UnexpectedValueException;
+use RuntimeException;
 
 /**
  * @group credentialsource
@@ -34,27 +35,76 @@ class ExecutableSourceTest extends TestCase
 {
     use ProphecyTrait;
 
-    /** @runInSeparateProcess */
-    public function testFetchSubjectToken()
+    /**
+     * @runInSeparateProcess
+     */
+    public function testNoAllowExecutableEnvVarThrowsException()
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(
+            'Pluggable Auth executables need to be explicitly allowed to run by setting the '
+            . 'GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES environment Variable to 1.'
+        );
+
+        // Ensure env var does not equal 0
+        putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=');
+        $source = new ExecutableSource('some-command', null, null);
+        $source->fetchSubjectToken();
+    }
+
+    /**
+     * @dataProvider provideFetchSubjectToken
+     * @runInSeparateProcess
+     */
+    public function testFetchSubjectToken(string $expectedCommand)
     {
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
-        $source = new ExecutableSource('fake-command', null, null);
-        $subjectToken = $source->fetchSubjectToken(function (string $command, array $envVars, &$returnCode) {
-            $this->assertEquals('fake-command', $command);
-            $this->assertEquals([], $envVars);
-            $returnCode = 0;
-            return '{"access_token": "abc"}';
-        });
+        $source = new ExecutableSource($expectedCommand, null, null);
+        $subjectToken = $source->fetchSubjectToken(
+            function (string $command, array $envVars, &$returnCode) use ($expectedCommand) {
+                $this->assertEquals($expectedCommand, $command);
+                $this->assertEquals([], $envVars);
+                $returnCode = 0;
+                return '{"access_token": "abc"}';
+            }
+        );
         $this->assertEquals('{"access_token": "abc"}', $subjectToken);
     }
 
-    // public function provideFetchSubjectToken()
-    // {
-    //     return [
-    //         ['abc', 'abc', null],
-    //         [json_encode(['token' => 'def']), 'def', 'json', 'token']
-    //     ];
-    // }
+    public function provideFetchSubjectToken()
+    {
+        return [
+            ['fake-command'],
+            ['bash fake-command --arg1=foo --arg2=bar'],
+        ];
+    }
+
+    /**
+     * @dataProvider provideFetchSubjectToken
+     * @runInSeparateProcess
+     */
+    public function testFetchSubjectTokenWithError(string $returnCode, string $output, string $expectedException)
+    {
+        putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
+        $source = new ExecutableSource($expectedCommand, null, null);
+        $subjectToken = $source->fetchSubjectToken(
+            function (string $command, array $envVars, &$returnCode) use ($expectedCommand) {
+                $this->assertEquals($expectedCommand, $command);
+                $this->assertEquals([], $envVars);
+                $returnCode = 0;
+                return '{"access_token": "abc"}';
+            }
+        );
+        $this->assertEquals('{"access_token": "abc"}', $subjectToken);
+    }
+
+    public function provideFetchSubjectTokenWithError()
+    {
+        return [
+            ['fake-command'],
+            ['bash fake-command --arg1=foo --arg2=bar'],
+        ];
+    }
 
     // public function testHeaders()
     // {
