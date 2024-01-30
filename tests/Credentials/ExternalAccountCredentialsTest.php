@@ -291,6 +291,8 @@ class ExternalAccountCredentialsTest extends TestCase
                     break;
                 case 2:
                     $this->assertEquals('service-account-impersonation-url.com', (string) $request->getUri());
+                    $requestBody = json_decode((string) $request->getBody(), true);
+                    $this->assertEquals(['a-scope'], $requestBody['scope']);
                     $responseBody = json_encode(['accessToken' => 'def', 'expireTime' => $expiry]);
                     break;
             }

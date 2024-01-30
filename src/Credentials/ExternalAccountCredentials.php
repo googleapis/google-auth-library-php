@@ -204,7 +204,7 @@ class ExternalAccountCredentials implements
             ],
             (string) json_encode([
                 'lifetime' => sprintf('%ss', OAuth2::DEFAULT_EXPIRY_SECONDS),
-                'scope' => $this->auth->getScope(),
+                'scope' => explode(' ', $this->auth->getScope()),
             ]),
         );
         if (is_null($httpHandler)) {
