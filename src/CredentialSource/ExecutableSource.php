@@ -63,7 +63,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      *                                      the following function signature:
      *                                      function (string $command, array $envVars, int &$returnVar): string
      */
-    public function fetchSubjectToken(callable $executableHandler = null): string
+    public function fetchSubjectToken(callable $httpHandler = null, callable $executableHandler = null): string
     {
         // Check if the executable is allowed to run.
         if (getenv(self::GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES) !== '1') {
@@ -81,19 +81,20 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             }
         }
 
-        $executableHandler ??= function (string $command, array $envVars, int &$returnVar): string {
-            $envVarString = array_map(
+        $executableHandler ??= function (string $command, array $envVars, &$returnVar): string {
+            $envVarString = implode(' ', array_map(
                 fn ($key, $value) => "$key=$value",
                 array_keys($envVars),
                 $envVars
-            );
+            ));
             $command = escapeshellcmd($envVarString . ' ' . $command);
             exec($command, $output, $returnVar);
 
-            return $output;
+            return implode("\n", $output);
         };
 
         // Run the executable.
+        $returnVar = null;
         $cmdOutput = $executableHandler($this->executable, $this->environmentVariables, $returnVar);
 
         // If the exit code is not 0, throw an exception with the output as the error details
@@ -106,9 +107,9 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
 
         // If the exit code is 0 and there's a response, return the output as the subject token.
         if ($cmdOutput) {
-            json_decode($cmdOutput);
+            $json = json_decode($cmdOutput, true);
             if (json_last_error() === JSON_ERROR_NONE) {
-                return $cmdOutput;
+                return $json['id_token'];
             }
         }
 

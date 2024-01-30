@@ -61,6 +61,7 @@ class ExecutableSourceTest extends TestCase
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
         $source = new ExecutableSource($expectedCommand, null, null);
         $subjectToken = $source->fetchSubjectToken(
+            null,
             function (string $command, array $envVars, &$returnCode) use ($expectedCommand) {
                 $this->assertEquals($expectedCommand, $command);
                 $this->assertEquals([], $envVars);
@@ -88,6 +89,7 @@ class ExecutableSourceTest extends TestCase
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
         $source = new ExecutableSource($expectedCommand, null, null);
         $subjectToken = $source->fetchSubjectToken(
+            null,
             function (string $command, array $envVars, &$returnCode) use ($expectedCommand) {
                 $this->assertEquals($expectedCommand, $command);
                 $this->assertEquals([], $envVars);
