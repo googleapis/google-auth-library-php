@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2023 Google Inc.
+ * Copyright 2024 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ class ExecutableSourceTest extends TestCase
             function (string $command, array $envVars, &$returnCode) use ($expectedCommand) {
                 $this->assertEquals($expectedCommand, $command);
                 $this->assertEquals([], $envVars);
-                $returnCode = 0;
+                $returnCode = 1;
                 return '{"access_token": "abc"}';
             }
         );

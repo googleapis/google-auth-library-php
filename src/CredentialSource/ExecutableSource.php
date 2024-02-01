@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2023 Google Inc.
+ * Copyright 2024 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 namespace Google\Auth\CredentialSource;
 
+use Google\Auth\ExecutableHandler\ExecutableHandler;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use RuntimeException;
 
@@ -33,38 +34,39 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
     /**
      * The default executable timeout when none is provided, in milliseconds.
      */
-    private const DEFAULT_EXECUTABLE_TIMEOUT_MILLIS = 30 * 1000;
     private const GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = 'GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES';
 
-    private string $executable;
-    private int $timeoutMillis;
+    private string $command;
+    private ExecutableHandler $executableHandler;
     private ?string $outputFile;
     private array $environmentVariables;
 
     /**
      * @param string $executable    The string executable to run to get the subject token.
-     * @param string $timeoutMillis
+     * @param int $timeoutMillis
      * @param string $outputFile
+     * @param array<string, string> $environmentVariables
      */
     public function __construct(
-        string $executable,
-        ?int $timeoutMillis,
+        string $command,
         ?string $outputFile,
-        array $environmentVariables = [],
+        ExecutableHandler $executableHandler = null,
     ) {
         $this->executable = $executable;
-        $this->timeoutMillis = $timeoutMillis ?: self::DEFAULT_EXECUTABLE_TIMEOUT_MILLIS;
         $this->outputFile = $outputFile;
-        $this->environmentVariables = $environmentVariables;
+        $this->executableHandler = $executableHandler ?: new ExecutableHandler();
     }
 
     /**
+     * @param callable $httpHandler         unused.
      * @param callable $executableHandler   A function which returns the output of the command with
      *                                      the following function signature:
-     *                                      function (string $command, array $envVars, int &$returnVar): string
+     *                                      function (string $command, array $envVars, int &$returnVar = null): string
      */
-    public function fetchSubjectToken(callable $httpHandler = null, callable $executableHandler = null): string
-    {
+    public function fetchSubjectToken(
+        callable $httpHandler = null,
+        callable $executableHandler = null
+    ): string {
         // Check if the executable is allowed to run.
         if (getenv(self::GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES) !== '1') {
             throw new RuntimeException(
@@ -75,27 +77,16 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
         }
 
         if ($this->outputFile && file_exists($this->outputFile)) {
-            $cachedToken = json_decode(file_get_contents($this->outputFile), true);
+            $outputFileContents = file_get_contents($this->outputFile) ?: '';
+            $cachedToken = json_decode($outputFileContents, true);
             if (time() < ($cachedToken['expiration_time'] ?? 0)) {
                 return $cachedToken;
             }
         }
 
-        $executableHandler ??= function (string $command, array $envVars, &$returnVar): string {
-            $envVarString = implode(' ', array_map(
-                fn ($key, $value) => "$key=$value",
-                array_keys($envVars),
-                $envVars
-            ));
-            $command = escapeshellcmd($envVarString . ' ' . $command);
-            exec($command, $output, $returnVar);
-
-            return implode("\n", $output);
-        };
-
         // Run the executable.
         $returnVar = null;
-        $cmdOutput = $executableHandler($this->executable, $this->environmentVariables, $returnVar);
+        $cmdOutput = ($this->executableHandler)($this->executable, $returnVar);
 
         // If the exit code is not 0, throw an exception with the output as the error details
         if ($returnVar !== 0) {
