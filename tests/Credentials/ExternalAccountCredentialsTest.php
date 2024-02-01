@@ -327,6 +327,9 @@ class ExternalAccountCredentialsTest extends TestCase
     }
 
     /**
+     * Test the getProjectId method, which makes an API call using the project number in order to
+     * retrieve the project ID.
+     *
      * @dataProvider provideGetProjectId
      */
     public function testGetProjectId(array $jsonCreds, string $expectedProjectNumber)
@@ -386,6 +389,11 @@ class ExternalAccountCredentialsTest extends TestCase
         ];
     }
 
+    /**
+     * the getProjectId method makes an API call using the project number in order to retrieve the
+     * project ID. Test that a cached access token is used for the API call to fetch the projectId,
+     * instead of retrieving a new one.
+     */
     public function testCacheIsCalledForGetProjectIdWithCache()
     {
         $jsonCreds = [
