@@ -26,10 +26,6 @@ use Google\Auth\Cache\TypedItem;
 $value = $argv[1];
 // Use the same variableKey in the test.
 $pool = new SysVCacheItemPool(['variableKey' => 99]);
-if (\PHP_VERSION_ID >= 80000) {
-    $item = new TypedItem('separate-process-item');
-} else {
-    $item = new Item('separate-process-item');
-}
+$item = new TypedItem('separate-process-item');
 $item->set($value);
 $pool->save($item);

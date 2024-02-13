@@ -20,6 +20,7 @@ namespace Google\Auth\Tests\Cache;
 use Google\Auth\Cache\MemoryCacheItemPool;
 use Google\Auth\Tests\BaseTest;
 use Psr\Cache\InvalidArgumentException;
+use Google\Auth\Cache\TypedItem;
 
 class MemoryCacheItemPoolTest extends BaseTest
 {
@@ -43,7 +44,7 @@ class MemoryCacheItemPoolTest extends BaseTest
     {
         $item = $this->pool->getItem('item');
 
-        $this->assertInstanceOf($this->getCacheItemClass(), $item);
+        $this->assertInstanceOf(TypedItem::class, $item);
         $this->assertNull($item->get());
         $this->assertFalse($item->isHit());
     }
@@ -55,7 +56,7 @@ class MemoryCacheItemPoolTest extends BaseTest
         $this->saveItem($key, $value);
         $item = $this->pool->getItem($key);
 
-        $this->assertInstanceOf($this->getCacheItemClass(), $item);
+        $this->assertInstanceOf(TypedItem::class, $item);
         $this->assertEquals($value, $item->get());
         $this->assertTrue($item->isHit());
     }
@@ -66,7 +67,7 @@ class MemoryCacheItemPoolTest extends BaseTest
         $items = $this->pool->getItems($keys);
 
         $this->assertEquals($keys, array_keys($items));
-        $this->assertContainsOnlyInstancesOf($this->getCacheItemClass(), $items);
+        $this->assertContainsOnlyInstancesOf(TypedItem::class, $items);
     }
 
     public function testHasItem()
