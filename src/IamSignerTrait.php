@@ -27,7 +27,7 @@ trait IamSignerTrait
     /**
      * @var Iam|null
      */
-    private ?Iam $iam;
+    private $iam;
 
     /**
      * Sign a string using the default service account private key.
@@ -51,8 +51,9 @@ trait IamSignerTrait
 
         // Providing a signer is useful for testing, but it's undocumented
         // because it's not something a user would generally need to do.
-        if (!isset($this->iam)) {
-            $this->iam = $this instanceof GetUniverseDomainInterface
+        $signer = $this->iam;
+        if (!$signer) {
+            $signer = $this instanceof GetUniverseDomainInterface
                 ? new Iam($httpHandler, $this->getUniverseDomain())
                 : new Iam($httpHandler);
         }
@@ -66,6 +67,6 @@ trait IamSignerTrait
                 : $this->fetchAuthToken($httpHandler)['access_token'];
         }
 
-        return $this->iam->signBlob($email, $accessToken, $stringToSign);
+        return $signer->signBlob($email, $accessToken, $stringToSign);
     }
 }
