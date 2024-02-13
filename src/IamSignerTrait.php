@@ -51,7 +51,7 @@ trait IamSignerTrait
 
         // Providing a signer is useful for testing, but it's undocumented
         // because it's not something a user would generally need to do.
-        if (is_null($this->iam)) {
+        if (!isset($this->iam)) {
             $this->iam = $this instanceof GetUniverseDomainInterface
                 ? new Iam($httpHandler, $this->getUniverseDomain())
                 : new Iam($httpHandler);
@@ -66,6 +66,6 @@ trait IamSignerTrait
                 : $this->fetchAuthToken($httpHandler)['access_token'];
         }
 
-        return $signer->signBlob($email, $accessToken, $stringToSign);
+        return $this->iam->signBlob($email, $accessToken, $stringToSign);
     }
 }

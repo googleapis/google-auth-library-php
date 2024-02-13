@@ -29,9 +29,13 @@ use GuzzleHttp\Psr7\Utils;
  */
 class Iam
 {
-    const IAM_API_ROOT = 'https://iamcredentials.UNIVERSE_DOMAIN/v1';
+    /**
+     * @deprecated
+     */
+    const IAM_API_ROOT = 'https://iamcredentials.googleapis.com/v1';
     const SIGN_BLOB_PATH = '%s:signBlob?alt=json';
     const SERVICE_ACCOUNT_NAME = 'projects/-/serviceAccounts/%s';
+    private const IAM_API_ROOT_TEMPLATE = 'https://iamcredentials.UNIVERSE_DOMAIN/v1';
 
     /**
      * @var callable
@@ -71,7 +75,7 @@ class Iam
     {
         $httpHandler = $this->httpHandler;
         $name = sprintf(self::SERVICE_ACCOUNT_NAME, $email);
-        $apiRoot = str_replace('UNIVERSE_DOMAIN', $this->universeDomain, self::IAM_API_ROOT);
+        $apiRoot = str_replace('UNIVERSE_DOMAIN', $this->universeDomain, self::IAM_API_ROOT_TEMPLATE);
         $uri = $apiRoot . '/' . sprintf(self::SIGN_BLOB_PATH, $name);
 
         if ($delegates) {
