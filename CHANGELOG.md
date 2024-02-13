@@ -2,6 +2,19 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.35.0](https://github.com/googleapis/google-auth-library-php/compare/v1.34.0...v1.35.0) (2024-02-01)
+
+
+### Features
+
+* Add `expires_in` and `token_type` to tokens from `ServiceAccountJwtAccessCredentials` ([#513](https://github.com/googleapis/google-auth-library-php/issues/513)) ([ee2436d](https://github.com/googleapis/google-auth-library-php/commit/ee2436da42bcf3b2ee09ec8d9eda086293c3a3d9))
+* Workforce credentials ([#485](https://github.com/googleapis/google-auth-library-php/issues/485)) ([c1b240f](https://github.com/googleapis/google-auth-library-php/commit/c1b240f77e5d2b97c481c9d1f23bd57524a22553))
+
+
+### Bug Fixes
+
+* Disallow vulnerable guzzle versions ([#520](https://github.com/googleapis/google-auth-library-php/issues/520)) ([cb782dd](https://github.com/googleapis/google-auth-library-php/commit/cb782dd46db94e5ae514c8e66cff6faddfeb4ed8))
+
 ## [1.34.0](https://github.com/googleapis/google-auth-library-php/compare/v1.33.0...v1.34.0) (2024-01-03)
 
 
