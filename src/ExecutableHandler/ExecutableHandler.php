@@ -16,35 +16,54 @@
  */
 namespace Google\Auth\ExecutableHandler;
 
+use Symfony\Component\Process\Process;
+
 class ExecutableHandler
 {
     private const DEFAULT_EXECUTABLE_TIMEOUT_MILLIS = 30 * 1000;
 
-    private int $timeout;
-    private array $envVars;
+    private int $timeoutMs;
+    private array $env = [];
+    private ?string $output = null;
+    private ?string $errorCode = null;
+    private ?string $errorMessage = null;
 
     public function __construct(
-        int $timeout = self::DEFAULT_EXECUTABLE_TIMEOUT_MILLIS,
-        array $envVars = []
+        int $timeoutMs = self::DEFAULT_EXECUTABLE_TIMEOUT_MILLIS,
+        array $env = []
     ) {
-        $this->timeout = $timeout;
-        $this->envVars = $envVars;
+        if (!class_exists(Process::class)) {
+            throw new RuntimeException(
+                'The "symfony/process" package is required to use the ProcessExecutableHandler.'
+            );
+        }
+        $this->timeoutMs = $timeoutMs;
+        $this->env = $env;
     }
 
     /**
      * @param string $command
-     * @param int|null $returnVar
+     * @return int
      */
-    public function __invoke(string $command, ?int &$returnVar): string
+    public function __invoke(string $command): int
     {
-        $envVarString = implode(' ', array_map(
-            fn ($key, $value) => "$key=$value",
-            array_keys($this->envVars),
-            $this->envVars
-        ));
-        $command = escapeshellcmd($envVarString . ' ' . $command);
-        exec($command, $output, $returnVar);
+        $process = Process::fromShellCommandline(
+            $command,
+            null,
+            $this->env,
+            null,
+            ($this->timeoutMs / 1000)
+        );
 
-        return implode("\n", $output);
+        $process->run();
+
+        $this->output = $process->getOutput();
+
+        return $process->getExitCode();
+    }
+
+    public function getOutput(): ?string
+    {
+        return $this->output;
     }
 }

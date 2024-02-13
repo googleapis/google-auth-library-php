@@ -22,7 +22,52 @@ use Google\Auth\ExternalAccountCredentialSourceInterface;
 use RuntimeException;
 
 /**
- * Retrieve a token from an executable.
+ * ExecutableSource enables the exchange of workload identity pool external credentials for
+ * Google access tokens by retrieving 3rd party tokens through a user supplied executable. These
+ * scripts/executables are completely independent of the Google Cloud Auth libraries. These
+ * credentials plug into ADC and will call the specified executable to retrieve the 3rd party token
+ * to be exchanged for a Google access token.
+ *
+ * To use these credentials, the GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES environment variable
+ * must be set to '1'. This is for security reasons.
+ *
+ * Both OIDC and SAML are supported. The executable must adhere to a specific response format
+ * defined below.
+ *
+ * The executable must print out the 3rd party token to STDOUT in JSON format. When an
+ * output_file is specified in the credential configuration, the executable must also handle writing the
+ * JSON response to this file.
+ *
+ * <pre>
+ * OIDC response sample:
+ * {
+ *   "version": 1,
+ *   "success": true,
+ *   "token_type": "urn:ietf:params:oauth:token-type:id_token",
+ *   "id_token": "HEADER.PAYLOAD.SIGNATURE",
+ *   "expiration_time": 1620433341
+ * }
+ *
+ * SAML2 response sample:
+ * {
+ *   "version": 1,
+ *   "success": true,
+ *   "token_type": "urn:ietf:params:oauth:token-type:saml2",
+ *   "saml_response": "...",
+ *   "expiration_time": 1620433341
+ * }
+ *
+ * Error response sample:
+ * {
+ *   "version": 1,
+ *   "success": false,
+ *   "code": "401",
+ *   "message": "Error message."
+ * }
+ * </pre>
+ *
+ * The "expiration_time" field in the JSON response is only required for successful
+ * responses when an output file was specified in the credential configuration
  *
  * The auth libraries will populate certain environment variables that will be accessible by the
  * executable, such as: GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE, GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE,
@@ -35,38 +80,32 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      * The default executable timeout when none is provided, in milliseconds.
      */
     private const GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = 'GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES';
+    private const SAML_SUBJECT_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:saml2';
+    private const OIDC_SUBJECT_TOKEN_TYPE1 = 'urn:ietf:params:oauth:token-type:id_token';
+    private const OIDC_SUBJECT_TOKEN_TYPE2 = 'urn:ietf:params:oauth:token-type:jwt';
 
     private string $command;
     private ExecutableHandler $executableHandler;
     private ?string $outputFile;
-    private array $environmentVariables;
 
     /**
-     * @param string $executable    The string executable to run to get the subject token.
-     * @param int $timeoutMillis
+     * @param string $command    The string command to run to get the subject token.
      * @param string $outputFile
-     * @param array<string, string> $environmentVariables
      */
     public function __construct(
         string $command,
         ?string $outputFile,
         ExecutableHandler $executableHandler = null,
     ) {
-        $this->executable = $executable;
+        $this->command = $command;
         $this->outputFile = $outputFile;
         $this->executableHandler = $executableHandler ?: new ExecutableHandler();
     }
 
     /**
-     * @param callable $httpHandler         unused.
-     * @param callable $executableHandler   A function which returns the output of the command with
-     *                                      the following function signature:
-     *                                      function (string $command, array $envVars, int &$returnVar = null): string
+     * @param callable $httpHandler unused.
      */
-    public function fetchSubjectToken(
-        callable $httpHandler = null,
-        callable $executableHandler = null
-    ): string {
+    public function fetchSubjectToken(callable $httpHandler = null): string {
         // Check if the executable is allowed to run.
         if (getenv(self::GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES) !== '1') {
             throw new RuntimeException(
@@ -85,24 +124,19 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
         }
 
         // Run the executable.
-        $returnVar = null;
-        $cmdOutput = ($this->executableHandler)($this->executable, $returnVar);
+        $exitCode = ($this->executableHandler)($this->command);
+        $output = $this->executableHandler->getOutput();
 
         // If the exit code is not 0, throw an exception with the output as the error details
-        if ($returnVar !== 0) {
+        if ($exitCode !== 0) {
             throw new RuntimeException(
                 'The executable failed to run'
-                . ($cmdOutput ? ' with the following error: ' . $cmdOutput : '.')
+                . ($output ? ' with the following error: ' . $output : '.'),
+                $exitCode
             );
         }
 
-        // If the exit code is 0 and there's a response, return the output as the subject token.
-        if ($cmdOutput) {
-            $json = json_decode($cmdOutput, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                return $json['id_token'];
-            }
-        }
+        return $this->parseTokenFromResponse($output);
 
         if ($this->outputFile && $fileContents = file_get_contents($this->outputFile)) {
             json_decode($fileContents);
@@ -113,5 +147,64 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
         }
 
         throw new RuntimeException('Unable to retrieve a token from the executable.');
+    }
+
+    private function parseTokenFromResponse(string $responseJson): string
+    {
+        $json = json_decode($token, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new UnexpectedValueException('The executable response is not valid JSON.');
+        }
+        if (empty($json['version'])) {
+            throw new UnexpectedValueException('Executable response must contain a "version" field.');
+        }
+        if (empty($json['success'])) {
+            throw new UnexpectedValueException('Executable response must contain a "success" field.');
+        }
+
+        // Validate required fields for a successful response.
+        if ($json['success']) {
+            // Validate token type field.
+            $tokenTypes = [self::SAML_SUBJECT_TOKEN_TYPE, self::OIDC_SUBJECT_TOKEN_TYPE1, self::OIDC_SUBJECT_TOKEN_TYPE2];
+            if (!in_array($json['token_type'], $tokenTypes)) {
+                throw new UnexpectedValueException(sprintf(
+                    'Executable response must contain a "token_type" field when successful and it'
+                    . ' must be one of %s.',
+                    implode(', ', $tokenTypes)
+                ));
+            }
+
+            // Validate subject token.
+            if ($json['token_type'] === self::SAML_SUBJECT_TOKEN_TYPE) {
+                if (empty($json['saml_response'])) {
+                    throw new UnexpectedValueException(sprintf(
+                        'Executable response must contain a "saml_response" field when token_type=%s.',
+                        self::SAML_SUBJECT_TOKEN_TYPE
+                    ));
+                }
+                return $json['saml_response'];
+            }
+
+            if (empty($json['id_token'])) {
+                throw new UnexpectedValueException(sprintf(
+                    'Executable response must contain a "id_token" field when '
+                    . 'token_type=%s or %s.',
+                    self::OIDC_SUBJECT_TOKEN_TYPE1,
+                    self::OIDC_SUBJECT_TOKEN_TYPE2
+                ));
+            }
+
+            return $json['id_token'];
+        }
+
+        // Both code and message must be provided for unsuccessful responses.
+        if (empty($json['code'])) {
+            throw new UnexpectedValueException('Executable response must contain a "code" field when unsuccessful.');
+        }
+        if (empty($json['message'])) {
+            throw new UnexpectedValueException('Executable response must contain a "message" field when unsuccessful.');
+        }
+
+        throw new UnexpectedValueException($json['message'], $json['code']);
     }
 }

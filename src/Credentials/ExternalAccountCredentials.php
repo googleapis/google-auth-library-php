@@ -21,6 +21,7 @@ use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\ExecutableSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
+use Google\Auth\ExecutableHandler\ExecutableHandler;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\GetQuotaProjectInterface;
@@ -33,6 +34,7 @@ use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
+use Symfony\Component\Process\Process;
 
 class ExternalAccountCredentials implements
     FetchAuthTokenInterface,
@@ -178,7 +180,7 @@ class ExternalAccountCredentials implements
             }
 
             // Build command environment variables
-            $envVars = [
+            $env = [
                 'GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE' => $jsonKey['audience'],
                 'GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE' => $jsonKey['subject_token_type'],
                 // Always set to 0 because interactive mode is not supported.
@@ -186,22 +188,24 @@ class ExternalAccountCredentials implements
 
             ];
             if ($outputFile = $credentialSource['executable']['output_file'] ?? null) {
-                $envVars['GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE'] = $outputFile;
+                $env['GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE'] = $outputFile;
             }
             if ($serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'] ?? null) {
                 // Parse email from URL. The formal looks as follows:
                 // https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/name@project-id.iam.gserviceaccount.com:generateAccessToken
                 $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
                 if (preg_match($regex, $serviceAccountImpersonationUrl, $matches)) {
-                    $envVars['GOOGLE_EXTERNAL_ACCOUNT_IMPERSONATED_EMAIL'] = $matches['email'];
+                    $env['GOOGLE_EXTERNAL_ACCOUNT_IMPERSONATED_EMAIL'] = $matches['email'];
                 }
             }
 
             return new ExecutableSource(
                 $credentialSource['executable']['command'],
-                $credentialSource['executable']['timeout_millis'] ?? null,
                 $outputFile,
-                $envVars,
+                new ExecutableHandler(
+                    $credentialSource['executable']['timeout_millis'] ?? null,
+                    $env
+                )
             );
         }
 

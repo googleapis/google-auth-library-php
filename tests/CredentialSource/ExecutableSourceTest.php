@@ -18,6 +18,7 @@
 namespace Google\Auth\Tests\CredentialSource;
 
 use Google\Auth\CredentialSource\ExecutableSource;
+use Google\Auth\ExecutableHandler\ExecutableHandler;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -59,16 +60,14 @@ class ExecutableSourceTest extends TestCase
     public function testFetchSubjectToken(string $expectedCommand)
     {
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
-        $source = new ExecutableSource($expectedCommand, null, null);
-        $subjectToken = $source->fetchSubjectToken(
-            null,
-            function (string $command, array $envVars, &$returnCode) use ($expectedCommand) {
-                $this->assertEquals($expectedCommand, $command);
-                $this->assertEquals([], $envVars);
-                $returnCode = 0;
-                return '{"access_token": "abc"}';
-            }
-        );
+
+        $returnVar = null;
+        $executableHandler = $this->prophesize(ExecutableHandler::class);
+        $executableHandler->__invoke($expectedCommand, $returnVar)
+            ->willReturn('{"access_token": "abc"}');
+
+        $source = new ExecutableSource($expectedCommand, null, $executableHandler->reveal());
+        $subjectToken = $source->fetchSubjectToken();
         $this->assertEquals('{"access_token": "abc"}', $subjectToken);
     }
 
