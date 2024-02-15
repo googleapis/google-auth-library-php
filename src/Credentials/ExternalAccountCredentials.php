@@ -199,13 +199,12 @@ class ExternalAccountCredentials implements
                 }
             }
 
+            $timeoutMs = $credentialSource['executable']['timeout_millis'] ?? null;
+
             return new ExecutableSource(
                 $credentialSource['executable']['command'],
                 $outputFile,
-                new ExecutableHandler(
-                    $credentialSource['executable']['timeout_millis'] ?? null,
-                    $env
-                )
+                $timeoutMs ? new ExecutableHandler($env, $timeoutMs) : new ExecutableHandler($env)
             );
         }
 

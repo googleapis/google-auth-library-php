@@ -17,6 +17,7 @@
 namespace Google\Auth\ExecutableHandler;
 
 use Symfony\Component\Process\Process;
+use RuntimeException;
 
 class ExecutableHandler
 {
@@ -29,16 +30,17 @@ class ExecutableHandler
     private ?string $errorMessage = null;
 
     public function __construct(
+        array $env = [],
         int $timeoutMs = self::DEFAULT_EXECUTABLE_TIMEOUT_MILLIS,
-        array $env = []
     ) {
         if (!class_exists(Process::class)) {
-            throw new RuntimeException(
-                'The "symfony/process" package is required to use the ProcessExecutableHandler.'
-            );
+            throw new RuntimeException(sprintf(
+                'The "symfony/process" package is required to use %s.',
+                self::class
+            ));
         }
-        $this->timeoutMs = $timeoutMs;
         $this->env = $env;
+        $this->timeoutMs = $timeoutMs;
     }
 
     /**

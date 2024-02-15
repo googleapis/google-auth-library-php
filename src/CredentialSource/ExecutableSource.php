@@ -20,6 +20,7 @@ namespace Google\Auth\CredentialSource;
 use Google\Auth\ExecutableHandler\ExecutableHandler;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use RuntimeException;
+use UnexpectedValueException;
 
 /**
  * ExecutableSource enables the exchange of workload identity pool external credentials for
@@ -76,9 +77,6 @@ use RuntimeException;
  */
 class ExecutableSource implements ExternalAccountCredentialSourceInterface
 {
-    /**
-     * The default executable timeout when none is provided, in milliseconds.
-     */
     private const GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES = 'GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES';
     private const SAML_SUBJECT_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:saml2';
     private const OIDC_SUBJECT_TOKEN_TYPE1 = 'urn:ietf:params:oauth:token-type:id_token';
@@ -151,7 +149,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
 
     private function parseTokenFromResponse(string $responseJson): string
     {
-        $json = json_decode($token, true);
+        $json = json_decode($responseJson, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new UnexpectedValueException('The executable response is not valid JSON.');
         }
