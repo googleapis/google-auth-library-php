@@ -58,6 +58,7 @@ class FetchAuthTokenCache implements
         $this->cacheConfig = array_merge([
             'lifetime' => 1500,
             'prefix' => '',
+            'cacheUniverseDomain' => $fetcher instanceof Credentials\GCECredentials,
         ], (array) $cacheConfig);
     }
 
@@ -212,6 +213,9 @@ class FetchAuthTokenCache implements
     public function getUniverseDomain(): string
     {
         if ($this->fetcher instanceof GetUniverseDomainInterface) {
+            if ($this->cacheConfig['cacheUniverseDomain']) {
+                return $this->getCachedUniverseDomain();
+            }
             return $this->fetcher->getUniverseDomain();
         }
 
@@ -319,5 +323,17 @@ class FetchAuthTokenCache implements
 
             $this->setCachedValue($cacheKey, $authToken);
         }
+    }
+
+    private function getCachedUniverseDomain(): string
+    {
+        $cacheKey = $this->getFullCacheKey($this->fetcher->getCacheKey() . 'universe_domain');
+        if ($universeDomain = $this->getCachedValue($cacheKey)) {
+            return $universeDomain;
+        }
+
+        $universeDomain = $this->fetcher->getUniverseDomain();
+        $this->setCachedValue($cacheKey, $universeDomain);
+        return $universeDomain;
     }
 }
