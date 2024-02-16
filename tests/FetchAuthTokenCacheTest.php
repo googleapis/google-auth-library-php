@@ -17,7 +17,6 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\Cache\CacheItemInterface;
 use Google\Auth\Cache\MemoryCacheItemPool;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;

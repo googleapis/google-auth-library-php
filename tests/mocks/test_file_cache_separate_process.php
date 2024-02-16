@@ -10,8 +10,7 @@ use Google\Auth\Tests\TestFileCacheItemPool;
 
 $cache = new TestFileCacheItemPool(sys_get_temp_dir() . '/google-auth-test');
 
-$fetcher = new class($argv[1]) implements FetchAuthTokenInterface, GetUniverseDomainInterface
-{
+$fetcher = new class($argv[1]) implements FetchAuthTokenInterface, GetUniverseDomainInterface {
     private $cacheKey;
 
     public function __construct(string $cacheKey)

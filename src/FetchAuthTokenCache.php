@@ -214,7 +214,7 @@ class FetchAuthTokenCache implements
     {
         if ($this->fetcher instanceof GetUniverseDomainInterface) {
             if ($this->cacheConfig['cacheUniverseDomain']) {
-                return $this->getCachedUniverseDomain();
+                return $this->getCachedUniverseDomain($this->fetcher);
             }
             return $this->fetcher->getUniverseDomain();
         }
@@ -325,14 +325,14 @@ class FetchAuthTokenCache implements
         }
     }
 
-    private function getCachedUniverseDomain(): string
+    private function getCachedUniverseDomain(GetUniverseDomainInterface $fetcher): string
     {
-        $cacheKey = $this->getFullCacheKey($this->fetcher->getCacheKey() . 'universe_domain');
+        $cacheKey = $this->getFullCacheKey($fetcher->getCacheKey() . 'universe_domain');
         if ($universeDomain = $this->getCachedValue($cacheKey)) {
             return $universeDomain;
         }
 
-        $universeDomain = $this->fetcher->getUniverseDomain();
+        $universeDomain = $fetcher->getUniverseDomain();
         $this->setCachedValue($cacheKey, $universeDomain);
         return $universeDomain;
     }
