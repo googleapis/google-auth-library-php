@@ -2,6 +2,8 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## 1.36.0
+
 ## [1.35.0](https://github.com/googleapis/google-auth-library-php/compare/v1.34.0...v1.35.0) (2024-02-01)
 
 
