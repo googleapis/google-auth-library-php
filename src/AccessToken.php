@@ -72,6 +72,7 @@ class AccessToken
         callable $httpHandler = null,
         CacheItemPoolInterface $cache = null
     ) {
+        // echo "Wow";
         $this->httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         $this->cache = $cache ?: new MemoryCacheItemPool();
