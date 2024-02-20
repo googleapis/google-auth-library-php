@@ -18,8 +18,8 @@
 namespace Google\Auth\Tests\Cache;
 
 use Google\Auth\Cache\SysVCacheItemPool;
-use Google\Auth\Tests\BaseTest;
 use Google\Auth\Cache\TypedItem;
+use Google\Auth\Tests\BaseTest;
 
 class SysVCacheItemPoolTest extends BaseTest
 {
