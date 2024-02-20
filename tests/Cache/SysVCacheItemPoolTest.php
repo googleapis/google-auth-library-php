@@ -19,6 +19,7 @@ namespace Google\Auth\Tests\Cache;
 
 use Google\Auth\Cache\SysVCacheItemPool;
 use Google\Auth\Tests\BaseTest;
+use Google\Auth\Cache\TypedItem;
 
 class SysVCacheItemPoolTest extends BaseTest
 {
@@ -48,7 +49,7 @@ class SysVCacheItemPoolTest extends BaseTest
     {
         $item = $this->pool->getItem('item');
 
-        $this->assertInstanceOf($this->getCacheItemClass(), $item);
+        $this->assertInstanceOf(TypedItem::class, $item);
         $this->assertNull($item->get());
         $this->assertFalse($item->isHit());
     }
@@ -70,7 +71,7 @@ class SysVCacheItemPoolTest extends BaseTest
         $this->saveItem($key, $value);
         $item = $this->pool->getItem($key);
 
-        $this->assertInstanceOf($this->getCacheItemClass(), $item);
+        $this->assertInstanceOf(TypedItem::class, $item);
         $this->assertEquals($value, $item->get());
         $this->assertTrue($item->isHit());
     }
@@ -81,7 +82,7 @@ class SysVCacheItemPoolTest extends BaseTest
         $items = $this->pool->getItems($keys);
 
         $this->assertEquals($keys, array_keys($items));
-        $this->assertContainsOnlyInstancesOf($this->getCacheItemClass(), $items);
+        $this->assertContainsOnlyInstancesOf(TypedItem::class, $items);
     }
 
     public function testHasItem()
