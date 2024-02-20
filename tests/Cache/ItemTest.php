@@ -17,7 +17,6 @@
 
 namespace Google\Auth\Tests\Cache;
 
-use Google\Auth\Cache\Item;
 use Google\Auth\Cache\TypedItem;
 use PHPUnit\Framework\TestCase;
 

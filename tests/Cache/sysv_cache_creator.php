@@ -19,7 +19,6 @@ namespace Google\Auth\Tests\Cache;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-use Google\Auth\Cache\Item;
 use Google\Auth\Cache\SysVCacheItemPool;
 use Google\Auth\Cache\TypedItem;
 

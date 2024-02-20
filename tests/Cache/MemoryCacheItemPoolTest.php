@@ -18,9 +18,9 @@
 namespace Google\Auth\Tests\Cache;
 
 use Google\Auth\Cache\MemoryCacheItemPool;
+use Google\Auth\Cache\TypedItem;
 use Google\Auth\Tests\BaseTest;
 use Psr\Cache\InvalidArgumentException;
-use Google\Auth\Cache\TypedItem;
 
 class MemoryCacheItemPoolTest extends BaseTest
 {
