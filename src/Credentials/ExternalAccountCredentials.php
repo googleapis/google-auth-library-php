@@ -43,7 +43,7 @@ class ExternalAccountCredentials implements
     use UpdateMetadataTrait;
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
-    private const CLOUD_RESOURCE_MANAGER_URL='https://cloudresourcemanager.UNIVERSE_DOMAIN/v1/projects/%s';
+    private const CLOUD_RESOURCE_MANAGER_URL = 'https://cloudresourcemanager.UNIVERSE_DOMAIN/v1/projects/%s';
 
     private OAuth2 $auth;
     private ?string $quotaProject;

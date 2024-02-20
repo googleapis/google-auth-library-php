@@ -23,6 +23,7 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
@@ -378,6 +379,44 @@ class GCECredentialsTest extends BaseTest
         $creds->fetchAuthToken();
 
         $signature = $creds->signBlob($stringToSign);
+    }
+
+    public function testSignBlobWithUniverseDomain()
+    {
+        $token = [
+            'access_token' => 'token',
+            'expires_in' => '57',
+            'token_type' => 'Bearer',
+        ];
+        $signedBlob = ['signedBlob' => 'abc123'];
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->willReturn(
+                new Response(200, [], Utils::streamFor('test@test.com')),
+                new Response(200, [], Utils::streamFor(json_encode($token)))
+            );
+        $client->send(
+            Argument::that(
+                fn (Request $request) => $request->getUri()->getHost() === 'iamcredentials.example-universe.com'
+            ),
+            Argument::any()
+        )
+            ->shouldBeCalledOnce()
+            ->willReturn(new Response(200, [], Utils::streamFor(json_encode($signedBlob))));
+
+        HttpClientCache::setHttpClient($client->reveal());
+
+        $creds = new GCECredentials(
+            null,
+            null,
+            null,
+            null,
+            null,
+            'example-universe.com'
+        );
+        $creds->setIsOnGce(true);
+        $signature = $creds->signBlob('inputString');
+        $this->assertEquals('abc123', $signature);
     }
 
     public function testGetProjectId()
