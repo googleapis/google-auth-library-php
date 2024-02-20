@@ -327,7 +327,7 @@ class FetchAuthTokenCache implements
 
     private function getCachedUniverseDomain(GetUniverseDomainInterface $fetcher): string
     {
-        $cacheKey = $this->getFullCacheKey($fetcher->getCacheKey() . 'universe_domain');
+        $cacheKey = $this->getFullCacheKey($fetcher->getCacheKey() . 'universe_domain'); // @phpstan-ignore-line
         if ($universeDomain = $this->getCachedValue($cacheKey)) {
             return $universeDomain;
         }
