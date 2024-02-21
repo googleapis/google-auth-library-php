@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.37.0](https://github.com/googleapis/google-auth-library-php/compare/v1.36.0...v1.37.0) (2024-02-21)
+
+
+### Features
+
+* Add caching for universe domain ([#533](https://github.com/googleapis/google-auth-library-php/issues/533)) ([69249ab](https://github.com/googleapis/google-auth-library-php/commit/69249ab03d4852e55377962752bdda5253f3d574))
+
 ## [1.36.0](https://github.com/googleapis/google-auth-library-php/compare/v1.35.0...v1.36.0) (2024-02-20)
 
 
