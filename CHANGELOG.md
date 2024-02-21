@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.36.0](https://github.com/googleapis/google-auth-library-php/compare/v1.35.0...v1.36.0) (2024-02-20)
+
+
+### Features
+
+* Universe domain for Iam ([#531](https://github.com/googleapis/google-auth-library-php/issues/531)) ([b905a56](https://github.com/googleapis/google-auth-library-php/commit/b905a561ac8913420d4b3c0a24734ded48687028))
+
 ## [1.35.0](https://github.com/googleapis/google-auth-library-php/compare/v1.34.0...v1.35.0) (2024-02-01)
 
 
