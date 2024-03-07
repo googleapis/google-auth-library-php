@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.37.1](https://github.com/googleapis/google-auth-library-php/compare/v1.37.0...v1.37.1) (2024-03-07)
+
+
+### Bug Fixes
+
+* Use gmdate to format x-amz-date with UTC irrespective of timezone ([#540](https://github.com/googleapis/google-auth-library-php/issues/540)) ([3031d2c](https://github.com/googleapis/google-auth-library-php/commit/3031d2c616902d514867953ede8688d2914d5b11))
+
 ## [1.37.0](https://github.com/googleapis/google-auth-library-php/compare/v1.36.0...v1.37.0) (2024-02-21)
 
 
