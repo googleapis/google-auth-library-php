@@ -17,31 +17,21 @@
 
 namespace Google\Auth\Tests\Cache;
 
-use Google\Auth\Cache\Item;
 use Google\Auth\Cache\TypedItem;
 use PHPUnit\Framework\TestCase;
 
 class ItemTest extends TestCase
 {
-    public function getItem($key)
-    {
-        if (\PHP_VERSION_ID >= 80000) {
-            return new TypedItem($key);
-        }
-
-        return new Item($key);
-    }
-
     public function testGetsKey()
     {
-        $key = 'item';
+        $item = new TypedItem('item');
 
-        $this->assertEquals($key, $this->getItem($key)->getKey());
+        $this->assertEquals('item', $item->getKey());
     }
 
     public function testGetsNull()
     {
-        $item = $this->getItem('item');
+        $item = new TypedItem('item');
 
         $this->assertNull($item->get());
         $this->assertFalse($item->isHit());
@@ -50,7 +40,7 @@ class ItemTest extends TestCase
     public function testGetsValue()
     {
         $value = 'value';
-        $item = $this->getItem('item');
+        $item = new TypedItem('item');
         $item->set($value);
 
         $this->assertEquals('value', $item->get());
@@ -61,7 +51,7 @@ class ItemTest extends TestCase
      */
     public function testSetsValue($value)
     {
-        $item = $this->getItem('item');
+        $item = new TypedItem('item');
         $item->set($value);
 
         $this->assertEquals($value, $item->get());
@@ -82,7 +72,7 @@ class ItemTest extends TestCase
 
     public function testIsHit()
     {
-        $item = $this->getItem('item');
+        $item = new TypedItem('item');
 
         $this->assertFalse($item->isHit());
 
@@ -93,7 +83,7 @@ class ItemTest extends TestCase
 
     public function testExpiresAt()
     {
-        $item = $this->getItem('item');
+        $item = new TypedItem('item');
         $item->set('value');
         $item->expiresAt(new \DateTime('now + 1 hour'));
 
@@ -110,7 +100,7 @@ class ItemTest extends TestCase
 
     public function testExpiresAfter()
     {
-        $item = $this->getItem('item');
+        $item = new TypedItem('item');
         $item->set('value');
         $item->expiresAfter(30);
 
