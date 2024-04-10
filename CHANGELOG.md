@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.36.0](https://github.com/googleapis/google-auth-library-php/compare/v1.35.0...v1.36.0) (2024-04-10)
+
+
+### Features
+
+* Test commit ([4ae8efd](https://github.com/googleapis/google-auth-library-php/commit/4ae8efd61220b438c7b75d0a1113d0d83e48cdab))
+
 ## [1.35.0](https://github.com/googleapis/google-auth-library-php/compare/v1.34.0...v1.35.0) (2024-02-01)
 
 
