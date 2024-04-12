@@ -264,7 +264,10 @@ class AccessTokenTest extends TestCase
         $this->assertEquals('https://cloud.google.com/iap', $payload['iss']);
     }
 
-    public function testGetCertsForIap()
+    /**
+     * @dataProvider provideCertsFromUrl
+     */
+    public function testGetCertsFromUrl($certUrl)
     {
         $token = new AccessToken();
         $reflector = new \ReflectionObject($token);
@@ -272,14 +275,22 @@ class AccessTokenTest extends TestCase
         $cacheKeyMethod->setAccessible(true);
         $getCertsMethod = $reflector->getMethod('getCerts');
         $getCertsMethod->setAccessible(true);
-        $cacheKey = $cacheKeyMethod->invoke($token, AccessToken::IAP_CERT_URL);
+        $cacheKey = $cacheKeyMethod->invoke($token, $certUrl);
         $certs = $getCertsMethod->invoke(
             $token,
-            AccessToken::IAP_CERT_URL,
+            $certUrl,
             $cacheKey
         );
         $this->assertTrue(is_array($certs));
-        $this->assertEquals(5, count($certs));
+        $this->assertGreaterThanOrEqual(2, count($certs));
+    }
+
+    public function provideCertsFromUrl()
+    {
+        return [
+            [AccessToken::IAP_CERT_URL],
+            [AccessToken::FEDERATED_SIGNON_CERT_URL],
+        ];
     }
 
     public function testRetrieveCertsFromLocationLocalFile()
@@ -396,6 +407,51 @@ class AccessTokenTest extends TestCase
         $token->verify($this->token, [
             'certsLocation' => $certsLocation
         ]);
+    }
+
+    public function testRetrieveCertsFromLocationRespectsCacheControl()
+    {
+        $certsLocation = __DIR__ . '/fixtures/federated-certs.json';
+        $certsJson = file_get_contents($certsLocation);
+        $certsData = json_decode($certsJson, true);
+
+        $httpHandler = function (RequestInterface $request) use ($certsJson) {
+            return new Response(200, [
+                'cache-control' => 'public, max-age=1000',
+            ], $certsJson);
+        };
+
+        $phpunit = $this;
+
+        $item = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $item->get()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(null);
+        $item->set($certsData)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($item->reveal());
+
+        // Assert date-time is set with difference of 1000 (the max-age in the Cache-Control header)
+        $item->expiresAt(Argument::type('\DateTime'))
+            ->shouldBeCalledTimes(1)
+            ->will(function ($value) use ($phpunit) {
+                $phpunit->assertEqualsWithDelta(1000, $value[0]->getTimestamp() - time(), 1);
+                return $this;
+            });
+
+        $this->cache->getItem('google_auth_certs_cache|federated_signon_certs_v3')
+            ->shouldBeCalledTimes(1)
+            ->willReturn($item->reveal());
+
+        $this->cache->save(Argument::type('Psr\Cache\CacheItemInterface'))
+            ->shouldBeCalledTimes(1);
+
+        $token = new AccessTokenStub(
+            $httpHandler,
+            $this->cache->reveal()
+        );
+
+        $token->verify($this->token);
     }
 
     public function testRetrieveCertsFromLocationRemote()

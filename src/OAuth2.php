@@ -41,6 +41,8 @@ class OAuth2 implements FetchAuthTokenInterface
     const DEFAULT_EXPIRY_SECONDS = 3600; // 1 hour
     const DEFAULT_SKEW_SECONDS = 60; // 1 minute
     const JWT_URN = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
+    const STS_URN = 'urn:ietf:params:oauth:grant-type:token-exchange';
+    private const STS_REQUESTED_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:access_token';
 
     /**
      * TODO: determine known methods from the keys of JWT::methods.
@@ -279,6 +281,55 @@ class OAuth2 implements FetchAuthTokenInterface
     private $codeVerifier;
 
     /**
+     * For STS requests.
+     * A URI that indicates the target service or resource where the client
+     * intends to use the requested security token.
+     */
+    private ?string $resource;
+
+    /**
+     * For STS requests.
+     * A fetcher for the "subject_token", which is a security token that
+     * represents the identity of the party on behalf of whom the request is
+     * being made.
+     */
+    private ?ExternalAccountCredentialSourceInterface $subjectTokenFetcher;
+
+    /**
+     * For STS requests.
+     * An identifier, that indicates the type of the security token in the
+     * subjectToken parameter.
+     */
+    private ?string $subjectTokenType;
+
+    /**
+     * For STS requests.
+     * A security token that represents the identity of the acting party.
+     */
+    private ?string $actorToken;
+
+    /**
+     * For STS requests.
+     * An identifier that indicates the type of the security token in the
+     * actorToken parameter.
+     */
+    private ?string $actorTokenType;
+
+    /**
+     * From STS response.
+     * An identifier for the representation of the issued security token.
+     */
+    private ?string $issuedTokenType = null;
+
+    /**
+     * From STS response.
+     * An identifier for the representation of the issued security token.
+     *
+     * @var array<mixed>
+     */
+    private array $additionalOptions;
+
+    /**
      * Create a new OAuthCredentials.
      *
      * The configuration array accepts various options
@@ -344,6 +395,28 @@ class OAuth2 implements FetchAuthTokenInterface
      *   When using an extension grant type, this is the set of parameters used
      *   by that extension.
      *
+     * - codeVerifier
+     *   The code verifier for PKCE for OAuth 2.0.
+     *
+     * - resource
+     *   The target service or resource where the client ntends to use the
+     *   requested security token.
+     *
+     * - subjectTokenFetcher
+     *    A fetcher for the "subject_token", which is a security token that
+     *    represents the identity of the party on behalf of whom the request is
+     *    being made.
+     *
+     * - subjectTokenType
+     *   An identifier that indicates the type of the security token in the
+     *   subjectToken parameter.
+     *
+     * - actorToken
+     *   A security token that represents the identity of the acting party.
+     *
+     * - actorTokenType
+     *   An identifier for the representation of the issued security token.
+     *
      * @param array<mixed> $config Configuration array
      */
     public function __construct(array $config)
@@ -368,6 +441,12 @@ class OAuth2 implements FetchAuthTokenInterface
             'scope' => null,
             'additionalClaims' => [],
             'codeVerifier' => null,
+            'resource' => null,
+            'subjectTokenFetcher' => null,
+            'subjectTokenType' => null,
+            'actorToken' => null,
+            'actorTokenType' => null,
+            'additionalOptions' => [],
         ], $config);
 
         $this->setAuthorizationUri($opts['authorizationUri']);
@@ -389,6 +468,15 @@ class OAuth2 implements FetchAuthTokenInterface
         $this->setExtensionParams($opts['extensionParams']);
         $this->setAdditionalClaims($opts['additionalClaims']);
         $this->setCodeVerifier($opts['codeVerifier']);
+
+        // for STS
+        $this->resource = $opts['resource'];
+        $this->subjectTokenFetcher = $opts['subjectTokenFetcher'];
+        $this->subjectTokenType = $opts['subjectTokenType'];
+        $this->actorToken = $opts['actorToken'];
+        $this->actorTokenType = $opts['actorTokenType'];
+        $this->additionalOptions = $opts['additionalOptions'];
+
         $this->updateToken($opts);
     }
 
@@ -493,9 +581,10 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Generates a request for token credentials.
      *
+     * @param callable $httpHandler callback which delivers psr7 request
      * @return RequestInterface the authorization Url.
      */
-    public function generateCredentialsRequest()
+    public function generateCredentialsRequest(callable $httpHandler = null)
     {
         $uri = $this->getTokenCredentialUri();
         if (is_null($uri)) {
@@ -524,6 +613,22 @@ class OAuth2 implements FetchAuthTokenInterface
                 break;
             case self::JWT_URN:
                 $params['assertion'] = $this->toJwt();
+                break;
+            case self::STS_URN:
+                $token = $this->subjectTokenFetcher->fetchSubjectToken($httpHandler);
+                $params['subject_token'] = $token;
+                $params['subject_token_type'] = $this->subjectTokenType;
+                $params += array_filter([
+                    'resource'             => $this->resource,
+                    'audience'             => $this->audience,
+                    'scope'                => $this->getScope(),
+                    'requested_token_type' => self::STS_REQUESTED_TOKEN_TYPE,
+                    'actor_token'          => $this->actorToken,
+                    'actor_token_type'     => $this->actorTokenType,
+                ]);
+                if ($this->additionalOptions) {
+                    $params['options'] = json_encode($this->additionalOptions);
+                }
                 break;
             default:
                 if (!is_null($this->getRedirectUri())) {
@@ -563,7 +668,7 @@ class OAuth2 implements FetchAuthTokenInterface
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
-        $response = $httpHandler($this->generateCredentialsRequest());
+        $response = $httpHandler($this->generateCredentialsRequest($httpHandler));
         $credentials = $this->parseTokenResponse($response);
         $this->updateToken($credentials);
         if (isset($credentials['scope'])) {
@@ -684,6 +789,12 @@ class OAuth2 implements FetchAuthTokenInterface
         // token.
         if (array_key_exists('refresh_token', $opts)) {
             $this->setRefreshToken($opts['refresh_token']);
+        }
+
+        // Required for STS response. An identifier for the representation of
+        // the issued security token.
+        if (array_key_exists('issued_token_type', $opts)) {
+            $this->issuedTokenType = $opts['issued_token_type'];
         }
     }
 
@@ -963,6 +1074,10 @@ class OAuth2 implements FetchAuthTokenInterface
 
         if (!is_null($this->issuer) && !is_null($this->signingKey)) {
             return self::JWT_URN;
+        }
+
+        if (!is_null($this->subjectTokenFetcher) && !is_null($this->subjectTokenType)) {
+            return self::STS_URN;
         }
 
         return null;
@@ -1493,6 +1608,16 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
+     * Gets the additional claims to be included in the JWT token.
+     *
+     * @return ?string
+     */
+    public function getIssuedTokenType()
+    {
+        return $this->issuedTokenType;
+    }
+
+    /**
      * The expiration of the last received token.
      *
      * @return array<mixed>|null
@@ -1611,7 +1736,7 @@ class OAuth2 implements FetchAuthTokenInterface
 
         $allowedAlg = null;
         if (is_string($allowedAlgs)) {
-            $allowedAlg = $allowedAlg;
+            $allowedAlg = $allowedAlgs;
         } elseif (is_array($allowedAlgs)) {
             if (count($allowedAlgs) > 1) {
                 throw new \InvalidArgumentException(

@@ -19,9 +19,11 @@ namespace Google\Auth\Tests;
 
 use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
+use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
+use Google\Auth\CredentialSource;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
@@ -747,5 +749,112 @@ class ApplicationDefaultCredentialsTest extends TestCase
             'Google\Auth\Credentials\GCECredentials',
             $creds
         );
+    }
+
+    /**
+     * @dataProvider provideExternalAccountCredentials
+     */
+    public function testExternalAccountCredentials(string $jsonFile, string $expectedCredSource)
+    {
+        putenv(sprintf('GOOGLE_APPLICATION_CREDENTIALS=%s/fixtures6/%s', __DIR__, $jsonFile));
+
+        $creds = ApplicationDefaultCredentials::getCredentials('a_scope');
+
+        $this->assertInstanceOf(ExternalAccountCredentials::class, $creds);
+
+        $credsReflection = new \ReflectionClass($creds);
+        $credsProp = $credsReflection->getProperty('auth');
+        $credsProp->setAccessible(true);
+
+        $oauth = $credsProp->getValue($creds);
+        $oauthReflection = new \ReflectionClass($oauth);
+        $oauthProp = $oauthReflection->getProperty('subjectTokenFetcher');
+        $oauthProp->setAccessible(true);
+
+        $subjectTokenFetcher = $oauthProp->getValue($oauth);
+        $this->assertInstanceOf($expectedCredSource, $subjectTokenFetcher);
+    }
+
+    public function provideExternalAccountCredentials()
+    {
+        return [
+            ['file_credentials.json', CredentialSource\FileSource::class],
+            ['url_credentials.json', CredentialSource\UrlSource::class],
+            ['aws_credentials.json', CredentialSource\AwsNativeSource::class],
+        ];
+    }
+
+    /** @runInSeparateProcess */
+    public function testUniverseDomainInKeyFile()
+    {
+        // Test no universe domain in keyfile defaults to "googleapis.com"
+        $keyFile = __DIR__ . '/fixtures3/service_account_credentials.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $creds = ApplicationDefaultCredentials::getCredentials();
+        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds->getUniverseDomain());
+
+        // Test universe domain in "service_account" keyfile
+        $keyFile = __DIR__ . '/fixtures/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $creds = ApplicationDefaultCredentials::getCredentials();
+        $this->assertEquals('example-universe.com', $creds->getUniverseDomain());
+
+        // Test universe domain in "authenticated_user" keyfile is not read.
+        $keyFile = __DIR__ . '/fixtures2/private.json';
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
+        $creds2 = ApplicationDefaultCredentials::getCredentials();
+        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain());
+
+        // test passing in a different universe domain for "authenticated_user" has no effect.
+        $creds3 = ApplicationDefaultCredentials::getCredentials(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'example-universe2.com'
+        );
+        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds3->getUniverseDomain());
+    }
+
+    /** @runInSeparateProcess */
+    public function testUniverseDomainInGceCredentials()
+    {
+        putenv('HOME');
+
+        $expectedUniverseDomain = 'example-universe.com';
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            $httpHandler = getHandler([
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                new Response(200, [], Utils::streamFor($expectedUniverseDomain)),
+            ]) // $httpHandler
+        );
+        $this->assertEquals('example-universe.com', $creds->getUniverseDomain($httpHandler));
+
+        // test passing in a different universe domain overrides metadata server
+        $creds2 = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            $httpHandler = getHandler([
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            ]), // $httpHandler
+            null, // $cacheConfig
+            null, // $cache
+            null, // $quotaProject
+            null, // $defaultScope
+            'example-universe2.com' // $universeDomain
+        );
+        $this->assertEquals('example-universe2.com', $creds2->getUniverseDomain($httpHandler));
+
+        // test error response returns default universe domain
+        $creds2 = ApplicationDefaultCredentials::getCredentials(
+            null, // $scope
+            $httpHandler = getHandler([
+                new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                new Response(404),
+            ]), // $httpHandler
+        );
+        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain($httpHandler));
     }
 }

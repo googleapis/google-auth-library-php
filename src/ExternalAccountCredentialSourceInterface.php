@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2018 Google Inc.
+ * Copyright 2023 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,9 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Tests\Cache;
+namespace Google\Auth;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
-
-use Google\Auth\Cache\SysVCacheItemPool;
-use Google\Auth\Cache\TypedItem;
-
-$value = $argv[1];
-// Use the same variableKey in the test.
-$pool = new SysVCacheItemPool(['variableKey' => 99]);
-$item = new TypedItem('separate-process-item');
-$item->set($value);
-$pool->save($item);
+interface ExternalAccountCredentialSourceInterface
+{
+    public function fetchSubjectToken(callable $httpHandler = null): string;
+}

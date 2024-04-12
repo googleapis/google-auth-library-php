@@ -23,6 +23,7 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
@@ -71,6 +72,38 @@ class GCECredentialsTest extends BaseTest
             new Response(500)
         ]);
         $this->assertFalse(GCECredentials::onGCE($httpHandler));
+    }
+
+    public function testCheckProductNameFile()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'gce-test-product-name');
+
+        $method = (new \ReflectionClass(GCECredentials::class))
+            ->getMethod('detectResidencyLinux');
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke(null, '/nonexistant/file'));
+
+        file_put_contents($tmpFile, 'Google');
+        $this->assertTrue($method->invoke(null, $tmpFile));
+
+        file_put_contents($tmpFile, 'Not Google');
+        $this->assertFalse($method->invoke(null, $tmpFile));
+    }
+
+    public function testOnGceWithResidency()
+    {
+        if (!GCECredentials::onGCE()) {
+            $this->markTestSkipped('This test only works while running on GCE');
+        }
+
+        // If calling metadata server fails, this will check the residency file.
+        $httpHandler = function () {
+            // Mock an exception, such as a ping timeout
+            throw $this->prophesize(ClientException::class)->reveal();
+        };
+
+        $this->assertTrue(GCECredentials::onGCE($httpHandler));
     }
 
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()
@@ -231,6 +264,21 @@ class GCECredentialsTest extends BaseTest
         $this->assertNull($creds->getLastReceivedToken());
     }
 
+    public function testGetLastReceivedTokenShouldWorkWithIdToken()
+    {
+        $idToken = '123asdfghjkl';
+        $httpHandler = getHandler([
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+            new Response(200, [], Utils::streamFor($idToken)),
+        ]);
+        $g = new GCECredentials(null, null, 'https://example.test.com');
+        $g->fetchAuthToken($httpHandler);
+        $this->assertEquals(
+            $idToken,
+            $g->getLastReceivedToken()['id_token']
+        );
+    }
+
     public function testGetClientName()
     {
         $expected = 'foobar';
@@ -331,6 +379,44 @@ class GCECredentialsTest extends BaseTest
         $creds->fetchAuthToken();
 
         $signature = $creds->signBlob($stringToSign);
+    }
+
+    public function testSignBlobWithUniverseDomain()
+    {
+        $token = [
+            'access_token' => 'token',
+            'expires_in' => '57',
+            'token_type' => 'Bearer',
+        ];
+        $signedBlob = ['signedBlob' => 'abc123'];
+        $client = $this->prophesize('GuzzleHttp\ClientInterface');
+        $client->send(Argument::any(), Argument::any())
+            ->willReturn(
+                new Response(200, [], Utils::streamFor('test@test.com')),
+                new Response(200, [], Utils::streamFor(json_encode($token)))
+            );
+        $client->send(
+            Argument::that(
+                fn (Request $request) => $request->getUri()->getHost() === 'iamcredentials.example-universe.com'
+            ),
+            Argument::any()
+        )
+            ->shouldBeCalledOnce()
+            ->willReturn(new Response(200, [], Utils::streamFor(json_encode($signedBlob))));
+
+        HttpClientCache::setHttpClient($client->reveal());
+
+        $creds = new GCECredentials(
+            null,
+            null,
+            null,
+            null,
+            null,
+            'example-universe.com'
+        );
+        $creds->setIsOnGce(true);
+        $signature = $creds->signBlob('inputString');
+        $this->assertEquals('abc123', $signature);
     }
 
     public function testGetProjectId()
@@ -479,5 +565,58 @@ class GCECredentialsTest extends BaseTest
 
         $creds = new GCECredentials(null, null, null, null, 'foo');
         $this->assertEquals($expected, $creds->getClientName($httpHandler));
+    }
+
+    public function testGetUniverseDomain()
+    {
+        $creds = new GCECredentials();
+        $creds->setIsOnGce(true);
+
+        // Pretend we are on GCE and mock the http handler.
+        $expected = 'example-universe.com';
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expected) {
+            $timesCalled++;
+            $this->assertEquals(
+                '/computeMetadata/v1/universe/universe_domain',
+                $request->getUri()->getPath()
+            );
+            $this->assertEquals(1, $timesCalled, 'should only be called once');
+            return new Psr7\Response(200, [], Utils::streamFor($expected));
+        };
+
+        // Assert correct universe domain.
+        $this->assertEquals($expected, $creds->getUniverseDomain($httpHandler));
+
+        // Assert the result is cached for subsequent calls.
+        $this->assertEquals($expected, $creds->getUniverseDomain($httpHandler));
+    }
+
+    public function testGetUniverseDomainEmptyStringReturnsDefault()
+    {
+        $creds = new GCECredentials();
+        $creds->setIsOnGce(true);
+
+        // Pretend we are on GCE and mock the MDS returning an empty string for the universe domain.
+        $httpHandler = function ($request) {
+            $this->assertEquals(
+                '/computeMetadata/v1/universe/universe_domain',
+                $request->getUri()->getPath()
+            );
+            return new Psr7\Response(200, [], Utils::streamFor(''));
+        };
+
+        // Assert the default universe domain is returned instead of the empty string.
+        $this->assertEquals(
+            GCECredentials::DEFAULT_UNIVERSE_DOMAIN,
+            $creds->getUniverseDomain($httpHandler)
+        );
+    }
+
+    public function testExplicitUniverseDomain()
+    {
+        $expected = 'example-universe.com';
+        $creds = new GCECredentials(null, null, null, null, null, $expected);
+        $this->assertEquals($expected, $creds->getUniverseDomain());
     }
 }

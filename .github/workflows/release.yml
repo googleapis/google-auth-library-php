@@ -1,0 +1,33 @@
+name: Release Pre-Check
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-suite:
+    runs-on: ubuntu-latest
+    name: Run googleapis/google-cloud-php tests against latest version
+    if: github.event.pull_request.user.login == 'release-please[bot]'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Clone googleapis/google-cloud-php
+      uses: actions/checkout@master
+      with:
+        repository: googleapis/google-cloud-php
+        path: google-cloud-php
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: grpc
+    - name: Configure google/auth to dev-main
+      run: |
+        cd google-cloud-php
+        composer install -q -d dev
+        dev/google-cloud update-deps google/auth 'dev-main as 1.200.0' --add=dev
+    - name: Run google/cloud package tests
+      run: |
+        cd google-cloud-php
+        bash .github/run-package-tests.sh
+
