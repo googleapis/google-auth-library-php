@@ -45,6 +45,6 @@ class ExecutableHandlerTest extends TestCase
         $this->expectExceptionMessage('The process "sleep "0.2"" exceeded the timeout of 0.1 seconds.');
 
         $handler = new ExecutableHandler([], 100);
-        $this->assertEquals(0, $handler('sleep "0.2"'));
+        $handler('sleep "0.2"');
     }
 }
