@@ -116,10 +116,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
 
         if ($this->outputFile && file_exists($this->outputFile)) {
             $outputFileContents = file_get_contents($this->outputFile) ?: '';
-            $cachedToken = json_decode($outputFileContents, true);
-            if (time() < ($cachedToken['expiration_time'] ?? 0)) {
-                return $cachedToken;
-            }
+            return $this->parseTokenFromResponse($outputFileContents);
         }
 
         // Run the executable.
@@ -163,7 +160,22 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
                 ));
             }
 
-            // Validate subject token.
+            // Validate expiration exists when an output file is specified.
+            if ($this->outputFile) {
+                if (!isset($json['expiration_time'])) {
+                    throw new UnexpectedValueException(
+                        'The executable response must contain a "expiration_time" field for successful responses ' .
+                        'when an output_file has been specified in the configuration.'
+                    );
+                }
+            }
+
+            // Validate expiration.
+            if (isset($json['expiration_time']) && time() >= $json['expiration_time']) {
+                throw new RuntimeException('Executable response is expired.');
+            }
+
+            // Validate subject token for SAML.
             if ($json['token_type'] === self::SAML_SUBJECT_TOKEN_TYPE) {
                 if (empty($json['saml_response'])) {
                     throw new UnexpectedValueException(sprintf(
@@ -174,6 +186,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
                 return $json['saml_response'];
             }
 
+            // Validate subject token for OIDC.
             if (empty($json['id_token'])) {
                 throw new UnexpectedValueException(sprintf(
                     'Executable response must contain a "id_token" field when '

@@ -89,7 +89,8 @@ class ExecutableSourceTest extends TestCase
         int $returnCode,
         string $output,
         string $expectedExceptionMessage,
-        string $expectedException = UnexpectedValueException::class
+        string $expectedException = UnexpectedValueException::class,
+        string $outputFile = null
     ) {
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
@@ -106,7 +107,7 @@ class ExecutableSourceTest extends TestCase
             ->shouldBeCalledOnce()
             ->willReturn($output);
 
-        $source = new ExecutableSource($cmd, null, $handler->reveal());
+        $source = new ExecutableSource($cmd, $outputFile, $handler->reveal());
         $subjectToken = $source->fetchSubjectToken();
         $this->assertEquals('{"access_token": "abc"}', $subjectToken);
     }
@@ -139,6 +140,82 @@ class ExecutableSourceTest extends TestCase
                 '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt"}',
                 'Executable response must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:jwt'
             ],
+            [
+                0,
+                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt", "id_token": "abc"}',
+                'The executable response must contain a "expiration_time" field for successful responses when an output_file has been specified in the configuration.',
+                UnexpectedValueException::class,
+                '/some/output/file',
+            ]
         ];
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCachedTokenFile()
+    {
+        putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
+
+        $tokenFile = tempnam(sys_get_temp_dir(), 'token');
+        file_put_contents($tokenFile, json_encode([
+            'version' => 1,
+            'success' => true,
+            'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
+            'id_token' => 'abc',
+            'expiration_time' => time() + 100,
+        ]));
+
+        $source = new ExecutableSource('fake-command', $tokenFile);
+        $subjectToken = $source->fetchSubjectToken();
+        $this->assertEquals('abc', $subjectToken);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCachedTokenFileExpired()
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Executable response is expired.');
+
+        putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
+
+        $tokenFile = tempnam(sys_get_temp_dir(), 'token');
+        file_put_contents($tokenFile, json_encode([
+            'version' => 1,
+            'success' => true,
+            'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
+            'id_token' => 'abc',
+            'expiration_time' => time() - 100,
+        ]));
+
+        $source = new ExecutableSource('fake-command', $tokenFile);
+        $source->fetchSubjectToken();
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCachedTokenFileWithMissingExpiration()
+    {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage(
+            'The executable response must contain a "expiration_time" field for successful responses when an ' .
+            'output_file has been specified in the configuration.'
+        );
+
+        putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
+
+        $tokenFile = tempnam(sys_get_temp_dir(), 'token');
+        file_put_contents($tokenFile, json_encode([
+            'version' => 1,
+            'success' => true,
+            'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
+            'id_token' => 'abc',
+        ]));
+
+        $source = new ExecutableSource('fake-command', $tokenFile);
+        $source->fetchSubjectToken();
     }
 }

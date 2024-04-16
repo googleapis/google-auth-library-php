@@ -520,4 +520,52 @@ class ExternalAccountCredentialsTest extends TestCase
         $this->assertEquals('def', $authToken['access_token']);
         $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
     }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testExecutableCredentialSourceEnvironmentVars()
+    {
+        putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test');
+        $fileContents = 'foo-' . rand();
+        $successJson = '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:id_token", "id_token": "abc"}';
+        $json = [
+            'audience' => 'test-audience',
+            'subject_token_type' => 'test-token-type',
+            'credential_source' => [
+                'executable' => [
+                    'command' => sprintf(
+                        'echo $GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE,$GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE,%s' .
+                        ' > $GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE && echo \'%s\'',
+                        $fileContents,
+                        $successJson
+                    ),
+                    'timeout_millis' => 5000,
+                    'output_file' => $tmpFile,
+                ],
+            ],
+        ] + $this->baseCreds;
+
+        $creds = new ExternalAccountCredentials('a-scope', $json);
+        $authToken = $creds->fetchAuthToken(function (RequestInterface $request) {
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn('{"access_token": "abc"}');
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+            $response->hasHeader('Content-Type')->willReturn(false);
+
+            return $response->reveal();
+        });
+
+        $this->assertArrayHasKey('access_token', $authToken);
+        $this->assertEquals('abc', $authToken['access_token']);
+
+        $this->assertFileExists($tmpFile);
+        $this->assertEquals(
+            'test-audience,test-token-type,' . $fileContents . PHP_EOL,
+            file_get_contents($tmpFile)
+        );
+    }
 }

@@ -184,11 +184,12 @@ class ExternalAccountCredentials implements
                 'GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE' => $jsonKey['subject_token_type'],
                 // Always set to 0 because interactive mode is not supported.
                 'GOOGLE_EXTERNAL_ACCOUNT_INTERACTIVE' => '0',
-
             ];
+
             if ($outputFile = $credentialSource['executable']['output_file'] ?? null) {
                 $env['GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE'] = $outputFile;
             }
+
             if ($serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'] ?? null) {
                 // Parse email from URL. The formal looks as follows:
                 // https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/name@project-id.iam.gserviceaccount.com:generateAccessToken
