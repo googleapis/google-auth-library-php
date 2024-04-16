@@ -142,11 +142,16 @@ class ExecutableSourceTest extends TestCase
             ],
             [
                 0,
+                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt", "id_token": "abc", "expiration_time": 1}',
+                'Executable response is expired.',
+            ],
+            [
+                0,
                 '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt", "id_token": "abc"}',
                 'The executable response must contain a "expiration_time" field for successful responses when an output_file has been specified in the configuration.',
                 UnexpectedValueException::class,
                 '/some/output/file',
-            ]
+            ],
         ];
     }
 
@@ -174,48 +179,59 @@ class ExecutableSourceTest extends TestCase
     /**
      * @runInSeparateProcess
      */
-    public function testCachedTokenFileExpired()
+    public function testCachedTokenFileExpiredCallsExecutable()
     {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Executable response is expired.');
-
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
 
-        $tokenFile = tempnam(sys_get_temp_dir(), 'token');
-        file_put_contents($tokenFile, json_encode([
+        $successToken = [
             'version' => 1,
             'success' => true,
             'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
             'id_token' => 'abc',
-            'expiration_time' => time() - 100,
-        ]));
+        ];
+        $tokenFile = tempnam(sys_get_temp_dir(), 'token');
+        file_put_contents($tokenFile, json_encode($successToken));
 
-        $source = new ExecutableSource('fake-command', $tokenFile);
-        $source->fetchSubjectToken();
+        $executableHandler = $this->prophesize(ExecutableHandler::class);
+        $executableHandler->__invoke('fake-command')
+            ->shouldBeCalledOnce()
+            ->willReturn(0);
+        $executableHandler->getOutput()
+            ->shouldBeCalledOnce()
+            ->willReturn(json_encode($successToken + ['expiration_time' => time() + 100]));
+
+        $source = new ExecutableSource('fake-command', $tokenFile, $executableHandler->reveal());
+        $subjectToken = $source->fetchSubjectToken();
+        $this->assertEquals('abc', $subjectToken);
     }
 
     /**
      * @runInSeparateProcess
      */
-    public function testCachedTokenFileWithMissingExpiration()
+    public function testCachedTokenFileWithMissingExpirationCallsExecutable()
     {
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage(
-            'The executable response must contain a "expiration_time" field for successful responses when an ' .
-            'output_file has been specified in the configuration.'
-        );
-
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
 
-        $tokenFile = tempnam(sys_get_temp_dir(), 'token');
-        file_put_contents($tokenFile, json_encode([
+        $successToken = [
             'version' => 1,
             'success' => true,
             'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
             'id_token' => 'abc',
-        ]));
+            'expiration_time' => time() + 100,
+        ];
+        $tokenFile = tempnam(sys_get_temp_dir(), 'token');
+        file_put_contents($tokenFile, json_encode(['expiration_time' => null] + $successToken));
 
-        $source = new ExecutableSource('fake-command', $tokenFile);
-        $source->fetchSubjectToken();
+        $executableHandler = $this->prophesize(ExecutableHandler::class);
+        $executableHandler->__invoke('fake-command')
+            ->shouldBeCalledOnce()
+            ->willReturn(0);
+        $executableHandler->getOutput()
+            ->shouldBeCalledOnce()
+            ->willReturn(json_encode($successToken));
+
+        $source = new ExecutableSource('fake-command', $tokenFile, $executableHandler->reveal());
+        $subjectToken = $source->fetchSubjectToken();
+        $this->assertEquals('abc', $subjectToken);
     }
 }

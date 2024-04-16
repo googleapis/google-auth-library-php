@@ -114,9 +114,16 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             );
         }
 
-        if ($this->outputFile && file_exists($this->outputFile)) {
-            $outputFileContents = file_get_contents($this->outputFile) ?: '';
-            return $this->parseTokenFromResponse($outputFileContents);
+        if (
+            $this->outputFile
+            && file_exists($this->outputFile)
+            && ($outputFileContents = file_get_contents($this->outputFile))
+            && !empty($outputFileContents)
+        ) {
+            $json = json_decode($outputFileContents, true);
+            if (isset($json['expiration_time']) && time() < $json['expiration_time']) {
+                return $this->parseTokenFromResponse($outputFileContents);
+            }
         }
 
         // Run the executable.
@@ -172,7 +179,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
 
             // Validate expiration.
             if (isset($json['expiration_time']) && time() >= $json['expiration_time']) {
-                throw new RuntimeException('Executable response is expired.');
+                throw new UnexpectedValueException('Executable response is expired.');
             }
 
             // Validate subject token for SAML.
