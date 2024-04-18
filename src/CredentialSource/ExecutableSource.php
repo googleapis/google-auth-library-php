@@ -120,7 +120,12 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             && !empty($outputFileContents = file_get_contents($this->outputFile))
         ) {
             $json = json_decode($outputFileContents, true);
-            if (isset($json['expiration_time']) && time() < $json['expiration_time']) {
+            if (
+                array_key_exists('expiration_time', $json)
+                && time() < $json['expiration_time']
+                && array_key_exists('success', $json)
+                && $json['success'] === true
+            ) {
                 return $this->parseTokenFromResponse($outputFileContents);
             }
         }

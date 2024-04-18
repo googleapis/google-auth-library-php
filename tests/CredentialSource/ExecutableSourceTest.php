@@ -183,14 +183,17 @@ class ExecutableSourceTest extends TestCase
     {
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
 
-        $successToken = [
+        $cachedToken = [
             'version' => 1,
             'success' => true,
             'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
             'id_token' => 'abc',
+            // token is expired
+            'expiration_time' => time() - 100,
         ];
+        $successToken = ['expiration_time' => time() + 100] + $cachedToken;
         $tokenFile = tempnam(sys_get_temp_dir(), 'token');
-        file_put_contents($tokenFile, json_encode($successToken));
+        file_put_contents($tokenFile, json_encode($cachedToken));
 
         $executableHandler = $this->prophesize(ExecutableHandler::class);
         $executableHandler->__invoke('fake-command')
@@ -198,7 +201,7 @@ class ExecutableSourceTest extends TestCase
             ->willReturn(0);
         $executableHandler->getOutput()
             ->shouldBeCalledOnce()
-            ->willReturn(json_encode($successToken + ['expiration_time' => time() + 100]));
+            ->willReturn(json_encode($successToken));
 
         $source = new ExecutableSource('fake-command', $tokenFile, $executableHandler->reveal());
         $subjectToken = $source->fetchSubjectToken();
@@ -212,15 +215,48 @@ class ExecutableSourceTest extends TestCase
     {
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
 
-        $successToken = [
+        $cachedToken = [
             'version' => 1,
             'success' => true,
             'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
             'id_token' => 'abc',
+            // token does not contain expiration_time
+        ];
+        $successToken = ['expiration_time' => time() + 100] + $cachedToken;
+        $tokenFile = tempnam(sys_get_temp_dir(), 'token');
+        file_put_contents($tokenFile, json_encode($cachedToken));
+
+        $executableHandler = $this->prophesize(ExecutableHandler::class);
+        $executableHandler->__invoke('fake-command')
+            ->shouldBeCalledOnce()
+            ->willReturn(0);
+        $executableHandler->getOutput()
+            ->shouldBeCalledOnce()
+            ->willReturn(json_encode($successToken));
+
+        $source = new ExecutableSource('fake-command', $tokenFile, $executableHandler->reveal());
+        $subjectToken = $source->fetchSubjectToken();
+        $this->assertEquals('abc', $subjectToken);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCachedTokenFileWithSuccessFalseCallsExecutable()
+    {
+        putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
+
+        $cachedToken = [
+            'version' => 1,
+            // token has success=false
+            'success' => false,
+            'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
+            'id_token' => 'abc',
             'expiration_time' => time() + 100,
         ];
+        $successToken = ['success' => true] + $cachedToken;
         $tokenFile = tempnam(sys_get_temp_dir(), 'token');
-        file_put_contents($tokenFile, json_encode(['expiration_time' => null] + $successToken));
+        file_put_contents($tokenFile, json_encode($cachedToken));
 
         $executableHandler = $this->prophesize(ExecutableHandler::class);
         $executableHandler->__invoke('fake-command')
