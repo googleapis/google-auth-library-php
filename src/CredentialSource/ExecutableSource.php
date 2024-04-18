@@ -18,9 +18,9 @@
 namespace Google\Auth\CredentialSource;
 
 use Google\Auth\ExecutableHandler\ExecutableHandler;
+use Google\Auth\ExecutableHandler\ExecutableResponseError;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use RuntimeException;
-use UnexpectedValueException;
 
 /**
  * ExecutableSource enables the exchange of workload identity pool external credentials for
@@ -102,6 +102,10 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
 
     /**
      * @param callable $httpHandler unused.
+     * @return string
+     * @throws RuntimeException if the executable is not allowed to run.
+     * @throws ExecutableResponseError if the executable response is invalid.
+     * @throws \Symfony\Component\Process\Exception\ProcessTimedOutException if the executable times out.
      */
     public function fetchSubjectToken(callable $httpHandler = null): string
     {
@@ -114,109 +118,127 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             );
         }
 
+        $executableResponse = null;
         if (
             $this->outputFile
             && file_exists($this->outputFile)
-            && !empty($outputFileContents = file_get_contents($this->outputFile))
+            && !empty(trim($outputFileContents = file_get_contents($this->outputFile)))
         ) {
-            $json = json_decode($outputFileContents, true);
+            try {
+                $executableResponse = $this->parseExecutableResponse($outputFileContents);
+            } catch (ExecutableResponseError $e) {
+                throw new ExecutableResponseError(
+                    'Error in output file: ' . $e->getMessage(),
+                    $e->getExecutableErrorCode()
+                );
+            }
+
             if (
-                array_key_exists('expiration_time', $json)
-                && time() < $json['expiration_time']
-                && array_key_exists('success', $json)
-                && $json['success'] === true
+                $executableResponse['success'] === false
+                || (isset($executableResponse['expiration_time']) && time() >= $executableResponse['expiration_time'])
             ) {
-                return $this->parseTokenFromResponse($outputFileContents);
+                // Uf the cached token was unsuccessful or expired, run the executable to get a new one.
+                $executableResponse = null;
             }
         }
 
-        // Run the executable.
-        $exitCode = ($this->executableHandler)($this->command);
-        $output = $this->executableHandler->getOutput();
+        if (is_null($executableResponse)) {
+            // Run the executable.
+            $exitCode = ($this->executableHandler)($this->command);
+            $output = $this->executableHandler->getOutput();
 
-        // If the exit code is not 0, throw an exception with the output as the error details
-        if ($exitCode !== 0) {
-            throw new RuntimeException(
-                'The executable failed to run'
-                . ($output ? ' with the following error: ' . $output : '.'),
-                $exitCode
-            );
+            // If the exit code is not 0, throw an exception with the output as the error details
+            if ($exitCode !== 0) {
+                throw new ExecutableResponseError(
+                    'The executable failed to run'
+                    . ($output ? ' with the following error: ' . $output : '.'),
+                    $exitCode
+                );
+            }
+
+            $executableResponse = $this->parseExecutableResponse($output);
+
+            // Validate expiration.
+            if (isset($executableResponse['expiration_time']) && time() >= $executableResponse['expiration_time']) {
+                throw new ExecutableResponseError('Executable response is expired.');
+            }
         }
 
-        return $this->parseTokenFromResponse($output);
+        // Throw error when the request was unsuccessful
+        if ($executableResponse['success'] === false) {
+            throw new ExecutableResponseError($executableResponse['message'], (string) $executableResponse['code']);
+        }
+
+        // Return subject token field based on the token type
+        return $executableResponse['token_type'] === self::SAML_SUBJECT_TOKEN_TYPE
+            ? $executableResponse['saml_response']
+            : $executableResponse['id_token'];
     }
 
-    private function parseTokenFromResponse(string $responseJson): string
+    private function parseExecutableResponse(string $responseJson): array
     {
-        $json = json_decode($responseJson, true);
+        $executableResponse = json_decode($responseJson, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new UnexpectedValueException('The executable response is not valid JSON.');
+            throw new ExecutableResponseError('The executable response is not valid JSON.');
         }
-        if (empty($json['version'])) {
-            throw new UnexpectedValueException('Executable response must contain a "version" field.');
+        if (!array_key_exists('version', $executableResponse)) {
+            throw new ExecutableResponseError('Executable response must contain a "version" field.');
         }
-        if (!array_key_exists('success', $json)) {
-            throw new UnexpectedValueException('Executable response must contain a "success" field.');
+        if (!array_key_exists('success', $executableResponse)) {
+            throw new ExecutableResponseError('Executable response must contain a "success" field.');
         }
 
         // Validate required fields for a successful response.
-        if ($json['success']) {
+        if ($executableResponse['success']) {
             // Validate token type field.
             $tokenTypes = [self::SAML_SUBJECT_TOKEN_TYPE, self::OIDC_SUBJECT_TOKEN_TYPE1, self::OIDC_SUBJECT_TOKEN_TYPE2];
-            if (!isset($json['token_type']) || !in_array($json['token_type'], $tokenTypes)) {
-                throw new UnexpectedValueException(sprintf(
-                    'Executable response must contain a "token_type" field when successful and it'
-                    . ' must be one of %s.',
+            if (!isset($executableResponse['token_type'])) {
+                throw new ExecutableResponseError(
+                    'Executable response must contain a "token_type" field when successful'
+                );
+            }
+            if (!in_array($executableResponse['token_type'], $tokenTypes)) {
+                throw new ExecutableResponseError(sprintf(
+                    'Executable response "token_type" field must be one of %s.',
                     implode(', ', $tokenTypes)
+                ));
+            }
+
+            // Validate subject token for SAML and OIDC.
+            if ($executableResponse['token_type'] === self::SAML_SUBJECT_TOKEN_TYPE) {
+                if (empty($executableResponse['saml_response'])) {
+                    throw new ExecutableResponseError(sprintf(
+                        'Executable response must contain a "saml_response" field when token_type=%s.',
+                        self::SAML_SUBJECT_TOKEN_TYPE
+                    ));
+                }
+            } elseif (empty($executableResponse['id_token'])) {
+                throw new ExecutableResponseError(sprintf(
+                    'Executable response must contain a "id_token" field when '
+                    . 'token_type=%s.',
+                    $executableResponse['token_type']
                 ));
             }
 
             // Validate expiration exists when an output file is specified.
             if ($this->outputFile) {
-                if (!isset($json['expiration_time'])) {
-                    throw new UnexpectedValueException(
+                if (!isset($executableResponse['expiration_time'])) {
+                    throw new ExecutableResponseError(
                         'The executable response must contain a "expiration_time" field for successful responses ' .
                         'when an output_file has been specified in the configuration.'
                     );
                 }
             }
-
-            // Validate expiration.
-            if (isset($json['expiration_time']) && time() >= $json['expiration_time']) {
-                throw new UnexpectedValueException('Executable response is expired.');
+        } else {
+            // Both code and message must be provided for unsuccessful responses.
+            if (!array_key_exists('code', $executableResponse)) {
+                throw new ExecutableResponseError('Executable response must contain a "code" field when unsuccessful.');
             }
-
-            // Validate subject token for SAML.
-            if ($json['token_type'] === self::SAML_SUBJECT_TOKEN_TYPE) {
-                if (empty($json['saml_response'])) {
-                    throw new UnexpectedValueException(sprintf(
-                        'Executable response must contain a "saml_response" field when token_type=%s.',
-                        self::SAML_SUBJECT_TOKEN_TYPE
-                    ));
-                }
-                return $json['saml_response'];
+            if (empty($executableResponse['message'])) {
+                throw new ExecutableResponseError('Executable response must contain a "message" field when unsuccessful.');
             }
-
-            // Validate subject token for OIDC.
-            if (empty($json['id_token'])) {
-                throw new UnexpectedValueException(sprintf(
-                    'Executable response must contain a "id_token" field when '
-                    . 'token_type=%s.',
-                    $json['token_type']
-                ));
-            }
-
-            return $json['id_token'];
         }
 
-        // Both code and message must be provided for unsuccessful responses.
-        if (empty($json['code'])) {
-            throw new UnexpectedValueException('Executable response must contain a "code" field when unsuccessful.');
-        }
-        if (empty($json['message'])) {
-            throw new UnexpectedValueException('Executable response must contain a "message" field when unsuccessful.');
-        }
-
-        throw new UnexpectedValueException($json['message'], $json['code']);
+        return $executableResponse;
     }
 }
