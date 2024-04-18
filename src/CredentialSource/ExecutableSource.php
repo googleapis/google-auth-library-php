@@ -122,7 +122,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
         if (
             $this->outputFile
             && file_exists($this->outputFile)
-            && !empty(trim($outputFileContents = file_get_contents($this->outputFile)))
+            && !empty(trim($outputFileContents = (string) file_get_contents($this->outputFile)))
         ) {
             try {
                 $executableResponse = $this->parseExecutableResponse($outputFileContents);
@@ -152,7 +152,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
                 throw new ExecutableResponseError(
                     'The executable failed to run'
                     . ($output ? ' with the following error: ' . $output : '.'),
-                    $exitCode
+                    (string) $exitCode
                 );
             }
 
@@ -175,6 +175,9 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             : $executableResponse['id_token'];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function parseExecutableResponse(string $responseJson): array
     {
         $executableResponse = json_decode($responseJson, true);

@@ -23,7 +23,6 @@ use Google\Auth\ExecutableHandler\ExecutableResponseError;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use RuntimeException;
-use UnexpectedValueException;
 
 /**
  * @group credentialsource
