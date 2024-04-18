@@ -118,31 +118,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             );
         }
 
-        $executableResponse = null;
-        if (
-            $this->outputFile
-            && file_exists($this->outputFile)
-            && !empty(trim($outputFileContents = (string) file_get_contents($this->outputFile)))
-        ) {
-            try {
-                $executableResponse = $this->parseExecutableResponse($outputFileContents);
-            } catch (ExecutableResponseError $e) {
-                throw new ExecutableResponseError(
-                    'Error in output file: ' . $e->getMessage(),
-                    $e->getExecutableErrorCode()
-                );
-            }
-
-            if (
-                $executableResponse['success'] === false
-                || (isset($executableResponse['expiration_time']) && time() >= $executableResponse['expiration_time'])
-            ) {
-                // Uf the cached token was unsuccessful or expired, run the executable to get a new one.
-                $executableResponse = null;
-            }
-        }
-
-        if (is_null($executableResponse)) {
+        if (!$executableResponse = $this->getCachedExecutableResponse()) {
             // Run the executable.
             $exitCode = ($this->executableHandler)($this->command);
             $output = $this->executableHandler->getOutput();
@@ -173,6 +149,41 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
         return $executableResponse['token_type'] === self::SAML_SUBJECT_TOKEN_TYPE
             ? $executableResponse['saml_response']
             : $executableResponse['id_token'];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function getCachedExecutableResponse(): ?array
+    {
+        if (
+            $this->outputFile
+            && file_exists($this->outputFile)
+            && !empty(trim($outputFileContents = (string) file_get_contents($this->outputFile)))
+        ) {
+            try {
+                $executableResponse = $this->parseExecutableResponse($outputFileContents);
+            } catch (ExecutableResponseError $e) {
+                throw new ExecutableResponseError(
+                    'Error in output file: ' . $e->getMessage(),
+                    $e->getExecutableErrorCode()
+                );
+            }
+
+            if ($executableResponse['success'] === false) {
+                // If the cached token was unsuccessful, run the executable to get a new one.
+                return null;
+            }
+
+            if (isset($executableResponse['expiration_time']) && time() >= $executableResponse['expiration_time']) {
+                // If the cached token is expired, run the executable to get a new one.
+                return null;
+            }
+
+            return $executableResponse;
+        }
+
+        return null;
     }
 
     /**
