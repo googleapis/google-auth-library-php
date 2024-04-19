@@ -22,7 +22,7 @@ class ExecutableResponseError extends Error
 {
     private mixed $executableErrorCode;
 
-    public function __construct(string $message, string $executableErrorCode = '')
+    public function __construct(string $message, string $executableErrorCode = 'INVALID_EXECUTABLE_RESPONSE')
     {
         $this->executableErrorCode = $executableErrorCode;
         parent::__construct($message);
@@ -36,9 +36,6 @@ class ExecutableResponseError extends Error
     public function __toString(): string
     {
         $msg = parent::__toString();
-        if ($this->executableErrorCode) {
-            return sprintf('Error code %s: %s', $this->executableErrorCode, $msg);
-        }
-        return $msg;
+        return sprintf('Error code %s: %s', $this->executableErrorCode, $msg);
     }
 }

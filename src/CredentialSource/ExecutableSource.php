@@ -105,7 +105,6 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      * @return string
      * @throws RuntimeException if the executable is not allowed to run.
      * @throws ExecutableResponseError if the executable response is invalid.
-     * @throws \Symfony\Component\Process\Exception\ProcessTimedOutException if the executable times out.
      */
     public function fetchSubjectToken(callable $httpHandler = null): string
     {
@@ -166,7 +165,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
             } catch (ExecutableResponseError $e) {
                 throw new ExecutableResponseError(
                     'Error in output file: ' . $e->getMessage(),
-                    $e->getExecutableErrorCode()
+                    'INVALID_OUTPUT_FILE'
                 );
             }
 
@@ -189,11 +188,14 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
     /**
      * @return array<string, mixed>
      */
-    private function parseExecutableResponse(string $responseJson): array
+    private function parseExecutableResponse(string $response): array
     {
-        $executableResponse = json_decode($responseJson, true);
+        $executableResponse = json_decode($response, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new ExecutableResponseError('The executable response is not valid JSON.');
+            throw new ExecutableResponseError(
+                'The executable returned an invalid response: ' . $response,
+                'INVALID_RESPONSE'
+            );
         }
         if (!array_key_exists('version', $executableResponse)) {
             throw new ExecutableResponseError('Executable response must contain a "version" field.');

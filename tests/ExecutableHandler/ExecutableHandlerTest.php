@@ -18,8 +18,8 @@
 namespace Google\Auth\Tests\ExecutableHandler;
 
 use Google\Auth\ExecutableHandler\ExecutableHandler;
+use Google\Auth\ExecutableHandler\ExecutableResponseError;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Process\Exception\ProcessTimedOutException;
 
 class ExecutableHandlerTest extends TestCase
 {
@@ -41,8 +41,8 @@ class ExecutableHandlerTest extends TestCase
 
     public function testTimeoutMsExceeded()
     {
-        $this->expectException(ProcessTimedOutException::class);
-        $this->expectExceptionMessage('The process "sleep "0.2"" exceeded the timeout of 0.1 seconds.');
+        $this->expectException(ExecutableResponseError::class);
+        $this->expectExceptionMessage('The executable failed to finish within the timeout specified.');
 
         $handler = new ExecutableHandler([], 100);
         $handler('sleep "0.2"');

@@ -115,7 +115,7 @@ class ExecutableSourceTest extends TestCase
         return [
             [1, '', 'The executable failed to run.'],
             [1, 'error', 'The executable failed to run with the following error: error'],
-            [0, '{', 'The executable response is not valid JSON'],
+            [0, '{', 'The executable returned an invalid response: {'],
             [0, '{}', 'Executable response must contain a "version" field'],
             [0, '{"version": 1}', 'Executable response must contain a "success" field'],
             [0, '{"version": 1, "success": false}', 'Executable response must contain a "code" field when unsuccessful'],
@@ -180,7 +180,7 @@ class ExecutableSourceTest extends TestCase
     public function provideCachedTokenWithError()
     {
         return [
-            ['{', 'Error in output file: The executable response is not valid JSON'],
+            ['{', 'Error in output file: The executable returned an invalid response: {'],
             ['{}', 'Error in output file: Executable response must contain a "version" field'],
             ['{"version": 1}', 'Error in output file: Executable response must contain a "success" field'],
             ['{"version": 1, "success": false}', 'Error in output file: Executable response must contain a "code" field when unsuccessful'],

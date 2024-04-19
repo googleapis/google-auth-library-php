@@ -18,6 +18,7 @@ namespace Google\Auth\ExecutableHandler;
 
 use RuntimeException;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 
 class ExecutableHandler
 {
@@ -61,9 +62,16 @@ class ExecutableHandler
             ($this->timeoutMs / 1000)
         );
 
-        $process->run();
+        try {
+            $process->run();
+        } catch (ProcessTimedOutException $e) {
+            throw new ExecutableResponseError(
+                'The executable failed to finish within the timeout specified.',
+                'TIMEOUT_EXCEEDED'
+            );
+        }
 
-        $this->output = $process->getOutput();
+        $this->output = $process->getOutput() . $process->getErrorOutput();
 
         return $process->getExitCode();
     }
