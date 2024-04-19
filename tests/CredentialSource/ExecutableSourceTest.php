@@ -180,28 +180,28 @@ class ExecutableSourceTest extends TestCase
     public function provideCachedTokenWithError()
     {
         return [
-            ['{', 'Error in output file: The executable returned an invalid response: {'],
-            ['{}', 'Error in output file: Executable response must contain a "version" field'],
-            ['{"version": 1}', 'Error in output file: Executable response must contain a "success" field'],
-            ['{"version": 1, "success": false}', 'Error in output file: Executable response must contain a "code" field when unsuccessful'],
-            ['{"version": 1, "success": false, "code": 1}', 'Error in output file: Executable response must contain a "message" field when unsuccessful'],
-            ['{"version": 1, "success": true}', 'Error in output file: Executable response must contain a "token_type" field'],
-            ['{"version": 1, "success": true, "token_type": "wrong"}', 'Error in output file: Executable response "token_type" field must be one of'],
+            ['{', 'Error in output file: Error code INVALID_RESPONSE: The executable returned an invalid response: {'],
+            ['{}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "version" field'],
+            ['{"version": 1}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "success" field'],
+            ['{"version": 1, "success": false}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "code" field when unsuccessful'],
+            ['{"version": 1, "success": false, "code": 1}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "message" field when unsuccessful'],
+            ['{"version": 1, "success": true}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "token_type" field'],
+            ['{"version": 1, "success": true, "token_type": "wrong"}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response "token_type" field must be one of'],
             [
                 '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:saml2"}',
-                'Error in output file: Executable response must contain a "saml_response" field when token_type=urn:ietf:params:oauth:token-type:saml2'
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "saml_response" field when token_type=urn:ietf:params:oauth:token-type:saml2'
             ],
             [
                 '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:id_token"}',
-                'Error in output file: Executable response must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:id_token'
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:id_token'
             ],
             [
                 '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt"}',
-                'Error in output file: Executable response must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:jwt'
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:jwt'
             ],
             [
                 '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt", "id_token": "abc"}',
-                'Error in output file: The executable response must contain a "expiration_time" field for successful responses when an output_file has been specified in the configuration.'
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: The executable response must contain a "expiration_time" field for successful responses when an output_file has been specified in the configuration.'
             ],
         ];
     }

@@ -20,22 +20,8 @@ use Error;
 
 class ExecutableResponseError extends Error
 {
-    private mixed $executableErrorCode;
-
     public function __construct(string $message, string $executableErrorCode = 'INVALID_EXECUTABLE_RESPONSE')
     {
-        $this->executableErrorCode = $executableErrorCode;
-        parent::__construct($message);
-    }
-
-    public function getExecutableErrorCode(): string
-    {
-        return $this->executableErrorCode;
-    }
-
-    public function __toString(): string
-    {
-        $msg = parent::__toString();
-        return sprintf('Error code %s: %s', $this->executableErrorCode, $msg);
+        parent::__construct(sprintf('Error code %s: %s', $executableErrorCode, $message));
     }
 }
