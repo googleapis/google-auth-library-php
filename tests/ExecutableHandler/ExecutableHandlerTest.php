@@ -47,4 +47,11 @@ class ExecutableHandlerTest extends TestCase
         $handler = new ExecutableHandler([], 100);
         $handler('sleep "0.2"');
     }
+
+    public function testErrorOutputIsReturnedAsOutput()
+    {
+        $handler = new ExecutableHandler();
+        $this->assertEquals(0, $handler('echo "Bad Response." >&2'));
+        $this->assertEquals("Bad Response.\n", $handler->getOutput());
+    }
 }
