@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.38.0](https://github.com/googleapis/google-auth-library-php/compare/v1.37.1...v1.38.0) (2024-04-24)
+
+
+### Features
+
+* Add ExecutableSource credentials ([#525](https://github.com/googleapis/google-auth-library-php/issues/525)) ([d98900d](https://github.com/googleapis/google-auth-library-php/commit/d98900d47bb5d6eeeaf64fc2a6a8dbde5797f338))
+
 ## [1.37.1](https://github.com/googleapis/google-auth-library-php/compare/v1.37.0...v1.37.1) (2024-03-07)
 
 
