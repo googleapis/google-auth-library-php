@@ -3,7 +3,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-  
+
 permissions:
   contents: read
 jobs:
@@ -11,7 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                php: [ "7.4", "8.0", "8.1", "8.2", "8.3" ]
+                php: [ "8.0", "8.1", "8.2", "8.3" ]
         name: PHP ${{matrix.php }} Unit Test
         steps:
             - uses: actions/checkout@v4
@@ -20,7 +20,7 @@ jobs:
               with:
                 php-version: ${{ matrix.php }}
             - name: Install Dependencies
-              uses: nick-invision/retry@v2
+              uses: nick-invision/retry@v3
               with:
                 timeout_minutes: 10
                 max_attempts: 3
@@ -35,9 +35,9 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: "7.4"
+                php-version: "8.0"
             - name: Install Dependencies
-              uses: nick-invision/retry@v2
+              uses: nick-invision/retry@v3
               with:
                 timeout_minutes: 10
                 max_attempts: 3

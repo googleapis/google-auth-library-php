@@ -2,6 +2,47 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.38.0](https://github.com/googleapis/google-auth-library-php/compare/v1.37.1...v1.38.0) (2024-04-24)
+
+
+### Features
+
+* Add ExecutableSource credentials ([#525](https://github.com/googleapis/google-auth-library-php/issues/525)) ([d98900d](https://github.com/googleapis/google-auth-library-php/commit/d98900d47bb5d6eeeaf64fc2a6a8dbde5797f338))
+
+## [1.37.1](https://github.com/googleapis/google-auth-library-php/compare/v1.37.0...v1.37.1) (2024-03-07)
+
+
+### Bug Fixes
+
+* Use gmdate to format x-amz-date with UTC irrespective of timezone ([#540](https://github.com/googleapis/google-auth-library-php/issues/540)) ([3031d2c](https://github.com/googleapis/google-auth-library-php/commit/3031d2c616902d514867953ede8688d2914d5b11))
+
+## [1.37.0](https://github.com/googleapis/google-auth-library-php/compare/v1.36.0...v1.37.0) (2024-02-21)
+
+
+### Features
+
+* Add caching for universe domain ([#533](https://github.com/googleapis/google-auth-library-php/issues/533)) ([69249ab](https://github.com/googleapis/google-auth-library-php/commit/69249ab03d4852e55377962752bdda5253f3d574))
+
+## [1.36.0](https://github.com/googleapis/google-auth-library-php/compare/v1.35.0...v1.36.0) (2024-02-20)
+
+
+### Features
+
+* Universe domain for Iam ([#531](https://github.com/googleapis/google-auth-library-php/issues/531)) ([b905a56](https://github.com/googleapis/google-auth-library-php/commit/b905a561ac8913420d4b3c0a24734ded48687028))
+
+## [1.35.0](https://github.com/googleapis/google-auth-library-php/compare/v1.34.0...v1.35.0) (2024-02-01)
+
+
+### Features
+
+* Add `expires_in` and `token_type` to tokens from `ServiceAccountJwtAccessCredentials` ([#513](https://github.com/googleapis/google-auth-library-php/issues/513)) ([ee2436d](https://github.com/googleapis/google-auth-library-php/commit/ee2436da42bcf3b2ee09ec8d9eda086293c3a3d9))
+* Workforce credentials ([#485](https://github.com/googleapis/google-auth-library-php/issues/485)) ([c1b240f](https://github.com/googleapis/google-auth-library-php/commit/c1b240f77e5d2b97c481c9d1f23bd57524a22553))
+
+
+### Bug Fixes
+
+* Disallow vulnerable guzzle versions ([#520](https://github.com/googleapis/google-auth-library-php/issues/520)) ([cb782dd](https://github.com/googleapis/google-auth-library-php/commit/cb782dd46db94e5ae514c8e66cff6faddfeb4ed8))
+
 ## [1.34.0](https://github.com/googleapis/google-auth-library-php/compare/v1.33.0...v1.34.0) (2024-01-03)
 
 

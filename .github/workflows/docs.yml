@@ -5,7 +5,7 @@ on:
             - main
         tags:
             - "*"
-        workflow_dispatch:
+    workflow_dispatch:
 
 jobs:
     docs:
@@ -18,9 +18,9 @@ jobs:
         - name: Setup PHP
           uses: shivammathur/setup-php@v2
           with:
-            php-version: 7.4
+            php-version: 8.1
         - name: Install Dependencies
-          uses: nick-invision/retry@v2
+          uses: nick-invision/retry@v3
           with:
             timeout_minutes: 10
             max_attempts: 3

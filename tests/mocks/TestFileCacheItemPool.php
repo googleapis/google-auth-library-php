@@ -15,25 +15,33 @@
  * limitations under the License.
  */
 
-namespace Google\Auth\Cache;
+namespace Google\Auth\Tests;
 
+use Google\Auth\Cache\Item;
+use Google\Auth\Cache\TypedItem;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * Simple in-memory cache implementation.
  */
-final class MemoryCacheItemPool implements CacheItemPoolInterface
+final class TestFileCacheItemPool implements CacheItemPoolInterface
 {
     /**
-     * @var CacheItemInterface[]
+     * @var string
      */
-    private $items;
+    private string $cacheDir;
 
     /**
      * @var CacheItemInterface[]
      */
     private $deferredItems;
+
+
+    public function __construct(string $cacheDir)
+    {
+        $this->cacheDir = $cacheDir;
+    }
 
     /**
      * {@inheritdoc}
@@ -58,7 +66,12 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
     {
         $items = [];
         foreach ($keys as $key) {
-            $items[$key] = $this->hasItem($key) ? clone $this->items[$key] : new TypedItem($key);
+            if ($this->hasItem($key)) {
+                $items[$key] = unserialize(file_get_contents($this->cacheDir . '/' . $key));
+            } else {
+                $itemClass = \PHP_VERSION_ID >= 80000 ? TypedItem::class : Item::class;
+                $items[$key] = new $itemClass($key);
+            }
         }
 
         return $items;
@@ -74,7 +87,8 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
     {
         $this->isValidKey($key);
 
-        return isset($this->items[$key]) && $this->items[$key]->isHit();
+        return file_exists($this->cacheDir . '/' . $key)
+            && unserialize(file_get_contents($this->cacheDir . '/' . $key))->isHit();
     }
 
     /**
@@ -85,7 +99,6 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      */
     public function clear(): bool
     {
-        $this->items = [];
         $this->deferredItems = [];
 
         return true;
@@ -113,7 +126,7 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
         array_walk($keys, [$this, 'isValidKey']);
 
         foreach ($keys as $key) {
-            unset($this->items[$key]);
+            unlink($this->cacheDir . '/' . $key);
         }
 
         return true;
@@ -127,7 +140,10 @@ final class MemoryCacheItemPool implements CacheItemPoolInterface
      */
     public function save(CacheItemInterface $item): bool
     {
-        $this->items[$item->getKey()] = $item;
+        if (!is_dir($this->cacheDir)) {
+            mkdir($this->cacheDir, 0777, true);
+        }
+        file_put_contents($this->cacheDir . '/' . $item->getKey(), serialize($item));
 
         return true;
     }
