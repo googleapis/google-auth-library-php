@@ -353,7 +353,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         return $this->universeDomain;
     }
 
-    public function getCredType(): string
+    protected function getCredType(): string
     {
         return self::CRED_TYPE;
     }

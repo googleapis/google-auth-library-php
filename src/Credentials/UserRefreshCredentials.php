@@ -165,7 +165,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
         return $this->auth->getGrantedScope();
     }
 
-    public function getCredType(): string
+    protected function getCredType(): string
     {
         return self::CRED_TYPE;
     }

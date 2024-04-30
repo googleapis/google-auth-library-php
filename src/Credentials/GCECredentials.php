@@ -632,7 +632,7 @@ class GCECredentials extends CredentialsLoader implements
         $this->isOnGce = $isOnGce;
     }
 
-    public function getCredType(): string
+    protected function getCredType(): string
     {
         return self::CRED_TYPE;
     }

@@ -146,7 +146,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         return $this->sourceCredentials->getLastReceivedToken();
     }
 
-    public function getCredType(): string
+    protected function getCredType(): string
     {
         return self::CRED_TYPE;
     }

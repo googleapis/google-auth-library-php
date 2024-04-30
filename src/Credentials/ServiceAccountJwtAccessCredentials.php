@@ -217,7 +217,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
         return $this->quotaProject;
     }
 
-    public function getCredType(): string
+    protected function getCredType(): string
     {
         return self::CRED_TYPE;
     }

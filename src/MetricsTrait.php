@@ -113,7 +113,7 @@ trait MetricsTrait
         return self::$version;
     }
 
-    public function getCredType(): string
+    protected function getCredType(): string
     {
         return '';
     }
