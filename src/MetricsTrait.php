@@ -97,7 +97,7 @@ trait MetricsTrait
      */
     protected function applyTokenEndpointMetrics($metadata, $authRequestType)
     {
-        $metricsHeader = $this->getMetricsHeader($this->getCredType(), $authRequestType);
+        $metricsHeader = self::getMetricsHeader($this->getCredType(), $authRequestType);
         if (!isset($metadata[self::$metricMetadataKey])) {
             $metadata[self::$metricMetadataKey] = $metricsHeader;
         }
