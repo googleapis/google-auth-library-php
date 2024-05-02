@@ -9,11 +9,6 @@
 
 * Enable auth observability metrics ([#509](https://github.com/googleapis/google-auth-library-php/issues/509)) ([6495f31](https://github.com/googleapis/google-auth-library-php/commit/6495f31061d2d51a173a968dbe65db8dfc6ac3cc))
 
-
-### Bug Fixes
-
-* Release Please version file config ([#549](https://github.com/googleapis/google-auth-library-php/issues/549)) ([23b1fc1](https://github.com/googleapis/google-auth-library-php/commit/23b1fc1d8275f5c81a3e11d0c680ddabca308cf9))
-
 ## [1.38.0](https://github.com/googleapis/google-auth-library-php/compare/v1.37.1...v1.38.0) (2024-04-24)
 
 
