@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.39.0](https://github.com/googleapis/google-auth-library-php/compare/v1.38.0...v1.39.0) (2024-05-02)
+
+
+### Features
+
+* Enable auth observability metrics ([#509](https://github.com/googleapis/google-auth-library-php/issues/509)) ([6495f31](https://github.com/googleapis/google-auth-library-php/commit/6495f31061d2d51a173a968dbe65db8dfc6ac3cc))
+
 ## [1.38.0](https://github.com/googleapis/google-auth-library-php/compare/v1.37.1...v1.38.0) (2024-04-24)
 
 
