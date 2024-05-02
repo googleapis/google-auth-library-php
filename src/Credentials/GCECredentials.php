@@ -110,6 +110,8 @@ class GCECredentials extends CredentialsLoader implements
      */
     private const GKE_PRODUCT_NAME_FILE = '/sys/class/dmi/id/product_name';
 
+    private const CRED_TYPE = 'mds';
+
     /**
      * Note: the explicit `timeout` and `tries` below is a workaround. The underlying
      * issue is that resolving an unknown host on some networks will take
@@ -359,7 +361,10 @@ class GCECredentials extends CredentialsLoader implements
                     new Request(
                         'GET',
                         $checkUri,
-                        [self::FLAVOR_HEADER => 'Google']
+                        [
+                            self::FLAVOR_HEADER => 'Google',
+                            self::$metricMetadataKey => self::getMetricsHeader('', 'mds')
+                        ]
                     ),
                     ['timeout' => self::COMPUTE_PING_CONNECTION_TIMEOUT_S]
                 );
@@ -421,7 +426,11 @@ class GCECredentials extends CredentialsLoader implements
             return [];  // return an empty array with no access token
         }
 
-        $response = $this->getFromMetadata($httpHandler, $this->tokenUri);
+        $response = $this->getFromMetadata(
+            $httpHandler,
+            $this->tokenUri,
+            $this->applyTokenEndpointMetrics([], $this->targetAudience ? 'it' : 'at')
+        );
 
         if ($this->targetAudience) {
             return $this->lastReceivedToken = ['id_token' => $response];
@@ -579,15 +588,18 @@ class GCECredentials extends CredentialsLoader implements
      *
      * @param callable $httpHandler An HTTP Handler to deliver PSR7 requests.
      * @param string $uri The metadata URI.
+     * @param array<mixed> $headers [optional] If present, add these headers to the token
+     *        endpoint request.
+     *
      * @return string
      */
-    private function getFromMetadata(callable $httpHandler, $uri)
+    private function getFromMetadata(callable $httpHandler, $uri, array $headers = [])
     {
         $resp = $httpHandler(
             new Request(
                 'GET',
                 $uri,
-                [self::FLAVOR_HEADER => 'Google']
+                [self::FLAVOR_HEADER => 'Google'] + $headers
             )
         );
 
@@ -618,5 +630,10 @@ class GCECredentials extends CredentialsLoader implements
 
         // Set isOnGce
         $this->isOnGce = $isOnGce;
+    }
+
+    protected function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 }

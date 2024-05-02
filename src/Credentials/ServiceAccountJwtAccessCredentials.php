@@ -41,6 +41,13 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
     use ServiceAccountSignerTrait;
 
     /**
+     * Used in observability metric headers
+     *
+     * @var string
+     */
+    private const CRED_TYPE = 'jwt';
+
+    /**
      * The OAuth2 instance used to conduct authorization.
      *
      * @var OAuth2
@@ -208,5 +215,10 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
     public function getQuotaProject()
     {
         return $this->quotaProject;
+    }
+
+    protected function getCredType(): string
+    {
+        return self::CRED_TYPE;
     }
 }
