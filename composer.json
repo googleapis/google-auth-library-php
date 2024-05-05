@@ -9,7 +9,7 @@
     "docs": "https://googleapis.github.io/google-auth-library-php/main/"
   },
   "require": {
-    "php": "^8.0",
+    "php": "^8.1",
     "firebase/php-jwt": "^6.0",
     "guzzlehttp/guzzle": "^7.4.5",
     "guzzlehttp/psr7": "^2.4.5",
