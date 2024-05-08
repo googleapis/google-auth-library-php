@@ -32,11 +32,11 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
         }
 
         if (is_dir($this->cachePath)) {
-            return true;
+            return;
         }
 
         if (!mkdir($this->cachePath)) {
-            throw new ErrorException("Cache folde couldn't be created");
+            throw new ErrorException("Cache folder couldn't be created");
         }
     }
 
@@ -65,10 +65,6 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
         $result = [];
 
         foreach ($keys as $key) {
-            if ($this->isValidKey($key)){
-                throw new InvalidArgumentException("The key '$key' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
-            }
-
             $result[$key] = $this->getItem($key);
         }
 
@@ -86,7 +82,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
             return false;
         }
 
-        $serializedItem = file_get_contents($this->cacheFilePath($key));
+        $serializedItem = file_get_contents($itemPath);
         return unserialize($serializedItem)->isHit();
     }
 
