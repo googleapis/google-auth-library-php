@@ -124,6 +124,16 @@ class GCECredentialsTest extends BaseTest
         $this->assertTrue(GCECredentials::onGCE($httpHandler));
     }
 
+    public function testOnWindowsGceWithResidencyWithNoCom()
+    {
+        $method = (new \ReflectionClass(GCECredentials::class))
+            ->getMethod('detectResidencyWindows');
+        
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke(null, 'thisShouldBeFalse'));
+    }
+
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()
     {
         $httpHandler = getHandler([

@@ -110,6 +110,21 @@ class GCECredentials extends CredentialsLoader implements
      */
     private const GKE_PRODUCT_NAME_FILE = '/sys/class/dmi/id/product_name';
 
+    /**
+     * The Windows Registry key path to the product name
+     */
+    private const REGISTRY_KEY_PATH = "HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\";
+
+    /**
+     * The Windows registry key name for the product name
+     */
+    private const REGISTRY_KEY_NAME = "SystemProductName";
+
+    /**
+     * The Name of the product expected from the windows registry
+     */
+    private const WINDOWS_PRODUCT_NAME = "Google Compute Engine";
+
     private const CRED_TYPE = 'mds';
 
     /**
@@ -378,8 +393,7 @@ class GCECredentials extends CredentialsLoader implements
         }
 
         if (PHP_OS === 'Windows') {
-            // @TODO: implement GCE residency detection on Windows
-            return false;
+            return self::detectResidencyWindows(self::REGISTRY_KEY_PATH . self::REGISTRY_KEY_NAME);
         }
 
         // Detect GCE residency on Linux
@@ -393,6 +407,22 @@ class GCECredentials extends CredentialsLoader implements
             return 0 === strpos($productName, 'Google');
         }
         return false;
+    }
+
+    private static function detectResidencyWindows(string $registryProductKey): bool
+    {
+        if (!class_exists('COM')) {
+            return false;
+        }
+
+        $shell = new COM('WScript');
+        $productName = $shell->regRead($registryProductKey);
+        
+        if ($productName !== self::WINDOWS_PRODUCT_NAME) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
