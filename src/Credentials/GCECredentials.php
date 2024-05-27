@@ -415,7 +415,7 @@ class GCECredentials extends CredentialsLoader implements
             return false;
         }
 
-        $shell = new COM('WScript');
+        $shell = new COM('WScript.Shell');
         $productName = $shell->regRead($registryProductKey);
         
         if ($productName !== self::WINDOWS_PRODUCT_NAME) {
