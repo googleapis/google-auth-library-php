@@ -414,6 +414,8 @@ class GCECredentials extends CredentialsLoader implements
     private static function detectResidencyWindows(string $registryProductKey): bool
     {
         if (!class_exists(COM::class)) {
+            // the COM extension must be installed and enabled to detect Windows residency
+            // see https://www.php.net/manual/en/book.com.php
             return false;
         }
 
