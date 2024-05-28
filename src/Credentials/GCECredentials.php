@@ -30,6 +30,8 @@ use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
+use \COM;
+
 use InvalidArgumentException;
 
 /**
@@ -411,7 +413,7 @@ class GCECredentials extends CredentialsLoader implements
 
     private static function detectResidencyWindows(string $registryProductKey): bool
     {
-        if (!class_exists('COM')) {
+        if (!class_exists(COM::class)) {
             return false;
         }
 
@@ -421,7 +423,7 @@ class GCECredentials extends CredentialsLoader implements
         if ($productName !== self::WINDOWS_PRODUCT_NAME) {
             return false;
         }
-
+        
         return true;
     }
 
