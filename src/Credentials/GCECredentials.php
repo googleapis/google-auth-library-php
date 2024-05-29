@@ -431,7 +431,7 @@ class GCECredentials extends CredentialsLoader implements
             return false;
         }
         
-        return explode(" ", $productName)[0] === self::WINDOWS_PRODUCT_NAME;
+        return explode(' ', $productName)[0] === self::WINDOWS_PRODUCT_NAME;
     }
 
     /**
