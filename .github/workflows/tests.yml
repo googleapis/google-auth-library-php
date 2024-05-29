@@ -19,7 +19,7 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                 php-version: ${{ matrix.php }}
-                extensions: gmp
+                extensions: gmp, php_com_dotnet.dll
             - name: Install Dependencies
               uses: nick-invision/retry@v3
               with:
