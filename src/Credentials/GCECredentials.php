@@ -17,6 +17,8 @@
 
 namespace Google\Auth\Credentials;
 
+use COM;
+use com_exception;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
@@ -412,18 +414,18 @@ class GCECredentials extends CredentialsLoader implements
 
     private static function detectResidencyWindows(string $registryProductKey): bool
     {
-        if (!class_exists(\COM::class)) {
+        if (!class_exists(COM::class)) {
             // the COM extension must be installed and enabled to detect Windows residency
             // see https://www.php.net/manual/en/book.com.php
             return false;
         }
 
-        $shell = new \COM('WScript.Shell');
+        $shell = new COM('WScript.Shell');
         $productName = null;
 
         try {
             $shell->regRead($registryProductKey);
-        } catch(\com_exception $e) {
+        } catch(com_exception $e) {
             // This means that we tried to read a key that doesn't exist on the registry
             // which might mean that it is a windows instance that is not on GCE
             return false;
