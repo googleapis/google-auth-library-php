@@ -419,7 +419,15 @@ class GCECredentials extends CredentialsLoader implements
         }
 
         $shell = new \COM('WScript.Shell');
-        $productName = $shell->regRead($registryProductKey);
+        $productName = null;
+
+        try {
+            $shell->regRead($registryProductKey);
+        } catch(\com_exception $e) {
+            // This means that we tried to read a key that doesn't exist on the registry
+            // which might mean that it is a windows instance that is not on GCE
+            return false;
+        }
         
         if ($productName !== self::WINDOWS_PRODUCT_NAME) {
             return false;
