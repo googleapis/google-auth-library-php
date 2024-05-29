@@ -150,11 +150,9 @@ class GCECredentialsTest extends BaseTest
 
         $keyPathProperty = (new \ReflectionClass(GCECredentials::class))
             ->getConstant('REGISTRY_KEY_PATH');
-        $keyPathProperty->setAccessible(true);
 
         $keyName = (new \ReflectionClass(GCECredentials::class))
             ->getConstant('REGISTRY_KEY_NAME');
-        $keyName->setAccessible(true);
 
         $this->assertTrue($method->invoke(null, $keyPathProperty.$keyName));
     }
