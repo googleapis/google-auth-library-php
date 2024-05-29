@@ -114,17 +114,17 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * The Windows Registry key path to the product name
      */
-    private const REGISTRY_KEY_PATH = "HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\";
+    private const REGISTRY_KEY_PATH = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
 
     /**
      * The Windows registry key name for the product name
      */
-    private const REGISTRY_KEY_NAME = "SystemProductName";
+    private const REGISTRY_KEY_NAME = 'SystemProductName';
 
     /**
      * The Name of the product expected from the windows registry
      */
-    private const WINDOWS_PRODUCT_NAME = "Google Compute Engine";
+    private const WINDOWS_PRODUCT_NAME = 'Google Compute Engine';
 
     private const CRED_TYPE = 'mds';
 
