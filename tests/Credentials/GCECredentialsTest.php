@@ -126,6 +126,10 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnWindowsGceWithResidencyWithNoCom()
     {
+        if (class_exists(\COM::class)) {
+            throw $this->markTestSkipped('This test in meant to handle when the COM class is not preset');
+        }
+
         $method = (new \ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyWindows');
         

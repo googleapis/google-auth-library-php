@@ -8,11 +8,31 @@ permissions:
   contents: read
 jobs:
     test:
-        runs-on: windows-latest
+        runs-on: ubuntu-latest
         strategy:
             matrix:
                 php: [ "8.0", "8.1", "8.2", "8.3" ]
         name: PHP ${{matrix.php }} Unit Test
+        steps:
+            - uses: actions/checkout@v4
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: ${{ matrix.php }}
+            - name: Install Dependencies
+              uses: nick-invision/retry@v3
+              with:
+                timeout_minutes: 10
+                max_attempts: 3
+                command: composer install
+            - name: Run Script
+              run: vendor/bin/phpunit
+    test_windows_with_com:
+        runs-on: windows-latest
+        strategy:
+            matrix:
+                php: [ "8.0", "8.1", "8.2", "8.3" ]
+        name: PHP ${{ matrix.php }} Windows with COM Unit Test
         steps:
             - uses: actions/checkout@v4
             - name: Setup PHP
@@ -27,7 +47,7 @@ jobs:
                 max_attempts: 3
                 command: composer install
             - name: Run Script
-              run: vendor/bin/phpunit
+              run: vendor/bin/phpunit --filter GCECredentialsTest
     test_lowest:
         runs-on: ubuntu-latest
         name: Test Prefer Lowest
