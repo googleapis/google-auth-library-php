@@ -134,6 +134,27 @@ class GCECredentialsTest extends BaseTest
         $this->assertFalse($method->invoke(null, 'thisShouldBeFalse'));
     }
 
+    public function testOnWindowsGceWithResidency()
+    {
+        if (!class_exists(\COM::class)) {
+            throw $this->markTestSkipped('This test only works while running on windiwos with GCE and the COM class enabled');
+        }
+
+        $method = (new \ReflectionClass(GCECredentials::class))
+            ->getMethod('detectResidencyWindows');
+        $method->setAccessible(true);
+
+        $keyPathProperty = (new \ReflectionClass(GCECredentials::class))
+            ->getProperty('REGISTRY_KEY_PATH');
+        $keyPathProperty->setAccessible(true);
+
+        $keyName = (new \ReflectionClass(GCECredentials::class))
+            ->getProperty('REGISTRY_KEY_NAME');
+        $keyName->setAccessible(true);
+
+        $this->assertTrue($method->invoke(null, $keyPathProperty->getValue() . $keyName->getValue()));
+    }
+
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()
     {
         $httpHandler = getHandler([
