@@ -17,7 +17,9 @@
 
 namespace Google\Auth\Tests\Credentials;
 
+use COM;
 use Exception;
+use ReflectionClass;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\Tests\BaseTest;
@@ -96,7 +98,7 @@ class GCECredentialsTest extends BaseTest
     {
         $tmpFile = tempnam(sys_get_temp_dir(), 'gce-test-product-name');
 
-        $method = (new \ReflectionClass(GCECredentials::class))
+        $method = (new ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyLinux');
         $method->setAccessible(true);
 
@@ -126,11 +128,11 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnWindowsGceWithResidencyWithNoCom()
     {
-        if (class_exists(\COM::class)) {
+        if (class_exists(COM::class)) {
             throw $this->markTestSkipped('This test in meant to handle when the COM class is not preset');
         }
 
-        $method = (new \ReflectionClass(GCECredentials::class))
+        $method = (new ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyWindows');
         
         $method->setAccessible(true);
@@ -138,21 +140,33 @@ class GCECredentialsTest extends BaseTest
         $this->assertFalse($method->invoke(null, 'thisShouldBeFalse'));
     }
 
-    public function testOnWindowsGceWithResidency()
+    public function testOnWindowsGceWithResidencyNotOnGCE()
     {
-        if (!class_exists(\COM::class)) {
-            throw $this->markTestSkipped('This test only works while running on windiwos with GCE and the COM class enabled');
+        if (!class_exists(COM::class)) {
+            throw $this->markTestSkipped('This test only works while running on windows COM class enabled');
         }
 
-        $method = (new \ReflectionClass(GCECredentials::class))
+        $keyPathProperty = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
+        $keyName = 'SystemProductName';
+
+        $method = (new ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyWindows');
         $method->setAccessible(true);
 
-        $keyPathProperty = (new \ReflectionClass(GCECredentials::class))
-            ->getConstant('REGISTRY_KEY_PATH');
+        $this->assertFalse($method->invoke(null, $keyPathProperty.$keyName));
+    }
 
-        $keyName = (new \ReflectionClass(GCECredentials::class))
-            ->getConstant('REGISTRY_KEY_NAME');
+    public function testOnWindowsGceWithResidency()
+    {
+        throw $this
+            ->markTestSkipped('This test only works while running on windows COM class enabled and running on GCE');
+
+        $keyPathProperty = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
+        $keyName = 'SystemProductName';
+
+        $method = (new ReflectionClass(GCECredentials::class))
+            ->getMethod('detectResidencyWindows');
+        $method->setAccessible(true);
 
         $this->assertTrue($method->invoke(null, $keyPathProperty.$keyName));
     }
