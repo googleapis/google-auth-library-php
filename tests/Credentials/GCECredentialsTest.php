@@ -149,14 +149,14 @@ class GCECredentialsTest extends BaseTest
         $method->setAccessible(true);
 
         $keyPathProperty = (new \ReflectionClass(GCECredentials::class))
-            ->getProperty('REGISTRY_KEY_PATH');
+            ->getConstant('REGISTRY_KEY_PATH');
         $keyPathProperty->setAccessible(true);
 
         $keyName = (new \ReflectionClass(GCECredentials::class))
-            ->getProperty('REGISTRY_KEY_NAME');
+            ->getConstant('REGISTRY_KEY_NAME');
         $keyName->setAccessible(true);
 
-        $this->assertTrue($method->invoke(null, $keyPathProperty->getValue() . $keyName->getValue()));
+        $this->assertTrue($method->invoke(null, $keyPathProperty.$keyName));
     }
 
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()
