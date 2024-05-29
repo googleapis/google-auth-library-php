@@ -30,7 +30,6 @@ use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
-use \COM;
 
 use InvalidArgumentException;
 
@@ -413,13 +412,13 @@ class GCECredentials extends CredentialsLoader implements
 
     private static function detectResidencyWindows(string $registryProductKey): bool
     {
-        if (!class_exists(COM::class)) {
+        if (!class_exists(\COM::class)) {
             // the COM extension must be installed and enabled to detect Windows residency
             // see https://www.php.net/manual/en/book.com.php
             return false;
         }
 
-        $shell = new COM('WScript.Shell');
+        $shell = new \COM('WScript.Shell');
         $productName = $shell->regRead($registryProductKey);
         
         if ($productName !== self::WINDOWS_PRODUCT_NAME) {
