@@ -19,7 +19,6 @@ namespace Google\Auth\Tests\Credentials;
 
 use COM;
 use Exception;
-use ReflectionClass;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\Tests\BaseTest;
@@ -31,6 +30,7 @@ use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use ReflectionClass;
 
 /**
  * @group credentials
@@ -153,7 +153,7 @@ class GCECredentialsTest extends BaseTest
             ->getMethod('detectResidencyWindows');
         $method->setAccessible(true);
 
-        $this->assertFalse($method->invoke(null, $keyPathProperty.$keyName));
+        $this->assertFalse($method->invoke(null, $keyPathProperty . $keyName));
     }
 
     public function testOnWindowsGceWithResidency()
@@ -168,7 +168,7 @@ class GCECredentialsTest extends BaseTest
             ->getMethod('detectResidencyWindows');
         $method->setAccessible(true);
 
-        $this->assertTrue($method->invoke(null, $keyPathProperty.$keyName));
+        $this->assertTrue($method->invoke(null, $keyPathProperty . $keyName));
     }
 
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()
