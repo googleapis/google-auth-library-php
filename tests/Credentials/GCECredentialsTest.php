@@ -129,7 +129,7 @@ class GCECredentialsTest extends BaseTest
     public function testOnWindowsGceWithResidencyWithNoCom()
     {
         if (class_exists(COM::class)) {
-            throw $this->markTestSkipped('This test in meant to handle when the COM class is not preset');
+            throw $this->markTestSkipped('This test in meant to handle when the COM extension is not preset');
         }
 
         $method = (new ReflectionClass(GCECredentials::class))
@@ -143,7 +143,7 @@ class GCECredentialsTest extends BaseTest
     public function testOnWindowsGceWithResidencyNotOnGCE()
     {
         if (!class_exists(COM::class)) {
-            throw $this->markTestSkipped('This test only works while running on windows COM class enabled');
+            throw $this->markTestSkipped('This test only works while running on windows COM extension enabled');
         }
 
         $keyPathProperty = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';

@@ -126,7 +126,7 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * The Name of the product expected from the windows registry
      */
-    private const WINDOWS_PRODUCT_NAME = 'Google Compute Engine';
+    private const WINDOWS_PRODUCT_NAME = 'Google';
 
     private const CRED_TYPE = 'mds';
 
@@ -424,18 +424,14 @@ class GCECredentials extends CredentialsLoader implements
         $productName = null;
 
         try {
-            $shell->regRead($registryProductKey);
+            $productName = $shell->regRead($registryProductKey);
         } catch(com_exception $e) {
             // This means that we tried to read a key that doesn't exist on the registry
             // which might mean that it is a windows instance that is not on GCE
             return false;
         }
         
-        if ($productName !== self::WINDOWS_PRODUCT_NAME) {
-            return false;
-        }
-        
-        return true;
+        return explode(" ", $productName)[0] === self::WINDOWS_PRODUCT_NAME;
     }
 
     /**
