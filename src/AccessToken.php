@@ -32,6 +32,7 @@ use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
+use stdClass;
 use TypeError;
 use UnexpectedValueException;
 
@@ -112,12 +113,6 @@ class AccessToken
 
         // Check signature against each available cert.
         $certs = $this->getCerts($certsLocation, $cacheKey, $options);
-        $alg = $this->determineAlg($certs);
-        if (!in_array($alg, ['RS256', 'ES256'])) {
-            throw new InvalidArgumentException(
-                'unrecognized "alg" in certs, expected ES256 or RS256'
-            );
-        }
         try {
             $keys = [];
             foreach ($certs as $cert) {
@@ -127,8 +122,8 @@ class AccessToken
                 // create an array of key IDs to certs for the JWT library
                 $keys[$cert['kid']] = JWK::parseKey($cert);
             }
-
-            $payload = $this->callJwtStatic('decode', [$token, $keys]);
+            $headers = new \stdClass();
+            $payload = $this->callJwtDecode($token, $keys, $headers);
 
             if ($audience) {
                 if (!property_exists($payload, 'aud') || $payload->aud != $audience) {
@@ -139,7 +134,7 @@ class AccessToken
             // support HTTP and HTTPS issuers
             // @see https://developers.google.com/identity/sign-in/web/backend-auth
             if (is_null($issuer)) {
-                $issuers = $alg == 'RS256'
+                $issuers = $headers->alg == 'RS256'
                     ?  [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS] // default to OAuth2 for RS256
                     :  [self::IAP_ISSUER]; // default to IAP for ES256
             } else {
@@ -163,34 +158,6 @@ class AccessToken
         }
 
         return false;
-    }
-
-    /**
-     * Identifies the expected algorithm to verify by looking at the "alg" key
-     * of the provided certs.
-     *
-     * @param array<mixed> $certs Certificate array according to the JWK spec (see
-     *                     https://tools.ietf.org/html/rfc7517).
-     * @return string The expected algorithm, such as "ES256" or "RS256".
-     */
-    private function determineAlg(array $certs)
-    {
-        $alg = null;
-        foreach ($certs as $cert) {
-            if (empty($cert['alg'])) {
-                throw new InvalidArgumentException(
-                    'certs expects "alg" to be set'
-                );
-            }
-            $alg = $alg ?: $cert['alg'];
-
-            if ($alg != $cert['alg']) {
-                throw new InvalidArgumentException(
-                    'More than one alg detected in certs'
-                );
-            }
-        }
-        return $alg;
     }
 
     /**
@@ -337,12 +304,15 @@ class AccessToken
     /**
      * Provide a hook to mock calls to the JWT static methods.
      *
-     * @param string $method
      * @param array<mixed> $args
      * @return mixed
      */
-    protected function callJwtStatic($method, array $args = [])
+    protected function callJwtDecode(
+        string $jwt,
+        $keyOrKeyArray,
+        stdClass &$headers = null
+    ): stdClass
     {
-        return call_user_func_array([JWT::class, $method], $args);
+        return JWT::decode($jwt, $keyOrKeyArray, $headers);
     }
 }

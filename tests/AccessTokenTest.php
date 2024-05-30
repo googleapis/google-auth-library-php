@@ -25,6 +25,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
 use UnexpectedValueException;
+use stdClass;
 
 /**
  * @group access-token
@@ -91,8 +92,9 @@ class AccessTokenTest extends TestCase
             $this->cache->reveal()
         );
 
-        $token->mocks['decode'] = function ($token, $keys) use ($payload, $exception) {
+        $token->mockDecode = function ($token, $keys, &$headers) use ($payload, $exception) {
             $this->assertEquals($this->token, $token);
+            $headers->alg = array_pop($keys)->getAlgorithm();
 
             if ($exception) {
                 throw $exception;
@@ -309,9 +311,10 @@ class AccessTokenTest extends TestCase
             $this->cache->reveal()
         );
 
-        $token->mocks['decode'] = function ($token, $keys) {
+        $token->mockDecode = function ($token, $keys, &$headers) {
             $this->assertEquals($this->token, $token);
             $this->assertEquals('RS256', array_pop($keys)->getAlgorithm());
+            $headers->alg = 'RS256';
 
             return (object) $this->payload;
         };
@@ -434,7 +437,7 @@ class AccessTokenTest extends TestCase
         $this->cache->save(Argument::type('Psr\Cache\CacheItemInterface'))
             ->shouldBeCalledTimes(1);
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             $httpHandler,
             $this->cache->reveal()
         );
@@ -478,9 +481,10 @@ class AccessTokenTest extends TestCase
             $this->cache->reveal()
         );
 
-        $token->mocks['decode'] = function ($token, $keys) {
+        $token->mockDecode = function ($token, $keys, &$headers) {
             $this->assertEquals($this->token, $token);
             $this->assertEquals('RS256', array_pop($keys)->getAlgorithm());
+            $headers->alg = 'RS256';
 
             return (object) $this->payload;
         };
@@ -569,13 +573,19 @@ class AccessTokenTest extends TestCase
 //@codingStandardsIgnoreStart
 class AccessTokenStub extends AccessToken
 {
-    public $mocks = [];
+    public $mockDecode = null;
 
-    protected function callJwtStatic($method, array $args = [])
+    protected function callJwtDecode(
+        string $jwt,
+        $keyOrKeyArray,
+        stdClass &$headers = null
+    ): stdClass
     {
-        return isset($this->mocks[$method])
-            ? call_user_func_array($this->mocks[$method], $args)
-            : parent::callJwtStatic($method, $args);
+        if (!isset($this->mockDecode)) {
+            throw new RuntimeException('mockDecode not set');
+        }
+
+        return ($this->mockDecode)($jwt, $keyOrKeyArray, $headers);
     }
 }
 //@codingStandardsIgnoreEnd
