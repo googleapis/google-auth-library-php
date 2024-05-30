@@ -18,7 +18,9 @@
 namespace Google\Auth;
 
 use DateTime;
+use DomainException;
 use Firebase\JWT\ExpiredException;
+use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
@@ -28,15 +30,8 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
-use phpseclib3\Crypt\PublicKeyLoader;
-use phpseclib3\Crypt\RSA;
-use phpseclib3\Math\BigInteger;
 use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
-use SimpleJWT\InvalidTokenException;
-use SimpleJWT\JWT as SimpleJWT;
-use SimpleJWT\Keys\KeyFactory;
-use SimpleJWT\Keys\KeySet;
 use TypeError;
 use UnexpectedValueException;
 
@@ -124,15 +119,43 @@ class AccessToken
             );
         }
         try {
-            if ($alg == 'RS256') {
-                return $this->verifyRs256($token, $certs, $audience, $issuer);
+            $keys = [];
+            foreach ($certs as $cert) {
+                if (empty($cert['kid'])) {
+                    throw new InvalidArgumentException('certs expects "kid" to be set');
+                }
+                // create an array of key IDs to certs for the JWT library
+                $keys[$cert['kid']] = JWK::parseKey($cert);
             }
-            return $this->verifyEs256($token, $certs, $audience, $issuer);
-        } catch (ExpiredException $e) {  // firebase/php-jwt 5+
-        } catch (SignatureInvalidException $e) {  // firebase/php-jwt 5+
-        } catch (InvalidTokenException $e) { // simplejwt
+
+            $payload = $this->callJwtStatic('decode', [$token, $keys]);
+
+            if ($audience) {
+                if (!property_exists($payload, 'aud') || $payload->aud != $audience) {
+                    throw new UnexpectedValueException('Audience does not match');
+                }
+            }
+
+            // support HTTP and HTTPS issuers
+            // @see https://developers.google.com/identity/sign-in/web/backend-auth
+            if (is_null($issuer)) {
+                $issuers = $alg == 'RS256'
+                    ?  [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS] // default to OAuth2 for RS256
+                    :  [self::IAP_ISSUER]; // default to IAP for ES256
+            } else {
+                $issuers = [$issuer];
+            }
+            if (!isset($payload->iss) || !in_array($payload->iss, $issuers)) {
+                throw new UnexpectedValueException('Issuer does not match');
+            }
+
+            return (array) $payload;
+
+        } catch (ExpiredException $e) {
+        } catch (SignatureInvalidException $e) {
         } catch (InvalidArgumentException $e) {
         } catch (UnexpectedValueException $e) {
+        } catch (DomainException $e) {
         }
 
         if ($throwException) {
@@ -168,100 +191,6 @@ class AccessToken
             }
         }
         return $alg;
-    }
-
-    /**
-     * Verifies an ES256-signed JWT.
-     *
-     * @param string $token The JSON Web Token to be verified.
-     * @param array<mixed> $certs Certificate array according to the JWK spec (see
-     *        https://tools.ietf.org/html/rfc7517).
-     * @param string|null $audience If set, returns false if the provided
-     *        audience does not match the "aud" claim on the JWT.
-     * @param string|null $issuer If set, returns false if the provided
-     *        issuer does not match the "iss" claim on the JWT.
-     * @return array<mixed> the token payload, if successful, or false if not.
-     */
-    private function verifyEs256($token, array $certs, $audience = null, $issuer = null)
-    {
-        $this->checkSimpleJwt();
-
-        $jwkset = new KeySet();
-        foreach ($certs as $cert) {
-            $jwkset->add(KeyFactory::create($cert, 'php'));
-        }
-
-        // Validate the signature using the key set and ES256 algorithm.
-        $jwt = $this->callSimpleJwtDecode([$token, $jwkset, 'ES256']);
-        $payload = $jwt->getClaims();
-
-        if ($audience) {
-            if (!isset($payload['aud']) || $payload['aud'] != $audience) {
-                throw new UnexpectedValueException('Audience does not match');
-            }
-        }
-
-        // @see https://cloud.google.com/iap/docs/signed-headers-howto#verifying_the_jwt_payload
-        $issuer = $issuer ?: self::IAP_ISSUER;
-        if (!isset($payload['iss']) || $payload['iss'] !== $issuer) {
-            throw new UnexpectedValueException('Issuer does not match');
-        }
-
-        return $payload;
-    }
-
-    /**
-     * Verifies an RS256-signed JWT.
-     *
-     * @param string $token The JSON Web Token to be verified.
-     * @param array<mixed> $certs Certificate array according to the JWK spec (see
-     *        https://tools.ietf.org/html/rfc7517).
-     * @param string|null $audience If set, returns false if the provided
-     *        audience does not match the "aud" claim on the JWT.
-     * @param string|null $issuer If set, returns false if the provided
-     *        issuer does not match the "iss" claim on the JWT.
-     * @return array<mixed> the token payload, if successful, or false if not.
-     */
-    private function verifyRs256($token, array $certs, $audience = null, $issuer = null)
-    {
-        $this->checkAndInitializePhpsec();
-        $keys = [];
-        foreach ($certs as $cert) {
-            if (empty($cert['kid'])) {
-                throw new InvalidArgumentException(
-                    'certs expects "kid" to be set'
-                );
-            }
-            if (empty($cert['n']) || empty($cert['e'])) {
-                throw new InvalidArgumentException(
-                    'RSA certs expects "n" and "e" to be set'
-                );
-            }
-            $publicKey = $this->loadPhpsecPublicKey($cert['n'], $cert['e']);
-
-            // create an array of key IDs to certs for the JWT library
-            $keys[$cert['kid']] = new Key($publicKey, 'RS256');
-        }
-
-        $payload = $this->callJwtStatic('decode', [
-            $token,
-            $keys,
-        ]);
-
-        if ($audience) {
-            if (!property_exists($payload, 'aud') || $payload->aud != $audience) {
-                throw new UnexpectedValueException('Audience does not match');
-            }
-        }
-
-        // support HTTP and HTTPS issuers
-        // @see https://developers.google.com/identity/sign-in/web/backend-auth
-        $issuers = $issuer ? [$issuer] : [self::OAUTH2_ISSUER, self::OAUTH2_ISSUER_HTTPS];
-        if (!isset($payload->iss) || !in_array($payload->iss, $issuers)) {
-            throw new UnexpectedValueException('Issuer does not match');
-        }
-
-        return (array) $payload;
     }
 
     /**
@@ -390,72 +319,6 @@ class AccessToken
     }
 
     /**
-     * @return void
-     */
-    private function checkAndInitializePhpsec()
-    {
-        if (!class_exists(RSA::class)) {
-            throw new RuntimeException('Please require phpseclib/phpseclib v3 to use this utility.');
-        }
-    }
-
-    /**
-     * @return string
-     * @throws TypeError If the key cannot be initialized to a string.
-     */
-    private function loadPhpsecPublicKey(string $modulus, string $exponent): string
-    {
-        $key = PublicKeyLoader::load([
-            'n' => new BigInteger($this->callJwtStatic('urlsafeB64Decode', [
-                $modulus,
-            ]), 256),
-            'e' => new BigInteger($this->callJwtStatic('urlsafeB64Decode', [
-                $exponent
-            ]), 256),
-        ]);
-        $formattedPublicKey = $key->toString('PKCS8');
-        if (!is_string($formattedPublicKey)) {
-            throw new TypeError('Failed to initialize the key');
-        }
-        return $formattedPublicKey;
-    }
-
-    /**
-     * @return void
-     */
-    private function checkSimpleJwt()
-    {
-        // @codeCoverageIgnoreStart
-        if (!class_exists(SimpleJwt::class)) {
-            throw new RuntimeException('Please require kelvinmo/simplejwt ^0.2 to use this utility.');
-        }
-        // @codeCoverageIgnoreEnd
-    }
-
-    /**
-     * Provide a hook to mock calls to the JWT static methods.
-     *
-     * @param string $method
-     * @param array<mixed> $args
-     * @return mixed
-     */
-    protected function callJwtStatic($method, array $args = [])
-    {
-        return call_user_func_array([JWT::class, $method], $args); // @phpstan-ignore-line
-    }
-
-    /**
-     * Provide a hook to mock calls to the JWT static methods.
-     *
-     * @param array<mixed> $args
-     * @return mixed
-     */
-    protected function callSimpleJwtDecode(array $args = [])
-    {
-        return call_user_func_array([SimpleJwt::class, 'decode'], $args);
-    }
-
-    /**
      * Generate a cache key based on the cert location using sha1 with the
      * exception of using "federated_signon_certs_v3" to preserve BC.
      *
@@ -469,5 +332,17 @@ class AccessToken
             : sha1($certsLocation);
 
         return 'google_auth_certs_cache|' . $key;
+    }
+
+    /**
+     * Provide a hook to mock calls to the JWT static methods.
+     *
+     * @param string $method
+     * @param array<mixed> $args
+     * @return mixed
+     */
+    protected function callJwtStatic($method, array $args = [])
+    {
+        return call_user_func_array([JWT::class, $method], $args);
     }
 }

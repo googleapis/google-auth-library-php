@@ -24,7 +24,6 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
-use SimpleJWT\JWT as SimpleJWT;
 use UnexpectedValueException;
 
 /**
@@ -239,18 +238,7 @@ class AccessTokenTest extends TestCase
             $this->markTestSkipped('Set the IAP_IDENTITY_TOKEN env var');
         }
 
-        $token = new AccessTokenStub();
-        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
-            // Skip expired validation
-            $jwt = SimpleJWT::decode(
-                $token,
-                $publicKey,
-                $allowedAlgs,
-                null,
-                ['exp']
-            );
-            return $jwt->getClaims();
-        };
+        $token = new AccessToken();
 
         // Use Iap Cert URL
         $payload = $token->verify($jwt, [
@@ -588,16 +576,6 @@ class AccessTokenStub extends AccessToken
         return isset($this->mocks[$method])
             ? call_user_func_array($this->mocks[$method], $args)
             : parent::callJwtStatic($method, $args);
-    }
-
-    protected function callSimpleJwtDecode(array $args = [])
-    {
-        if (isset($this->mocks['decode'])) {
-            $claims = call_user_func_array($this->mocks['decode'], $args);
-            return new SimpleJWT(null, (array) $claims);
-        }
-
-        return parent::callSimpleJwtDecode($args);
     }
 }
 //@codingStandardsIgnoreEnd
