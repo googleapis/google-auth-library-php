@@ -94,4 +94,4 @@ jobs:
         run: |
           composer install
           composer global require phpstan/phpstan:^1.8
-          ~/.composer/vendor/bin/phpstan --autoload tests/phpstan-autoload.php analyse
+          ~/.composer/vendor/bin/phpstan analyse --autoload tests/phpstan-autoload.php
