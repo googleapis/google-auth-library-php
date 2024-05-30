@@ -6,6 +6,11 @@ require_once __DIR__ . '/../vendor/autoload.php';
 if (!class_exists(COM::class)) {
     class COM
     {
+        public function __construct(string $command)
+        {
+            //do nothing
+        }
+        
         public function regRead(string $key): string
         {
             // do nothing
