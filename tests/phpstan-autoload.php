@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// moc the windows-only COM class so that the autoloader understands it
+// moc the windows-only COM class so that phpstan understands it
 if (!class_exists(COM::class)) {
     class COM
     {

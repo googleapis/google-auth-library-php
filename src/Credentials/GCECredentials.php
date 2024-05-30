@@ -32,7 +32,6 @@ use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
-
 use InvalidArgumentException;
 
 /**
@@ -116,17 +115,17 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * The Windows Registry key path to the product name
      */
-    private const REGISTRY_KEY_PATH = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
+    private const WINDOWS_REGISTRY_KEY_PATH = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
 
     /**
      * The Windows registry key name for the product name
      */
-    private const REGISTRY_KEY_NAME = 'SystemProductName';
+    private const WINDOWS_REGISTRY_KEY_NAME = 'SystemProductName';
 
     /**
      * The Name of the product expected from the windows registry
      */
-    private const WINDOWS_PRODUCT_NAME = 'Google';
+    private const PRODUCT_NAME = 'Google';
 
     private const CRED_TYPE = 'mds';
 
@@ -396,7 +395,9 @@ class GCECredentials extends CredentialsLoader implements
         }
 
         if (PHP_OS === 'Windows') {
-            return self::detectResidencyWindows(self::REGISTRY_KEY_PATH . self::REGISTRY_KEY_NAME);
+            return self::detectResidencyWindows(
+                self::WINDOWS_REGISTRY_KEY_PATH . self::WINDOWS_REGISTRY_KEY_NAME
+            );
         }
 
         // Detect GCE residency on Linux
@@ -407,7 +408,7 @@ class GCECredentials extends CredentialsLoader implements
     {
         if (file_exists($productNameFile)) {
             $productName = trim((string) file_get_contents($productNameFile));
-            return 0 === strpos($productName, 'Google');
+            return 0 === strpos($productName, self::PRODUCT_NAME);
         }
         return false;
     }
@@ -425,13 +426,13 @@ class GCECredentials extends CredentialsLoader implements
 
         try {
             $productName = $shell->regRead($registryProductKey);
-        } catch(com_exception $e) {
+        } catch(com_exception) {
             // This means that we tried to read a key that doesn't exist on the registry
             // which might mean that it is a windows instance that is not on GCE
             return false;
         }
         
-        return explode(' ', $productName)[0] === self::WINDOWS_PRODUCT_NAME;
+        return 0 === strpos($productName, self::PRODUCT_NAME);
     }
 
     /**

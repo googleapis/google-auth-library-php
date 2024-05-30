@@ -158,8 +158,17 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnWindowsGceWithResidency()
     {
-        throw $this
-            ->markTestSkipped('This test only works while running on windows COM class enabled and running on GCE');
+        if (PHP_OS !== 'Windows') {
+            $this->markTestSkipped('This test only works while running on Windows');
+        }
+
+        if (!class_exists(COM::class)) {
+            $this->markTestSkipped('This test only works with the COM extension enabled');
+        }
+
+        if (!GCECredentials::onGce()) {
+            $this->markTestSkipped('This test only works while running on GCE');
+        }
 
         $keyPathProperty = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
         $keyName = 'SystemProductName';
