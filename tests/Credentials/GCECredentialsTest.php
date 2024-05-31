@@ -128,8 +128,12 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnWindowsGceWithResidencyWithNoCom()
     {
+        if (PHP_OS !== 'Windows' && PHP_OS !== 'WINNT') {
+            $this->markTestSkipped('This test only works while running on Windows');
+        }
+
         if (class_exists(COM::class)) {
-            throw $this->markTestSkipped('This test in meant to handle when the COM extension is not preset');
+            throw $this->markTestSkipped('This test in meant to handle when the COM extension is not present');
         }
 
         $method = (new ReflectionClass(GCECredentials::class))
@@ -146,6 +150,10 @@ class GCECredentialsTest extends BaseTest
             throw $this->markTestSkipped('This test only works while running on windows COM extension enabled');
         }
 
+        if (GCECredentials::onGce()) {
+            $this->markTestSkipped('This test runs only on non GCE machines');
+        }
+
         $keyPathProperty = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
         $keyName = 'SystemProductName';
 
@@ -158,7 +166,7 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnWindowsGceWithResidency()
     {
-        if (PHP_OS !== 'Windows') {
+        if (PHP_OS !== 'Windows' && PHP_OS !== 'WINNT') {
             $this->markTestSkipped('This test only works while running on Windows');
         }
 

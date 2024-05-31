@@ -394,7 +394,7 @@ class GCECredentials extends CredentialsLoader implements
             }
         }
 
-        if (PHP_OS === 'Windows') {
+        if (PHP_OS === 'Windows' || PHP_OS === 'WINNT') {
             return self::detectResidencyWindows(
                 self::WINDOWS_REGISTRY_KEY_PATH . self::WINDOWS_REGISTRY_KEY_NAME
             );
