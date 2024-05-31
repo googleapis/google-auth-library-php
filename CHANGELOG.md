@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.40.0](https://github.com/googleapis/google-auth-library-php/compare/v1.39.0...v1.40.0) (2024-05-31)
+
+
+### Features
+
+* Add windows residency check ([#553](https://github.com/googleapis/google-auth-library-php/issues/553)) ([ec13a53](https://github.com/googleapis/google-auth-library-php/commit/ec13a53ddd625265b7a596817eb052c693ab89e2))
+
 ## [1.39.0](https://github.com/googleapis/google-auth-library-php/compare/v1.38.0...v1.39.0) (2024-05-02)
 
 
