@@ -490,6 +490,14 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
         $sa = new ServiceAccountJwtAccessCredentials($testJson);
         $this->assertEquals($testJson['client_email'], $sa->getClientName());
     }
+
+    public function testReturnsPrivateKey()
+    {
+        $testJson = $this->createTestJson();
+        $sa = new ServiceAccountJwtAccessCredentials($testJson);
+        $this->assertEquals($testJson['private_key'], $sa->getPrivateKey());
+    }
+
     public function testGetProjectId()
     {
         $testJson = $this->createTestJson();
