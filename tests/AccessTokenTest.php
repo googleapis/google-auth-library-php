@@ -589,8 +589,7 @@ class MockJWT extends JWT
         string $jwt,
         $keyOrKeyArray,
         stdClass &$headers = null
-    ): stdClass
-    {
+    ): stdClass {
         if (!isset(self::$mockDecode)) {
             throw new RuntimeException('mockDecode not set');
         }
