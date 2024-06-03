@@ -16,6 +16,7 @@
  */
 namespace Google\Auth\Tests;
 
+use Firebase\JWT\JWT;
 use Google\Auth\AccessToken;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
@@ -24,8 +25,8 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
-use UnexpectedValueException;
 use stdClass;
+use UnexpectedValueException;
 
 /**
  * @group access-token
@@ -87,12 +88,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
-            null,
-            $this->cache->reveal()
-        );
-
-        $token->mockDecode = function ($token, $keys, &$headers) use ($payload, $exception) {
+        $jwt = new MockJWT(function ($token, $keys, &$headers) use ($payload, $exception) {
             $this->assertEquals($this->token, $token);
             $headers->alg = array_pop($keys)->getAlgorithm();
 
@@ -101,7 +97,13 @@ class AccessTokenTest extends TestCase
             }
 
             return (object) $payload;
-        };
+        });
+
+        $token = new AccessToken(
+            null,
+            $this->cache->reveal(),
+            $jwt
+        );
 
         $e = null;
         $res = false;
@@ -306,18 +308,19 @@ class AccessTokenTest extends TestCase
         $this->cache->save(Argument::type('Psr\Cache\CacheItemInterface'))
             ->shouldBeCalledTimes(1);
 
-        $token = new AccessTokenStub(
-            null,
-            $this->cache->reveal()
-        );
-
-        $token->mockDecode = function ($token, $keys, &$headers) {
+        $jwt = new MockJWT(function ($token, $keys, &$headers) {
             $this->assertEquals($this->token, $token);
             $this->assertEquals('RS256', array_pop($keys)->getAlgorithm());
             $headers->alg = 'RS256';
 
             return (object) $this->payload;
-        };
+        });
+
+        $token = new AccessToken(
+            null,
+            $this->cache->reveal(),
+            $jwt
+        );
 
         $token->verify($this->token, [
             'certsLocation' => $certsLocation
@@ -340,7 +343,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             null,
             $this->cache->reveal()
         );
@@ -364,7 +367,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             null,
             $this->cache->reveal()
         );
@@ -390,7 +393,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             null,
             $this->cache->reveal()
         );
@@ -476,18 +479,20 @@ class AccessTokenTest extends TestCase
         $this->cache->save(Argument::type('Psr\Cache\CacheItemInterface'))
             ->shouldBeCalledTimes(1);
 
-        $token = new AccessTokenStub(
-            $httpHandler,
-            $this->cache->reveal()
-        );
-
-        $token->mockDecode = function ($token, $keys, &$headers) {
+        $jwt = new MockJWT(function ($token, $keys, &$headers) {
             $this->assertEquals($this->token, $token);
             $this->assertEquals('RS256', array_pop($keys)->getAlgorithm());
             $headers->alg = 'RS256';
 
             return (object) $this->payload;
-        };
+        });
+
+        $token = new AccessToken(
+            $httpHandler,
+            $this->cache->reveal(),
+            $jwt
+        );
+
 
         $token->verify($this->token);
     }
@@ -512,7 +517,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             $httpHandler,
             $this->cache->reveal()
         );
@@ -571,21 +576,26 @@ class AccessTokenTest extends TestCase
 }
 
 //@codingStandardsIgnoreStart
-class AccessTokenStub extends AccessToken
+class MockJWT extends JWT
 {
-    public $mockDecode = null;
+    private static $mockDecode;
 
-    protected function callJwtDecode(
+    public function __construct($mockDecode)
+    {
+        self::$mockDecode = $mockDecode;
+    }
+
+    public static function decode(
         string $jwt,
         $keyOrKeyArray,
         stdClass &$headers = null
     ): stdClass
     {
-        if (!isset($this->mockDecode)) {
+        if (!isset(self::$mockDecode)) {
             throw new RuntimeException('mockDecode not set');
         }
 
-        return ($this->mockDecode)($jwt, $keyOrKeyArray, $headers);
+        return (self::$mockDecode)($jwt, $keyOrKeyArray, $headers);
     }
 }
 //@codingStandardsIgnoreEnd

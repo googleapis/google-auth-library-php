@@ -60,17 +60,21 @@ class AccessToken
      */
     private $cache;
 
+    private JWT $jwt;
+
     /**
      * @param callable $httpHandler [optional] An HTTP Handler to deliver PSR-7 requests.
      * @param CacheItemPoolInterface $cache [optional] A PSR-6 compatible cache implementation.
      */
     public function __construct(
         callable $httpHandler = null,
-        CacheItemPoolInterface $cache = null
+        CacheItemPoolInterface $cache = null,
+        JWT $jwt = null
     ) {
         $this->httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         $this->cache = $cache ?: new MemoryCacheItemPool();
+        $this->jwt = $jwt ?: new JWT();
     }
 
     /**
@@ -120,10 +124,10 @@ class AccessToken
                     throw new InvalidArgumentException('certs expects "kid" to be set');
                 }
                 // create an array of key IDs to certs for the JWT library
-                $keys[$cert['kid']] = JWK::parseKey($cert);
+                $keys[(string) $cert['kid']] = JWK::parseKey($cert);
             }
             $headers = new \stdClass();
-            $payload = $this->callJwtDecode($token, $keys, $headers);
+            $payload = ($this->jwt)::decode($token, $keys, $headers);
 
             if ($audience) {
                 if (!property_exists($payload, 'aud') || $payload->aud != $audience) {
@@ -299,20 +303,5 @@ class AccessToken
             : sha1($certsLocation);
 
         return 'google_auth_certs_cache|' . $key;
-    }
-
-    /**
-     * Provide a hook to mock calls to the JWT static methods.
-     *
-     * @param array<mixed> $args
-     * @return mixed
-     */
-    protected function callJwtDecode(
-        string $jwt,
-        $keyOrKeyArray,
-        stdClass &$headers = null
-    ): stdClass
-    {
-        return JWT::decode($jwt, $keyOrKeyArray, $headers);
     }
 }
