@@ -281,7 +281,7 @@ class ExternalAccountCredentials implements
 
     public function getCacheKey()
     {
-        return implode(":", $this->flattenJsonKey($this->jsonKey)) . ':' . $this->auth->getFormattedScopeOrAudience();
+        return implode(':', $this->flattenJsonKey($this->jsonKey)) . ':' . $this->auth->getFormattedScopeOrAudience();
     }
 
     public function getLastReceivedToken()
@@ -367,7 +367,7 @@ class ExternalAccountCredentials implements
     {
         $result = [];
 
-        foreach($arr as $key => $val){
+        foreach($arr as $key => $val) {
             if (is_array($val)) {
                 $result = array_merge($result, $this->flattenJsonKey($val));
             } elseif ($val === '') {
