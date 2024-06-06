@@ -33,7 +33,6 @@ use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
 use RuntimeException;
 use stdClass;
-use TypeError;
 use UnexpectedValueException;
 
 /**
@@ -126,7 +125,7 @@ class AccessToken
                 // create an array of key IDs to certs for the JWT library
                 $keys[(string) $cert['kid']] = JWK::parseKey($cert);
             }
-            $headers = new \stdClass();
+            $headers = new stdClass();
             $payload = ($this->jwt)::decode($token, $keys, $headers);
 
             if ($audience) {
