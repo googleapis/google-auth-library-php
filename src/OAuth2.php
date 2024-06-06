@@ -704,6 +704,26 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
+     * Obtains the scope or the Audience and formats it for external classes to use
+     * in generating a cache key.
+     *
+     * @return ?string a key that may be used to cache the auth token.
+     */
+    public function getFormattedScopeOrAudience()
+    {
+        if (is_array($this->scope)) {
+            return implode(':', $this->scope);
+        }
+
+        if ($this->audience) {
+            return $this->audience;
+        }
+
+        // If scope has not set, return null to indicate no caching.
+        return null;
+    }
+
+    /**
      * Parses the fetched tokens.
      *
      * @param ResponseInterface $resp the response.

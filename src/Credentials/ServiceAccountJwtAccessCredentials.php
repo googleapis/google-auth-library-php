@@ -170,7 +170,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
      */
     public function getCacheKey()
     {
-        return $this->auth->getCacheKey();
+        return $this->auth->getIssuer() . ":" . $this->auth->getFormattedScopeOrAudience();
     }
 
     /**

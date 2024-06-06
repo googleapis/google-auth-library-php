@@ -134,7 +134,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      */
     public function getCacheKey()
     {
-        return $this->auth->getClientId() . ':' . $this->auth->getCacheKey();
+        return $this->auth->getClientId() . ':' . $this->auth->getFormattedScopeOrAudience();
     }
 
     /**

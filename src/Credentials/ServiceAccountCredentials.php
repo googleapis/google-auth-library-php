@@ -223,7 +223,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getCacheKey()
     {
-        $key = $this->auth->getIssuer() . ':' . $this->auth->getCacheKey();
+        $key = $this->auth->getIssuer() . ':' . $this->auth->getFormattedScopeOrAudience();
+        
         if ($sub = $this->auth->getSub()) {
             $key .= ':' . $sub;
         }

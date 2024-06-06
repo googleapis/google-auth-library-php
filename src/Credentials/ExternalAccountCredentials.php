@@ -53,6 +53,7 @@ class ExternalAccountCredentials implements
     private ?string $workforcePoolUserProject;
     private ?string $projectId;
     private string $universeDomain;
+    private array $jsonKey; // We will need to take a look into this. PR draft.
 
     /**
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
@@ -122,6 +123,8 @@ class ExternalAccountCredentials implements
                 'workforce_pool_user_project should not be set for non-workforce pool credentials.'
             );
         }
+
+        $this->jsonKey = $jsonKey;
     }
 
     /**
@@ -278,7 +281,7 @@ class ExternalAccountCredentials implements
 
     public function getCacheKey()
     {
-        return $this->auth->getCacheKey();
+        return implode(":", $this->flattenJsonKey($this->jsonKey)) . ':' . $this->auth->getFormattedScopeOrAudience();
     }
 
     public function getLastReceivedToken()
@@ -358,5 +361,22 @@ class ExternalAccountCredentials implements
     {
         $regex = '#//iam\.googleapis\.com/locations/[^/]+/workforcePools/#';
         return preg_match($regex, $this->auth->getAudience()) === 1;
+    }
+
+    private function flattenJsonKey($arr): array
+    {
+        $result = [];
+
+        foreach($arr as $key => $val){
+            if (is_array($val)) {
+                $result = array_merge($result, $this->flattenJsonKey($val));
+            } elseif ($val === '') {
+                continue;
+            } else {
+                array_push($result, $val);
+            }
+        }
+
+        return $result;
     }
 }

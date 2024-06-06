@@ -493,7 +493,7 @@ class GCECredentials extends CredentialsLoader implements
      */
     public function getCacheKey()
     {
-        return self::cacheKey;
+        return $this->tokenUri;
     }
 
     /**

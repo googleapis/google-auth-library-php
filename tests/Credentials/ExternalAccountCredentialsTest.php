@@ -521,6 +521,18 @@ class ExternalAccountCredentialsTest extends TestCase
         $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
     }
 
+    public function testCacheKeyFormat()
+    {
+        $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
+        $cacheKey = $credentials->getCacheKey();        
+
+        // I decided to hand craft this manually to avoid reusing the flattenJsonKey method
+        // inside the ExternalAccountCredentials class and make 
+        // sure the flat function works properly
+        $expectedKey = 'external_account:token-url.com:sts-url.com:scope1'; 
+        $this->assertEquals($expectedKey, $cacheKey);
+    }
+
     /**
      * @runInSeparateProcess
      */
