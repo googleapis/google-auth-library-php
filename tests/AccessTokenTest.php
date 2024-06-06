@@ -289,35 +289,43 @@ class AccessTokenTest extends TestCase
     {
         $certsLocation = __DIR__ . '/fixtures/federated-certs.json';
         $certsData = json_decode(file_get_contents($certsLocation), true);
+        $kid = null;
+        foreach ($certsData['keys'] as $i => $cert) {
+            $certsData[$cert['kid']] = $cert;
+            $kid = $cert['kid'];
+        }
+        unset($certsData['keys']);
 
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
-        $item->get()
-            ->shouldBeCalledTimes(1)
-            ->willReturn(null);
+        $item->isHit()->shouldBeCalledTimes(1)->willReturn(false);
         $item->set($certsData)
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
-        $item->expiresAt(Argument::type('\DateTime'))
-            ->shouldBeCalledTimes(1)
-            ->willReturn($item->reveal());
 
-        $this->cache->getItem('google_auth_certs_cache|' . sha1($certsLocation))
+        $cacheKey = 'jwks' . preg_replace('|[^a-zA-Z0-9_\.!]|', '', $certsLocation);
+        $cacheKey = substr(hash('sha256', $cacheKey), 0, 64);
+        $this->cache->getItem($cacheKey)
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
         $this->cache->save(Argument::type('Psr\Cache\CacheItemInterface'))
             ->shouldBeCalledTimes(1);
 
-        $jwt = new MockJWT(function ($token, $keys, &$headers) {
+        $jwt = new MockJWT(function ($token, $keys, &$headers) use ($kid) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals('RS256', array_pop($keys)->getAlgorithm());
+            $this->assertArrayHasKey($kid, $keys);
+            $this->assertEquals('RS256', $keys[$kid]->getAlgorithm());
             $headers->alg = 'RS256';
 
             return (object) $this->payload;
         });
 
         $token = new AccessToken(
-            null,
+            function ($request) {
+                return new Response(200, [
+                    'cache-control' => 'public, max-age=1000',
+                ], file_get_contents((string)$request->getUri()));
+            },
             $this->cache->reveal(),
             $jwt
         );
