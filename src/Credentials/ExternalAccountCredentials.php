@@ -53,7 +53,13 @@ class ExternalAccountCredentials implements
     private ?string $workforcePoolUserProject;
     private ?string $projectId;
     private string $universeDomain;
-    private array $jsonKey; // We will need to take a look into this. PR draft.
+
+    /**
+     * Used to calculate the Cache Key for caching
+     *
+     * @var array<mixed>
+     */
+    private array $jsonKey;
 
     /**
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
@@ -363,7 +369,12 @@ class ExternalAccountCredentials implements
         return preg_match($regex, $this->auth->getAudience()) === 1;
     }
 
-    private function flattenJsonKey($arr): array
+    /**
+     * @param array<mixed> $arr
+     *
+     * @return array<string>
+     */
+    private function flattenJsonKey(array $arr): array
     {
         $result = [];
 
