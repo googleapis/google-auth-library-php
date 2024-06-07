@@ -104,9 +104,9 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      * Gets the unique key for caching
      * This source is considered non cacheable so returns null.
      *
-     * @return null
+     * @return null|string
      */
-    public function getCacheKey(): null
+    public function getCacheKey(): null|string
     {
         return null;
     }
