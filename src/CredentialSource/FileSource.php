@@ -29,6 +29,7 @@ class FileSource implements ExternalAccountCredentialSourceInterface
     private string $file;
     private ?string $format;
     private ?string $subjectTokenFieldName;
+    private string $cacheKey;
 
     /**
      * @param string $file                  The file to read the subject token from.
@@ -71,5 +72,16 @@ class FileSource implements ExternalAccountCredentialSourceInterface
         }
 
         return $contents;
+    }
+
+    /**
+     * Gets the unique key for caching.
+     * The CacheKey is the File name provided on the constructor.
+     *
+     * @return string
+     */
+    public function getCacheKey(): string
+    {
+        return $this->file;
     }
 }

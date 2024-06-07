@@ -50,7 +50,7 @@ class URCGetCacheKeyTest extends TestCase
         );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_id'] . ':' . $o->getCacheKey(),
+            $testJson['client_id'] . ':' . implode(' ', $scope),
             $sa->getCacheKey()
         );
     }

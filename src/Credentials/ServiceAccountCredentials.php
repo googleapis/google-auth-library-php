@@ -219,12 +219,20 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     }
 
     /**
+     * Return the Cache Key for the credentials.
+     * For the cache key format is:
+     * ClientEmail:Scope | Audience:sub.
+     *
      * @return string
      */
     public function getCacheKey()
     {
-        $key = $this->auth->getIssuer() . ':' . $this->auth->getFormattedScopeOrAudience();
-        
+        $scopeOrAudience = $this->auth->getScope();
+        if (!$scopeOrAudience) {
+            $scopeOrAudience = $this->auth->getAudience();
+        }
+
+        $key = $this->auth->getIssuer() . ':' . $scopeOrAudience;
         if ($sub = $this->auth->getSub()) {
             $key .= ':' . $sub;
         }

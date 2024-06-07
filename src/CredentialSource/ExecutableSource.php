@@ -101,6 +101,17 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
     }
 
     /**
+     * Gets the unique key for caching
+     * This source is considered non cacheable so returns null.
+     *
+     * @return null
+     */
+    public function getCacheKey(): null
+    {
+        return null;
+    }
+
+    /**
      * @param callable $httpHandler unused.
      * @return string
      * @throws RuntimeException if the executable is not allowed to run.

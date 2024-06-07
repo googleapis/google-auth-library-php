@@ -285,9 +285,16 @@ class ExternalAccountCredentials implements
         return $stsToken;
     }
 
-    public function getCacheKey()
+    /**
+     * Get the cache token key for the credentials.
+     * The cache token key format depends on the type of source 
+     * was used to configure these credentials.
+     *
+     * @return null|string;
+     */
+    public function getCacheKey(): null|string
     {
-        return implode(':', $this->flattenJsonKey($this->jsonKey)) . ':' . $this->auth->getFormattedScopeOrAudience();
+        return $this->auth->getSubjectTokenFetcher()->getCacheKey();
     }
 
     public function getLastReceivedToken()

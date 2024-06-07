@@ -489,6 +489,9 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
+     * Returns the Cache Key for the credential token.
+     * The cache key is the TokenURI given to the constructor.
+     *
      * @return string
      */
     public function getCacheKey()
