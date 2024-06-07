@@ -684,7 +684,7 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * @deprecated
-     * 
+     *
      * Obtains a key that can used to cache the results of #fetchAuthToken.
      *
      * The key is derived from the scopes.
@@ -707,7 +707,7 @@ class OAuth2 implements FetchAuthTokenInterface
 
     /**
      * Gets this instance's SubjectTokenFetcher
-     * 
+     *
      * @return null|ExternalAccountCredentialSourceInterface
      */
     public function getSubjectTokenFetcher(): null|ExternalAccountCredentialSourceInterface

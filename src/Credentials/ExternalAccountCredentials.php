@@ -55,13 +55,6 @@ class ExternalAccountCredentials implements
     private string $universeDomain;
 
     /**
-     * Used to calculate the Cache Key for caching
-     *
-     * @var array<mixed>
-     */
-    private array $jsonKey;
-
-    /**
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
      *                                 or as a space-delimited string.
      * @param array<mixed>    $jsonKey JSON credentials as an associative array.
@@ -129,8 +122,6 @@ class ExternalAccountCredentials implements
                 'workforce_pool_user_project should not be set for non-workforce pool credentials.'
             );
         }
-
-        $this->jsonKey = $jsonKey;
     }
 
     /**
@@ -287,7 +278,7 @@ class ExternalAccountCredentials implements
 
     /**
      * Get the cache token key for the credentials.
-     * The cache token key format depends on the type of source 
+     * The cache token key format depends on the type of source
      * was used to configure these credentials.
      *
      * @return null|string;
@@ -374,27 +365,5 @@ class ExternalAccountCredentials implements
     {
         $regex = '#//iam\.googleapis\.com/locations/[^/]+/workforcePools/#';
         return preg_match($regex, $this->auth->getAudience()) === 1;
-    }
-
-    /**
-     * @param array<mixed> $arr
-     *
-     * @return array<string>
-     */
-    private function flattenJsonKey(array $arr): array
-    {
-        $result = [];
-
-        foreach($arr as $key => $val) {
-            if (is_array($val)) {
-                $result = array_merge($result, $this->flattenJsonKey($val));
-            } elseif ($val === '') {
-                continue;
-            } else {
-                array_push($result, $val);
-            }
-        }
-
-        return $result;
     }
 }

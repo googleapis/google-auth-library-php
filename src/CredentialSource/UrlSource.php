@@ -104,6 +104,6 @@ class UrlSource implements ExternalAccountCredentialSourceInterface
      */
     public function getCacheKey(): string
     {
-        return $this->url . ":" . $this->subjectTokenFieldName;
+        return $this->url . ':' . $this->subjectTokenFieldName;
     }
 }

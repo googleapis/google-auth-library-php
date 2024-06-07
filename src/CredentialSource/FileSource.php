@@ -29,7 +29,6 @@ class FileSource implements ExternalAccountCredentialSourceInterface
     private string $file;
     private ?string $format;
     private ?string $subjectTokenFieldName;
-    private string $cacheKey;
 
     /**
      * @param string $file                  The file to read the subject token from.
