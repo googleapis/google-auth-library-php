@@ -282,6 +282,54 @@ $auth->verify($idToken, [
 [google-id-tokens]: https://developers.google.com/identity/sign-in/web/backend-auth
 [iap-id-tokens]: https://cloud.google.com/iap/docs/signed-headers-howto
 
+## Caching
+We currently have limited support for caching. Caching is enabled by passing a PSR-6 `CacheItemPoolInterface` instance to the constructor when instantiating the credentials.
+
+We offer some caching classes out of the box under the `Google\Auth\Cache` namespace.
+
+```php
+use Google\Auth\ApplicationDefaultCredentials;
+use Google\Auth\Cache\MemoryCacheItemPool;
+use GuzzleHttp\HandlerStack;
+
+// specify the path to your application credentials
+putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+
+// Provide the ID token audience. This can be a Client ID associated with an IAP application
+//    $targetAudience = 'IAP_CLIENT_ID.apps.googleusercontent.com';
+$targetAudience = 'YOUR_ID_TOKEN_AUDIENCE';
+
+// Cache Instance
+$memoryCache = new MemoryCacheItemPool;
+
+// Create Middleware
+$middleware = ApplicationDefaultCredentials::getProxyIdTokenMiddleware($targetAudience, cache: $memoryCache);
+$stack = HandlerStack::create();
+$stack->push($middleware);
+
+// create the HTTP client
+$client = new Client([
+  'handler' => $stack,
+  'auth' => ['username', 'pass'], // auth option handled by your application
+  'proxy_auth' => 'google_auth',
+]);
+
+// make the request
+$response = $client->get('/');
+
+// show the result!
+print_r((string) $response->getBody());
+```
+### Cache supported methods:
+* `ApplicationDefaultCredentials::getSubscriber`
+* `ApplicationDefaultCredentials::getMiddleware`
+* `ApplicationDefaultCredentials::getCredentials`
+* `ApplicationDefaultCredentials::getIdTokenMiddleware`
+* `ApplicationDefaultCredentials::getProxyIdTokenMiddleware`
+* `ApplicationDefaultCredentials::getIdTokenCredentials`
+* `FetchAuthTokenCache::__construct`
+* `AccessToken::__construct`
+
 ## License
 
 This library is licensed under Apache 2.0. Full license text is
