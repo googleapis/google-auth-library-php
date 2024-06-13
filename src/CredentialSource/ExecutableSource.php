@@ -108,7 +108,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      */
     public function getCacheKey(): ?string
     {
-        return null;
+        return $this->command . $this->outputFile;
     }
 
     /**

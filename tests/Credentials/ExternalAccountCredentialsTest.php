@@ -566,13 +566,16 @@ class ExternalAccountCredentialsTest extends TestCase
     {
         $this->baseCreds['credential_source'] = [
             'executable' => [
-                'command' => 'ls -al'
+                'command' => 'ls -al',
+                'output_file' => './output.txt'
             ]
         ];
 
         $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
         $cacheKey = $credentials->getCacheKey();
-        $this->assertNull($cacheKey);
+
+        $expectedCacheKey = 'ls -al./output.txtscope1';
+        $this->assertEquals($cacheKey, $expectedCacheKey);
     }
 
     /**

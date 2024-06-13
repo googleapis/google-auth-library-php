@@ -288,18 +288,12 @@ class ExternalAccountCredentials implements
      */
     public function getCacheKey(): ?string
     {
-        $cacheKey = $this->auth->getSubjectTokenFetcher()->getCacheKey();
-
-        if ($cacheKey === null) {
-            return null;
-        }
-
         $scopeOrAudience = $this->auth->getAudience();
         if (!$scopeOrAudience) {
             $scopeOrAudience = $this->auth->getScope();
         }
 
-        return $cacheKey .
+        return $this->auth->getSubjectTokenFetcher()->getCacheKey() .
             $scopeOrAudience .
             $this->serviceAccountImpersonationUrl .
             $this->auth->getSubjectTokenType() .
