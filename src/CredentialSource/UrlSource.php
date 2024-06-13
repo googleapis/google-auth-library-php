@@ -100,10 +100,10 @@ class UrlSource implements ExternalAccountCredentialSourceInterface
      * The format for the cache key is:
      * URL + subjectTokenFieldName
      *
-     * @return string
+     * @return ?string
      */
-    public function getCacheKey(): string
+    public function getCacheKey(): ?string
     {
-        return $this->url . ':' . $this->subjectTokenFieldName;
+        return $this->url;
     }
 }

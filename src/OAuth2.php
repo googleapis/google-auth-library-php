@@ -1033,6 +1033,16 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
+     * Gets the subject token type
+     *
+     * @return ?string
+     */
+    public function getSubjectTokenType(): ?string
+    {
+        return $this->subjectTokenType;
+    }
+
+    /**
      * Sets the scope of the access request, expressed either as an Array or as
      * a space-delimited String.
      *

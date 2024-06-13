@@ -79,7 +79,7 @@ class FileSource implements ExternalAccountCredentialSourceInterface
      *
      * @return string
      */
-    public function getCacheKey(): string
+    public function getCacheKey(): ?string
     {
         return $this->file;
     }

@@ -281,11 +281,20 @@ class ExternalAccountCredentials implements
      * The cache token key format depends on the type of source
      * was used to configure these credentials.
      *
-     * @return null|string;
+     * @return ?string;
      */
-    public function getCacheKey(): null|string
+    public function getCacheKey(): ?string
     {
-        return $this->auth->getSubjectTokenFetcher()->getCacheKey();
+        $scopeOrAudience = $this->auth->getAudience();
+        if (!$scopeOrAudience) {
+            $scopeOrAudience = $this->auth->getScope();
+        }
+
+        return $this->auth->getSubjectTokenFetcher()->getCacheKey() . 
+            $scopeOrAudience . 
+            $this->serviceAccountImpersonationUrl .
+            $this->auth->getSubjectTokenType() .
+            $this->workforcePoolUserProject;
     }
 
     public function getLastReceivedToken()
