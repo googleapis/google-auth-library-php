@@ -102,7 +102,7 @@ class ExternalAccountCredentials implements
             $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'];
         } else {
             //If we do not initalize this, getCacheKey throws an error.
-            $this->serviceAccountImpersonationUrl = null; 
+            $this->serviceAccountImpersonationUrl = null;
         }
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
@@ -287,7 +287,7 @@ class ExternalAccountCredentials implements
      * @return ?string;
      */
     public function getCacheKey(): ?string
-    {   
+    {
         $cacheKey = $this->auth->getSubjectTokenFetcher()->getCacheKey();
 
         if ($cacheKey === null) {
@@ -299,8 +299,8 @@ class ExternalAccountCredentials implements
             $scopeOrAudience = $this->auth->getScope();
         }
 
-        return $cacheKey . 
-            $scopeOrAudience . 
+        return $cacheKey .
+            $scopeOrAudience .
             $this->serviceAccountImpersonationUrl .
             $this->auth->getSubjectTokenType() .
             $this->workforcePoolUserProject;
