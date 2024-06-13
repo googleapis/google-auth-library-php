@@ -100,6 +100,9 @@ class ExternalAccountCredentials implements
 
         if (array_key_exists('service_account_impersonation_url', $jsonKey)) {
             $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'];
+        } else {
+            //If we do not initalize this, getCacheKey throws an error.
+            $this->serviceAccountImpersonationUrl = null; 
         }
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
@@ -284,13 +287,19 @@ class ExternalAccountCredentials implements
      * @return ?string;
      */
     public function getCacheKey(): ?string
-    {
+    {   
+        $cacheKey = $this->auth->getSubjectTokenFetcher()->getCacheKey();
+
+        if ($cacheKey === null) {
+            return null;
+        }
+
         $scopeOrAudience = $this->auth->getAudience();
         if (!$scopeOrAudience) {
             $scopeOrAudience = $this->auth->getScope();
         }
 
-        return $this->auth->getSubjectTokenFetcher()->getCacheKey() . 
+        return $cacheKey . 
             $scopeOrAudience . 
             $this->serviceAccountImpersonationUrl .
             $this->auth->getSubjectTokenType() .

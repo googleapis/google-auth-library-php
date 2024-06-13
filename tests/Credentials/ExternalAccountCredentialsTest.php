@@ -526,7 +526,7 @@ class ExternalAccountCredentialsTest extends TestCase
         $this->baseCreds['credential_source'] = ['file' => 'fakeFile'];
         $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
         $cacheKey = $credentials->getCacheKey();
-        $expectedKey = 'fakeFile';
+        $expectedKey = 'fakeFilescope1';
         $this->assertEquals($expectedKey, $cacheKey);
     }
 
@@ -542,7 +542,7 @@ class ExternalAccountCredentialsTest extends TestCase
         $this->baseCreds['audience'] = 'audience1';
         $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
         $cacheKey = $credentials->getCacheKey();
-        $expectedKey = '12345:aws.us-east.token.com:aws.us-east.com:us-east:audience1';
+        $expectedKey = '12345aws.us-east.token.comaws.us-east.comus-eastaudience1';
         $this->assertEquals($expectedKey, $cacheKey);
     }
 
@@ -558,7 +558,7 @@ class ExternalAccountCredentialsTest extends TestCase
 
         $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
         $cacheKey = $credentials->getCacheKey();
-        $expectedKey = 'fakeUrl:keyShouldBeHere';
+        $expectedKey = 'fakeUrlscope1';
         $this->assertEquals($expectedKey, $cacheKey);
     }
     
