@@ -297,20 +297,20 @@ $memoryCache = new MemoryCacheItemPool;
 
 // Get the credentials
 // From here, the credentials will cache the access token
-$middleware = ApplicationDefaultCredentials::getCredentials($targetAudience, cache: $memoryCache);
+$middleware = ApplicationDefaultCredentials::getCredentials($scope, cache: $memoryCache);
 ```
 
 ### Integrating with a third party cache
 You can use a third party that follows the `PSR-6` interface of your choice.
 
 ```php
-use Symphony\Component\Cache\Adapter\FukeststenAdapter;
+use Symphony\Component\Cache\Adapter\FileststenAdapter;
 
 // Create the cache instance
 $filesystemCache = new FilesystemAdapter();
 
 // Create Get the credentials
-$middleware = ApplicationDefaultCredentials::getCredentials($targetAudience, cache: $filesystemCache);
+$credentials = ApplicationDefaultCredentials::getCredentials($targetAudience, cache: $filesystemCache);
 ```
 
 ## License
