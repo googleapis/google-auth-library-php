@@ -62,10 +62,12 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      *   either as an Array or as a space-delimited String.
      * @param string|array<mixed> $jsonKey JSON credential file path or JSON credentials
      *   as an associative array
+     * @param string $targetAudience The audience for the ID token.
      */
     public function __construct(
         $scope,
-        $jsonKey
+        $jsonKey,
+        $targetAudience = null
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -91,12 +93,17 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
                 'json key is missing the refresh_token field'
             );
         }
+        $additionalClaims = [];
+        if ($targetAudience) {
+            $additionalClaims = ['target_audience' => $targetAudience];
+        }
         $this->auth = new OAuth2([
             'clientId' => $jsonKey['client_id'],
             'clientSecret' => $jsonKey['client_secret'],
             'refresh_token' => $jsonKey['refresh_token'],
             'scope' => $scope,
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
+            'additionalClaims' => $additionalClaims,
         ]);
         if (array_key_exists('quota_project_id', $jsonKey)) {
             $this->quotaProject = (string) $jsonKey['quota_project_id'];
