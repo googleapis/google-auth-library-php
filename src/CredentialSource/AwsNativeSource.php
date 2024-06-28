@@ -329,6 +329,21 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     }
 
     /**
+     * Gets the unique key for caching
+     * For AwsNativeSource the values are:
+     * <imdsv2SessionTokenUrl><securityCredentialsUrl><regionUrl><regionalCredVerificationUrl>
+     *
+     * @return string
+     */
+    public function getCacheKey(): string
+    {
+        return $this->imdsv2SessionTokenUrl .
+            $this->securityCredentialsUrl .
+            $this->regionUrl .
+            $this->regionalCredVerificationUrl;
+    }
+
+    /**
      * Return HMAC hash in binary string
      */
     private static function hmacSign(string $key, string $msg): string

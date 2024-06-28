@@ -100,6 +100,9 @@ class ExternalAccountCredentials implements
 
         if (array_key_exists('service_account_impersonation_url', $jsonKey)) {
             $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'];
+        } else {
+            //If we do not initalize this, getCacheKey throws an error.
+            $this->serviceAccountImpersonationUrl = null;
         }
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
@@ -276,9 +279,25 @@ class ExternalAccountCredentials implements
         return $stsToken;
     }
 
-    public function getCacheKey()
+    /**
+     * Get the cache token key for the credentials.
+     * The cache token key format depends on the type of source
+     * was used to configure these credentials.
+     *
+     * @return ?string;
+     */
+    public function getCacheKey(): ?string
     {
-        return $this->auth->getCacheKey();
+        $scopeOrAudience = $this->auth->getAudience();
+        if (!$scopeOrAudience) {
+            $scopeOrAudience = $this->auth->getScope();
+        }
+
+        return $this->auth->getSubjectTokenFetcher()->getCacheKey() .
+            $scopeOrAudience .
+            $this->serviceAccountImpersonationUrl .
+            $this->auth->getSubjectTokenType() .
+            $this->workforcePoolUserProject;
     }
 
     public function getLastReceivedToken()

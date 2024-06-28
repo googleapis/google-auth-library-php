@@ -72,4 +72,15 @@ class FileSource implements ExternalAccountCredentialSourceInterface
 
         return $contents;
     }
+
+    /**
+     * Gets the unique key for caching.
+     * The CacheKey is the File name provided on the constructor.
+     *
+     * @return string
+     */
+    public function getCacheKey(): ?string
+    {
+        return $this->file;
+    }
 }
