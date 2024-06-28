@@ -482,7 +482,7 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
         $scope = ['scope/1', 'scope/2'];
         $sa = new ServiceAccountJwtAccessCredentials($testJson, $scope);
 
-        $expectedKey = $testJson['client_email'] . ':' . implode(' ', $scope);
+        $expectedKey = $testJson['client_email'] . implode(' ', $scope);
         $this->assertEquals($expectedKey, $sa->getCacheKey());
     }
 

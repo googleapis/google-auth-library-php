@@ -235,7 +235,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
         $key = $this->auth->getIssuer() . $scopeOrAudience;
         if ($sub = $this->auth->getSub()) {
-            $key .= ':' . $sub;
+            $key .= $sub;
         }
 
         return $key;
