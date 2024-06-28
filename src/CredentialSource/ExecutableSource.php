@@ -102,7 +102,7 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
 
     /**
      * Gets the unique key for caching
-     * This source is considered non cacheable so returns null.
+     * The format for this source is <command><outputFile>
      *
      * @return ?string
      */
