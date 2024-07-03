@@ -102,13 +102,13 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
 
     /**
      * Gets the unique key for caching
-     * The format for this source is <command><outputFile>
+     * The format for this source is command.outputFile
      *
      * @return ?string
      */
     public function getCacheKey(): ?string
     {
-        return $this->command . $this->outputFile;
+        return $this->command . '.' . $this->outputFile;
     }
 
     /**

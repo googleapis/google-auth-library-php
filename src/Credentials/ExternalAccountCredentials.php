@@ -282,7 +282,9 @@ class ExternalAccountCredentials implements
     /**
      * Get the cache token key for the credentials.
      * The cache token key format depends on the type of source
-     * was used to configure these credentials.
+     * The format for the Cache Key one of the following:
+     * FetcherCacheKey.scope.tokenType.workforcePoolUserProject
+     * FetcherCacheKey.audience.tokenType.workforcePoolUserProject
      *
      * @return ?string;
      */
@@ -294,10 +296,10 @@ class ExternalAccountCredentials implements
         }
 
         return $this->auth->getSubjectTokenFetcher()->getCacheKey() .
-            $scopeOrAudience .
-            $this->serviceAccountImpersonationUrl .
-            $this->auth->getSubjectTokenType() .
-            $this->workforcePoolUserProject;
+            '.' . $scopeOrAudience .
+            $this->concatenateValueOrEmpty($this->serviceAccountImpersonationUrl) .
+            $this->concatenateValueOrEmpty($this->auth->getSubjectTokenType()) .
+            $this->concatenateValueOrEmpty($this->workforcePoolUserProject);
     }
 
     public function getLastReceivedToken()
@@ -377,5 +379,14 @@ class ExternalAccountCredentials implements
     {
         $regex = '#//iam\.googleapis\.com/locations/[^/]+/workforcePools/#';
         return preg_match($regex, $this->auth->getAudience()) === 1;
+    }
+
+    private function concatenateValueOrEmpty(string|null $value): string
+    {
+        if (!$value) {
+            return '';
+        }
+
+        return '.' . $value;
     }
 }

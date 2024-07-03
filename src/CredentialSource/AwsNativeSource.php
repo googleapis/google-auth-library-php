@@ -331,16 +331,16 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     /**
      * Gets the unique key for caching
      * For AwsNativeSource the values are:
-     * <imdsv2SessionTokenUrl><securityCredentialsUrl><regionUrl><regionalCredVerificationUrl>
+     * imdsv2SessionTokenUrl.securityCredentialsUrl.regionUrl.regionalCredVerificationUrl
      *
      * @return string
      */
     public function getCacheKey(): string
     {
-        return $this->imdsv2SessionTokenUrl .
-            $this->securityCredentialsUrl .
-            $this->regionUrl .
-            $this->regionalCredVerificationUrl;
+        return ($this->imdsv2SessionTokenUrl ? $this->imdsv2SessionTokenUrl : '') .
+            '.' . ($this->securityCredentialsUrl ? $this->securityCredentialsUrl : '') .
+            '.' . $this->regionUrl .
+            '.' . $this->regionalCredVerificationUrl;
     }
 
     /**

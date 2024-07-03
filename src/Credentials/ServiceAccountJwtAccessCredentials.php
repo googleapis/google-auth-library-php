@@ -168,8 +168,8 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
     /**
      * Return the cache key for the credentials.
      * The format for the Cache Key one of the following:
-     * <ClientEmail><Scope>
-     * <ClientEmail><Audience>
+     * ClientEmail.Scope
+     * ClientEmail.Audience
      *
      * @return string
      */
@@ -180,7 +180,7 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
             $scopeOrAudience = $this->auth->getAudience();
         }
 
-        return $this->auth->getIssuer() . $scopeOrAudience;
+        return $this->auth->getIssuer() . '.' . $scopeOrAudience;
     }
 
     /**
