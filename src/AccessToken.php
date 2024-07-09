@@ -30,6 +30,7 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
@@ -118,10 +119,26 @@ class AccessToken
         $certsLocation = $options['certsLocation'] ?? self::FEDERATED_SIGNON_CERT_URL;
         $throwException = $options['throwException'] ?? false; // for backwards compatibility
 
-        // Check signature against each available cert.
+        // If we're retrieving a local file, just grab it.
+        $httpHandler = null;
+        if (strpos($certsLocation, 'http') !== 0) {
+            if (!file_exists($certsLocation)) {
+                throw new InvalidArgumentException(sprintf(
+                    'Failed to retrieve verification certificates from path: %s.',
+                    $certsLocation
+                ));
+            }
+
+            $httpHandler = function () use ($certsLocation) {
+                return new Response(200, [
+                    'cache-control' => 'public, max-age=1000',
+                ], file_get_contents($certsLocation));
+            };
+        }
+
         $keySet = new CachedKeySet(
             $certsLocation,
-            new class($this->httpHandler) implements ClientInterface {
+            new class($httpHandler ?: $this->httpHandler) implements ClientInterface {
                 public function __construct(private $httpHandler)
                 {
                 }

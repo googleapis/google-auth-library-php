@@ -321,11 +321,7 @@ class AccessTokenTest extends TestCase
         });
 
         $token = new AccessToken(
-            function ($request) {
-                return new Response(200, [
-                    'cache-control' => 'public, max-age=1000',
-                ], file_get_contents((string)$request->getUri()));
-            },
+            null,
             $this->cache->reveal(),
             $jwt
         );
