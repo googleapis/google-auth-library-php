@@ -98,7 +98,7 @@ class UrlSource implements ExternalAccountCredentialSourceInterface
     /**
      * Get the cache key for the credentials.
      * The format for the cache key is:
-     * URL + subjectTokenFieldName
+     * URL
      *
      * @return ?string
      */

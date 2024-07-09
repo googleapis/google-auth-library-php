@@ -102,7 +102,8 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
 
     /**
      * Gets the unique key for caching
-     * The format for this source is command.outputFile
+     * The format for the cache key is:
+     * Command.OutputFile
      *
      * @return ?string
      */

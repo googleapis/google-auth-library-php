@@ -282,9 +282,9 @@ class ExternalAccountCredentials implements
     /**
      * Get the cache token key for the credentials.
      * The cache token key format depends on the type of source
-     * The format for the Cache Key one of the following:
-     * FetcherCacheKey.scope.tokenType.workforcePoolUserProject
-     * FetcherCacheKey.audience.tokenType.workforcePoolUserProject
+     * The format for the cache key one of the following:
+     * FetcherCacheKey.Scope.[ServiceAccount].[TokenType].[WorkforcePoolUserProject]
+     * FetcherCacheKey.Audience.[ServiceAccount].[TokenType].[WorkforcePoolUserProject]
      *
      * @return ?string;
      */

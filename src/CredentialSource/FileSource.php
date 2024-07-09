@@ -75,7 +75,8 @@ class FileSource implements ExternalAccountCredentialSourceInterface
 
     /**
      * Gets the unique key for caching.
-     * The CacheKey is the File name provided on the constructor.
+     * The format for the cache key one of the following:
+     * Filename
      *
      * @return string
      */

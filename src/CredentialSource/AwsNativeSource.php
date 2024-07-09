@@ -331,7 +331,7 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     /**
      * Gets the unique key for caching
      * For AwsNativeSource the values are:
-     * imdsv2SessionTokenUrl.securityCredentialsUrl.regionUrl.regionalCredVerificationUrl
+     * Imdsv2SessionTokenUrl.SecurityCredentialsUrl.RegionUrl.RegionalCredVerificationUrl
      *
      * @return string
      */
