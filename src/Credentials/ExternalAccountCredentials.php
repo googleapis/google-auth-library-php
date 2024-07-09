@@ -98,12 +98,7 @@ class ExternalAccountCredentials implements
             );
         }
 
-        if (array_key_exists('service_account_impersonation_url', $jsonKey)) {
-            $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'];
-        } else {
-            //If we do not initalize this, getCacheKey throws an error.
-            $this->serviceAccountImpersonationUrl = null;
-        }
+        $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'] ?? null;
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
         $this->workforcePoolUserProject = $jsonKey['workforce_pool_user_project'] ?? null;
@@ -297,9 +292,9 @@ class ExternalAccountCredentials implements
 
         return $this->auth->getSubjectTokenFetcher()->getCacheKey() .
             '.' . $scopeOrAudience .
-            $this->concatenateValueOrEmpty($this->serviceAccountImpersonationUrl) .
-            $this->concatenateValueOrEmpty($this->auth->getSubjectTokenType()) .
-            $this->concatenateValueOrEmpty($this->workforcePoolUserProject);
+            '.' . ($this->serviceAccountImpersonationUrl ?? '') .
+            '.' . ($this->auth->getSubjectTokenType() ?? '') .
+            '.' . ($this->workforcePoolUserProject ?? '');
     }
 
     public function getLastReceivedToken()
@@ -379,14 +374,5 @@ class ExternalAccountCredentials implements
     {
         $regex = '#//iam\.googleapis\.com/locations/[^/]+/workforcePools/#';
         return preg_match($regex, $this->auth->getAudience()) === 1;
-    }
-
-    private function concatenateValueOrEmpty(string|null $value): string
-    {
-        if (!$value) {
-            return '';
-        }
-
-        return '.' . $value;
     }
 }

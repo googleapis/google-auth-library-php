@@ -337,8 +337,8 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
      */
     public function getCacheKey(): string
     {
-        return ($this->imdsv2SessionTokenUrl ? $this->imdsv2SessionTokenUrl : '') .
-            '.' . ($this->securityCredentialsUrl ? $this->securityCredentialsUrl : '') .
+        return ($this->imdsv2SessionTokenUrl ?? '') .
+            '.' . ($this->securityCredentialsUrl ?? '') .
             '.' . $this->regionUrl .
             '.' . $this->regionalCredVerificationUrl;
     }

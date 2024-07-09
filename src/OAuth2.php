@@ -710,7 +710,7 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @return null|ExternalAccountCredentialSourceInterface
      */
-    public function getSubjectTokenFetcher(): null|ExternalAccountCredentialSourceInterface
+    public function getSubjectTokenFetcher(): ?ExternalAccountCredentialSourceInterface
     {
         return $this->subjectTokenFetcher;
     }
