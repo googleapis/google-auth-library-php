@@ -212,10 +212,9 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
      *
      * In this case, it returns the keyfile's private_key key, needed for JWT signing.
      *
-     * @param callable $httpHandler Not used by this credentials type.
      * @return string
      */
-    public function getPrivateKey(callable $httpHandler = null)
+    public function getPrivateKey()
     {
         return $this->auth->getSigningKey();
     }
