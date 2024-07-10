@@ -683,6 +683,8 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
+     * @deprecated
+     *
      * Obtains a key that can used to cache the results of #fetchAuthToken.
      *
      * The key is derived from the scopes.
@@ -701,6 +703,16 @@ class OAuth2 implements FetchAuthTokenInterface
 
         // If scope has not set, return null to indicate no caching.
         return null;
+    }
+
+    /**
+     * Gets this instance's SubjectTokenFetcher
+     *
+     * @return null|ExternalAccountCredentialSourceInterface
+     */
+    public function getSubjectTokenFetcher(): ?ExternalAccountCredentialSourceInterface
+    {
+        return $this->subjectTokenFetcher;
     }
 
     /**
@@ -1018,6 +1030,16 @@ class OAuth2 implements FetchAuthTokenInterface
         }
 
         return implode(' ', $this->scope);
+    }
+
+    /**
+     * Gets the subject token type
+     *
+     * @return ?string
+     */
+    public function getSubjectTokenType(): ?string
+    {
+        return $this->subjectTokenType;
     }
 
     /**

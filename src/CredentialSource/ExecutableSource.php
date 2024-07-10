@@ -101,6 +101,18 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
     }
 
     /**
+     * Gets the unique key for caching
+     * The format for the cache key is:
+     * Command.OutputFile
+     *
+     * @return ?string
+     */
+    public function getCacheKey(): ?string
+    {
+        return $this->command . '.' . $this->outputFile;
+    }
+
+    /**
      * @param callable $httpHandler unused.
      * @return string
      * @throws RuntimeException if the executable is not allowed to run.

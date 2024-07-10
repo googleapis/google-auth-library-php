@@ -489,11 +489,15 @@ class GCECredentials extends CredentialsLoader implements
     }
 
     /**
+     * Returns the Cache Key for the credential token.
+     * The format for the cache key is:
+     * TokenURI
+     *
      * @return string
      */
     public function getCacheKey()
     {
-        return self::cacheKey;
+        return $this->tokenUri;
     }
 
     /**
