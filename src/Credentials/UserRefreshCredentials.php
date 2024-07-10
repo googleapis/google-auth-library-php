@@ -130,11 +130,21 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     }
 
     /**
+     * Return the Cache Key for the credentials.
+     * The format for the Cache key is one of the following:
+     * ClientId.Scope
+     * ClientId.Audience
+     *
      * @return string
      */
     public function getCacheKey()
     {
-        return $this->auth->getClientId() . ':' . $this->auth->getCacheKey();
+        $scopeOrAudience = $this->auth->getScope();
+        if (!$scopeOrAudience) {
+            $scopeOrAudience = $this->auth->getAudience();
+        }
+
+        return $this->auth->getClientId() . '.' . $scopeOrAudience;
     }
 
     /**

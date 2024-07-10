@@ -54,7 +54,7 @@ class ServiceAccountCredentialsTest extends TestCase
         );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey(),
+            $testJson['client_email'] . '.' . implode(' ', $scope),
             $sa->getCacheKey()
         );
     }
@@ -71,7 +71,7 @@ class ServiceAccountCredentialsTest extends TestCase
         );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
+            $testJson['client_email'] . '.' . implode(' ', $scope) . '.' . $sub,
             $sa->getCacheKey()
         );
     }
@@ -90,7 +90,7 @@ class ServiceAccountCredentialsTest extends TestCase
 
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
+            $testJson['client_email'] . '.' . implode(' ', $scope) . '.' . $sub,
             $sa->getCacheKey()
         );
     }

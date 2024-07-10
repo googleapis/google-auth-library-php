@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.41.0](https://github.com/googleapis/google-auth-library-php/compare/v1.40.0...v1.41.0) (2024-07-10)
+
+
+### Features
+
+* Change getCacheKey implementation for more unique keys ([#560](https://github.com/googleapis/google-auth-library-php/issues/560)) ([a35c4db](https://github.com/googleapis/google-auth-library-php/commit/a35c4dbb52e01faedacd09d23634939ced4a8a63))
+
 ## [1.40.0](https://github.com/googleapis/google-auth-library-php/compare/v1.39.0...v1.40.0) (2024-05-31)
 
 
