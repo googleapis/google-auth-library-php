@@ -369,6 +369,13 @@ class ServiceAccountCredentialsTest extends TestCase
         $this->assertEquals($testJson['client_email'], $sa->getClientName());
     }
 
+    public function testReturnsPrivateKey()
+    {
+        $testJson = $this->createTestJson();
+        $sa = new ServiceAccountCredentials('scope/1', $testJson);
+        $this->assertEquals($testJson['private_key'], $sa->getPrivateKey());
+    }
+
     public function testGetProjectId()
     {
         $testJson = $this->createTestJson();
