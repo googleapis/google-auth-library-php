@@ -304,7 +304,9 @@ $middleware = ApplicationDefaultCredentials::getCredentials($scope, cache: $memo
 You can use a third party that follows the `PSR-6` interface of your choice.
 
 ```php
-use Symphony\Component\Cache\Adapter\FileststenAdapter;
+// run "composer require symfony/cache"
+use Google\Auth\ApplicationDefaultCredentials;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 // Create the cache instance
 $filesystemCache = new FilesystemAdapter();
