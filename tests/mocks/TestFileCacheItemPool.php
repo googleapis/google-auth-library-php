@@ -17,7 +17,6 @@
 
 namespace Google\Auth\Tests;
 
-use Google\Auth\Cache\Item;
 use Google\Auth\Cache\TypedItem;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -69,8 +68,7 @@ final class TestFileCacheItemPool implements CacheItemPoolInterface
             if ($this->hasItem($key)) {
                 $items[$key] = unserialize(file_get_contents($this->cacheDir . '/' . $key));
             } else {
-                $itemClass = \PHP_VERSION_ID >= 80000 ? TypedItem::class : Item::class;
-                $items[$key] = new $itemClass($key);
+                $items[$key] = new TypedItem($key);
             }
         }
 

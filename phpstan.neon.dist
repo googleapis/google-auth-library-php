@@ -5,5 +5,3 @@ parameters:
     - src
     featureToggles:
       disableRuntimeReflectionProvider: true
-    excludePaths:
-    - src/Cache/Item.php
