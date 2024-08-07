@@ -91,25 +91,13 @@ class LogEvent
      * 
      * @param null|string $startTime (Optional) Parameter to calculate the latency
      */
-    public function __construct(null|string $startTime)
+    public function __construct(null|string $startTime = null)
     {
         $this->timestamp = date(DATE_RFC3339);
 
         if ($startTime) {
-            $this->latency = $this->calculateAndSetLatency($startTime);
+            // We should check for false in here
+            $this->latency = (int)strtotime($this->timestamp) - (int)strtotime($startTime); 
         }
-    }
-
-    /**
-     * Function that sets the latency by sustracting to the timestamp value
-     * the startTime value
-     * 
-     * @param string $startTime An RFC3339 formatted timestamp
-     * 
-     * @return void
-     */
-    public function calculateAndSetLatency(string $startTime): void
-    {
-        $this->latency = strtotime($this->timestamp) - $startTime;
     }
 }

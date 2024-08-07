@@ -366,9 +366,9 @@ class ApplicationDefaultCredentials
      */
     public static function getDefaultLogger(): null|LoggerInterface
     {
-        $loggingFlag = strtolower(getenv(self::SDK_DEBUG_FLAG));
+        $loggingFlag = getenv(self::SDK_DEBUG_FLAG);
 
-        if ($loggingFlag !== 'true') {
+        if (!$loggingFlag || strtolower(getenv((string) $loggingFlag)) !== 'true') {
             return null;
         }
 

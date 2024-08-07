@@ -16,6 +16,7 @@
  */
 namespace Google\Auth\HttpHandler;
 
+use Google\Auth\Logger\LogEvent;
 use Google\Auth\Logger\LoggingTrait;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\RequestInterface;
@@ -67,15 +68,29 @@ class Guzzle6HttpHandler
      */
     public function async(RequestInterface $request, array $options = [])
     {
-        $startTime = null;
+        $requestEvent = null;
         
         if ($this->logger) {
-            $startTime = $this->logHTTPRequest($request, $options['retryAttempt'] ?? 0);
+            $requestEvent = new LogEvent();
+
+            $requestEvent->method = $request->getMethod();
+            $requestEvent->url = $request->getUri()->__toString();
+            $requestEvent->headers = $request->getHeaders();
+            $requestEvent->payload = json_encode($request->getBody()->getContents());
+            $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
+
+            $this->logRequest($requestEvent);
         }
         
-        return $this->client->sendAsync($request, $options)->then(function(ResponseInterface $response) use ($startTime) {
+        return $this->client->sendAsync($request, $options)->then(function(ResponseInterface $response) use ($requestEvent) {
             if ($this->logger) {
-                $this->logHTTPResponse($response, $startTime);
+                $responseEvent = new LogEvent($requestEvent->timestamp);
+
+                $responseEvent->headers = $response->getHeaders();
+                $responseEvent->payload = json_encode($response->getBody()->getContents());
+                $response->status = $response->getStatusCode();
+
+                $this->logResponse($responseEvent);
             }
 
             return $response;

@@ -23,10 +23,10 @@ use Psr\Http\Message\ResponseInterface;
 
 trait LoggingTrait
 {
-     /**
-     * @param LogEvent
+    /**
+     * @param LogEvent $event
      *
-     * @return string
+     * @return void
      */
     private function logRequest(LogEvent $event): void
     {
@@ -54,7 +54,7 @@ trait LoggingTrait
     }
 
     /**
-     * @param LogEvent $response
+     * @param LogEvent $event
      *
      * @return void
      */
@@ -84,8 +84,8 @@ trait LoggingTrait
     }
 
     /**
-     * @param array $headers
-     * @return null|array
+     * @param array<string> $headers
+     * @return null|array<string>
      */
     private function getJwtToken(array $headers): null|array
     {

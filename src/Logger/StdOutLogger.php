@@ -42,6 +42,9 @@ use Stringable;
  */
 class StdOutLogger implements LoggerInterface
 {
+    /**
+     * @var array<string,int>
+     */
     private array $levelMapping = [
         LogLevel::EMERGENCY => 7,
         LogLevel::ALERT => 6,
