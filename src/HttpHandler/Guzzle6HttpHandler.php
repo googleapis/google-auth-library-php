@@ -16,8 +16,8 @@
  */
 namespace Google\Auth\HttpHandler;
 
+use Google\Auth\Logger\LoggingTrait;
 use GuzzleHttp\ClientInterface;
-use LoggingTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\log\LoggerInterface;

@@ -17,8 +17,6 @@
 namespace Google\Auth\HttpHandler;
 
 use Google\Auth\ApplicationDefaultCredentials;
-use Google\Auth\Logger;
-use Google\Auth\LogMiddleware;
 use GuzzleHttp\BodySummarizer;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
