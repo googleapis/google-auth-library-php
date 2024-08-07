@@ -72,7 +72,7 @@ use Psr\Log\LoggerInterface;
 class ApplicationDefaultCredentials
 {
     private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_DEBUG_LOGGING';
-    
+
     /**
      * @deprecated
      *
@@ -162,7 +162,6 @@ class ApplicationDefaultCredentials
         $quotaProject = null,
         $defaultScope = null,
         string $universeDomain = null,
-        LoggerInterface $logger = null,
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -175,7 +174,7 @@ class ApplicationDefaultCredentials
                 HttpClientCache::setHttpClient($client);
             }
 
-            $httpHandler = HttpHandlerFactory::build($client, $logger);
+            $httpHandler = HttpHandlerFactory::build($client);
         }
 
         if (is_null($quotaProject)) {

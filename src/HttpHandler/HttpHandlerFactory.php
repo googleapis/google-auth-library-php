@@ -16,6 +16,7 @@
  */
 namespace Google\Auth\HttpHandler;
 
+use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Logger;
 use Google\Auth\LogMiddleware;
 use GuzzleHttp\BodySummarizer;
@@ -54,6 +55,10 @@ class HttpHandlerFactory
             $version = ClientInterface::MAJOR_VERSION;
         } elseif (defined('GuzzleHttp\ClientInterface::VERSION')) {
             $version = (int) substr(ClientInterface::VERSION, 0, 1);
+        }
+
+        if (!$logger) {
+            $logger = ApplicationDefaultCredentials::getDefaultLogger();
         }
 
         switch ($version) {
