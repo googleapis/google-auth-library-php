@@ -24,147 +24,63 @@ use Psr\Http\Message\ResponseInterface;
 trait LoggingTrait
 {
      /**
-     * @param RequestInterface $request
+     * @param LogEvent
      *
      * @return string
      */
-    private function logHTTPRequest(RequestInterface $request, int $retryAttempt = 0): string
+    private function logRequest(LogEvent $event): void
     {
-        $timestamp = date(DATE_RFC3339);
+        $timestamp = $event->timestamp;
 
         $debugEvent = [
             'timestamp' => $timestamp,
             'severity' => 'DEBUG', //Perhaps have something like Logger::debug
-            'jsonPayload' => [
-                'request.method' => $request->getMethod(),
-                'request.url' => $request->getUri(),
-                'request.headers' => $request->getHeaders(),
-                'request.payload' => $request->getBody()
-            ]
         ];
 
-        $jwtToken = $this->getJwtToken($request->getHeaders());
+        $jsonPayload = [
+            'request.method' => $event->method,
+            'request.url' => $event->url,
+            'request.headers' => $event->headers,
+            'request.payload' => $event->payload,
+            'request.rpcName' => $event->rpcName,
+            'jwt' => $this->getJwtToken($event->headers),
+            'retryAttempt' => $event->retryAttempt
+        ];
 
-        if ($jwtToken) {
-            $debugEvent['jsonPayload']['JWT'] = $jwtToken;
-        }
+        // Filters out all the falsey values
+        $jsonPayload = array_filter($jsonPayload);
 
-        if ($retryAttempt) {
-            $debugEvent['jsonPayload']['retryAttempt'] = $retryAttempt;
-        }
-
-        $this->logger->debug(json_encode($debugEvent));
-
-        return $timestamp;
+        $this->logger->debug((string)json_encode($debugEvent));
     }
 
     /**
-     * @param ResponseInterface $response
+     * @param LogEvent $response
      *
      * @return void
      */
-    private function logHTTPResponse(ResponseInterface $response, string $startTime): void
+    private function logResponse(LogEvent $event): void
     {
-        $timestamp = date(DATE_RFC3339);
-        $latency = strtotime($timestamp) - strtotime($startTime);
-
         $debugEvent = [
-            'timestamp' => $timestamp,
+            'timestamp' => $event->timestamp,
             'severity' => 'DEBUG', //Perhaps have something like Logger::debug
             'jsonPayload' => [
-                'response.headers' => $response->getHeaders(),
-                'response.payload' => $response->getBody(),
-                'latency' => $latency,
+                'response.headers' => $event->headers,
+                'response.payload' => $event->payload,
+                'latency' => $event->latency,
             ]
         ];
 
-        $this->logger->debug(json_encode($debugEvent));
+        $this->logger->debug((string)json_encode($debugEvent));
 
         $infoEvent = [
-            'timestamp' => $timestamp,
+            'timestamp' => $event->timestamp,
             'severity' => 'INFO', //Perhaps have something like Logger::debug
             'jsonPayload' => [
-                'response.status' => $response->getStatusCode()
+                'response.status' => $event->status
             ]
         ];
 
-        $this->logger->info(json_encode($infoEvent));
-    }
-
-    /**
-     * Logs a GRPC call request
-     * 
-     * @param Call $call
-     * @param array $headers
-     *
-     * @return string
-     */
-    private function logGRPCRequest(Call $call, array $headers, int $retryAttempt = 0): string
-    {
-        $timestamp = date(DATE_RFC3339);
-
-        $debugEvent = [
-            'timestamp' => $timestamp,
-            'severity' => 'DEBUG',
-            'jsonPayload' => [
-                'request.rpcName' => $call->getMethod(),
-                'request.headers' => $headers,
-                'request.payload' => $call->getMessage()
-            ]
-        ];
-
-        $jwtToken = $this->getJwtToken($headers);
-
-        if ($jwtToken) {
-            $debugEvent['jsonPayload']['JWT'] = $jwtToken;
-        }
-
-        if ($retryAttempt) {
-            $debugEvent['jsonPayload']['retryAttempt'] = $retryAttempt;
-        }
-
-        $this->logger->debug(json_encode($debugEvent));
-
-        return $timestamp;
-    }
-
-    /**
-     * @param mixed $response
-     * @param mixed $status
-     *
-     * @return void
-     */
-    private function logGRPCResponse(mixed $response, mixed $status, string $startTime): void
-    {
-        $timestamp = date(DATE_RFC3339);
-        $latency = strtotime($timestamp) - strtotime($startTime);
-
-        // In the case we have a $status->code != Code::OK
-        // from the request, we log the status only and we do not have
-        // a response.
-        if ($response) {
-            $debugEvent = [
-                'timestamp' => $timestamp,
-                'severity' => 'DEBUG',
-                'jsonPayload' => [
-                    'response.headers' => $status->metadata,
-                    'response.payload' => $response,
-                    'latency' => $latency
-                ]
-            ];
-
-            $this->logger->debug(json_encode($debugEvent));
-        }
-
-        $infoEvent = [
-            'timestamp' => $timestamp,
-            'severity' => 'INFO',
-            'jsonPayload' => [
-                'response.status' => $status->code
-            ]
-        ];
-
-        $this->logger->info(json_encode($infoEvent));
+        $this->logger->info((string)json_encode($infoEvent));
     }
 
     /**
