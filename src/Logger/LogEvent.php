@@ -83,6 +83,13 @@ class LogEvent
     public null|string $rpcName = null;
 
     /**
+     * The Service Name of the gRPC
+     * 
+     * @var null|string $serviceName
+     */
+    public null|string $serviceName;
+
+    /**
      * Creates an object with all the fields required for logging
      *
      * @param null|string $startTime (Optional) Parameter to calculate the latency
