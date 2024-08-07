@@ -50,9 +50,9 @@ class LogEvent
     /**
      * An array representation of JSON for the response or request
      *
-     * @var null|array<mixed>
+     * @var null|string
      */
-    public null|array $payload = null;
+    public null|string $payload = null;
 
     /**
      * Status code for REST or gRPC methods

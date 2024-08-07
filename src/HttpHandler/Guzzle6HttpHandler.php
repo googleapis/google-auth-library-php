@@ -76,8 +76,9 @@ class Guzzle6HttpHandler
             $requestEvent->method = $request->getMethod();
             $requestEvent->url = $request->getUri()->__toString();
             $requestEvent->headers = $request->getHeaders();
-            $requestEvent->payload = json_decode($request->getBody()->getContents()) ?: null;
+            $requestEvent->payload = $request->getBody()->getContents();
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
+            $requestEvent->serviceName = $options['serviceName'];
 
             $this->logRequest($requestEvent);
         }
