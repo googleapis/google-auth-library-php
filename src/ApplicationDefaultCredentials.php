@@ -361,8 +361,8 @@ class ApplicationDefaultCredentials
     /**
      * A function that returns the default logger if the GOOGLE_SDK_DEBUG_LOGGING
      * environment variable is set. Returns null if not.
-     * 
-     * @return null|LoggerInterface 
+     *
+     * @return null|LoggerInterface
      */
     public static function getDefaultLogger(): null|LoggerInterface
     {

@@ -76,18 +76,18 @@ class Guzzle6HttpHandler
             $requestEvent->method = $request->getMethod();
             $requestEvent->url = $request->getUri()->__toString();
             $requestEvent->headers = $request->getHeaders();
-            $requestEvent->payload = json_encode($request->getBody()->getContents()) ?: null;
+            $requestEvent->payload = json_decode($request->getBody()->getContents()) ?: null;
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
 
             $this->logRequest($requestEvent);
         }
         
-        return $this->client->sendAsync($request, $options)->then(function(ResponseInterface $response) use ($requestEvent) {
+        return $this->client->sendAsync($request, $options)->then(function (ResponseInterface $response) use ($requestEvent) {
             if ($this->logger) {
                 $responseEvent = new LogEvent($requestEvent->timestamp);
 
                 $responseEvent->headers = $response->getHeaders();
-                $responseEvent->payload = json_encode($response->getBody()->getContents()) ?: null;
+                $responseEvent->payload = json_decode($response->getBody()->getContents()) ?: null;
                 $responseEvent->status = $response->getStatusCode();
 
                 $this->logResponse($responseEvent);

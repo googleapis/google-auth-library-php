@@ -17,10 +17,6 @@
 
 namespace Google\Auth\Logger;
 
-use Google\ApiCore\Call;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
-
 trait LoggingTrait
 {
     /**

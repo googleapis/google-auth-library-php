@@ -17,78 +17,74 @@
 
 namespace Google\Auth\Logger;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UriInterface;
-
 class LogEvent
 {
     /**
      * Timestamp in format RFC3339 representing when this event ocurred
-     * 
+     *
      * @var null|string
      */
     public null|string $timestamp = null;
 
     /**
      * Rest method type
-     * 
+     *
      * @var null|string
      */
     public null|string $method = null;
 
     /**
      * URL representing the rest URL endpoint
-     * 
+     *
      * @var null|string
      */
     public null|string $url = null;
 
     /**
      * An array that contains the headers for the response or request
-     * 
+     *
      * @var null|array<mixed>
      */
     public null|array $headers = null;
 
     /**
      * An array representation of JSON for the response or request
-     * 
+     *
      * @var null|array<mixed>
      */
     public null|array $payload = null;
 
     /**
      * Status code for REST or gRPC methods
-     * 
+     *
      * @var null|int|string
      */
     public null|int|string $status = null;
 
     /**
      * The latency in miliseconds
-     * 
+     *
      * @var null|int
      */
     public null|int $latency = null;
 
     /**
      * The retry attempt number
-     * 
+     *
      * @var null|int
      */
     public null|int $retryAttempt = null;
 
     /**
      * The name of the gRPC method being called
-     * 
+     *
      * @var null|string
      */
     public null|string $rpcName = null;
 
     /**
      * Creates an object with all the fields required for logging
-     * 
+     *
      * @param null|string $startTime (Optional) Parameter to calculate the latency
      */
     public function __construct(null|string $startTime = null)
@@ -97,7 +93,7 @@ class LogEvent
 
         if ($startTime) {
             // We should check for false in here
-            $this->latency = (int)strtotime($this->timestamp) - (int)strtotime($startTime); 
+            $this->latency = (int)strtotime($this->timestamp) - (int)strtotime($startTime);
         }
     }
 }
