@@ -85,7 +85,7 @@ trait LoggingTrait
 
     /**
      * @param array<string> $headers
-     * @return null|array<string>
+     * @return null|array<string,array<string,string>>
      */
     private function getJwtToken(array $headers): null|array
     {

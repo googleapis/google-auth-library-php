@@ -21,7 +21,7 @@ use Google\Auth\Logger\LoggingTrait;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\log\LoggerInterface;
+use Psr\Log\LoggerInterface;
 
 class Guzzle6HttpHandler
 {
@@ -76,7 +76,7 @@ class Guzzle6HttpHandler
             $requestEvent->method = $request->getMethod();
             $requestEvent->url = $request->getUri()->__toString();
             $requestEvent->headers = $request->getHeaders();
-            $requestEvent->payload = json_encode($request->getBody()->getContents());
+            $requestEvent->payload = json_encode($request->getBody()->getContents()) ?: null;
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
 
             $this->logRequest($requestEvent);
@@ -87,8 +87,8 @@ class Guzzle6HttpHandler
                 $responseEvent = new LogEvent($requestEvent->timestamp);
 
                 $responseEvent->headers = $response->getHeaders();
-                $responseEvent->payload = json_encode($response->getBody()->getContents());
-                $response->status = $response->getStatusCode();
+                $responseEvent->payload = json_encode($response->getBody()->getContents()) ?: null;
+                $responseEvent->status = $response->getStatusCode();
 
                 $this->logResponse($responseEvent);
             }
