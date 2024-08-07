@@ -84,7 +84,7 @@ class LogEvent
 
     /**
      * The Service Name of the gRPC
-     * 
+     *
      * @var null|string $serviceName
      */
     public null|string $serviceName;
