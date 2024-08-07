@@ -67,6 +67,8 @@ class Guzzle6HttpHandler
      */
     public function async(RequestInterface $request, array $options = [])
     {
+        $startTime = null;
+        
         if ($this->logger) {
             $startTime = $this->logHTTPRequest($request, $options['retryAttempt'] ?? 0);
         }
