@@ -23,12 +23,14 @@ use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\Logger\StdOutLogger;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\Middleware\ProxyAuthTokenMiddleware;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * ApplicationDefaultCredentials obtains the default credentials for
@@ -69,6 +71,8 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 class ApplicationDefaultCredentials
 {
+    private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_DEBUG_LOGGING';
+    
     /**
      * @deprecated
      *
@@ -157,7 +161,8 @@ class ApplicationDefaultCredentials
         CacheItemPoolInterface $cache = null,
         $quotaProject = null,
         $defaultScope = null,
-        string $universeDomain = null
+        string $universeDomain = null,
+        LoggerInterface $logger = null,
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -170,7 +175,7 @@ class ApplicationDefaultCredentials
                 HttpClientCache::setHttpClient($client);
             }
 
-            $httpHandler = HttpHandlerFactory::build($client);
+            $httpHandler = HttpHandlerFactory::build($client, $logger);
         }
 
         if (is_null($quotaProject)) {
@@ -352,5 +357,22 @@ class ApplicationDefaultCredentials
         }
 
         return (new GCECache($gceCacheConfig, $cache))->onGce($httpHandler);
+    }
+
+    /**
+     * A function that returns the default logger if the GOOGLE_SDK_DEBUG_LOGGING
+     * environment variable is set. Returns null if not.
+     * 
+     * @return null|LoggerInterface 
+     */
+    public static function getDefaultLogger(): null|LoggerInterface
+    {
+        $loggingFlag = strtolower(getenv(self::SDK_DEBUG_FLAG));
+
+        if ($loggingFlag !== 'true') {
+            return null;
+        }
+
+        return new StdOutLogger();
     }
 }

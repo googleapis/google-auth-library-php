@@ -17,22 +17,32 @@
 namespace Google\Auth\HttpHandler;
 
 use GuzzleHttp\ClientInterface;
+use LoggingTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\log\LoggerInterface;
 
 class Guzzle6HttpHandler
 {
+    use LoggingTrait;
+
     /**
      * @var ClientInterface
      */
     private $client;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param ClientInterface $client
      */
-    public function __construct(ClientInterface $client)
+    public function __construct(ClientInterface $client, LoggerInterface $logger = null)
     {
         $this->client = $client;
+        $this->logger = $logger;
     }
 
     /**
@@ -57,6 +67,16 @@ class Guzzle6HttpHandler
      */
     public function async(RequestInterface $request, array $options = [])
     {
-        return $this->client->sendAsync($request, $options);
+        if ($this->logger) {
+            $startTime = $this->logHTTPRequest($request, $options['retryAttempt'] ?? 0);
+        }
+        
+        return $this->client->sendAsync($request, $options)->then(function(ResponseInterface $response) use ($startTime) {
+            if ($this->logger) {
+                $this->logHTTPResponse($response, $startTime);
+            }
+
+            return $response;
+        });
     }
 }
