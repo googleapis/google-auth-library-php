@@ -24,16 +24,27 @@ use Psr\Cache\CacheItemPoolInterface;
 
 class FileSystemCacheItemPool implements CacheItemPoolInterface
 {
+    /**
+     * @var string
+     */
     private string $cachePath = 'cache/';
+    
+    /**
+     * @var array<CacheItemInterface>
+     */
     private array $buffer = [];
 
     /**
      * Creates a FileSystemCacheItemPool cache that stores values in local storage
-     * 
-     * @var FileSystemCacheItemPoolOptions $options
+     *
+     * @var null|FileSystemCacheItemPoolOptions $options
      */
-    public function __construct(FileSystemCacheItemPoolOptions $options = new FileSystemCacheItemPoolOptions())
+    public function __construct(null|FileSystemCacheItemPoolOptions $options = null)
     {
+        if (!$options) {
+            $options = new FileSystemCacheItemPoolOptions();
+        }
+        
         $this->cachePath = $options->cachePath;
 
         if (is_dir($this->cachePath)) {
@@ -61,11 +72,22 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
         }
 
         $serializedItem = file_get_contents($itemPath);
+
+        if ($serializedItem === false) {
+            return new TypedItem($key);
+        }
+
         return unserialize($serializedItem);
     }
 
     /**
      * {@inheritdoc}
+     * 
+     * @return iterable<CacheItemInterface> An iterable object containing all the 
+     *   A traversable collection of Cache Items keyed by the cache keys of
+     *   each item. A Cache item will be returned for each key, even if that
+     *   key is not found. However, if no keys are specified then an empty
+     *   traversable MUST be returned instead.
      */
     public function getItems(array $keys = []): iterable
     {
@@ -84,7 +106,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     public function save(CacheItemInterface $item): bool
     {
         if (!$this->validKey($item->getKey())) {
-            throw new InvalidArgumentException("The key " . $item->getKey() . " is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+            throw new InvalidArgumentException('The key ' . $item->getKey() . " is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
         }
 
         $itemPath = $this->cacheFilePath($item->getKey());
@@ -104,7 +126,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
      */
     public function hasItem(string $key): bool
     {
-       return $this->getItem($key)->isHit();
+        return $this->getItem($key)->isHit();
     }
 
     /**
@@ -126,7 +148,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
                 continue;
             }
 
-            if (!unlink($this->cachePath . "/" . $fileName)) {
+            if (!unlink($this->cachePath . '/' . $fileName)) {
                 return false;
             }
         }
@@ -201,6 +223,6 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
 
     private function validKey(string $key): bool
     {
-        return preg_match('|^[a-zA-Z0-9_\.! ]+$|', $key);
+        return (bool)preg_match('|^[a-zA-Z0-9_\.! ]+$|', $key);
     }
 }
