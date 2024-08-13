@@ -37,7 +37,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     /**
      * Creates a FileSystemCacheItemPool cache that stores values in local storage
      *
-     * @var null|FileSystemCacheItemPoolOptions $options
+     * @param null|FileSystemCacheItemPoolOptions $options
      */
     public function __construct(null|FileSystemCacheItemPoolOptions $options = null)
     {
@@ -82,8 +82,8 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
 
     /**
      * {@inheritdoc}
-     * 
-     * @return iterable<CacheItemInterface> An iterable object containing all the 
+     *
+     * @return iterable<CacheItemInterface> An iterable object containing all the
      *   A traversable collection of Cache Items keyed by the cache keys of
      *   each item. A Cache item will be returned for each key, even if that
      *   key is not found. However, if no keys are specified then an empty
