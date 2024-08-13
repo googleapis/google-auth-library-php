@@ -41,7 +41,7 @@ class FileSystemCacheItemPoolTest extends TestCase
                 continue;
             }
 
-            unlink($this->defaultCacheDirectory . "/" . $fileName);
+            unlink($this->defaultCacheDirectory . '/' . $fileName);
         }
 
         rmdir($this->defaultCacheDirectory);
@@ -84,22 +84,22 @@ class FileSystemCacheItemPoolTest extends TestCase
     {
         $items = [
             $this->getNewItem(),
-            $this->getNewItem("NewItem2"),
-            $this->getNewItem("NewItem3")
+            $this->getNewItem('NewItem2'),
+            $this->getNewItem('NewItem3')
         ];
 
         foreach ($items as $item) {
             $this->pool->save($item);
         }
 
-        $result = $this->pool->deleteItems(array_map(function(CacheItemInterface $item) {
+        $itemKeys = array_map(function (CacheItemInterface $item) {
             return $item->getKey();
-        }, $items));
+        }, $items);
+
+        $result = $this->pool->deleteItems($itemKeys);
         $this->assertTrue($result);
 
-        $result = $this->pool->deleteItems(array_map(function(CacheItemInterface $item) {
-            return $item->getKey();
-        }, $items));
+        $result = $this->pool->deleteItems($itemKeys);
         $this->assertFalse($result);
     }
 
@@ -107,15 +107,15 @@ class FileSystemCacheItemPoolTest extends TestCase
     {
         $items = [
             $this->getNewItem(),
-            $this->getNewItem("NewItem2"),
-            $this->getNewItem("NewItem3")
+            $this->getNewItem('NewItem2'),
+            $this->getNewItem('NewItem3')
         ];
 
         foreach ($items as $item) {
             $this->pool->save($item);
         }
 
-        $keys = array_map(function(CacheItemInterface $item) {
+        $keys = array_map(function (CacheItemInterface $item) {
             return $item->getKey();
         }, $items);
         array_push($keys, 'NonExistant');
