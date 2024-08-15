@@ -100,7 +100,7 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * The metadata path of the project ID.
      */
-    const UNIVERSE_DOMAIN_URI_PATH = 'v1/universe/universe_domain';
+    const UNIVERSE_DOMAIN_URI_PATH = 'v1/universe/universe-domain';
 
     /**
      * The header whose presence indicates GCE presence.
@@ -431,7 +431,7 @@ class GCECredentials extends CredentialsLoader implements
             // which might mean that it is a windows instance that is not on GCE
             return false;
         }
-        
+
         return 0 === strpos($productName, self::PRODUCT_NAME);
     }
 
