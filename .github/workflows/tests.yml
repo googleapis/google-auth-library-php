@@ -52,10 +52,10 @@ jobs:
 
     style:
       name: PHP Style Check
-      uses: github/workflows/code-standards.yml
+      uses: GoogleCloudPlatform/php-tools/.github/workflows/code-standards.yml@main
 
     staticanalysis:
       name: PHPStan Static Analysis
-      uses: .github/workflows/static-analysis.yml
+      uses: GoogleCloudPlatform/php-tools/.github/workflows/code-standards.yml@main
       with:
         autoload-file: tests/phpstan-autoload.php
