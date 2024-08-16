@@ -29,7 +29,7 @@ class FileSystemCacheItemPoolTest extends TestCase
 
     public function setUp(): void
     {
-        $this->pool = new FileSystemCacheItemPool();
+        $this->pool = new FileSystemCacheItemPool($this->defaultCacheDirectory);
     }
 
     public function tearDown(): void
