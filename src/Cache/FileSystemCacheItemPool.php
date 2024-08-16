@@ -37,7 +37,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     /**
      * Creates a FileSystemCacheItemPool cache that stores values in local storage
      *
-     * @param string $options The string representation of the path where the cache will store the serialized objects.
+     * @param string $path The string representation of the path where the cache will store the serialized objects.
      */
     public function __construct(string $path)
     {
