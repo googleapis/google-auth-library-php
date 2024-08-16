@@ -18,7 +18,6 @@
 namespace Google\Auth\Cache;
 
 use ErrorException;
-use Exception;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
@@ -102,7 +101,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     public function save(CacheItemInterface $item): bool
     {
         if (!$this->validKey($item->getKey())) {
-            throw new InvalidArgumentException('The key ' . $item->getKey() . " is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+            return false;
         }
 
         $itemPath = $this->cacheFilePath($item->getKey());
@@ -158,7 +157,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     public function deleteItem(string $key): bool
     {
         if (!$this->validKey($key)) {
-            throw new Exception("The key '$key' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+            throw new InvalidArgumentException("The key '$key' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
         }
 
         $itemPath = $this->cacheFilePath($key);
@@ -219,6 +218,6 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
 
     private function validKey(string $key): bool
     {
-        return (bool)preg_match('|^[a-zA-Z0-9_\.! ]+$|', $key);
+        return (bool)preg_match('|^[a-zA-Z0-9_\.]+$|', $key);
     }
 }

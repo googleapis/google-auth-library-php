@@ -21,11 +21,19 @@ use Google\Auth\Cache\FileSystemCacheItemPool;
 use Google\Auth\Cache\TypedItem;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemInterface;
+use Psr\Cache\InvalidArgumentException;
 
 class FileSystemCacheItemPoolTest extends TestCase
 {
     private string $defaultCacheDirectory = 'cache/';
     private FileSystemCacheItemPool $pool;
+    private array $invalidChars = [
+        '`','~','!','@','#','$',
+        '%','^','&','*','(',')',
+        '-','=','+','[',']','{',
+        '}','\\',';','\'','"','<',
+        '>',',','/',' ',
+    ];
 
     public function setUp(): void
     {
@@ -147,6 +155,71 @@ class FileSystemCacheItemPoolTest extends TestCase
 
         $this->pool->commit();
         $this->assertTrue($this->pool->getItem($item->getKey())->isHit());
+    }
+
+    public function testGetItemWithIncorrectKeyShouldThrowAnException()
+    {
+        foreach ($this->invalidChars as $char) {
+            try {
+                $item = $this->getNewItem($char);
+                $this->pool->getItem($item->getKey());
+                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
+            } catch (InvalidArgumentException $e) {
+                $this->assertTrue($e instanceof InvalidArgumentException);
+            }
+        }
+    }
+
+    public function testGetItemsWithIncorrectKeyShouldThrowAnException()
+    {
+        foreach ($this->invalidChars as $char) {
+            try {
+                $item = $this->getNewItem($char);
+                $this->pool->getItems([$item->getKey()]);
+                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
+            } catch (InvalidArgumentException $e) {
+                $this->assertTrue($e instanceof InvalidArgumentException);
+            }
+        }
+    }
+
+    public function testHasItemWithIncorrectKeyShouldThrowAnException()
+    {
+        foreach ($this->invalidChars as $char) {
+            try {
+                $item = $this->getNewItem($char);
+                $this->pool->hasItem($item->getKey());
+                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
+            } catch (InvalidArgumentException $e) {
+                $this->assertTrue($e instanceof InvalidArgumentException);
+            }
+        }
+    }
+
+    public function testDeleteItemWithIncorrectKeyShouldThrowAnException()
+    {
+        foreach ($this->invalidChars as $char) {
+            try {
+                $item = $this->getNewItem($char);
+                $this->pool->deleteItem($item->getKey());
+                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
+            } catch (InvalidArgumentException $e) {
+                $this->assertTrue($e instanceof InvalidArgumentException);
+            }
+        }
+    }
+
+    public function testDeleteItemsWithIncorrectKeyShouldThrowAnException()
+    {
+        foreach ($this->invalidChars as $char) {
+            try {
+                $item = $this->getNewItem($char);
+                $this->pool->deleteItems([$item->getKey()]);
+                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
+            } catch (InvalidArgumentException $e) {
+                $this->assertTrue($e instanceof InvalidArgumentException);
+            }
+        }
     }
 
     private function getNewItem(null|string $key = null): TypedItem
