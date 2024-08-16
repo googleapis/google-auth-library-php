@@ -25,14 +25,14 @@ use Psr\Cache\InvalidArgumentException;
 
 class FileSystemCacheItemPoolTest extends TestCase
 {
-    private string $defaultCacheDirectory = 'cache/';
+    private string $defaultCacheDirectory = '.cache';
     private FileSystemCacheItemPool $pool;
     private array $invalidChars = [
-        '`','~','!','@','#','$',
-        '%','^','&','*','(',')',
-        '-','=','+','[',']','{',
-        '}','\\',';','\'','"','<',
-        '>',',','/',' ',
+        '`', '~', '!', '@', '#', '$',
+        '%', '^', '&', '*', '(', ')',
+        '-', '=', '+', '[', ']', '{',
+        '}', '\\', ';', '\'', '"', '<',
+        '>', ',', '/', ' ',
     ];
 
     public function setUp(): void

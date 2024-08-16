@@ -26,7 +26,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     /**
      * @var string
      */
-    private string $cachePath = 'cache/';
+    private string $cachePath;
 
     /**
      * @var array<CacheItemInterface>
