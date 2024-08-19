@@ -106,9 +106,6 @@ class FileSystemCacheItemPoolTest extends TestCase
 
         $result = $this->pool->deleteItems($itemKeys);
         $this->assertTrue($result);
-
-        $result = $this->pool->deleteItems($itemKeys);
-        $this->assertFalse($result);
     }
 
     public function testGetItems()

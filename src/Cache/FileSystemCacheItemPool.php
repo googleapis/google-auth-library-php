@@ -109,7 +109,8 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
 
         $result = file_put_contents($itemPath, $serializedItem);
 
-        if (!$result) {
+        // 0 bytes write is considered a successful operation
+        if ($result === false) {
             return false;
         }
 
@@ -129,6 +130,8 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
      */
     public function clear(): bool
     {
+        $this->buffer = [];
+
         if (!is_dir($this->cachePath)) {
             return false;
         }
@@ -163,7 +166,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
         $itemPath = $this->cacheFilePath($key);
 
         if (!file_exists($itemPath)) {
-            return false;
+            return true;
         }
 
         return unlink($itemPath);
