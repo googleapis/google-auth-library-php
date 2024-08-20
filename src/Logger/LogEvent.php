@@ -99,7 +99,7 @@ class LogEvent
     /**
      * The Request id for easy trace
      *
-     * @var in $requestId;
+     * @var int $requestId;
      */
     public int $requestId;
 
