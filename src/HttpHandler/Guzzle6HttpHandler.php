@@ -69,7 +69,7 @@ class Guzzle6HttpHandler
     public function async(RequestInterface $request, array $options = [])
     {
         $requestEvent = null;
-        
+
         if ($this->logger) {
             $requestEvent = new LogEvent();
 
@@ -79,10 +79,12 @@ class Guzzle6HttpHandler
             $requestEvent->payload = $request->getBody()->getContents();
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
             $requestEvent->serviceName = $options['serviceName'];
+            $requestEvent->clientId = $options['clientId'];
+            $requestEvent->requestId = spl_object_id($request);
 
             $this->logRequest($requestEvent);
         }
-        
+
         return $this->client->sendAsync($request, $options)->then(function (ResponseInterface $response) use ($requestEvent) {
             if ($this->logger) {
                 $responseEvent = new LogEvent($requestEvent->timestamp);
@@ -90,6 +92,8 @@ class Guzzle6HttpHandler
                 $responseEvent->headers = $response->getHeaders();
                 $responseEvent->payload = json_decode($response->getBody()->getContents()) ?: null;
                 $responseEvent->status = $response->getStatusCode();
+                $responseEvent->clientId = $requestEvent->clientId;
+                $responseEvent->requestId = $requestEvent->requestId;
 
                 $this->logResponse($responseEvent);
             }

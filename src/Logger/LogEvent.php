@@ -90,6 +90,20 @@ class LogEvent
     public null|string $serviceName;
 
     /**
+     * The Client Id for easy trace
+     *
+     * @var int $clientId
+     */
+    public int $clientId;
+
+    /**
+     * The Request id for easy trace
+     *
+     * @var in $requestId;
+     */
+    public int $requestId;
+
+    /**
      * Creates an object with all the fields required for logging
      *
      * @param null|string $startTime (Optional) Parameter to calculate the latency
