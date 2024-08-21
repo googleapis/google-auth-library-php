@@ -20,7 +20,6 @@ namespace Google\Auth\Tests\Cache;
 use Google\Auth\Cache\FileSystemCacheItemPool;
 use Google\Auth\Cache\TypedItem;
 use PHPUnit\Framework\TestCase;
-use Psr\Cache\CacheItemInterface;
 use Psr\Cache\InvalidArgumentException;
 
 class FileSystemCacheItemPoolTest extends TestCase
@@ -100,7 +99,7 @@ class FileSystemCacheItemPoolTest extends TestCase
             $this->pool->save($item);
         }
 
-        $itemKeys = array_map(fn($item) => $item->getKey(), $items);
+        $itemKeys = array_map(fn ($item) => $item->getKey(), $items);
 
         $result = $this->pool->deleteItems($itemKeys);
         $this->assertTrue($result);
@@ -118,7 +117,7 @@ class FileSystemCacheItemPoolTest extends TestCase
             $this->pool->save($item);
         }
 
-        $keys = array_map(fn($item) => $item->getKey(), $items);
+        $keys = array_map(fn ($item) => $item->getKey(), $items);
         array_push($keys, 'NonExistant');
 
         $retrievedItems = $this->pool->getItems($keys);
@@ -150,9 +149,9 @@ class FileSystemCacheItemPoolTest extends TestCase
         $this->assertTrue($this->pool->getItem($item->getKey())->isHit());
     }
 
-     /**
-     * @dataProvider provideInvalidChars
-     */
+    /**
+    * @dataProvider provideInvalidChars
+    */
     public function testGetItemWithIncorrectKeyShouldThrowAnException($char)
     {
         $this->expectException(InvalidArgumentException::class);
@@ -161,9 +160,9 @@ class FileSystemCacheItemPoolTest extends TestCase
         $this->pool->getItem($item->getKey());
     }
 
-     /**
-     * @dataProvider provideInvalidChars
-     */
+    /**
+    * @dataProvider provideInvalidChars
+    */
     public function testGetItemsWithIncorrectKeyShouldThrowAnException($char)
     {
         $this->expectException(InvalidArgumentException::class);
@@ -172,9 +171,9 @@ class FileSystemCacheItemPoolTest extends TestCase
         $this->pool->getItems([$item->getKey()]);
     }
 
-     /**
-     * @dataProvider provideInvalidChars
-     */
+    /**
+    * @dataProvider provideInvalidChars
+    */
     public function testHasItemWithIncorrectKeyShouldThrowAnException($char)
     {
         $this->expectException(InvalidArgumentException::class);
@@ -194,9 +193,9 @@ class FileSystemCacheItemPoolTest extends TestCase
         $this->pool->deleteItem($item->getKey());
     }
 
-     /**
-     * @dataProvider provideInvalidChars
-     */
+    /**
+    * @dataProvider provideInvalidChars
+    */
     public function testDeleteItemsWithIncorrectKeyShouldThrowAnException($char)
     {
         $this->expectException(InvalidArgumentException::class);
@@ -215,6 +214,6 @@ class FileSystemCacheItemPoolTest extends TestCase
 
     public function provideInvalidChars(): array
     {
-        return array_map(fn($char) => [$char], $this->invalidChars);
+        return array_map(fn ($char) => [$char], $this->invalidChars);
     }
 }
