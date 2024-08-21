@@ -213,7 +213,7 @@ class FileSystemCacheItemPoolTest extends TestCase
         return $item;
     }
 
-    private function provideInvalidChars(): array
+    public function provideInvalidChars(): array
     {
         return array_map(fn($char) => [$char], $this->invalidChars);
     }
