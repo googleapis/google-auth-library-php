@@ -100,9 +100,7 @@ class FileSystemCacheItemPoolTest extends TestCase
             $this->pool->save($item);
         }
 
-        $itemKeys = array_map(function (CacheItemInterface $item) {
-            return $item->getKey();
-        }, $items);
+        $itemKeys = array_map(fn($item) => $item->getKey(), $items);
 
         $result = $this->pool->deleteItems($itemKeys);
         $this->assertTrue($result);
@@ -120,9 +118,7 @@ class FileSystemCacheItemPoolTest extends TestCase
             $this->pool->save($item);
         }
 
-        $keys = array_map(function (CacheItemInterface $item) {
-            return $item->getKey();
-        }, $items);
+        $keys = array_map(fn($item) => $item->getKey(), $items);
         array_push($keys, 'NonExistant');
 
         $retrievedItems = $this->pool->getItems($keys);
@@ -154,69 +150,59 @@ class FileSystemCacheItemPoolTest extends TestCase
         $this->assertTrue($this->pool->getItem($item->getKey())->isHit());
     }
 
-    public function testGetItemWithIncorrectKeyShouldThrowAnException()
+     /**
+     * @dataProvider provideInvalidChars
+     */
+    public function testGetItemWithIncorrectKeyShouldThrowAnException($char)
     {
-        foreach ($this->invalidChars as $char) {
-            try {
-                $item = $this->getNewItem($char);
-                $this->pool->getItem($item->getKey());
-                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
-            } catch (InvalidArgumentException $e) {
-                $this->assertTrue($e instanceof InvalidArgumentException);
-            }
-        }
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $item = $this->getNewItem($char);
+        $this->pool->getItem($item->getKey());
     }
 
-    public function testGetItemsWithIncorrectKeyShouldThrowAnException()
+     /**
+     * @dataProvider provideInvalidChars
+     */
+    public function testGetItemsWithIncorrectKeyShouldThrowAnException($char)
     {
-        foreach ($this->invalidChars as $char) {
-            try {
-                $item = $this->getNewItem($char);
-                $this->pool->getItems([$item->getKey()]);
-                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
-            } catch (InvalidArgumentException $e) {
-                $this->assertTrue($e instanceof InvalidArgumentException);
-            }
-        }
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $item = $this->getNewItem($char);
+        $this->pool->getItems([$item->getKey()]);
     }
 
-    public function testHasItemWithIncorrectKeyShouldThrowAnException()
+     /**
+     * @dataProvider provideInvalidChars
+     */
+    public function testHasItemWithIncorrectKeyShouldThrowAnException($char)
     {
-        foreach ($this->invalidChars as $char) {
-            try {
-                $item = $this->getNewItem($char);
-                $this->pool->hasItem($item->getKey());
-                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
-            } catch (InvalidArgumentException $e) {
-                $this->assertTrue($e instanceof InvalidArgumentException);
-            }
-        }
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $item = $this->getNewItem($char);
+        $this->pool->hasItem($item->getKey());
     }
 
-    public function testDeleteItemWithIncorrectKeyShouldThrowAnException()
+    /**
+     * @dataProvider provideInvalidChars
+     */
+    public function testDeleteItemWithIncorrectKeyShouldThrowAnException($char)
     {
-        foreach ($this->invalidChars as $char) {
-            try {
-                $item = $this->getNewItem($char);
-                $this->pool->deleteItem($item->getKey());
-                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
-            } catch (InvalidArgumentException $e) {
-                $this->assertTrue($e instanceof InvalidArgumentException);
-            }
-        }
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $item = $this->getNewItem($char);
+        $this->pool->deleteItem($item->getKey());
     }
 
-    public function testDeleteItemsWithIncorrectKeyShouldThrowAnException()
+     /**
+     * @dataProvider provideInvalidChars
+     */
+    public function testDeleteItemsWithIncorrectKeyShouldThrowAnException($char)
     {
-        foreach ($this->invalidChars as $char) {
-            try {
-                $item = $this->getNewItem($char);
-                $this->pool->deleteItems([$item->getKey()]);
-                $this->fail('The key ' . $char . ' is passing validation when should not be valid');
-            } catch (InvalidArgumentException $e) {
-                $this->assertTrue($e instanceof InvalidArgumentException);
-            }
-        }
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $item = $this->getNewItem($char);
+        $this->pool->deleteItems([$item->getKey()]);
     }
 
     private function getNewItem(null|string $key = null): TypedItem
@@ -225,5 +211,10 @@ class FileSystemCacheItemPoolTest extends TestCase
         $item->set('NewValue');
 
         return $item;
+    }
+
+    private function provideInvalidChars(): array
+    {
+        return array_map(fn($char) => [$char], $this->invalidChars);
     }
 }

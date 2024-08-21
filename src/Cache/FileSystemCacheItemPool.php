@@ -141,7 +141,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
             return false;
         }
 
-        foreach($files as $fileName) {
+        foreach ($files as $fileName) {
             if ($fileName === '.' || $fileName === '..') {
                 continue;
             }
@@ -179,7 +179,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
     {
         $result = true;
 
-        foreach($keys as $key) {
+        foreach ($keys as $key) {
             if (!$this->deleteItem($key)) {
                 $result = false;
             }
@@ -221,6 +221,6 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
 
     private function validKey(string $key): bool
     {
-        return (bool)preg_match('|^[a-zA-Z0-9_\.]+$|', $key);
+        return (bool) preg_match('|^[a-zA-Z0-9_\.]+$|', $key);
     }
 }
