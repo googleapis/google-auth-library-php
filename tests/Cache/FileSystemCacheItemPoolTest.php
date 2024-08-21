@@ -63,6 +63,7 @@ class FileSystemCacheItemPoolTest extends TestCase
     public function testSaveAndGetItem()
     {
         $item = $this->getNewItem();
+        $item->expiresAfter(60);
         $this->pool->save($item);
         $retrievedItem = $this->pool->getItem($item->getKey());
 

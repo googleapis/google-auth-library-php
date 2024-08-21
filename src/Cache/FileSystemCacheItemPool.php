@@ -60,19 +60,23 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
             throw new InvalidArgumentException("The key '$key' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
         }
 
+        $item = new TypedItem($key);
+
         $itemPath = $this->cacheFilePath($key);
 
         if (!file_exists($itemPath)) {
-            return new TypedItem($key);
+            return $item;
         }
 
         $serializedItem = file_get_contents($itemPath);
 
         if ($serializedItem === false) {
-            return new TypedItem($key);
+            return $item;
         }
 
-        return unserialize($serializedItem);
+        $item->set(unserialize($serializedItem));
+
+        return $item;
     }
 
     /**
@@ -105,7 +109,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
         }
 
         $itemPath = $this->cacheFilePath($item->getKey());
-        $serializedItem = serialize($item);
+        $serializedItem = serialize($item->get());
 
         $result = file_put_contents($itemPath, $serializedItem);
 
