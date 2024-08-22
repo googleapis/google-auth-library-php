@@ -302,7 +302,8 @@ $middleware = ApplicationDefaultCredentials::getCredentials($scope, cache: $memo
 
 ### FileSystemCacheItemPool Cache
 The `FileSystemCacheItemPool` class is a `PSR-6` compliant cache that stores its
- serialized objects on disk eliminating for caching data between processes making it possible to use data between different requests.
+serialized objects on disk, caching data between processes and making it possible 
+to use data between different requests.
 
 ```php
 use Google\Auth\Cache\FileSystemCacheItemPool;
