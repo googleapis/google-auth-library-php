@@ -3,101 +3,246 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="robots" content="index, follow, all" />
-    <title>Google\Auth\OAuth2 | Google Auth Library for PHP API Reference</title>
+    <title>Google\Auth\OAuth2 | Google Auth Library PHP Reference Documentation</title>
 
             <link rel="stylesheet" type="text/css" href="../../css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="../../css/bootstrap-theme.min.css">
-        <link rel="stylesheet" type="text/css" href="../../css/sami.css">
-        <script src="../../js/jquery-1.11.1.min.js"></script>
-        <script src="../../js/bootstrap.min.js"></script>
-        <script src="../../js/typeahead.min.js"></script>
-        <script src="../../sami.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../css/doctum.css">
+        <link rel="stylesheet" type="text/css" href="../../fonts/doctum-font.css">
+        <script src="../../js/jquery-3.5.1.slim.min.js"></script>
+        <script async defer src="../../doctum.js"></script>
+        <script async defer src="../../js/bootstrap.min.js"></script>
+        <script async defer src="../../js/autocomplete.min.js"></script>
         <meta name="MobileOptimized" content="width">
         <meta name="HandheldFriendly" content="true">
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-    
-    
+
     </head>
 
-    <body id="class" data-name="class:Google_Auth_OAuth2" data-root-path="../../">
+    <body id="class" data-name="class:Google_Auth_OAuth2" data-root-path="../../" data-search-index-url="../../doctum-search.json">
             <div id="content">
         <div id="left-column">
                 <div id="control-panel">
-                    <form action="#" method="GET">
-                <select id="version-switcher" name="version">
-                                            <option value="../../../v1.0/index.html" data-version="v1.0">v1.0</option>
-                                            <option value="../../../v1.0.1/index.html" data-version="v1.0.1">v1.0.1</option>
-                                            <option value="../../../v1.1.0/index.html" data-version="v1.1.0">v1.1.0</option>
-                                            <option value="../../../v1.2.0/index.html" data-version="v1.2.0">v1.2.0</option>
-                                            <option value="../../../v1.2.1/index.html" data-version="v1.2.1">v1.2.1</option>
-                                            <option value="../../../v1.3.0/index.html" data-version="v1.3.0">v1.3.0</option>
-                                            <option value="../../../v1.3.1/index.html" data-version="v1.3.1">v1.3.1</option>
-                                            <option value="../../../v1.3.2/index.html" data-version="v1.3.2">v1.3.2</option>
-                                            <option value="../../../v1.3.3/index.html" data-version="v1.3.3">v1.3.3</option>
-                                            <option value="../../../v1.4.0/index.html" data-version="v1.4.0">v1.4.0</option>
-                                            <option value="../../../v1.5.0/index.html" data-version="v1.5.0">v1.5.0</option>
-                                            <option value="../../../v1.5.1/index.html" data-version="v1.5.1">v1.5.1</option>
-                                            <option value="../../../v1.5.2/index.html" data-version="v1.5.2">v1.5.2</option>
-                                            <option value="../../../v1.6.0/index.html" data-version="v1.6.0">v1.6.0</option>
-                                            <option value="../../../v1.6.1/index.html" data-version="v1.6.1">v1.6.1</option>
-                                            <option value="../../../v1.7.0/index.html" data-version="v1.7.0">v1.7.0</option>
-                                            <option value="../../../v1.7.1/index.html" data-version="v1.7.1">v1.7.1</option>
-                                            <option value="../../../v1.8.0/index.html" data-version="v1.8.0">v1.8.0</option>
-                                            <option value="../../../v1.9.0/index.html" data-version="v1.9.0">v1.9.0</option>
-                                            <option value="../../../v1.10.0/index.html" data-version="v1.10.0">v1.10.0</option>
-                                            <option value="../../../v1.11.0/index.html" data-version="v1.11.0">v1.11.0</option>
-                                            <option value="../../../v1.11.1/index.html" data-version="v1.11.1">v1.11.1</option>
-                                            <option value="../../../v1.12.0/index.html" data-version="v1.12.0">v1.12.0</option>
-                                            <option value="../../../v1.12.1/index.html" data-version="v1.12.1">v1.12.1</option>
-                                            <option value="../../../v1.13.0/index.html" data-version="v1.13.0">v1.13.0</option>
-                                            <option value="../../../v1.14.0/index.html" data-version="v1.14.0">v1.14.0</option>
-                                            <option value="../../../v1.14.1/index.html" data-version="v1.14.1">v1.14.1</option>
-                                            <option value="../../../v1.14.2/index.html" data-version="v1.14.2">v1.14.2</option>
-                                            <option value="../../../v1.14.3/index.html" data-version="v1.14.3">v1.14.3</option>
-                                            <option value="../../../v1.15.0/index.html" data-version="v1.15.0">v1.15.0</option>
-                                            <option value="../../../v1.15.1/index.html" data-version="v1.15.1">v1.15.1</option>
-                                            <option value="../../../v1.15.2/index.html" data-version="v1.15.2">v1.15.2</option>
-                                            <option value="../../../v1.16.0/index.html" data-version="v1.16.0">v1.16.0</option>
-                                            <option value="../../../v1.17.0/index.html" data-version="v1.17.0">v1.17.0</option>
-                                            <option value="../../../v1.18.0/index.html" data-version="v1.18.0">v1.18.0</option>
-                                            <option value="../../../v1.19.0/index.html" data-version="v1.19.0">v1.19.0</option>
-                                            <option value="../../../v1.19.1/index.html" data-version="v1.19.1">v1.19.1</option>
-                                            <option value="../../../v1.20.0/index.html" data-version="v1.20.0">v1.20.0</option>
-                                            <option value="../../../v1.20.1/index.html" data-version="v1.20.1">v1.20.1</option>
-                                            <option value="../../../v1.21.0/index.html" data-version="v1.21.0">v1.21.0</option>
-                                            <option value="../../../v1.21.1/index.html" data-version="v1.21.1">v1.21.1</option>
-                                            <option value="../../../v1.22.0/index.html" data-version="v1.22.0">v1.22.0</option>
-                                            <option value="../../../v1.23.0/index.html" data-version="v1.23.0">v1.23.0</option>
-                                            <option value="../../../v1.23.1/index.html" data-version="v1.23.1">v1.23.1</option>
-                                            <option value="../../../v1.24.0/index.html" data-version="v1.24.0">v1.24.0</option>
-                                            <option value="../../../v1.25.0/index.html" data-version="v1.25.0">v1.25.0</option>
-                                            <option value="../../../v1.26.0/index.html" data-version="v1.26.0">v1.26.0</option>
-                                            <option value="../../../v1.27.0/index.html" data-version="v1.27.0">v1.27.0</option>
-                                            <option value="../../../v1.28.0/index.html" data-version="v1.28.0">v1.28.0</option>
-                                            <option value="../../../v1.29.0/index.html" data-version="v1.29.0">v1.29.0</option>
-                                            <option value="../../../v1.29.1/index.html" data-version="v1.29.1">v1.29.1</option>
-                                            <option value="../../../v1.30.0/index.html" data-version="v1.30.0">v1.30.0</option>
-                                            <option value="../../../v1.31.0/index.html" data-version="v1.31.0">v1.31.0</option>
-                                            <option value="../../../v1.32.0/index.html" data-version="v1.32.0">v1.32.0</option>
-                                            <option value="../../../v1.32.1/index.html" data-version="v1.32.1">v1.32.1</option>
-                                            <option value="../../../v1.33.0/index.html" data-version="v1.33.0">v1.33.0</option>
-                                            <option value="../../../v1.34.0/index.html" data-version="v1.34.0">v1.34.0</option>
-                                            <option value="../../../v1.35.0/index.html" data-version="v1.35.0">v1.35.0</option>
-                                            <option value="../../../v1.36.0/index.html" data-version="v1.36.0">v1.36.0</option>
-                                            <option value="../../../v1.37.0/index.html" data-version="v1.37.0">v1.37.0</option>
-                                            <option value="../../../v1.37.1/index.html" data-version="v1.37.1">v1.37.1</option>
-                                            <option value="../../../main/index.html" data-version="main">main branch</option>
+                    <form action="#">
+                <select class="form-control" id="version-switcher" name="version">
+                                            <option
+                            value="../../../v1.0/index.html"
+                            data-version="v1.0" >v1.0</option>
+                                            <option
+                            value="../../../v1.0.1/index.html"
+                            data-version="v1.0.1" >v1.0.1</option>
+                                            <option
+                            value="../../../v1.1.0/index.html"
+                            data-version="v1.1.0" >v1.1.0</option>
+                                            <option
+                            value="../../../v1.2.0/index.html"
+                            data-version="v1.2.0" >v1.2.0</option>
+                                            <option
+                            value="../../../v1.10.0/index.html"
+                            data-version="v1.10.0" >v1.10.0</option>
+                                            <option
+                            value="../../../v1.11.0/index.html"
+                            data-version="v1.11.0" >v1.11.0</option>
+                                            <option
+                            value="../../../v1.11.1/index.html"
+                            data-version="v1.11.1" >v1.11.1</option>
+                                            <option
+                            value="../../../v1.12.0/index.html"
+                            data-version="v1.12.0" >v1.12.0</option>
+                                            <option
+                            value="../../../v1.12.1/index.html"
+                            data-version="v1.12.1" >v1.12.1</option>
+                                            <option
+                            value="../../../v1.13.0/index.html"
+                            data-version="v1.13.0" >v1.13.0</option>
+                                            <option
+                            value="../../../v1.14.0/index.html"
+                            data-version="v1.14.0" >v1.14.0</option>
+                                            <option
+                            value="../../../v1.14.1/index.html"
+                            data-version="v1.14.1" >v1.14.1</option>
+                                            <option
+                            value="../../../v1.2.1/index.html"
+                            data-version="v1.2.1" >v1.2.1</option>
+                                            <option
+                            value="../../../v1.14.2/index.html"
+                            data-version="v1.14.2" >v1.14.2</option>
+                                            <option
+                            value="../../../v1.14.3/index.html"
+                            data-version="v1.14.3" >v1.14.3</option>
+                                            <option
+                            value="../../../v1.15.0/index.html"
+                            data-version="v1.15.0" >v1.15.0</option>
+                                            <option
+                            value="../../../v1.16.0/index.html"
+                            data-version="v1.16.0" selected>v1.16.0</option>
+                                            <option
+                            value="../../../v1.17.0/index.html"
+                            data-version="v1.17.0" >v1.17.0</option>
+                                            <option
+                            value="../../../v1.18.0/index.html"
+                            data-version="v1.18.0" >v1.18.0</option>
+                                            <option
+                            value="../../../v1.19.0/index.html"
+                            data-version="v1.19.0" >v1.19.0</option>
+                                            <option
+                            value="../../../v1.19.1/index.html"
+                            data-version="v1.19.1" >v1.19.1</option>
+                                            <option
+                            value="../../../v1.5.0/index.html"
+                            data-version="v1.5.0" >v1.5.0</option>
+                                            <option
+                            value="../../../v1.15.1/index.html"
+                            data-version="v1.15.1" >v1.15.1</option>
+                                            <option
+                            value="../../../v1.20.0/index.html"
+                            data-version="v1.20.0" >v1.20.0</option>
+                                            <option
+                            value="../../../v1.20.1/index.html"
+                            data-version="v1.20.1" >v1.20.1</option>
+                                            <option
+                            value="../../../v1.21.0/index.html"
+                            data-version="v1.21.0" >v1.21.0</option>
+                                            <option
+                            value="../../../v1.21.1/index.html"
+                            data-version="v1.21.1" >v1.21.1</option>
+                                            <option
+                            value="../../../v1.22.0/index.html"
+                            data-version="v1.22.0" >v1.22.0</option>
+                                            <option
+                            value="../../../v1.5.1/index.html"
+                            data-version="v1.5.1" >v1.5.1</option>
+                                            <option
+                            value="../../../v1.5.2/index.html"
+                            data-version="v1.5.2" >v1.5.2</option>
+                                            <option
+                            value="../../../v1.15.2/index.html"
+                            data-version="v1.15.2" >v1.15.2</option>
+                                            <option
+                            value="../../../v1.23.0/index.html"
+                            data-version="v1.23.0" >v1.23.0</option>
+                                            <option
+                            value="../../../v1.3.0/index.html"
+                            data-version="v1.3.0" >v1.3.0</option>
+                                            <option
+                            value="../../../v1.3.1/index.html"
+                            data-version="v1.3.1" >v1.3.1</option>
+                                            <option
+                            value="../../../v1.3.2/index.html"
+                            data-version="v1.3.2" >v1.3.2</option>
+                                            <option
+                            value="../../../v1.3.3/index.html"
+                            data-version="v1.3.3" >v1.3.3</option>
+                                            <option
+                            value="../../../v1.23.1/index.html"
+                            data-version="v1.23.1" >v1.23.1</option>
+                                            <option
+                            value="../../../v1.27.0/index.html"
+                            data-version="v1.27.0" >v1.27.0</option>
+                                            <option
+                            value="../../../v1.28.0/index.html"
+                            data-version="v1.28.0" >v1.28.0</option>
+                                            <option
+                            value="../../../v1.29.0/index.html"
+                            data-version="v1.29.0" >v1.29.0</option>
+                                            <option
+                            value="../../../v1.29.1/index.html"
+                            data-version="v1.29.1" >v1.29.1</option>
+                                            <option
+                            value="../../../v1.30.0/index.html"
+                            data-version="v1.30.0" >v1.30.0</option>
+                                            <option
+                            value="../../../v1.31.0/index.html"
+                            data-version="v1.31.0" >v1.31.0</option>
+                                            <option
+                            value="../../../v1.32.0/index.html"
+                            data-version="v1.32.0" >v1.32.0</option>
+                                            <option
+                            value="../../../v1.32.1/index.html"
+                            data-version="v1.32.1" >v1.32.1</option>
+                                            <option
+                            value="../../../v1.33.0/index.html"
+                            data-version="v1.33.0" >v1.33.0</option>
+                                            <option
+                            value="../../../v1.4.0/index.html"
+                            data-version="v1.4.0" >v1.4.0</option>
+                                            <option
+                            value="../../../v1.34.0/index.html"
+                            data-version="v1.34.0" >v1.34.0</option>
+                                            <option
+                            value="../../../v1.35.0/index.html"
+                            data-version="v1.35.0" >v1.35.0</option>
+                                            <option
+                            value="../../../v1.36.0/index.html"
+                            data-version="v1.36.0" >v1.36.0</option>
+                                            <option
+                            value="../../../v1.37.0/index.html"
+                            data-version="v1.37.0" >v1.37.0</option>
+                                            <option
+                            value="../../../v1.37.1/index.html"
+                            data-version="v1.37.1" >v1.37.1</option>
+                                            <option
+                            value="../../../v1.38.0/index.html"
+                            data-version="v1.38.0" >v1.38.0</option>
+                                            <option
+                            value="../../../v1.39.0/index.html"
+                            data-version="v1.39.0" >v1.39.0</option>
+                                            <option
+                            value="../../../v1.40.0/index.html"
+                            data-version="v1.40.0" >v1.40.0</option>
+                                            <option
+                            value="../../../v1.41.0/index.html"
+                            data-version="v1.41.0" >v1.41.0</option>
+                                            <option
+                            value="../../../v1.6.0/index.html"
+                            data-version="v1.6.0" >v1.6.0</option>
+                                            <option
+                            value="../../../v1.6.1/index.html"
+                            data-version="v1.6.1" >v1.6.1</option>
+                                            <option
+                            value="../../../v1.24.0/index.html"
+                            data-version="v1.24.0" >v1.24.0</option>
+                                            <option
+                            value="../../../v1.7.0/index.html"
+                            data-version="v1.7.0" >v1.7.0</option>
+                                            <option
+                            value="../../../v1.7.1/index.html"
+                            data-version="v1.7.1" >v1.7.1</option>
+                                            <option
+                            value="../../../v1.25.0/index.html"
+                            data-version="v1.25.0" >v1.25.0</option>
+                                            <option
+                            value="../../../v1.8.0/index.html"
+                            data-version="v1.8.0" >v1.8.0</option>
+                                            <option
+                            value="../../../v1.9.0/index.html"
+                            data-version="v1.9.0" >v1.9.0</option>
+                                            <option
+                            value="../../../v1.26.0/index.html"
+                            data-version="v1.26.0" >v1.26.0</option>
+                                            <option
+                            value="../../../doctum/index.html"
+                            data-version="doctum" >doctum</option>
                                     </select>
             </form>
-                <script>
-            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
-        </script>
-        <form id="search-form" action="../../search.html" method="GET">
-            <span class="glyphicon glyphicon-search"></span>
+                <div class="search-bar hidden" id="search-progress-bar-container">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" id="search-progress-bar"
+                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+            </div>
+        </div>
+        <form id="search-form" action="../../search.html">
+            <span class="icon icon-search"></span>
             <input name="search"
+                   id="doctum-search-auto-complete"
                    class="typeahead form-control"
                    type="search"
-                   placeholder="Search">
+                   placeholder="Search"
+                   spellcheck="false"
+                   autocorrect="off"
+                   autocomplete="off"
+                   autocapitalize="off">
+            <div class="auto-complete-results" id="auto-complete-results"></div>
         </form>
     </div>
 
@@ -114,13 +259,86 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="../../index.html">Google Auth Library for PHP API Reference</a>
+                <a class="navbar-brand" href="../../index.html">Google Auth Library PHP Reference Documentation</a>
             </div>
             <div class="collapse navbar-collapse" id="navbar-elements">
                 <ul class="nav navbar-nav">
+                                        <li role="presentation" class="dropdown visible-xs-block visible-sm-block">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"
+                            role="button" aria-haspopup="true" aria-expanded="false">Versions&nbsp;<span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                        <li ><a href="../../../v1.0/index.html" data-version="v1.0">v1.0</a></li>
+                        <li ><a href="../../../v1.0.1/index.html" data-version="v1.0.1">v1.0.1</a></li>
+                        <li ><a href="../../../v1.1.0/index.html" data-version="v1.1.0">v1.1.0</a></li>
+                        <li ><a href="../../../v1.2.0/index.html" data-version="v1.2.0">v1.2.0</a></li>
+                        <li ><a href="../../../v1.10.0/index.html" data-version="v1.10.0">v1.10.0</a></li>
+                        <li ><a href="../../../v1.11.0/index.html" data-version="v1.11.0">v1.11.0</a></li>
+                        <li ><a href="../../../v1.11.1/index.html" data-version="v1.11.1">v1.11.1</a></li>
+                        <li ><a href="../../../v1.12.0/index.html" data-version="v1.12.0">v1.12.0</a></li>
+                        <li ><a href="../../../v1.12.1/index.html" data-version="v1.12.1">v1.12.1</a></li>
+                        <li ><a href="../../../v1.13.0/index.html" data-version="v1.13.0">v1.13.0</a></li>
+                        <li ><a href="../../../v1.14.0/index.html" data-version="v1.14.0">v1.14.0</a></li>
+                        <li ><a href="../../../v1.14.1/index.html" data-version="v1.14.1">v1.14.1</a></li>
+                        <li ><a href="../../../v1.2.1/index.html" data-version="v1.2.1">v1.2.1</a></li>
+                        <li ><a href="../../../v1.14.2/index.html" data-version="v1.14.2">v1.14.2</a></li>
+                        <li ><a href="../../../v1.14.3/index.html" data-version="v1.14.3">v1.14.3</a></li>
+                        <li ><a href="../../../v1.15.0/index.html" data-version="v1.15.0">v1.15.0</a></li>
+                        <li class="active"><a href="../../../v1.16.0/index.html" data-version="v1.16.0">v1.16.0</a></li>
+                        <li ><a href="../../../v1.17.0/index.html" data-version="v1.17.0">v1.17.0</a></li>
+                        <li ><a href="../../../v1.18.0/index.html" data-version="v1.18.0">v1.18.0</a></li>
+                        <li ><a href="../../../v1.19.0/index.html" data-version="v1.19.0">v1.19.0</a></li>
+                        <li ><a href="../../../v1.19.1/index.html" data-version="v1.19.1">v1.19.1</a></li>
+                        <li ><a href="../../../v1.5.0/index.html" data-version="v1.5.0">v1.5.0</a></li>
+                        <li ><a href="../../../v1.15.1/index.html" data-version="v1.15.1">v1.15.1</a></li>
+                        <li ><a href="../../../v1.20.0/index.html" data-version="v1.20.0">v1.20.0</a></li>
+                        <li ><a href="../../../v1.20.1/index.html" data-version="v1.20.1">v1.20.1</a></li>
+                        <li ><a href="../../../v1.21.0/index.html" data-version="v1.21.0">v1.21.0</a></li>
+                        <li ><a href="../../../v1.21.1/index.html" data-version="v1.21.1">v1.21.1</a></li>
+                        <li ><a href="../../../v1.22.0/index.html" data-version="v1.22.0">v1.22.0</a></li>
+                        <li ><a href="../../../v1.5.1/index.html" data-version="v1.5.1">v1.5.1</a></li>
+                        <li ><a href="../../../v1.5.2/index.html" data-version="v1.5.2">v1.5.2</a></li>
+                        <li ><a href="../../../v1.15.2/index.html" data-version="v1.15.2">v1.15.2</a></li>
+                        <li ><a href="../../../v1.23.0/index.html" data-version="v1.23.0">v1.23.0</a></li>
+                        <li ><a href="../../../v1.3.0/index.html" data-version="v1.3.0">v1.3.0</a></li>
+                        <li ><a href="../../../v1.3.1/index.html" data-version="v1.3.1">v1.3.1</a></li>
+                        <li ><a href="../../../v1.3.2/index.html" data-version="v1.3.2">v1.3.2</a></li>
+                        <li ><a href="../../../v1.3.3/index.html" data-version="v1.3.3">v1.3.3</a></li>
+                        <li ><a href="../../../v1.23.1/index.html" data-version="v1.23.1">v1.23.1</a></li>
+                        <li ><a href="../../../v1.27.0/index.html" data-version="v1.27.0">v1.27.0</a></li>
+                        <li ><a href="../../../v1.28.0/index.html" data-version="v1.28.0">v1.28.0</a></li>
+                        <li ><a href="../../../v1.29.0/index.html" data-version="v1.29.0">v1.29.0</a></li>
+                        <li ><a href="../../../v1.29.1/index.html" data-version="v1.29.1">v1.29.1</a></li>
+                        <li ><a href="../../../v1.30.0/index.html" data-version="v1.30.0">v1.30.0</a></li>
+                        <li ><a href="../../../v1.31.0/index.html" data-version="v1.31.0">v1.31.0</a></li>
+                        <li ><a href="../../../v1.32.0/index.html" data-version="v1.32.0">v1.32.0</a></li>
+                        <li ><a href="../../../v1.32.1/index.html" data-version="v1.32.1">v1.32.1</a></li>
+                        <li ><a href="../../../v1.33.0/index.html" data-version="v1.33.0">v1.33.0</a></li>
+                        <li ><a href="../../../v1.4.0/index.html" data-version="v1.4.0">v1.4.0</a></li>
+                        <li ><a href="../../../v1.34.0/index.html" data-version="v1.34.0">v1.34.0</a></li>
+                        <li ><a href="../../../v1.35.0/index.html" data-version="v1.35.0">v1.35.0</a></li>
+                        <li ><a href="../../../v1.36.0/index.html" data-version="v1.36.0">v1.36.0</a></li>
+                        <li ><a href="../../../v1.37.0/index.html" data-version="v1.37.0">v1.37.0</a></li>
+                        <li ><a href="../../../v1.37.1/index.html" data-version="v1.37.1">v1.37.1</a></li>
+                        <li ><a href="../../../v1.38.0/index.html" data-version="v1.38.0">v1.38.0</a></li>
+                        <li ><a href="../../../v1.39.0/index.html" data-version="v1.39.0">v1.39.0</a></li>
+                        <li ><a href="../../../v1.40.0/index.html" data-version="v1.40.0">v1.40.0</a></li>
+                        <li ><a href="../../../v1.41.0/index.html" data-version="v1.41.0">v1.41.0</a></li>
+                        <li ><a href="../../../v1.6.0/index.html" data-version="v1.6.0">v1.6.0</a></li>
+                        <li ><a href="../../../v1.6.1/index.html" data-version="v1.6.1">v1.6.1</a></li>
+                        <li ><a href="../../../v1.24.0/index.html" data-version="v1.24.0">v1.24.0</a></li>
+                        <li ><a href="../../../v1.7.0/index.html" data-version="v1.7.0">v1.7.0</a></li>
+                        <li ><a href="../../../v1.7.1/index.html" data-version="v1.7.1">v1.7.1</a></li>
+                        <li ><a href="../../../v1.25.0/index.html" data-version="v1.25.0">v1.25.0</a></li>
+                        <li ><a href="../../../v1.8.0/index.html" data-version="v1.8.0">v1.8.0</a></li>
+                        <li ><a href="../../../v1.9.0/index.html" data-version="v1.9.0">v1.9.0</a></li>
+                        <li ><a href="../../../v1.26.0/index.html" data-version="v1.26.0">v1.26.0</a></li>
+                        <li ><a href="../../../doctum/index.html" data-version="doctum">doctum</a></li>
+                        </ul>
+                    </li>
                     <li><a href="../../classes.html">Classes</a></li>
-                                            <li><a href="../../namespaces.html">Namespaces</a></li>
-                                        <li><a href="../../interfaces.html">Interfaces</a></li>
+                    <li><a href="../../namespaces.html">Namespaces</a></li>
+                    <li><a href="../../interfaces.html">Interfaces</a></li>
                     <li><a href="../../traits.html">Traits</a></li>
                     <li><a href="../../doc-index.html">Index</a></li>
                     <li><a href="../../search.html">Search</a></li>
@@ -136,47 +354,51 @@
             </ol>
         </div>
                 <div id="page-content">
-                
     <div class="page-header">
-        <h1>
-            OAuth2
-                
-        </h1>
+        <h1>OAuth2    
+            </h1>
     </div>
 
-    <p>    class
-    <strong>OAuth2</strong>        implements
-        <a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php">View source</a>)
+    
+    <p>        class
+    <strong>OAuth2</strong>        implements        <a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php">View source</a>)
 </p>
 
         
     
+        
 
             <div class="description">
-            <p>OAuth2 supports authentication by OAuth2 2-legged flows.</p>            <p>It primary supports
-- service account authorization
-- authorization where a user already has an access token</p>                    </div>
-    
-    
-            <h2>Constants</h2>
-
-            <table class="table table-condensed">
+            <p><p>OAuth2 supports authentication by OAuth2 2-legged flows.</p></p>            <p><p>It primary supports</p>
+<ul>
+<li>service account authorization</li>
+<li>authorization where a user already has an access token</li>
+</ul></p>        </div>
+            
+        
+            <h2>Constants</h2>    <table class="table table-condensed">
                     <tr>
-                <td>DEFAULT_EXPIRY_SECONDS</td>
+                <td>
+                                                                                                                        DEFAULT_EXPIRY_SECONDS
+                                    </td>
                 <td class="last">
                     <p><em></em></p>
                     <p></p>
                 </td>
             </tr>
                     <tr>
-                <td>DEFAULT_SKEW_SECONDS</td>
+                <td>
+                                                                                                                        DEFAULT_SKEW_SECONDS
+                                    </td>
                 <td class="last">
                     <p><em></em></p>
                     <p></p>
                 </td>
             </tr>
                     <tr>
-                <td>JWT_URN</td>
+                <td>
+                                                                                                                        JWT_URN
+                                    </td>
                 <td class="last">
                     <p><em></em></p>
                     <p></p>
@@ -191,17 +413,19 @@
                     <tr>
                 <td class="type" id="property_knownSigningAlgorithms">
                     static                                                            
-                </td>
+                                                                                
+                                    </td>
                 <td>$knownSigningAlgorithms</td>
-                <td class="last">TODO: determine known methods from the keys of JWT::methods.</td>
+                <td class="last"><p>TODO: determine known methods from the keys of JWT::methods.</p></td>
                 <td></td>
             </tr>
                     <tr>
                 <td class="type" id="property_knownGrantTypes">
                     static                                                            array
-                </td>
+                                                                                
+                                    </td>
                 <td>$knownGrantTypes</td>
-                <td class="last">The well known grant types.</td>
+                <td class="last"><p>The well known grant types.</p></td>
                 <td></td>
             </tr>
             </table>
@@ -214,651 +438,641 @@
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(array $config)
         
-                                            <p>Create a new OAuthCredentials.</p>                </div>
+                                            <p><p>Create a new OAuthCredentials.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     null|object
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_verifyIdToken">verifyIdToken</a>(string $publicKey = null, array $allowed_algs = array())
         
-                                            <p>Verifies the idToken if present.</p>                </div>
+                                            <p><p>Verifies the idToken if present.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     string
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_toJwt">toJwt</a>(array $config = [])
         
-                                            <p>Obtains the encoded jwt from the instance data.</p>                </div>
+                                            <p><p>Obtains the encoded jwt from the instance data.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     <abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr>
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_generateCredentialsRequest">generateCredentialsRequest</a>()
         
-                                            <p>Generates a request for token credentials.</p>                </div>
+                                            <p><p>Generates a request for token credentials.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     array
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_fetchAuthToken">fetchAuthToken</a>(callable $httpHandler = null)
         
-                                            <p>Fetches the auth tokens based on the current state.</p>                </div>
+                                            <p><p>Fetches the auth tokens based on the current state.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     string
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getCacheKey">getCacheKey</a>()
         
-                                            <p>Obtains a key that can used to cache the results of #fetchAuthToken.</p>                </div>
+                                            <p><p>Obtains a key that can used to cache the results of #fetchAuthToken.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     array
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_parseTokenResponse">parseTokenResponse</a>(<abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr> $resp)
         
-                                            <p>Parses the fetched tokens.</p>                </div>
+                                            <p><p>Parses the fetched tokens.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_updateToken">updateToken</a>(array $config)
         
-                                            <p>Updates an OAuth 2.0 client.</p>                </div>
+                                            <p><p>Updates an OAuth 2.0 client.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     <abbr title="Psr\Http\Message\UriInterface">UriInterface</abbr>
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_buildFullAuthorizationUri">buildFullAuthorizationUri</a>(array $config = [])
         
-                                            <p>Builds the authorization Uri that the user should be redirected to.</p>                </div>
+                                            <p><p>Builds the authorization Uri that the user should be redirected to.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setAuthorizationUri">setAuthorizationUri</a>(string $uri)
         
-                                            <p>Sets the authorization server's HTTP endpoint capable of authenticating
-the end-user and obtaining authorization.</p>                </div>
+                                            <p><p>Sets the authorization server's HTTP endpoint capable of authenticating
+the end-user and obtaining authorization.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     <abbr title="Psr\Http\Message\UriInterface">UriInterface</abbr>
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getAuthorizationUri">getAuthorizationUri</a>()
         
-                                            <p>Gets the authorization server's HTTP endpoint capable of authenticating
-the end-user and obtaining authorization.</p>                </div>
+                                            <p><p>Gets the authorization server's HTTP endpoint capable of authenticating
+the end-user and obtaining authorization.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     string
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getTokenCredentialUri">getTokenCredentialUri</a>()
         
-                                            <p>Gets the authorization server's HTTP endpoint capable of issuing tokens
-and refreshing expired tokens.</p>                </div>
+                                            <p><p>Gets the authorization server's HTTP endpoint capable of issuing tokens
+and refreshing expired tokens.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setTokenCredentialUri">setTokenCredentialUri</a>(string $uri)
         
-                                            <p>Sets the authorization server's HTTP endpoint capable of issuing tokens
-and refreshing expired tokens.</p>                </div>
+                                            <p><p>Sets the authorization server's HTTP endpoint capable of issuing tokens
+and refreshing expired tokens.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     string
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getRedirectUri">getRedirectUri</a>()
         
-                                            <p>Gets the redirection URI used in the initial request.</p>                </div>
+                                            <p><p>Gets the redirection URI used in the initial request.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setRedirectUri">setRedirectUri</a>(string $uri)
         
-                                            <p>Sets the redirection URI used in the initial request.</p>                </div>
+                                            <p><p>Sets the redirection URI used in the initial request.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     string
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getScope">getScope</a>()
         
-                                            <p>Gets the scope of the access requests as a space-delimited String.</p>                </div>
+                                            <p><p>Gets the scope of the access requests as a space-delimited String.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setScope">setScope</a>(string|array $scope)
         
-                                            <p>Sets the scope of the access request, expressed either as an Array or as
-a space-delimited String.</p>                </div>
+                                            <p><p>Sets the scope of the access request, expressed either as an Array or as
+a space-delimited String.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     string
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getGrantType">getGrantType</a>()
         
-                                            <p>Gets the current grant type.</p>                </div>
+                                            <p><p>Gets the current grant type.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setGrantType">setGrantType</a>($grantType)
         
-                                            <p>Sets the current grant type.</p>                </div>
+                                            <p><p>Sets the current grant type.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     string
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getState">getState</a>()
         
-                                            <p>Gets an arbitrary string designed to allow the client to maintain state.</p>                </div>
+                                            <p><p>Gets an arbitrary string designed to allow the client to maintain state.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setState">setState</a>(string $state)
         
-                                            <p>Sets an arbitrary string designed to allow the client to maintain state.</p>                </div>
+                                            <p><p>Sets an arbitrary string designed to allow the client to maintain state.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getCode">getCode</a>()
         
-                                            <p>Gets the authorization code issued to this client.</p>                </div>
+                                            <p><p>Gets the authorization code issued to this client.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setCode">setCode</a>(string $code)
         
-                                            <p>Sets the authorization code issued to this client.</p>                </div>
+                                            <p><p>Sets the authorization code issued to this client.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getUsername">getUsername</a>()
         
-                                            <p>Gets the resource owner's username.</p>                </div>
+                                            <p><p>Gets the resource owner's username.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setUsername">setUsername</a>(string $username)
         
-                                            <p>Sets the resource owner's username.</p>                </div>
+                                            <p><p>Sets the resource owner's username.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getPassword">getPassword</a>()
         
-                                            <p>Gets the resource owner's password.</p>                </div>
+                                            <p><p>Gets the resource owner's password.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setPassword">setPassword</a>($password)
         
-                                            <p>Sets the resource owner's password.</p>                </div>
+                                            <p><p>Sets the resource owner's password.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getClientId">getClientId</a>()
         
-                                            <p>Sets a unique identifier issued to the client to identify itself to the
-authorization server.</p>                </div>
+                                            <p><p>Sets a unique identifier issued to the client to identify itself to the
+authorization server.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setClientId">setClientId</a>($clientId)
         
-                                            <p>Sets a unique identifier issued to the client to identify itself to the
-authorization server.</p>                </div>
+                                            <p><p>Sets a unique identifier issued to the client to identify itself to the
+authorization server.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getClientSecret">getClientSecret</a>()
         
-                                            <p>Gets a shared symmetric secret issued by the authorization server, which
-is used to authenticate the client.</p>                </div>
+                                            <p><p>Gets a shared symmetric secret issued by the authorization server, which
+is used to authenticate the client.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setClientSecret">setClientSecret</a>($clientSecret)
         
-                                            <p>Sets a shared symmetric secret issued by the authorization server, which
-is used to authenticate the client.</p>                </div>
+                                            <p><p>Sets a shared symmetric secret issued by the authorization server, which
+is used to authenticate the client.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getIssuer">getIssuer</a>()
         
-                                            <p>Gets the Issuer ID when using assertion profile.</p>                </div>
+                                            <p><p>Gets the Issuer ID when using assertion profile.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setIssuer">setIssuer</a>(string $issuer)
         
-                                            <p>Sets the Issuer ID when using assertion profile.</p>                </div>
+                                            <p><p>Sets the Issuer ID when using assertion profile.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getSub">getSub</a>()
         
-                                            <p>Gets the target sub when issuing assertions.</p>                </div>
+                                            <p><p>Gets the target sub when issuing assertions.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setSub">setSub</a>(string $sub)
         
-                                            <p>Sets the target sub when issuing assertions.</p>                </div>
+                                            <p><p>Sets the target sub when issuing assertions.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getAudience">getAudience</a>()
         
-                                            <p>Gets the target audience when issuing assertions.</p>                </div>
+                                            <p><p>Gets the target audience when issuing assertions.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setAudience">setAudience</a>(string $audience)
         
-                                            <p>Sets the target audience when issuing assertions.</p>                </div>
+                                            <p><p>Sets the target audience when issuing assertions.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getSigningKey">getSigningKey</a>()
         
-                                            <p>Gets the signing key when using an assertion profile.</p>                </div>
+                                            <p><p>Gets the signing key when using an assertion profile.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setSigningKey">setSigningKey</a>(string $signingKey)
         
-                                            <p>Sets the signing key when using an assertion profile.</p>                </div>
+                                            <p><p>Sets the signing key when using an assertion profile.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     string
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getSigningKeyId">getSigningKeyId</a>()
         
-                                            <p>Gets the signing key id when using an assertion profile.</p>                </div>
+                                            <p><p>Gets the signing key id when using an assertion profile.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setSigningKeyId">setSigningKeyId</a>(string $signingKeyId)
         
-                                            <p>Sets the signing key id when using an assertion profile.</p>                </div>
+                                            <p><p>Sets the signing key id when using an assertion profile.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     string
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getSigningAlgorithm">getSigningAlgorithm</a>()
         
-                                            <p>Gets the signing algorithm when using an assertion profile.</p>                </div>
+                                            <p><p>Gets the signing algorithm when using an assertion profile.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setSigningAlgorithm">setSigningAlgorithm</a>(string $signingAlgorithm)
         
-                                            <p>Sets the signing algorithm when using an assertion profile.</p>                </div>
+                                            <p><p>Sets the signing algorithm when using an assertion profile.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getExtensionParams">getExtensionParams</a>()
         
-                                            <p>Gets the set of parameters used by extension when using an extension
-grant type.</p>                </div>
+                                            <p><p>Gets the set of parameters used by extension when using an extension
+grant type.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setExtensionParams">setExtensionParams</a>($extensionParams)
         
-                                            <p>Sets the set of parameters used by extension when using an extension
-grant type.</p>                </div>
+                                            <p><p>Sets the set of parameters used by extension when using an extension
+grant type.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getExpiry">getExpiry</a>()
         
-                                            <p>Gets the number of seconds assertions are valid for.</p>                </div>
+                                            <p><p>Gets the number of seconds assertions are valid for.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setExpiry">setExpiry</a>(int $expiry)
         
-                                            <p>Sets the number of seconds assertions are valid for.</p>                </div>
+                                            <p><p>Sets the number of seconds assertions are valid for.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getExpiresIn">getExpiresIn</a>()
         
-                                            <p>Gets the lifetime of the access token in seconds.</p>                </div>
+                                            <p><p>Gets the lifetime of the access token in seconds.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setExpiresIn">setExpiresIn</a>(int $expiresIn)
         
-                                            <p>Sets the lifetime of the access token in seconds.</p>                </div>
+                                            <p><p>Sets the lifetime of the access token in seconds.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     int
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getExpiresAt">getExpiresAt</a>()
         
-                                            <p>Gets the time the current access token expires at.</p>                </div>
+                                            <p><p>Gets the time the current access token expires at.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     bool
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_isExpired">isExpired</a>()
         
-                                            <p>Returns true if the acccess token has expired.</p>                </div>
+                                            <p><p>Returns true if the acccess token has expired.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setExpiresAt">setExpiresAt</a>(int $expiresAt)
         
-                                            <p>Sets the time the current access token expires at.</p>                </div>
+                                            <p><p>Sets the time the current access token expires at.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getIssuedAt">getIssuedAt</a>()
         
-                                            <p>Gets the time the current access token was issued at.</p>                </div>
+                                            <p><p>Gets the time the current access token was issued at.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setIssuedAt">setIssuedAt</a>(int $issuedAt)
         
-                                            <p>Sets the time the current access token was issued at.</p>                </div>
+                                            <p><p>Sets the time the current access token was issued at.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getAccessToken">getAccessToken</a>()
         
-                                            <p>Gets the current access token.</p>                </div>
+                                            <p><p>Gets the current access token.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setAccessToken">setAccessToken</a>(string $accessToken)
         
-                                            <p>Sets the current access token.</p>                </div>
+                                            <p><p>Sets the current access token.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getIdToken">getIdToken</a>()
         
-                                            <p>Gets the current ID token.</p>                </div>
+                                            <p><p>Gets the current ID token.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setIdToken">setIdToken</a>($idToken)
         
-                                            <p>Sets the current ID token.</p>                </div>
+                                            <p><p>Sets the current ID token.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getRefreshToken">getRefreshToken</a>()
         
-                                            <p>Gets the refresh token associated with the current access token.</p>                </div>
+                                            <p><p>Gets the refresh token associated with the current access token.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setRefreshToken">setRefreshToken</a>($refreshToken)
         
-                                            <p>Sets the refresh token associated with the current access token.</p>                </div>
+                                            <p><p>Sets the refresh token associated with the current access token.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_setAdditionalClaims">setAdditionalClaims</a>(array $additionalClaims)
         
-                                            <p>Sets additional claims to be included in the JWT token</p>                </div>
+                                            <p><p>Sets additional claims to be included in the JWT token</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     array
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getAdditionalClaims">getAdditionalClaims</a>()
         
-                                            <p>Gets the additional claims to be included in the JWT token.</p>                </div>
+                                            <p><p>Gets the additional claims to be included in the JWT token.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     null|array
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_getLastReceivedToken">getLastReceivedToken</a>()
         
-                                            <p>The expiration of the last received token.</p>                </div>
-                <div class="col-md-2"></div>
-            </div>
-                    <div class="row">
-                <div class="col-md-2 type">
-                    string
-                </div>
-                <div class="col-md-8 type">
-                    <a href="#method_getClientName">getClientName</a>(callable $httpHandler = null)
-        
-                                            <p>Get the client ID.</p>                </div>
+                                            <p><p>The expiration of the last received token.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
             </div>
@@ -869,75 +1083,111 @@ grant type.</p>                </div>
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L323">line 323</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L323">at line 323</a></div>
         <code>                    
     <strong>__construct</strong>(array $config)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Create a new OAuthCredentials.</p>                    <p>The configuration array accepts various options</p>
-
+        <div class="method-description">
+                            <p><p>Create a new OAuthCredentials.</p></p>                <p><p>The configuration array accepts various options</p>
 <ul>
-<li><p>authorizationUri
+<li>
+<p>authorizationUri
 The authorization server's HTTP endpoint capable of
-authenticating the end-user and obtaining authorization.</p></li>
-<li><p>tokenCredentialUri
+authenticating the end-user and obtaining authorization.</p>
+</li>
+<li>
+<p>tokenCredentialUri
 The authorization server's HTTP endpoint capable of issuing
-tokens and refreshing expired tokens.</p></li>
-<li><p>clientId
+tokens and refreshing expired tokens.</p>
+</li>
+<li>
+<p>clientId
 A unique identifier issued to the client to identify itself to the
-authorization server.</p></li>
-<li><p>clientSecret
+authorization server.</p>
+</li>
+<li>
+<p>clientSecret
 A shared symmetric secret issued by the authorization server,
-which is used to authenticate the client.</p></li>
-<li><p>scope
+which is used to authenticate the client.</p>
+</li>
+<li>
+<p>scope
 The scope of the access request, expressed either as an Array
-or as a space-delimited String.</p></li>
-<li><p>state
-An arbitrary string designed to allow the client to maintain state.</p></li>
-<li><p>redirectUri
-The redirection URI used in the initial request.</p></li>
-<li><p>username
-The resource owner's username.</p></li>
-<li><p>password
-The resource owner's password.</p></li>
-<li><p>issuer
-Issuer ID when using assertion profile</p></li>
-<li><p>audience
-Target audience for assertions</p></li>
-<li><p>expiry
-Number of seconds assertions are valid for</p></li>
-<li><p>signingKey
-Signing key when using assertion profile</p></li>
-<li><p>signingKeyId
-Signing key id when using assertion profile</p></li>
-<li><p>refreshToken
+or as a space-delimited String.</p>
+</li>
+<li>
+<p>state
+An arbitrary string designed to allow the client to maintain state.</p>
+</li>
+<li>
+<p>redirectUri
+The redirection URI used in the initial request.</p>
+</li>
+<li>
+<p>username
+The resource owner's username.</p>
+</li>
+<li>
+<p>password
+The resource owner's password.</p>
+</li>
+<li>
+<p>issuer
+Issuer ID when using assertion profile</p>
+</li>
+<li>
+<p>audience
+Target audience for assertions</p>
+</li>
+<li>
+<p>expiry
+Number of seconds assertions are valid for</p>
+</li>
+<li>
+<p>signingKey
+Signing key when using assertion profile</p>
+</li>
+<li>
+<p>signingKeyId
+Signing key id when using assertion profile</p>
+</li>
+<li>
+<p>refreshToken
 The refresh token associated with the access token
-to be refreshed.</p></li>
-<li><p>accessToken
-The current access token for this client.</p></li>
-<li><p>idToken
-The current ID token for this client.</p></li>
-<li><p>extensionParams
+to be refreshed.</p>
+</li>
+<li>
+<p>accessToken
+The current access token for this client.</p>
+</li>
+<li>
+<p>idToken
+The current ID token for this client.</p>
+</li>
+<li>
+<p>extensionParams
 When using an extension grant type, this is the set of parameters used
-by that extension.</p></li>
-</ul>
-</p>                            </div>
-                <div class="tags">
+by that extension.</p>
+</li>
+</ul></p>        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
                 <td>array</td>
                 <td>$config</td>
-                <td>Configuration array</td>
+                <td><p>Configuration array</p></td>
             </tr>
             </table>
 
+            
             
             
             
@@ -947,40 +1197,40 @@ by that extension.</p></li>
             </div>
                     <div class="method-item">
                     <h3 id="method_verifyIdToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L391">line 391</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L391">at line 391</a></div>
         <code>                    null|object
     <strong>verifyIdToken</strong>(string $publicKey = null, array $allowed_algs = array())
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Verifies the idToken if present.</p>                    <p><ul>
+        <div class="method-description">
+                            <p><p>Verifies the idToken if present.</p></p>                <p><ul>
 <li>if none is present, return null</li>
 <li>if present, but invalid, raises DomainException.</li>
 <li>otherwise returns the payload in the idtoken as a PHP object.</li>
 </ul>
-
 <p>The behavior of this method varies depending on the version of
 <code>firebase/php-jwt</code> you are using. In versions lower than 3.0.0, if
 <code>$publicKey</code> is null, the key is decoded without being verified. In
 newer versions, if a public key is not given, this method will throw an
-<code>\InvalidArgumentException</code>.</p>                            </div>
-                <div class="tags">
+<code>\InvalidArgumentException</code>.</p></p>        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
                 <td>string</td>
                 <td>$publicKey</td>
-                <td>The public key to use to authenticate the token</td>
+                <td><p>The public key to use to authenticate the token</p></td>
             </tr>
                     <tr>
                 <td>array</td>
                 <td>$allowed_algs</td>
-                <td>List of supported verification algorithms</td>
+                <td><p>List of supported verification algorithms</p></td>
             </tr>
             </table>
 
@@ -999,32 +1249,32 @@ newer versions, if a public key is not given, this method will throw an
 
                     <table class="table table-condensed">
                     <tr>
-                <td><a target="_blank" href="http://php.net/DomainException">DomainException</a></td>
-                <td>if the token is missing an audience.</td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/DomainException">DomainException</a></td>
+                <td></td>
             </tr>
                     <tr>
-                <td><a target="_blank" href="http://php.net/DomainException">DomainException</a></td>
-                <td>if the audience does not match the one set in
-        the OAuth2 class instance.</td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/DomainException">DomainException</a></td>
+                <td></td>
             </tr>
                     <tr>
-                <td><a target="_blank" href="http://php.net/UnexpectedValueException">UnexpectedValueException</a></td>
-                <td>If the token is invalid</td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/UnexpectedValueException">UnexpectedValueException</a></td>
+                <td></td>
             </tr>
                     <tr>
                 <td><abbr title="Google\Auth\SignatureInvalidException">SignatureInvalidException</abbr></td>
-                <td>If the signature is invalid.</td>
+                <td></td>
             </tr>
                     <tr>
                 <td><abbr title="Google\Auth\BeforeValidException">BeforeValidException</abbr></td>
-                <td>If the token is not yet valid.</td>
+                <td></td>
             </tr>
                     <tr>
                 <td><abbr title="Google\Auth\ExpiredException">ExpiredException</abbr></td>
-                <td>If the token has expired.</td>
+                <td></td>
             </tr>
             </table>
 
+            
             
                     </div>
     </div>
@@ -1032,25 +1282,26 @@ newer versions, if a public key is not given, this method will throw an
             </div>
                     <div class="method-item">
                     <h3 id="method_toJwt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L415">line 415</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L415">at line 415</a></div>
         <code>                    string
     <strong>toJwt</strong>(array $config = [])
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Obtains the encoded jwt from the instance data.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Obtains the encoded jwt from the instance data.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
                 <td>array</td>
                 <td>$config</td>
-                <td>array optional configuration parameters</td>
+                <td><p>array optional configuration parameters</p></td>
             </tr>
             </table>
 
@@ -1066,34 +1317,37 @@ newer versions, if a public key is not given, this method will throw an
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_generateCredentialsRequest">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L469">line 469</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L469">at line 469</a></div>
         <code>                    <abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr>
     <strong>generateCredentialsRequest</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Generates a request for token credentials.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Generates a request for token credentials.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
         <tr>
             <td><abbr title="Psr\Http\Message\RequestInterface">RequestInterface</abbr></td>
-            <td>the authorization Url.</td>
+            <td><p>the authorization Url.</p></td>
         </tr>
     </table>
 
+            
             
             
                     </div>
@@ -1102,25 +1356,26 @@ newer versions, if a public key is not given, this method will throw an
             </div>
                     <div class="method-item">
                     <h3 id="method_fetchAuthToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L528">line 528</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L528">at line 528</a></div>
         <code>                    array
     <strong>fetchAuthToken</strong>(callable $httpHandler = null)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Fetches the auth tokens based on the current state.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Fetches the auth tokens based on the current state.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
                 <td>callable</td>
                 <td>$httpHandler</td>
-                <td>callback which delivers psr7 request</td>
+                <td><p>callback which delivers psr7 request</p></td>
             </tr>
             </table>
 
@@ -1130,10 +1385,11 @@ newer versions, if a public key is not given, this method will throw an
                     <table class="table table-condensed">
         <tr>
             <td>array</td>
-            <td>a hash of auth tokens</td>
+            <td><p>a hash of auth tokens</p></td>
         </tr>
     </table>
 
+            
             
             
                     </div>
@@ -1142,28 +1398,30 @@ newer versions, if a public key is not given, this method will throw an
             </div>
                     <div class="method-item">
                     <h3 id="method_getCacheKey">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L548">line 548</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L548">at line 548</a></div>
         <code>                    string
     <strong>getCacheKey</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Obtains a key that can used to cache the results of #fetchAuthToken.</p>                    <p>The key is derived from the scopes.</p>                            </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Obtains a key that can used to cache the results of #fetchAuthToken.</p></p>                <p><p>The key is derived from the scopes.</p></p>        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
         <tr>
             <td>string</td>
-            <td>a key that may be used to cache the auth token.</td>
+            <td><p>a key that may be used to cache the auth token.</p></td>
         </tr>
     </table>
 
+            
             
             
                     </div>
@@ -1172,25 +1430,26 @@ newer versions, if a public key is not given, this method will throw an
             </div>
                     <div class="method-item">
                     <h3 id="method_parseTokenResponse">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L569">line 569</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L569">at line 569</a></div>
         <code>                    array
     <strong>parseTokenResponse</strong>(<abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr> $resp)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Parses the fetched tokens.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Parses the fetched tokens.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
                 <td><abbr title="Psr\Http\Message\ResponseInterface">ResponseInterface</abbr></td>
                 <td>$resp</td>
-                <td>the response.</td>
+                <td><p>the response.</p></td>
             </tr>
             </table>
 
@@ -1200,7 +1459,7 @@ newer versions, if a public key is not given, this method will throw an
                     <table class="table table-condensed">
         <tr>
             <td>array</td>
-            <td>the tokens parsed from the response body.</td>
+            <td><p>the tokens parsed from the response body.</p></td>
         </tr>
     </table>
 
@@ -1209,11 +1468,12 @@ newer versions, if a public key is not given, this method will throw an
 
                     <table class="table table-condensed">
                     <tr>
-                <td><a target="_blank" href="http://php.net/Exception">Exception</a></td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/Exception">Exception</a></td>
                 <td></td>
             </tr>
             </table>
 
+            
             
                     </div>
     </div>
@@ -1221,53 +1481,62 @@ newer versions, if a public key is not given, this method will throw an
             </div>
                     <div class="method-item">
                     <h3 id="method_updateToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L623">line 623</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L623">at line 623</a></div>
         <code>                    
     <strong>updateToken</strong>(array $config)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Updates an OAuth 2.0 client.</p>                    <p>Example:</p>
-
+        <div class="method-description">
+                            <p><p>Updates an OAuth 2.0 client.</p></p>                <p><p>Example:</p>
 <pre><code>$oauth-&gt;updateToken([
     'refresh_token' =&gt; 'n4E9O119d',
     'access_token' =&gt; 'FJQbwq9',
     'expires_in' =&gt; 3600
-]);
-</code></pre>
-</p>                            </div>
-                <div class="tags">
+]);</code></pre></p>        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
                 <td>array</td>
                 <td>$config</td>
-                <td>The configuration parameters related to the token.</p>
-
+                <td><p>The configuration parameters related to the token.</p>
 <ul>
-<li><p>refresh_token
+<li>
+<p>refresh_token
 The refresh token associated with the access token
-to be refreshed.</p></li>
-<li><p>access_token
-The current access token for this client.</p></li>
-<li><p>id_token
-The current ID token for this client.</p></li>
-<li><p>expires_in
-The time in seconds until access token expiration.</p></li>
-<li><p>expires_at
-The time as an integer number of seconds since the Epoch</p></li>
-<li><p>issued_at
-The timestamp that the token was issued at.</p></li>
-</ul>
-</td>
+to be refreshed.</p>
+</li>
+<li>
+<p>access_token
+The current access token for this client.</p>
+</li>
+<li>
+<p>id_token
+The current ID token for this client.</p>
+</li>
+<li>
+<p>expires_in
+The time in seconds until access token expiration.</p>
+</li>
+<li>
+<p>expires_at
+The time as an integer number of seconds since the Epoch</p>
+</li>
+<li>
+<p>issued_at
+The timestamp that the token was issued at.</p>
+</li>
+</ul></td>
             </tr>
             </table>
 
+            
             
             
             
@@ -1277,25 +1546,26 @@ The timestamp that the token was issued at.</p></li>
             </div>
                     <div class="method-item">
                     <h3 id="method_buildFullAuthorizationUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L659">line 659</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L659">at line 659</a></div>
         <code>                    <abbr title="Psr\Http\Message\UriInterface">UriInterface</abbr>
     <strong>buildFullAuthorizationUri</strong>(array $config = [])
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Builds the authorization Uri that the user should be redirected to.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Builds the authorization Uri that the user should be redirected to.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
                 <td>array</td>
                 <td>$config</td>
-                <td>configuration options that customize the return url</td>
+                <td><p>configuration options that customize the return url</p></td>
             </tr>
             </table>
 
@@ -1305,7 +1575,7 @@ The timestamp that the token was issued at.</p></li>
                     <table class="table table-condensed">
         <tr>
             <td><abbr title="Psr\Http\Message\UriInterface">UriInterface</abbr></td>
-            <td>the authorization Url.</td>
+            <td><p>the authorization Url.</p></td>
         </tr>
     </table>
 
@@ -1314,11 +1584,12 @@ The timestamp that the token was issued at.</p></li>
 
                     <table class="table table-condensed">
                     <tr>
-                <td><a target="_blank" href="http://php.net/InvalidArgumentException">InvalidArgumentException</a></td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/InvalidArgumentException">InvalidArgumentException</a></td>
                 <td></td>
             </tr>
             </table>
 
+            
             
                     </div>
     </div>
@@ -1326,19 +1597,20 @@ The timestamp that the token was issued at.</p></li>
             </div>
                     <div class="method-item">
                     <h3 id="method_setAuthorizationUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L714">line 714</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L714">at line 714</a></div>
         <code>                    
     <strong>setAuthorizationUri</strong>(string $uri)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the authorization server's HTTP endpoint capable of authenticating
-the end-user and obtaining authorization.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the authorization server's HTTP endpoint capable of authenticating
+the end-user and obtaining authorization.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1349,6 +1621,7 @@ the end-user and obtaining authorization.</p>                                   
             </tr>
             </table>
 
+            
             
             
             
@@ -1358,19 +1631,20 @@ the end-user and obtaining authorization.</p>                                   
             </div>
                     <div class="method-item">
                     <h3 id="method_getAuthorizationUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L725">line 725</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L725">at line 725</a></div>
         <code>                    <abbr title="Psr\Http\Message\UriInterface">UriInterface</abbr>
     <strong>getAuthorizationUri</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the authorization server's HTTP endpoint capable of authenticating
-the end-user and obtaining authorization.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the authorization server's HTTP endpoint capable of authenticating
+the end-user and obtaining authorization.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -1383,25 +1657,27 @@ the end-user and obtaining authorization.</p>                                   
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getTokenCredentialUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L736">line 736</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L736">at line 736</a></div>
         <code>                    string
     <strong>getTokenCredentialUri</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the authorization server's HTTP endpoint capable of issuing tokens
-and refreshing expired tokens.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the authorization server's HTTP endpoint capable of issuing tokens
+and refreshing expired tokens.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -1414,25 +1690,27 @@ and refreshing expired tokens.</p>                                              
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_setTokenCredentialUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L747">line 747</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L747">at line 747</a></div>
         <code>                    
     <strong>setTokenCredentialUri</strong>(string $uri)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the authorization server's HTTP endpoint capable of issuing tokens
-and refreshing expired tokens.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the authorization server's HTTP endpoint capable of issuing tokens
+and refreshing expired tokens.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1443,6 +1721,7 @@ and refreshing expired tokens.</p>                                              
             </tr>
             </table>
 
+            
             
             
             
@@ -1452,18 +1731,19 @@ and refreshing expired tokens.</p>                                              
             </div>
                     <div class="method-item">
                     <h3 id="method_getRedirectUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L757">line 757</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L757">at line 757</a></div>
         <code>                    string
     <strong>getRedirectUri</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the redirection URI used in the initial request.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the redirection URI used in the initial request.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -1476,24 +1756,26 @@ and refreshing expired tokens.</p>                                              
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_setRedirectUri">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L767">line 767</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L767">at line 767</a></div>
         <code>                    
     <strong>setRedirectUri</strong>(string $uri)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the redirection URI used in the initial request.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the redirection URI used in the initial request.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1507,24 +1789,26 @@ and refreshing expired tokens.</p>                                              
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getScope">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L792">line 792</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L792">at line 792</a></div>
         <code>                    string
     <strong>getScope</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the scope of the access requests as a space-delimited String.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the scope of the access requests as a space-delimited String.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -1537,25 +1821,27 @@ and refreshing expired tokens.</p>                                              
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_setScope">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L808">line 808</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L808">at line 808</a></div>
         <code>                    
     <strong>setScope</strong>(string|array $scope)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the scope of the access request, expressed either as an Array or as
-a space-delimited String.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the scope of the access request, expressed either as an Array or as
+a space-delimited String.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1572,11 +1858,12 @@ a space-delimited String.</p>                                                </d
 
                     <table class="table table-condensed">
                     <tr>
-                <td><a target="_blank" href="http://php.net/InvalidArgumentException">InvalidArgumentException</a></td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/InvalidArgumentException">InvalidArgumentException</a></td>
                 <td></td>
             </tr>
             </table>
 
+            
             
                     </div>
     </div>
@@ -1584,18 +1871,19 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_getGrantType">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L836">line 836</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L836">at line 836</a></div>
         <code>                    string
     <strong>getGrantType</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the current grant type.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the current grant type.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -1608,24 +1896,26 @@ a space-delimited String.</p>                                                </d
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_setGrantType">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L869">line 869</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L869">at line 869</a></div>
         <code>                    
     <strong>setGrantType</strong>($grantType)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the current grant type.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the current grant type.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1642,11 +1932,12 @@ a space-delimited String.</p>                                                </d
 
                     <table class="table table-condensed">
                     <tr>
-                <td><a target="_blank" href="http://php.net/InvalidArgumentException">InvalidArgumentException</a></td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/InvalidArgumentException">InvalidArgumentException</a></td>
                 <td></td>
             </tr>
             </table>
 
+            
             
                     </div>
     </div>
@@ -1654,18 +1945,19 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_getState">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L889">line 889</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L889">at line 889</a></div>
         <code>                    string
     <strong>getState</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets an arbitrary string designed to allow the client to maintain state.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets an arbitrary string designed to allow the client to maintain state.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -1678,24 +1970,26 @@ a space-delimited String.</p>                                                </d
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_setState">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L899">line 899</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L899">at line 899</a></div>
         <code>                    
     <strong>setState</strong>(string $state)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets an arbitrary string designed to allow the client to maintain state.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets an arbitrary string designed to allow the client to maintain state.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1709,24 +2003,27 @@ a space-delimited String.</p>                                                </d
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getCode">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L907">line 907</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L907">at line 907</a></div>
         <code>                    
     <strong>getCode</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the authorization code issued to this client.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the authorization code issued to this client.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -1736,18 +2033,19 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_setCode">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L917">line 917</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L917">at line 917</a></div>
         <code>                    
     <strong>setCode</strong>(string $code)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the authorization code issued to this client.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the authorization code issued to this client.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1761,24 +2059,27 @@ a space-delimited String.</p>                                                </d
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getUsername">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L925">line 925</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L925">at line 925</a></div>
         <code>                    
     <strong>getUsername</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the resource owner's username.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the resource owner's username.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -1788,18 +2089,19 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_setUsername">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L935">line 935</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L935">at line 935</a></div>
         <code>                    
     <strong>setUsername</strong>(string $username)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the resource owner's username.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the resource owner's username.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1813,24 +2115,27 @@ a space-delimited String.</p>                                                </d
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getPassword">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L943">line 943</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L943">at line 943</a></div>
         <code>                    
     <strong>getPassword</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the resource owner's password.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the resource owner's password.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -1840,18 +2145,19 @@ a space-delimited String.</p>                                                </d
             </div>
                     <div class="method-item">
                     <h3 id="method_setPassword">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L953">line 953</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L953">at line 953</a></div>
         <code>                    
     <strong>setPassword</strong>($password)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the resource owner's password.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the resource owner's password.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1865,25 +2171,28 @@ a space-delimited String.</p>                                                </d
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getClientId">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L962">line 962</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L962">at line 962</a></div>
         <code>                    
     <strong>getClientId</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets a unique identifier issued to the client to identify itself to the
-authorization server.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets a unique identifier issued to the client to identify itself to the
+authorization server.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -1893,19 +2202,20 @@ authorization server.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setClientId">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L973">line 973</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L973">at line 973</a></div>
         <code>                    
     <strong>setClientId</strong>($clientId)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets a unique identifier issued to the client to identify itself to the
-authorization server.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets a unique identifier issued to the client to identify itself to the
+authorization server.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1919,25 +2229,28 @@ authorization server.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getClientSecret">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L982">line 982</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L982">at line 982</a></div>
         <code>                    
     <strong>getClientSecret</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets a shared symmetric secret issued by the authorization server, which
-is used to authenticate the client.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets a shared symmetric secret issued by the authorization server, which
+is used to authenticate the client.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -1947,19 +2260,20 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setClientSecret">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L993">line 993</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L993">at line 993</a></div>
         <code>                    
     <strong>setClientSecret</strong>($clientSecret)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets a shared symmetric secret issued by the authorization server, which
-is used to authenticate the client.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets a shared symmetric secret issued by the authorization server, which
+is used to authenticate the client.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -1973,24 +2287,27 @@ is used to authenticate the client.</p>                                         
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getIssuer">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1001">line 1001</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1001">at line 1001</a></div>
         <code>                    
     <strong>getIssuer</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the Issuer ID when using assertion profile.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the Issuer ID when using assertion profile.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2000,18 +2317,19 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setIssuer">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1011">line 1011</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1011">at line 1011</a></div>
         <code>                    
     <strong>setIssuer</strong>(string $issuer)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the Issuer ID when using assertion profile.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the Issuer ID when using assertion profile.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2025,24 +2343,27 @@ is used to authenticate the client.</p>                                         
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getSub">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1019">line 1019</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1019">at line 1019</a></div>
         <code>                    
     <strong>getSub</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the target sub when issuing assertions.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the target sub when issuing assertions.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2052,18 +2373,19 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setSub">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1029">line 1029</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1029">at line 1029</a></div>
         <code>                    
     <strong>setSub</strong>(string $sub)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the target sub when issuing assertions.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the target sub when issuing assertions.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2077,24 +2399,27 @@ is used to authenticate the client.</p>                                         
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getAudience">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1037">line 1037</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1037">at line 1037</a></div>
         <code>                    
     <strong>getAudience</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the target audience when issuing assertions.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the target audience when issuing assertions.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2104,18 +2429,19 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setAudience">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1047">line 1047</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1047">at line 1047</a></div>
         <code>                    
     <strong>setAudience</strong>(string $audience)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the target audience when issuing assertions.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the target audience when issuing assertions.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2129,24 +2455,27 @@ is used to authenticate the client.</p>                                         
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getSigningKey">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1055">line 1055</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1055">at line 1055</a></div>
         <code>                    
     <strong>getSigningKey</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the signing key when using an assertion profile.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the signing key when using an assertion profile.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2156,18 +2485,19 @@ is used to authenticate the client.</p>                                         
             </div>
                     <div class="method-item">
                     <h3 id="method_setSigningKey">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1065">line 1065</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1065">at line 1065</a></div>
         <code>                    
     <strong>setSigningKey</strong>(string $signingKey)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the signing key when using an assertion profile.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the signing key when using an assertion profile.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2181,24 +2511,26 @@ is used to authenticate the client.</p>                                         
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getSigningKeyId">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1075">line 1075</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1075">at line 1075</a></div>
         <code>                    string
     <strong>getSigningKeyId</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the signing key id when using an assertion profile.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the signing key id when using an assertion profile.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -2211,24 +2543,26 @@ is used to authenticate the client.</p>                                         
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_setSigningKeyId">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1085">line 1085</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1085">at line 1085</a></div>
         <code>                    
     <strong>setSigningKeyId</strong>(string $signingKeyId)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the signing key id when using an assertion profile.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the signing key id when using an assertion profile.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2242,24 +2576,26 @@ is used to authenticate the client.</p>                                         
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getSigningAlgorithm">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1095">line 1095</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1095">at line 1095</a></div>
         <code>                    string
     <strong>getSigningAlgorithm</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the signing algorithm when using an assertion profile.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the signing algorithm when using an assertion profile.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -2272,24 +2608,26 @@ is used to authenticate the client.</p>                                         
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_setSigningAlgorithm">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1105">line 1105</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1105">at line 1105</a></div>
         <code>                    
     <strong>setSigningAlgorithm</strong>(string $signingAlgorithm)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the signing algorithm when using an assertion profile.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the signing algorithm when using an assertion profile.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2303,25 +2641,28 @@ is used to authenticate the client.</p>                                         
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getExtensionParams">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1120">line 1120</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1120">at line 1120</a></div>
         <code>                    
     <strong>getExtensionParams</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the set of parameters used by extension when using an extension
-grant type.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the set of parameters used by extension when using an extension
+grant type.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2331,19 +2672,20 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setExtensionParams">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1131">line 1131</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1131">at line 1131</a></div>
         <code>                    
     <strong>setExtensionParams</strong>($extensionParams)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the set of parameters used by extension when using an extension
-grant type.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the set of parameters used by extension when using an extension
+grant type.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2357,24 +2699,27 @@ grant type.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getExpiry">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1139">line 1139</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1139">at line 1139</a></div>
         <code>                    
     <strong>getExpiry</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the number of seconds assertions are valid for.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the number of seconds assertions are valid for.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2384,18 +2729,19 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setExpiry">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1149">line 1149</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1149">at line 1149</a></div>
         <code>                    
     <strong>setExpiry</strong>(int $expiry)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the number of seconds assertions are valid for.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the number of seconds assertions are valid for.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2409,24 +2755,27 @@ grant type.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getExpiresIn">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1157">line 1157</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1157">at line 1157</a></div>
         <code>                    
     <strong>getExpiresIn</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the lifetime of the access token in seconds.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the lifetime of the access token in seconds.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2436,18 +2785,19 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setExpiresIn">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1167">line 1167</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1167">at line 1167</a></div>
         <code>                    
     <strong>setExpiresIn</strong>(int $expiresIn)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the lifetime of the access token in seconds.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the lifetime of the access token in seconds.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2461,24 +2811,26 @@ grant type.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getExpiresAt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1183">line 1183</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1183">at line 1183</a></div>
         <code>                    int
     <strong>getExpiresAt</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the time the current access token expires at.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the time the current access token expires at.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -2491,24 +2843,26 @@ grant type.</p>                                                </div>
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_isExpired">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1201">line 1201</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1201">at line 1201</a></div>
         <code>                    bool
     <strong>isExpired</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Returns true if the acccess token has expired.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Returns true if the acccess token has expired.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -2521,24 +2875,26 @@ grant type.</p>                                                </div>
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_setExpiresAt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1214">line 1214</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1214">at line 1214</a></div>
         <code>                    
     <strong>setExpiresAt</strong>(int $expiresAt)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the time the current access token expires at.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the time the current access token expires at.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2552,24 +2908,27 @@ grant type.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getIssuedAt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1222">line 1222</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1222">at line 1222</a></div>
         <code>                    
     <strong>getIssuedAt</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the time the current access token was issued at.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the time the current access token was issued at.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2579,18 +2938,19 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setIssuedAt">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1232">line 1232</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1232">at line 1232</a></div>
         <code>                    
     <strong>setIssuedAt</strong>(int $issuedAt)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the time the current access token was issued at.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the time the current access token was issued at.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2604,24 +2964,27 @@ grant type.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getAccessToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1240">line 1240</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1240">at line 1240</a></div>
         <code>                    
     <strong>getAccessToken</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the current access token.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the current access token.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2631,18 +2994,19 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setAccessToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1250">line 1250</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1250">at line 1250</a></div>
         <code>                    
     <strong>setAccessToken</strong>(string $accessToken)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the current access token.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the current access token.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2656,24 +3020,27 @@ grant type.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getIdToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1258">line 1258</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1258">at line 1258</a></div>
         <code>                    
     <strong>getIdToken</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the current ID token.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the current ID token.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2683,18 +3050,19 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setIdToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1268">line 1268</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1268">at line 1268</a></div>
         <code>                    
     <strong>setIdToken</strong>($idToken)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the current ID token.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the current ID token.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2708,24 +3076,27 @@ grant type.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getRefreshToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1276">line 1276</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1276">at line 1276</a></div>
         <code>                    
     <strong>getRefreshToken</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the refresh token associated with the current access token.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the refresh token associated with the current access token.</p></p>                        
+        </div>
+        <div class="tags">
+            
             
             
             
@@ -2735,18 +3106,19 @@ grant type.</p>                                                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_setRefreshToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1286">line 1286</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1286">at line 1286</a></div>
         <code>                    
     <strong>setRefreshToken</strong>($refreshToken)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets the refresh token associated with the current access token.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets the refresh token associated with the current access token.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2760,24 +3132,26 @@ grant type.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_setAdditionalClaims">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1296">line 1296</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1296">at line 1296</a></div>
         <code>                    
     <strong>setAdditionalClaims</strong>(array $additionalClaims)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Sets additional claims to be included in the JWT token</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Sets additional claims to be included in the JWT token</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -2791,24 +3165,26 @@ grant type.</p>                                                </div>
             
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getAdditionalClaims">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1306">line 1306</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1306">at line 1306</a></div>
         <code>                    array
     <strong>getAdditionalClaims</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Gets the additional claims to be included in the JWT token.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Gets the additional claims to be included in the JWT token.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
@@ -2821,75 +3197,38 @@ grant type.</p>                                                </div>
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_getLastReceivedToken">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1316">line 1316</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1316">at line 1316</a></div>
         <code>                    null|array
     <strong>getLastReceivedToken</strong>()
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>The expiration of the last received token.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>The expiration of the last received token.</p></p>                        
+        </div>
+        <div class="tags">
             
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
         <tr>
             <td>null|array</td>
-            <td>{
-     The last received access token.</td>
+            <td><p>{
+The last received access token.</p></td>
         </tr>
     </table>
 
             
-            
-                    </div>
-    </div>
-
-            </div>
-                    <div class="method-item">
-                    <h3 id="method_getClientName">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.16.0/src/OAuth2.php#L1355">line 1355</a></div>
-        <code>                    string
-    <strong>getClientName</strong>(callable $httpHandler = null)
-        </code>
-    </h3>
-    <div class="details">
-            
-    
-
-                    <div class="method-description">
-                                    <p>Get the client ID.</p>                    <p>Alias of {see Google\Auth\OAuth2::getClientId()}.</p>                            </div>
-                <div class="tags">
-                            <h4>Parameters</h4>
-
-                    <table class="table table-condensed">
-                    <tr>
-                <td>callable</td>
-                <td>$httpHandler</td>
-                <td></td>
-            </tr>
-            </table>
-
-            
-                            <h4>Return Value</h4>
-
-                    <table class="table table-condensed">
-        <tr>
-            <td>string</td>
-            <td></td>
-        </tr>
-    </table>
-
             
             
                     </div>
@@ -2899,12 +3238,8 @@ grant type.</p>                                                </div>
             </div>
 
     
-            </div>
-                <div id="footer">
-        Generated by <a href="http://sami.sensiolabs.org/">Sami, the API Documentation Generator</a>.
-    </div>
-
-        </div>
+</div><div id="footer">
+        Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
     </body>
 

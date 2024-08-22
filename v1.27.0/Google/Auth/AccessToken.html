@@ -3,101 +3,246 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="robots" content="index, follow, all" />
-    <title>Google\Auth\AccessToken | Google Auth Library for PHP API Reference</title>
+    <title>Google\Auth\AccessToken | Google Auth Library PHP Reference Documentation</title>
 
             <link rel="stylesheet" type="text/css" href="../../css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="../../css/bootstrap-theme.min.css">
-        <link rel="stylesheet" type="text/css" href="../../css/sami.css">
-        <script src="../../js/jquery-1.11.1.min.js"></script>
-        <script src="../../js/bootstrap.min.js"></script>
-        <script src="../../js/typeahead.min.js"></script>
-        <script src="../../sami.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../css/doctum.css">
+        <link rel="stylesheet" type="text/css" href="../../fonts/doctum-font.css">
+        <script src="../../js/jquery-3.5.1.slim.min.js"></script>
+        <script async defer src="../../doctum.js"></script>
+        <script async defer src="../../js/bootstrap.min.js"></script>
+        <script async defer src="../../js/autocomplete.min.js"></script>
         <meta name="MobileOptimized" content="width">
         <meta name="HandheldFriendly" content="true">
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-    
-    
+
     </head>
 
-    <body id="class" data-name="class:Google_Auth_AccessToken" data-root-path="../../">
+    <body id="class" data-name="class:Google_Auth_AccessToken" data-root-path="../../" data-search-index-url="../../doctum-search.json">
             <div id="content">
         <div id="left-column">
                 <div id="control-panel">
-                    <form action="#" method="GET">
-                <select id="version-switcher" name="version">
-                                            <option value="../../../v1.0/index.html" data-version="v1.0">v1.0</option>
-                                            <option value="../../../v1.0.1/index.html" data-version="v1.0.1">v1.0.1</option>
-                                            <option value="../../../v1.1.0/index.html" data-version="v1.1.0">v1.1.0</option>
-                                            <option value="../../../v1.2.0/index.html" data-version="v1.2.0">v1.2.0</option>
-                                            <option value="../../../v1.2.1/index.html" data-version="v1.2.1">v1.2.1</option>
-                                            <option value="../../../v1.3.0/index.html" data-version="v1.3.0">v1.3.0</option>
-                                            <option value="../../../v1.3.1/index.html" data-version="v1.3.1">v1.3.1</option>
-                                            <option value="../../../v1.3.2/index.html" data-version="v1.3.2">v1.3.2</option>
-                                            <option value="../../../v1.3.3/index.html" data-version="v1.3.3">v1.3.3</option>
-                                            <option value="../../../v1.4.0/index.html" data-version="v1.4.0">v1.4.0</option>
-                                            <option value="../../../v1.5.0/index.html" data-version="v1.5.0">v1.5.0</option>
-                                            <option value="../../../v1.5.1/index.html" data-version="v1.5.1">v1.5.1</option>
-                                            <option value="../../../v1.5.2/index.html" data-version="v1.5.2">v1.5.2</option>
-                                            <option value="../../../v1.6.0/index.html" data-version="v1.6.0">v1.6.0</option>
-                                            <option value="../../../v1.6.1/index.html" data-version="v1.6.1">v1.6.1</option>
-                                            <option value="../../../v1.7.0/index.html" data-version="v1.7.0">v1.7.0</option>
-                                            <option value="../../../v1.7.1/index.html" data-version="v1.7.1">v1.7.1</option>
-                                            <option value="../../../v1.8.0/index.html" data-version="v1.8.0">v1.8.0</option>
-                                            <option value="../../../v1.9.0/index.html" data-version="v1.9.0">v1.9.0</option>
-                                            <option value="../../../v1.10.0/index.html" data-version="v1.10.0">v1.10.0</option>
-                                            <option value="../../../v1.11.0/index.html" data-version="v1.11.0">v1.11.0</option>
-                                            <option value="../../../v1.11.1/index.html" data-version="v1.11.1">v1.11.1</option>
-                                            <option value="../../../v1.12.0/index.html" data-version="v1.12.0">v1.12.0</option>
-                                            <option value="../../../v1.12.1/index.html" data-version="v1.12.1">v1.12.1</option>
-                                            <option value="../../../v1.13.0/index.html" data-version="v1.13.0">v1.13.0</option>
-                                            <option value="../../../v1.14.0/index.html" data-version="v1.14.0">v1.14.0</option>
-                                            <option value="../../../v1.14.1/index.html" data-version="v1.14.1">v1.14.1</option>
-                                            <option value="../../../v1.14.2/index.html" data-version="v1.14.2">v1.14.2</option>
-                                            <option value="../../../v1.14.3/index.html" data-version="v1.14.3">v1.14.3</option>
-                                            <option value="../../../v1.15.0/index.html" data-version="v1.15.0">v1.15.0</option>
-                                            <option value="../../../v1.15.1/index.html" data-version="v1.15.1">v1.15.1</option>
-                                            <option value="../../../v1.15.2/index.html" data-version="v1.15.2">v1.15.2</option>
-                                            <option value="../../../v1.16.0/index.html" data-version="v1.16.0">v1.16.0</option>
-                                            <option value="../../../v1.17.0/index.html" data-version="v1.17.0">v1.17.0</option>
-                                            <option value="../../../v1.18.0/index.html" data-version="v1.18.0">v1.18.0</option>
-                                            <option value="../../../v1.19.0/index.html" data-version="v1.19.0">v1.19.0</option>
-                                            <option value="../../../v1.19.1/index.html" data-version="v1.19.1">v1.19.1</option>
-                                            <option value="../../../v1.20.0/index.html" data-version="v1.20.0">v1.20.0</option>
-                                            <option value="../../../v1.20.1/index.html" data-version="v1.20.1">v1.20.1</option>
-                                            <option value="../../../v1.21.0/index.html" data-version="v1.21.0">v1.21.0</option>
-                                            <option value="../../../v1.21.1/index.html" data-version="v1.21.1">v1.21.1</option>
-                                            <option value="../../../v1.22.0/index.html" data-version="v1.22.0">v1.22.0</option>
-                                            <option value="../../../v1.23.0/index.html" data-version="v1.23.0">v1.23.0</option>
-                                            <option value="../../../v1.23.1/index.html" data-version="v1.23.1">v1.23.1</option>
-                                            <option value="../../../v1.24.0/index.html" data-version="v1.24.0">v1.24.0</option>
-                                            <option value="../../../v1.25.0/index.html" data-version="v1.25.0">v1.25.0</option>
-                                            <option value="../../../v1.26.0/index.html" data-version="v1.26.0">v1.26.0</option>
-                                            <option value="../../../v1.27.0/index.html" data-version="v1.27.0">v1.27.0</option>
-                                            <option value="../../../v1.28.0/index.html" data-version="v1.28.0">v1.28.0</option>
-                                            <option value="../../../v1.29.0/index.html" data-version="v1.29.0">v1.29.0</option>
-                                            <option value="../../../v1.29.1/index.html" data-version="v1.29.1">v1.29.1</option>
-                                            <option value="../../../v1.30.0/index.html" data-version="v1.30.0">v1.30.0</option>
-                                            <option value="../../../v1.31.0/index.html" data-version="v1.31.0">v1.31.0</option>
-                                            <option value="../../../v1.32.0/index.html" data-version="v1.32.0">v1.32.0</option>
-                                            <option value="../../../v1.32.1/index.html" data-version="v1.32.1">v1.32.1</option>
-                                            <option value="../../../v1.33.0/index.html" data-version="v1.33.0">v1.33.0</option>
-                                            <option value="../../../v1.34.0/index.html" data-version="v1.34.0">v1.34.0</option>
-                                            <option value="../../../v1.35.0/index.html" data-version="v1.35.0">v1.35.0</option>
-                                            <option value="../../../v1.36.0/index.html" data-version="v1.36.0">v1.36.0</option>
-                                            <option value="../../../v1.37.0/index.html" data-version="v1.37.0">v1.37.0</option>
-                                            <option value="../../../v1.37.1/index.html" data-version="v1.37.1">v1.37.1</option>
-                                            <option value="../../../main/index.html" data-version="main">main branch</option>
+                    <form action="#">
+                <select class="form-control" id="version-switcher" name="version">
+                                            <option
+                            value="../../../v1.0/index.html"
+                            data-version="v1.0" >v1.0</option>
+                                            <option
+                            value="../../../v1.0.1/index.html"
+                            data-version="v1.0.1" >v1.0.1</option>
+                                            <option
+                            value="../../../v1.1.0/index.html"
+                            data-version="v1.1.0" >v1.1.0</option>
+                                            <option
+                            value="../../../v1.2.0/index.html"
+                            data-version="v1.2.0" >v1.2.0</option>
+                                            <option
+                            value="../../../v1.10.0/index.html"
+                            data-version="v1.10.0" >v1.10.0</option>
+                                            <option
+                            value="../../../v1.11.0/index.html"
+                            data-version="v1.11.0" >v1.11.0</option>
+                                            <option
+                            value="../../../v1.11.1/index.html"
+                            data-version="v1.11.1" >v1.11.1</option>
+                                            <option
+                            value="../../../v1.12.0/index.html"
+                            data-version="v1.12.0" >v1.12.0</option>
+                                            <option
+                            value="../../../v1.12.1/index.html"
+                            data-version="v1.12.1" >v1.12.1</option>
+                                            <option
+                            value="../../../v1.13.0/index.html"
+                            data-version="v1.13.0" >v1.13.0</option>
+                                            <option
+                            value="../../../v1.14.0/index.html"
+                            data-version="v1.14.0" >v1.14.0</option>
+                                            <option
+                            value="../../../v1.14.1/index.html"
+                            data-version="v1.14.1" >v1.14.1</option>
+                                            <option
+                            value="../../../v1.2.1/index.html"
+                            data-version="v1.2.1" >v1.2.1</option>
+                                            <option
+                            value="../../../v1.14.2/index.html"
+                            data-version="v1.14.2" >v1.14.2</option>
+                                            <option
+                            value="../../../v1.14.3/index.html"
+                            data-version="v1.14.3" >v1.14.3</option>
+                                            <option
+                            value="../../../v1.15.0/index.html"
+                            data-version="v1.15.0" >v1.15.0</option>
+                                            <option
+                            value="../../../v1.16.0/index.html"
+                            data-version="v1.16.0" >v1.16.0</option>
+                                            <option
+                            value="../../../v1.17.0/index.html"
+                            data-version="v1.17.0" >v1.17.0</option>
+                                            <option
+                            value="../../../v1.18.0/index.html"
+                            data-version="v1.18.0" >v1.18.0</option>
+                                            <option
+                            value="../../../v1.19.0/index.html"
+                            data-version="v1.19.0" >v1.19.0</option>
+                                            <option
+                            value="../../../v1.19.1/index.html"
+                            data-version="v1.19.1" >v1.19.1</option>
+                                            <option
+                            value="../../../v1.5.0/index.html"
+                            data-version="v1.5.0" >v1.5.0</option>
+                                            <option
+                            value="../../../v1.15.1/index.html"
+                            data-version="v1.15.1" >v1.15.1</option>
+                                            <option
+                            value="../../../v1.20.0/index.html"
+                            data-version="v1.20.0" >v1.20.0</option>
+                                            <option
+                            value="../../../v1.20.1/index.html"
+                            data-version="v1.20.1" >v1.20.1</option>
+                                            <option
+                            value="../../../v1.21.0/index.html"
+                            data-version="v1.21.0" >v1.21.0</option>
+                                            <option
+                            value="../../../v1.21.1/index.html"
+                            data-version="v1.21.1" >v1.21.1</option>
+                                            <option
+                            value="../../../v1.22.0/index.html"
+                            data-version="v1.22.0" >v1.22.0</option>
+                                            <option
+                            value="../../../v1.5.1/index.html"
+                            data-version="v1.5.1" >v1.5.1</option>
+                                            <option
+                            value="../../../v1.5.2/index.html"
+                            data-version="v1.5.2" >v1.5.2</option>
+                                            <option
+                            value="../../../v1.15.2/index.html"
+                            data-version="v1.15.2" >v1.15.2</option>
+                                            <option
+                            value="../../../v1.23.0/index.html"
+                            data-version="v1.23.0" >v1.23.0</option>
+                                            <option
+                            value="../../../v1.3.0/index.html"
+                            data-version="v1.3.0" >v1.3.0</option>
+                                            <option
+                            value="../../../v1.3.1/index.html"
+                            data-version="v1.3.1" >v1.3.1</option>
+                                            <option
+                            value="../../../v1.3.2/index.html"
+                            data-version="v1.3.2" >v1.3.2</option>
+                                            <option
+                            value="../../../v1.3.3/index.html"
+                            data-version="v1.3.3" >v1.3.3</option>
+                                            <option
+                            value="../../../v1.23.1/index.html"
+                            data-version="v1.23.1" >v1.23.1</option>
+                                            <option
+                            value="../../../v1.27.0/index.html"
+                            data-version="v1.27.0" selected>v1.27.0</option>
+                                            <option
+                            value="../../../v1.28.0/index.html"
+                            data-version="v1.28.0" >v1.28.0</option>
+                                            <option
+                            value="../../../v1.29.0/index.html"
+                            data-version="v1.29.0" >v1.29.0</option>
+                                            <option
+                            value="../../../v1.29.1/index.html"
+                            data-version="v1.29.1" >v1.29.1</option>
+                                            <option
+                            value="../../../v1.30.0/index.html"
+                            data-version="v1.30.0" >v1.30.0</option>
+                                            <option
+                            value="../../../v1.31.0/index.html"
+                            data-version="v1.31.0" >v1.31.0</option>
+                                            <option
+                            value="../../../v1.32.0/index.html"
+                            data-version="v1.32.0" >v1.32.0</option>
+                                            <option
+                            value="../../../v1.32.1/index.html"
+                            data-version="v1.32.1" >v1.32.1</option>
+                                            <option
+                            value="../../../v1.33.0/index.html"
+                            data-version="v1.33.0" >v1.33.0</option>
+                                            <option
+                            value="../../../v1.4.0/index.html"
+                            data-version="v1.4.0" >v1.4.0</option>
+                                            <option
+                            value="../../../v1.34.0/index.html"
+                            data-version="v1.34.0" >v1.34.0</option>
+                                            <option
+                            value="../../../v1.35.0/index.html"
+                            data-version="v1.35.0" >v1.35.0</option>
+                                            <option
+                            value="../../../v1.36.0/index.html"
+                            data-version="v1.36.0" >v1.36.0</option>
+                                            <option
+                            value="../../../v1.37.0/index.html"
+                            data-version="v1.37.0" >v1.37.0</option>
+                                            <option
+                            value="../../../v1.37.1/index.html"
+                            data-version="v1.37.1" >v1.37.1</option>
+                                            <option
+                            value="../../../v1.38.0/index.html"
+                            data-version="v1.38.0" >v1.38.0</option>
+                                            <option
+                            value="../../../v1.39.0/index.html"
+                            data-version="v1.39.0" >v1.39.0</option>
+                                            <option
+                            value="../../../v1.40.0/index.html"
+                            data-version="v1.40.0" >v1.40.0</option>
+                                            <option
+                            value="../../../v1.41.0/index.html"
+                            data-version="v1.41.0" >v1.41.0</option>
+                                            <option
+                            value="../../../v1.6.0/index.html"
+                            data-version="v1.6.0" >v1.6.0</option>
+                                            <option
+                            value="../../../v1.6.1/index.html"
+                            data-version="v1.6.1" >v1.6.1</option>
+                                            <option
+                            value="../../../v1.24.0/index.html"
+                            data-version="v1.24.0" >v1.24.0</option>
+                                            <option
+                            value="../../../v1.7.0/index.html"
+                            data-version="v1.7.0" >v1.7.0</option>
+                                            <option
+                            value="../../../v1.7.1/index.html"
+                            data-version="v1.7.1" >v1.7.1</option>
+                                            <option
+                            value="../../../v1.25.0/index.html"
+                            data-version="v1.25.0" >v1.25.0</option>
+                                            <option
+                            value="../../../v1.8.0/index.html"
+                            data-version="v1.8.0" >v1.8.0</option>
+                                            <option
+                            value="../../../v1.9.0/index.html"
+                            data-version="v1.9.0" >v1.9.0</option>
+                                            <option
+                            value="../../../v1.26.0/index.html"
+                            data-version="v1.26.0" >v1.26.0</option>
+                                            <option
+                            value="../../../doctum/index.html"
+                            data-version="doctum" >doctum</option>
                                     </select>
             </form>
-                <script>
-            $('option[data-version="'+window.projectVersion+'"]').prop('selected', true);
-        </script>
-        <form id="search-form" action="../../search.html" method="GET">
-            <span class="glyphicon glyphicon-search"></span>
+                <div class="search-bar hidden" id="search-progress-bar-container">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" id="search-progress-bar"
+                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+            </div>
+        </div>
+        <form id="search-form" action="../../search.html">
+            <span class="icon icon-search"></span>
             <input name="search"
+                   id="doctum-search-auto-complete"
                    class="typeahead form-control"
                    type="search"
-                   placeholder="Search">
+                   placeholder="Search"
+                   spellcheck="false"
+                   autocorrect="off"
+                   autocomplete="off"
+                   autocapitalize="off">
+            <div class="auto-complete-results" id="auto-complete-results"></div>
         </form>
     </div>
 
@@ -114,13 +259,86 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="../../index.html">Google Auth Library for PHP API Reference</a>
+                <a class="navbar-brand" href="../../index.html">Google Auth Library PHP Reference Documentation</a>
             </div>
             <div class="collapse navbar-collapse" id="navbar-elements">
                 <ul class="nav navbar-nav">
+                                        <li role="presentation" class="dropdown visible-xs-block visible-sm-block">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"
+                            role="button" aria-haspopup="true" aria-expanded="false">Versions&nbsp;<span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                        <li ><a href="../../../v1.0/index.html" data-version="v1.0">v1.0</a></li>
+                        <li ><a href="../../../v1.0.1/index.html" data-version="v1.0.1">v1.0.1</a></li>
+                        <li ><a href="../../../v1.1.0/index.html" data-version="v1.1.0">v1.1.0</a></li>
+                        <li ><a href="../../../v1.2.0/index.html" data-version="v1.2.0">v1.2.0</a></li>
+                        <li ><a href="../../../v1.10.0/index.html" data-version="v1.10.0">v1.10.0</a></li>
+                        <li ><a href="../../../v1.11.0/index.html" data-version="v1.11.0">v1.11.0</a></li>
+                        <li ><a href="../../../v1.11.1/index.html" data-version="v1.11.1">v1.11.1</a></li>
+                        <li ><a href="../../../v1.12.0/index.html" data-version="v1.12.0">v1.12.0</a></li>
+                        <li ><a href="../../../v1.12.1/index.html" data-version="v1.12.1">v1.12.1</a></li>
+                        <li ><a href="../../../v1.13.0/index.html" data-version="v1.13.0">v1.13.0</a></li>
+                        <li ><a href="../../../v1.14.0/index.html" data-version="v1.14.0">v1.14.0</a></li>
+                        <li ><a href="../../../v1.14.1/index.html" data-version="v1.14.1">v1.14.1</a></li>
+                        <li ><a href="../../../v1.2.1/index.html" data-version="v1.2.1">v1.2.1</a></li>
+                        <li ><a href="../../../v1.14.2/index.html" data-version="v1.14.2">v1.14.2</a></li>
+                        <li ><a href="../../../v1.14.3/index.html" data-version="v1.14.3">v1.14.3</a></li>
+                        <li ><a href="../../../v1.15.0/index.html" data-version="v1.15.0">v1.15.0</a></li>
+                        <li ><a href="../../../v1.16.0/index.html" data-version="v1.16.0">v1.16.0</a></li>
+                        <li ><a href="../../../v1.17.0/index.html" data-version="v1.17.0">v1.17.0</a></li>
+                        <li ><a href="../../../v1.18.0/index.html" data-version="v1.18.0">v1.18.0</a></li>
+                        <li ><a href="../../../v1.19.0/index.html" data-version="v1.19.0">v1.19.0</a></li>
+                        <li ><a href="../../../v1.19.1/index.html" data-version="v1.19.1">v1.19.1</a></li>
+                        <li ><a href="../../../v1.5.0/index.html" data-version="v1.5.0">v1.5.0</a></li>
+                        <li ><a href="../../../v1.15.1/index.html" data-version="v1.15.1">v1.15.1</a></li>
+                        <li ><a href="../../../v1.20.0/index.html" data-version="v1.20.0">v1.20.0</a></li>
+                        <li ><a href="../../../v1.20.1/index.html" data-version="v1.20.1">v1.20.1</a></li>
+                        <li ><a href="../../../v1.21.0/index.html" data-version="v1.21.0">v1.21.0</a></li>
+                        <li ><a href="../../../v1.21.1/index.html" data-version="v1.21.1">v1.21.1</a></li>
+                        <li ><a href="../../../v1.22.0/index.html" data-version="v1.22.0">v1.22.0</a></li>
+                        <li ><a href="../../../v1.5.1/index.html" data-version="v1.5.1">v1.5.1</a></li>
+                        <li ><a href="../../../v1.5.2/index.html" data-version="v1.5.2">v1.5.2</a></li>
+                        <li ><a href="../../../v1.15.2/index.html" data-version="v1.15.2">v1.15.2</a></li>
+                        <li ><a href="../../../v1.23.0/index.html" data-version="v1.23.0">v1.23.0</a></li>
+                        <li ><a href="../../../v1.3.0/index.html" data-version="v1.3.0">v1.3.0</a></li>
+                        <li ><a href="../../../v1.3.1/index.html" data-version="v1.3.1">v1.3.1</a></li>
+                        <li ><a href="../../../v1.3.2/index.html" data-version="v1.3.2">v1.3.2</a></li>
+                        <li ><a href="../../../v1.3.3/index.html" data-version="v1.3.3">v1.3.3</a></li>
+                        <li ><a href="../../../v1.23.1/index.html" data-version="v1.23.1">v1.23.1</a></li>
+                        <li class="active"><a href="../../../v1.27.0/index.html" data-version="v1.27.0">v1.27.0</a></li>
+                        <li ><a href="../../../v1.28.0/index.html" data-version="v1.28.0">v1.28.0</a></li>
+                        <li ><a href="../../../v1.29.0/index.html" data-version="v1.29.0">v1.29.0</a></li>
+                        <li ><a href="../../../v1.29.1/index.html" data-version="v1.29.1">v1.29.1</a></li>
+                        <li ><a href="../../../v1.30.0/index.html" data-version="v1.30.0">v1.30.0</a></li>
+                        <li ><a href="../../../v1.31.0/index.html" data-version="v1.31.0">v1.31.0</a></li>
+                        <li ><a href="../../../v1.32.0/index.html" data-version="v1.32.0">v1.32.0</a></li>
+                        <li ><a href="../../../v1.32.1/index.html" data-version="v1.32.1">v1.32.1</a></li>
+                        <li ><a href="../../../v1.33.0/index.html" data-version="v1.33.0">v1.33.0</a></li>
+                        <li ><a href="../../../v1.4.0/index.html" data-version="v1.4.0">v1.4.0</a></li>
+                        <li ><a href="../../../v1.34.0/index.html" data-version="v1.34.0">v1.34.0</a></li>
+                        <li ><a href="../../../v1.35.0/index.html" data-version="v1.35.0">v1.35.0</a></li>
+                        <li ><a href="../../../v1.36.0/index.html" data-version="v1.36.0">v1.36.0</a></li>
+                        <li ><a href="../../../v1.37.0/index.html" data-version="v1.37.0">v1.37.0</a></li>
+                        <li ><a href="../../../v1.37.1/index.html" data-version="v1.37.1">v1.37.1</a></li>
+                        <li ><a href="../../../v1.38.0/index.html" data-version="v1.38.0">v1.38.0</a></li>
+                        <li ><a href="../../../v1.39.0/index.html" data-version="v1.39.0">v1.39.0</a></li>
+                        <li ><a href="../../../v1.40.0/index.html" data-version="v1.40.0">v1.40.0</a></li>
+                        <li ><a href="../../../v1.41.0/index.html" data-version="v1.41.0">v1.41.0</a></li>
+                        <li ><a href="../../../v1.6.0/index.html" data-version="v1.6.0">v1.6.0</a></li>
+                        <li ><a href="../../../v1.6.1/index.html" data-version="v1.6.1">v1.6.1</a></li>
+                        <li ><a href="../../../v1.24.0/index.html" data-version="v1.24.0">v1.24.0</a></li>
+                        <li ><a href="../../../v1.7.0/index.html" data-version="v1.7.0">v1.7.0</a></li>
+                        <li ><a href="../../../v1.7.1/index.html" data-version="v1.7.1">v1.7.1</a></li>
+                        <li ><a href="../../../v1.25.0/index.html" data-version="v1.25.0">v1.25.0</a></li>
+                        <li ><a href="../../../v1.8.0/index.html" data-version="v1.8.0">v1.8.0</a></li>
+                        <li ><a href="../../../v1.9.0/index.html" data-version="v1.9.0">v1.9.0</a></li>
+                        <li ><a href="../../../v1.26.0/index.html" data-version="v1.26.0">v1.26.0</a></li>
+                        <li ><a href="../../../doctum/index.html" data-version="doctum">doctum</a></li>
+                        </ul>
+                    </li>
                     <li><a href="../../classes.html">Classes</a></li>
-                                            <li><a href="../../namespaces.html">Namespaces</a></li>
-                                        <li><a href="../../interfaces.html">Interfaces</a></li>
+                    <li><a href="../../namespaces.html">Namespaces</a></li>
+                    <li><a href="../../interfaces.html">Interfaces</a></li>
                     <li><a href="../../traits.html">Traits</a></li>
                     <li><a href="../../doc-index.html">Index</a></li>
                     <li><a href="../../search.html">Search</a></li>
@@ -136,65 +354,74 @@
             </ol>
         </div>
                 <div id="page-content">
-                
     <div class="page-header">
-        <h1>
-            AccessToken
-                
-        </h1>
+        <h1>AccessToken    
+            </h1>
     </div>
 
-    <p>    class
+    
+    <p>        class
     <strong>AccessToken</strong>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php">View source</a>)
 </p>
 
         
     
+        
 
             <div class="description">
-            <p>Wrapper around Google Access Tokens which provides convenience functions.</p>                                </div>
-    
-    
-            <h2>Constants</h2>
-
-            <table class="table table-condensed">
+            <p><p>Wrapper around Google Access Tokens which provides convenience functions.</p></p>                    </div>
+            
+        
+            <h2>Constants</h2>    <table class="table table-condensed">
                     <tr>
-                <td>FEDERATED_SIGNON_CERT_URL</td>
+                <td>
+                                                                                                                        FEDERATED_SIGNON_CERT_URL
+                                    </td>
                 <td class="last">
                     <p><em></em></p>
                     <p></p>
                 </td>
             </tr>
                     <tr>
-                <td>IAP_CERT_URL</td>
+                <td>
+                                                                                                                        IAP_CERT_URL
+                                    </td>
                 <td class="last">
                     <p><em></em></p>
                     <p></p>
                 </td>
             </tr>
                     <tr>
-                <td>IAP_ISSUER</td>
+                <td>
+                                                                                                                        IAP_ISSUER
+                                    </td>
                 <td class="last">
                     <p><em></em></p>
                     <p></p>
                 </td>
             </tr>
                     <tr>
-                <td>OAUTH2_ISSUER</td>
+                <td>
+                                                                                                                        OAUTH2_ISSUER
+                                    </td>
                 <td class="last">
                     <p><em></em></p>
                     <p></p>
                 </td>
             </tr>
                     <tr>
-                <td>OAUTH2_ISSUER_HTTPS</td>
+                <td>
+                                                                                                                        OAUTH2_ISSUER_HTTPS
+                                    </td>
                 <td class="last">
                     <p><em></em></p>
                     <p></p>
                 </td>
             </tr>
                     <tr>
-                <td>OAUTH2_REVOKE_URI</td>
+                <td>
+                                                                                                                        OAUTH2_REVOKE_URI
+                                    </td>
                 <td class="last">
                     <p><em></em></p>
                     <p></p>
@@ -211,7 +438,7 @@
                 <div class="col-md-2 type">
                     
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(callable $httpHandler = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
         
                                             <p class="no-description">No description</p>
@@ -220,43 +447,43 @@
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>|false
+                    array|false
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_verify">verify</a>(string $token, array $options = [])
         
-                                            <p>Verifies an id token and returns the authenticated apiLoginTicket.</p>                </div>
+                                            <p><p>Verifies an id token and returns the authenticated apiLoginTicket.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     bool
                 </div>
-                <div class="col-md-8 type">
-                    <a href="#method_revoke">revoke</a>(string|<abbr title="Google\Auth\array<mixed>">array<mixed></abbr> $token, array $options = [])
+                <div class="col-md-8">
+                    <a href="#method_revoke">revoke</a>(string|array $token, array $options = [])
         
-                                            <p>Revoke an OAuth2 access token or refresh token. This method will revoke the current access
-token, if a token isn't provided.</p>                </div>
+                                            <p><p>Revoke an OAuth2 access token or refresh token. This method will revoke the current access
+token, if a token isn't provided.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     mixed
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_callJwtStatic">callJwtStatic</a>(string $method, array $args = [])
         
-                                            <p>Provide a hook to mock calls to the JWT static methods.</p>                </div>
+                                            <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
                     mixed
                 </div>
-                <div class="col-md-8 type">
+                <div class="col-md-8">
                     <a href="#method_callSimpleJwtDecode">callSimpleJwtDecode</a>(array $args = [])
         
-                                            <p>Provide a hook to mock calls to the JWT static methods.</p>                </div>
+                                            <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
             </div>
@@ -267,31 +494,36 @@ token, if a token isn't provided.</p>                </div>
             <div id="method-details">
                     <div class="method-item">
                     <h3 id="method___construct">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L72">line 72</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L72">at line 72</a></div>
         <code>                    
     <strong>__construct</strong>(callable $httpHandler = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                <div class="tags">
+        <div class="method-description">
+                            <p class="no-description">No description</p>
+                    
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
                 <td>callable</td>
                 <td>$httpHandler</td>
-                <td>[optional] An HTTP Handler to deliver PSR-7 requests.</td>
+                <td><p>[optional] An HTTP Handler to deliver PSR-7 requests.</p></td>
             </tr>
                     <tr>
                 <td><abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr></td>
                 <td>$cache</td>
-                <td>[optional] A PSR-6 compatible cache implementation.</td>
+                <td><p>[optional] A PSR-6 compatible cache implementation.</p></td>
             </tr>
             </table>
 
+            
             
             
             
@@ -301,46 +533,47 @@ token, if a token isn't provided.</p>                </div>
             </div>
                     <div class="method-item">
                     <h3 id="method_verify">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L111">line 111</a></div>
-        <code>                    <abbr title="Google\Auth\array<mixed>">array<mixed></abbr>|false
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L111">at line 111</a></div>
+        <code>                    array|false
     <strong>verify</strong>(string $token, array $options = [])
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Verifies an id token and returns the authenticated apiLoginTicket.</p>                    <p>Throws an exception if the id token is not valid.
+        <div class="method-description">
+                            <p><p>Verifies an id token and returns the authenticated apiLoginTicket.</p></p>                <p><p>Throws an exception if the id token is not valid.
 The audience parameter can be used to control which id tokens are
-accepted.  By default, the id token must have been issued to this OAuth2 client.</p>                            </div>
-                <div class="tags">
+accepted.  By default, the id token must have been issued to this OAuth2 client.</p></p>        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
                 <td>string</td>
                 <td>$token</td>
-                <td>The JSON Web Token to be verified.</td>
+                <td><p>The JSON Web Token to be verified.</p></td>
             </tr>
                     <tr>
                 <td>array</td>
                 <td>$options</td>
-                <td>[optional] {
-    Configuration options.
-    @type string $audience The indended recipient of the token.
-    @type string $issuer The intended issuer of the token.
-    @type string $cacheKey The cache key of the cached certs. Defaults to
-       the sha1 of $certsLocation if provided, otherwise is set to
-       "federated_signon_certs_v3".
-    @type string $certsLocation The location (remote or local) from which
-       to retrieve certificates, if not cached. This value should only be
-       provided in limited circumstances in which you are sure of the
-       behavior.
-    @type bool $throwException Whether the function should throw an
-       exception if the verification fails. This is useful for
-       determining the reason verification failed.
-}</td>
+                <td><p>[optional] {
+Configuration options.
+@type string $audience The indended recipient of the token.
+@type string $issuer The intended issuer of the token.
+@type string $cacheKey The cache key of the cached certs. Defaults to
+the sha1 of $certsLocation if provided, otherwise is set to
+&quot;federated_signon_certs_v3&quot;.
+@type string $certsLocation The location (remote or local) from which
+to retrieve certificates, if not cached. This value should only be
+provided in limited circumstances in which you are sure of the
+behavior.
+@type bool $throwException Whether the function should throw an
+exception if the verification fails. This is useful for
+determining the reason verification failed.
+}</p></td>
             </tr>
             </table>
 
@@ -349,8 +582,8 @@ accepted.  By default, the id token must have been issued to this OAuth2 client.
 
                     <table class="table table-condensed">
         <tr>
-            <td><abbr title="Google\Auth\array<mixed>">array<mixed></abbr>|false</td>
-            <td>the token payload, if successful, or false if not.</td>
+            <td>array|false</td>
+            <td><p>the token payload, if successful, or false if not.</p></td>
         </tr>
     </table>
 
@@ -359,31 +592,32 @@ accepted.  By default, the id token must have been issued to this OAuth2 client.
 
                     <table class="table table-condensed">
                     <tr>
-                <td><a target="_blank" href="http://php.net/InvalidArgumentException">InvalidArgumentException</a></td>
-                <td>If certs could not be retrieved from a local file.</td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/InvalidArgumentException">InvalidArgumentException</a></td>
+                <td></td>
             </tr>
                     <tr>
-                <td><a target="_blank" href="http://php.net/InvalidArgumentException">InvalidArgumentException</a></td>
-                <td>If received certs are in an invalid format.</td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/InvalidArgumentException">InvalidArgumentException</a></td>
+                <td></td>
             </tr>
                     <tr>
-                <td><a target="_blank" href="http://php.net/InvalidArgumentException">InvalidArgumentException</a></td>
-                <td>If the cert alg is not supported.</td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/InvalidArgumentException">InvalidArgumentException</a></td>
+                <td></td>
             </tr>
                     <tr>
-                <td><a target="_blank" href="http://php.net/RuntimeException">RuntimeException</a></td>
-                <td>If certs could not be retrieved from a remote location.</td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/RuntimeException">RuntimeException</a></td>
+                <td></td>
             </tr>
                     <tr>
-                <td><a target="_blank" href="http://php.net/UnexpectedValueException">UnexpectedValueException</a></td>
-                <td>If the token issuer does not match.</td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/UnexpectedValueException">UnexpectedValueException</a></td>
+                <td></td>
             </tr>
                     <tr>
-                <td><a target="_blank" href="http://php.net/UnexpectedValueException">UnexpectedValueException</a></td>
-                <td>If the token audience does not match.</td>
+                <td><a target="_blank" rel="noopener" href="https://www.php.net/UnexpectedValueException">UnexpectedValueException</a></td>
+                <td></td>
             </tr>
             </table>
 
+            
             
                     </div>
     </div>
@@ -391,31 +625,32 @@ accepted.  By default, the id token must have been issued to this OAuth2 client.
             </div>
                     <div class="method-item">
                     <h3 id="method_revoke">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L276">line 276</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L276">at line 276</a></div>
         <code>                    bool
-    <strong>revoke</strong>(string|<abbr title="Google\Auth\array<mixed>">array<mixed></abbr> $token, array $options = [])
+    <strong>revoke</strong>(string|array $token, array $options = [])
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Revoke an OAuth2 access token or refresh token. This method will revoke the current access
-token, if a token isn't provided.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Revoke an OAuth2 access token or refresh token. This method will revoke the current access
+token, if a token isn't provided.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
                     <tr>
-                <td>string|<abbr title="Google\Auth\array<mixed>">array<mixed></abbr></td>
+                <td>string|array</td>
                 <td>$token</td>
-                <td>The token (access token or a refresh token) that should be revoked.</td>
+                <td><p>The token (access token or a refresh token) that should be revoked.</p></td>
             </tr>
                     <tr>
                 <td>array</td>
                 <td>$options</td>
-                <td>[optional] Configuration options.</td>
+                <td><p>[optional] Configuration options.</p></td>
             </tr>
             </table>
 
@@ -425,10 +660,11 @@ token, if a token isn't provided.</p>                                           
                     <table class="table table-condensed">
         <tr>
             <td>bool</td>
-            <td>Returns True if the revocation was successful, otherwise False.</td>
+            <td><p>Returns True if the revocation was successful, otherwise False.</p></td>
         </tr>
     </table>
 
+            
             
             
                     </div>
@@ -437,18 +673,19 @@ token, if a token isn't provided.</p>                                           
             </div>
                     <div class="method-item">
                     <h3 id="method_callJwtStatic">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L472">line 472</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L472">at line 472</a></div>
         <code>            protected        mixed
     <strong>callJwtStatic</strong>(string $method, array $args = [])
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Provide a hook to mock calls to the JWT static methods.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -476,24 +713,26 @@ token, if a token isn't provided.</p>                                           
 
             
             
+            
                     </div>
     </div>
 
             </div>
                     <div class="method-item">
                     <h3 id="method_callSimpleJwtDecode">
-        <div class="location">at         <a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L483">line 483</a></div>
+        <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.27.0/src/AccessToken.php#L483">at line 483</a></div>
         <code>            protected        mixed
     <strong>callSimpleJwtDecode</strong>(array $args = [])
         </code>
     </h3>
-    <div class="details">
-            
+    <div class="details">    
     
+            
 
-                    <div class="method-description">
-                                    <p>Provide a hook to mock calls to the JWT static methods.</p>                                                </div>
-                <div class="tags">
+        <div class="method-description">
+                            <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>                        
+        </div>
+        <div class="tags">
                             <h4>Parameters</h4>
 
                     <table class="table table-condensed">
@@ -516,6 +755,7 @@ token, if a token isn't provided.</p>                                           
 
             
             
+            
                     </div>
     </div>
 
@@ -523,12 +763,8 @@ token, if a token isn't provided.</p>                                           
             </div>
 
     
-            </div>
-                <div id="footer">
-        Generated by <a href="http://sami.sensiolabs.org/">Sami, the API Documentation Generator</a>.
-    </div>
-
-        </div>
+</div><div id="footer">
+        Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
     </body>
 
