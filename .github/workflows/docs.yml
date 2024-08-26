@@ -1,8 +1,6 @@
 name: Generate Documentation
 on:
     push:
-        branches:
-            - main
         tags:
             - "*"
     workflow_dispatch:
