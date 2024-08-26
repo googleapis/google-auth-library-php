@@ -20,6 +20,6 @@ jobs:
         uses: GoogleCloudPlatform/php-tools/.github/workflows/doctum.yml@main
         with:
           title: "Google Auth Library PHP Reference Documentation"
-          default_version: ${{ inputs.tag || github.ref_name }}
+          default_version: ${{ inputs.tag || github.head_ref || github.ref_name }}
           dry_run: ${{ github.event_name == 'pull_request' }}
 
