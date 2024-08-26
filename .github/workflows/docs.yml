@@ -9,6 +9,7 @@ on:
         inputs:
             tag:
                 description: 'Tag to release'
+    pull_request:
 
 permissions:
   contents: write
@@ -16,8 +17,9 @@ permissions:
 jobs:
     docs:
         name: "Generate and Deploy Documentation"
-        uses: GoogleCloudPlatform/php-tools/.github/workflows/doctum.yml@doctum
+        uses: GoogleCloudPlatform/php-tools/.github/workflows/doctum.yml@main
         with:
           title: "Google Auth Library PHP Reference Documentation"
           default_version: ${{ inputs.tag || github.ref_name }}
+          dry_run: ${{ github.event_name == 'pull_request' }}
 
