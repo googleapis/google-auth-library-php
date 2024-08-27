@@ -24,7 +24,8 @@
     "sebastian/comparator": ">=1.2.3",
     "phpseclib/phpseclib": "^3.0.35",
     "kelvinmo/simplejwt": "0.7.1",
-    "webmozart/assert": "^1.11"
+    "webmozart/assert": "^1.11",
+    "symfony/process": "^6.0||^7.0"
   },
   "suggest": {
     "phpseclib/phpseclib": "May be used in place of OpenSSL for signing strings or for token management. Please require version ^2."

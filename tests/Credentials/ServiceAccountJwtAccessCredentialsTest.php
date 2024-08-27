@@ -480,8 +480,10 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
     {
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
-        $sa = new ServiceAccountJwtAccessCredentials($testJson);
-        $this->assertNull($sa->getCacheKey());
+        $sa = new ServiceAccountJwtAccessCredentials($testJson, $scope);
+
+        $expectedKey = $testJson['client_email'] . '.' . implode(' ', $scope);
+        $this->assertEquals($expectedKey, $sa->getCacheKey());
     }
 
     public function testReturnsClientEmail()
@@ -490,6 +492,14 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
         $sa = new ServiceAccountJwtAccessCredentials($testJson);
         $this->assertEquals($testJson['client_email'], $sa->getClientName());
     }
+
+    public function testReturnsPrivateKey()
+    {
+        $testJson = $this->createTestJson();
+        $sa = new ServiceAccountJwtAccessCredentials($testJson);
+        $this->assertEquals($testJson['private_key'], $sa->getPrivateKey());
+    }
+
     public function testGetProjectId()
     {
         $testJson = $this->createTestJson();

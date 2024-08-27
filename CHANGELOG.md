@@ -2,6 +2,42 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.42.0](https://github.com/googleapis/google-auth-library-php/compare/v1.41.0...v1.42.0) (2024-08-26)
+
+
+### Features
+
+* Add a file system cache class ([#571](https://github.com/googleapis/google-auth-library-php/issues/571)) ([8555cb0](https://github.com/googleapis/google-auth-library-php/commit/8555cb063caa5571f80d9605969411b894ee6eb0))
+* Private key getters on service account credentials (https://github.com/googleapis/google-auth-library-php/pull/557) ([d2fa07b](https://github.com/googleapis/google-auth-library-php/commit/d2fa07b8a8edfa65c1bd732dac794c070e3451bc))
+
+## [1.41.0](https://github.com/googleapis/google-auth-library-php/compare/v1.40.0...v1.41.0) (2024-07-10)
+
+
+### Features
+
+* Change getCacheKey implementation for more unique keys ([#560](https://github.com/googleapis/google-auth-library-php/issues/560)) ([a35c4db](https://github.com/googleapis/google-auth-library-php/commit/a35c4dbb52e01faedacd09d23634939ced4a8a63))
+
+## [1.40.0](https://github.com/googleapis/google-auth-library-php/compare/v1.39.0...v1.40.0) (2024-05-31)
+
+
+### Features
+
+* Add windows residency check ([#553](https://github.com/googleapis/google-auth-library-php/issues/553)) ([ec13a53](https://github.com/googleapis/google-auth-library-php/commit/ec13a53ddd625265b7a596817eb052c693ab89e2))
+
+## [1.39.0](https://github.com/googleapis/google-auth-library-php/compare/v1.38.0...v1.39.0) (2024-05-02)
+
+
+### Features
+
+* Enable auth observability metrics ([#509](https://github.com/googleapis/google-auth-library-php/issues/509)) ([6495f31](https://github.com/googleapis/google-auth-library-php/commit/6495f31061d2d51a173a968dbe65db8dfc6ac3cc))
+
+## [1.38.0](https://github.com/googleapis/google-auth-library-php/compare/v1.37.1...v1.38.0) (2024-04-24)
+
+
+### Features
+
+* Add ExecutableSource credentials ([#525](https://github.com/googleapis/google-auth-library-php/issues/525)) ([d98900d](https://github.com/googleapis/google-auth-library-php/commit/d98900d47bb5d6eeeaf64fc2a6a8dbde5797f338))
+
 ## [1.37.1](https://github.com/googleapis/google-auth-library-php/compare/v1.37.0...v1.37.1) (2024-03-07)
 
 

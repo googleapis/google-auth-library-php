@@ -282,6 +282,58 @@ $auth->verify($idToken, [
 [google-id-tokens]: https://developers.google.com/identity/sign-in/web/backend-auth
 [iap-id-tokens]: https://cloud.google.com/iap/docs/signed-headers-howto
 
+## Caching
+Caching is enabled by passing a PSR-6 `CacheItemPoolInterface`
+instance to the constructor when instantiating the credentials.
+
+We offer some caching classes out of the box under the `Google\Auth\Cache` namespace.
+
+```php
+use Google\Auth\ApplicationDefaultCredentials;
+use Google\Auth\Cache\MemoryCacheItemPool;
+
+// Cache Instance
+$memoryCache = new MemoryCacheItemPool;
+
+// Get the credentials
+// From here, the credentials will cache the access token
+$middleware = ApplicationDefaultCredentials::getCredentials($scope, cache: $memoryCache);
+```
+
+### FileSystemCacheItemPool Cache
+The `FileSystemCacheItemPool` class is a `PSR-6` compliant cache that stores its
+serialized objects on disk, caching data between processes and making it possible 
+to use data between different requests.
+
+```php
+use Google\Auth\Cache\FileSystemCacheItemPool;
+use Google\Auth\ApplicationDefaultCredentials;
+
+// Create a Cache pool instance
+$cache = new FileSystemCacheItemPool(__DIR__ . '/cache');
+
+// Pass your Cache to the Auth Library
+$credentials = ApplicationDefaultCredentials::getCredentials($scope, cache: $cache);
+
+// This token will be cached and be able to be used for the next request
+$token = $credentials->fetchAuthToken();
+```
+
+### Integrating with a third party cache
+You can use a third party that follows the `PSR-6` interface of your choice.
+
+```php
+// run "composer require symfony/cache"
+use Google\Auth\ApplicationDefaultCredentials;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+
+// Create the cache instance
+$filesystemCache = new FilesystemAdapter();
+
+// Create Get the credentials
+$credentials = ApplicationDefaultCredentials::getCredentials($targetAudience, cache: $filesystemCache);
+```
+
 ## License
 
 This library is licensed under Apache 2.0. Full license text is

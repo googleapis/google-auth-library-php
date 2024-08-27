@@ -8,17 +8,22 @@ permissions:
   contents: read
 jobs:
     test:
-        runs-on: ubuntu-latest
         strategy:
             matrix:
                 php: [ "8.1", "8.2", "8.3" ]
-        name: PHP ${{matrix.php }} Unit Test
+                os: [ ubuntu-latest ]
+                include:
+                  - os: windows-latest
+                    php: "8.1"
+        runs-on: ${{ matrix.os }}
+        name: PHP ${{ matrix.php }} Unit Test ${{ matrix.os == 'windows-latest' && 'on Windows' || '' }}
         steps:
             - uses: actions/checkout@v4
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                 php-version: ${{ matrix.php }}
+                extensions: ${{ matrix.os == 'windows-latest' && 'gmp, php_com_dotnet' || '' }}
             - name: Install Dependencies
               uses: nick-invision/retry@v3
               with:
@@ -26,7 +31,7 @@ jobs:
                 max_attempts: 3
                 command: composer install
             - name: Run Script
-              run: vendor/bin/phpunit
+              run: vendor/bin/phpunit ${{ matrix.os == 'windows-latest' && '--filter GCECredentialsTest' || '' }}
     test_lowest:
         runs-on: ubuntu-latest
         name: Test Prefer Lowest
@@ -46,31 +51,11 @@ jobs:
               run: vendor/bin/phpunit
 
     style:
-      runs-on: ubuntu-latest
       name: PHP Style Check
-      steps:
-      - uses: actions/checkout@v4
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-      - name: Run Script
-        run: |
-          composer install
-          composer global require friendsofphp/php-cs-fixer:^3.0
-          ~/.composer/vendor/bin/php-cs-fixer fix --dry-run --diff
+      uses: GoogleCloudPlatform/php-tools/.github/workflows/code-standards.yml@main
 
     staticanalysis:
-      runs-on: ubuntu-latest
       name: PHPStan Static Analysis
-      steps:
-      - uses: actions/checkout@v4
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-      - name: Run Script
-        run: |
-          composer install
-          composer global require phpstan/phpstan:^1.8
-          ~/.composer/vendor/bin/phpstan analyse
+      uses: GoogleCloudPlatform/php-tools/.github/workflows/static-analysis.yml@main
+      with:
+        autoload-file: tests/phpstan-autoload.php
