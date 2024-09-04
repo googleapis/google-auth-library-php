@@ -42,6 +42,11 @@ class StdOutLogger implements LoggerInterface
     ];
     private int $level;
 
+    /**
+     * Constructs a basic PSR-3 logger class that logs into StdOut for GCP Logging
+     *
+     * @param string $level The level of the logger instance.
+     */
     public function __construct(string $level = LogLevel::DEBUG)
     {
         $this->level = $this->getLevelMap($level);
