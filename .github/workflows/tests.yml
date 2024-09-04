@@ -52,7 +52,7 @@ jobs:
 
     style:
       name: PHP Style Check
-      uses: GoogleCloudPlatform/php-tools/.github/workflows/code-standards.yml@main
+      uses: GoogleCloudPlatform/php-tools/.github/workflows/code-standards.yml@add-rules-for-cs-fixer
 
     staticanalysis:
       name: PHPStan Static Analysis
