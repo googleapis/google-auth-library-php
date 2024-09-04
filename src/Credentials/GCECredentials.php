@@ -426,12 +426,12 @@ class GCECredentials extends CredentialsLoader implements
 
         try {
             $productName = $shell->regRead($registryProductKey);
-        } catch(com_exception) {
+        } catch (com_exception) {
             // This means that we tried to read a key that doesn't exist on the registry
             // which might mean that it is a windows instance that is not on GCE
             return false;
         }
-        
+
         return 0 === strpos($productName, self::PRODUCT_NAME);
     }
 
