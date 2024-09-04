@@ -50,7 +50,7 @@ class LogEvent
     /**
      * An array representation of JSON for the response or request
      *
-     * @var null|string|array
+     * @var null|string|array<string, mixed>
      */
     public null|string|array $payload = null;
 
@@ -99,7 +99,7 @@ class LogEvent
     /**
      * The Request id for easy trace
      *
-     * @var in $requestId;
+     * @var int $requestId;
      */
     public int $requestId;
 
