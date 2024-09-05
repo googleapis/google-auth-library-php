@@ -92,6 +92,11 @@ class StdOutLogger implements LoggerInterface
         $this->log(LogLevel::DEBUG, $message);
     }
 
+    /**
+     * @param string $level
+     * @param string|Stringable $message
+     * @param array<mixed> $context
+     */
     public function log($level, string|Stringable $message, array $context = []): void
     {
         if ($this->getLevelMap($level) < $this->level) {
