@@ -9,7 +9,7 @@ permissions:
 jobs:
     style:
       name: PHP Style Check
-      uses: GoogleCloudPlatform/php-tools/.github/workflows/code-standards.yml@add-rules-for-cs-fixer
+      uses: GoogleCloudPlatform/php-tools/.github/workflows/code-standards.yml@main
 
     staticanalysis:
       name: PHPStan Static Analysis
