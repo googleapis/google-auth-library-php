@@ -24,7 +24,6 @@ use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
-use Prophecy\Promise\ReturnPromise;
 use Psr\Log\LoggerInterface;
 
 /**
