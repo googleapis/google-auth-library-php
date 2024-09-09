@@ -329,17 +329,29 @@ class ApplicationDefaultCredentials
     public static function getDefaultLogger(): null|LoggerInterface
     {
         $loggingFlag = getenv(self::SDK_DEBUG_FLAG);
-        if ($loggingFlag instanceof string) {
-            $loggingFlag = strtolower($loggingFlag);
-        }
 
-        if ($loggingFlag === false || $loggingFlag !== 'true' && $loggingFlag !== '1') {
-            if (strtolower($loggingFlag) !== 'false' && strtolower($loggingFlag) !== '0') {
-                trigger_error('The ' . self::SDK_DEBUG_FLAG . ' is set, but it is set to another value than false, true or 0. Logging is disabled');
+        // Env var is not set
+        if (!is_string($loggingFlag)) {
+            if (is_array($loggingFlag)) {
+                trigger_error('The ' . self::SDK_DEBUG_FLAG . ' is set, but it is set to another value than false, true, 0 or 1. Logging is disabled');
+                return null;
             }
 
             return null;
         }
+
+        $loggingFlag = strtolower($loggingFlag);
+
+        // Env Var is not true
+        if ($loggingFlag !== 'true' && $loggingFlag !== '1') {
+            // Env var is set to a non valid value
+            if ($loggingFlag !== 'false' && $loggingFlag !== '0') {
+                trigger_error('The ' . self::SDK_DEBUG_FLAG . ' is set, but it is set to another value than false, true, 0 or 1. Logging is disabled');
+            }
+
+            return null;
+        }
+
 
         return new StdOutLogger();
     }
