@@ -75,6 +75,9 @@ trait LoggingTrait
         $this->logger->info((string) json_encode($infoEvent));
     }
 
+    /**
+     * @param array<mixed> $headers
+     */
     private function getJwtToken(array $headers): null|array
     {
         $tokenHeader = $headers['Authorization'] ?? '';
