@@ -64,7 +64,7 @@ class Guzzle7HttpHandlerTest extends Guzzle6HttpHandlerTest
 
     public function testLoggerDoesNotGetsCalledIfLoggerIsNotPassed()
     {
-        $requestPromise = new Promise(function() use (&$requestPromise) {
+        $requestPromise = new Promise(function () use (&$requestPromise) {
             $response = new Response(200);
             $requestPromise->resolve($response);
         });

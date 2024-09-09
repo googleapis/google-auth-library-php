@@ -352,7 +352,6 @@ class ApplicationDefaultCredentials
             return null;
         }
 
-
         return new StdOutLogger();
     }
 
