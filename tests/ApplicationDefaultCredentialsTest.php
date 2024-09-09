@@ -28,9 +28,11 @@ use Google\Auth\CredentialsLoader;
 use Google\Auth\CredentialSource;
 use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\GCECache;
+use Google\Auth\Logging\StdOutLogger;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
+use PHPUnit\Framework\Error\Notice;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Cache\CacheItemPoolInterface;
@@ -47,6 +49,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     private $targetAudience = 'a target audience';
     private $quotaProject = 'a-quota-project';
     private $originalServiceAccount;
+    private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_DEBUG_LOGGING';
 
     public function testGetCredentialsFailsIfEnvSpecifiesNonExistentFile()
     {
@@ -770,6 +773,39 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         $subjectTokenFetcher = $oauthProp->getValue($oauth);
         $this->assertInstanceOf($expectedCredSource, $subjectTokenFetcher);
+    }
+
+    public function testGetDefaultLoggerReturnStdOutLoggerIfEnvVarIsPresent()
+    {
+        putenv($this::SDK_DEBUG_FLAG . '=true');
+        $logger = ApplicationDefaultCredentials::getDefaultLogger();
+        $this->assertTrue($logger instanceof StdOutLogger);
+
+        putenv($this::SDK_DEBUG_FLAG . '=1');
+        $logger = ApplicationDefaultCredentials::getDefaultLogger();
+        $this->assertTrue($logger instanceof StdOutLogger);
+    }
+
+    public function testGetDefaultLoggerReturnsNullIfNotEnvVar()
+    {
+        putenv($this::SDK_DEBUG_FLAG . '=false');
+        $logger = ApplicationDefaultCredentials::getDefaultLogger();
+
+        $this->assertNull($logger);
+
+        putenv($this::SDK_DEBUG_FLAG . '=0');
+        $logger = ApplicationDefaultCredentials::getDefaultLogger();
+
+        $this->assertNull($logger);
+    }
+
+    public function testGetDefaultLoggerRaiseAWarningIfMisconfiguredAndReturnsNull()
+    {
+        putenv($this::SDK_DEBUG_FLAG . '=invalid');
+        $this->expectException(Notice::class);
+        $logger = ApplicationDefaultCredentials::getDefaultLogger();
+
+        $this->assertNull($logger);
     }
 
     public function provideExternalAccountCredentials()

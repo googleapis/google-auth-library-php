@@ -16,11 +16,13 @@
  */
 namespace Google\Auth\HttpHandler;
 
+use Google\Auth\ApplicationDefaultCredentials;
 use GuzzleHttp\BodySummarizer;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use Psr\Log\LoggerInterface;
 
 class HttpHandlerFactory
 {
@@ -31,7 +33,7 @@ class HttpHandlerFactory
      * @return Guzzle6HttpHandler|Guzzle7HttpHandler
      * @throws \Exception
      */
-    public static function build(?ClientInterface $client = null)
+    public static function build(?ClientInterface $client = null, LoggerInterface $logger = null)
     {
         if (is_null($client)) {
             $stack = null;
@@ -45,6 +47,8 @@ class HttpHandlerFactory
             $client = new Client(['handler' => $stack]);
         }
 
+        $logger = $logger ?? ApplicationDefaultCredentials::getDefaultLogger();
+
         $version = null;
         if (defined('GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
             $version = ClientInterface::MAJOR_VERSION;
@@ -54,9 +58,9 @@ class HttpHandlerFactory
 
         switch ($version) {
             case 6:
-                return new Guzzle6HttpHandler($client);
+                return new Guzzle6HttpHandler($client, $logger);
             case 7:
-                return new Guzzle7HttpHandler($client);
+                return new Guzzle7HttpHandler($client, $logger);
             default:
                 throw new \Exception('Version not supported');
         }
