@@ -16,23 +16,34 @@
  */
 namespace Google\Auth\HttpHandler;
 
+use Google\Auth\Logging\LogEvent;
+use Google\Auth\Logging\LoggingTrait;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
 class Guzzle6HttpHandler
 {
+    use LoggingTrait;
+
     /**
      * @var ClientInterface
      */
     private $client;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param ClientInterface $client
      */
-    public function __construct(ClientInterface $client)
+    public function __construct(ClientInterface $client, LoggerInterface $logger = null)
     {
         $this->client = $client;
+        $this->logger = $logger;
     }
 
     /**
@@ -57,6 +68,41 @@ class Guzzle6HttpHandler
      */
     public function async(RequestInterface $request, array $options = [])
     {
-        return $this->client->sendAsync($request, $options);
+        $requestEvent = null;
+
+        if ($this->logger) {
+            $requestEvent = new LogEvent();
+
+            $requestEvent->method = $request->getMethod();
+            $requestEvent->url = $request->getUri()->__toString();
+            $requestEvent->headers = $request->getHeaders();
+            $requestEvent->payload = $request->getBody()->getContents();
+            $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
+            $requestEvent->serviceName = $options['serviceName'] ?? null;
+            $requestEvent->clientId = spl_object_id($this->client);
+            $requestEvent->requestId = spl_object_id($request);
+
+            $this->logRequest($requestEvent);
+        }
+
+        $promise = $this->client->sendAsync($request, $options);
+
+        if ($this->logger) {
+            $promise->then(function (ResponseInterface $response) use ($requestEvent) {
+                $responseEvent = new LogEvent($requestEvent->timestamp);
+
+                $responseEvent->headers = $response->getHeaders();
+                $responseEvent->payload = $response->getBody()->getContents();
+                $responseEvent->status = $response->getStatusCode();
+                $responseEvent->clientId = $requestEvent->clientId;
+                $responseEvent->requestId = $requestEvent->requestId;
+
+                $this->logResponse($responseEvent);
+
+                return $response;
+            });
+        }
+
+        return $promise;
     }
 }
