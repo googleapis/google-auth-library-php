@@ -30,10 +30,15 @@ class HttpHandlerFactory
      * Builds out a default http handler for the installed version of guzzle.
      *
      * @param ClientInterface|null $client
+     * @param LoggerInterface $logger
+     * @param bool $loggerDisabled
      * @return Guzzle6HttpHandler|Guzzle7HttpHandler
      * @throws \Exception
      */
-    public static function build(?ClientInterface $client = null, LoggerInterface $logger = null)
+    public static function build(
+        ?ClientInterface $client = null,
+        LoggerInterface $logger = null,
+        bool $loggerDisabled = false)
     {
         if (is_null($client)) {
             $stack = null;
@@ -47,7 +52,9 @@ class HttpHandlerFactory
             $client = new Client(['handler' => $stack]);
         }
 
-        $logger = $logger ?? ApplicationDefaultCredentials::getDefaultLogger();
+        if (!$loggerDisabled) {
+            $logger = $logger ?? ApplicationDefaultCredentials::getDefaultLogger();
+        }
 
         $version = null;
         if (defined('GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
