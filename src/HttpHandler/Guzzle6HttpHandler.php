@@ -55,7 +55,38 @@ class Guzzle6HttpHandler
      */
     public function __invoke(RequestInterface $request, array $options = [])
     {
-        return $this->client->send($request, $options);
+        $requestEvent = null;
+
+        if ($this->logger) {
+            $requestEvent = new LogEvent();
+
+            $requestEvent->method = $request->getMethod();
+            $requestEvent->url = $request->getUri()->__toString();
+            $requestEvent->headers = $request->getHeaders();
+            $requestEvent->payload = $request->getBody()->getContents();
+            $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
+            $requestEvent->serviceName = $options['serviceName'] ?? null;
+            $requestEvent->clientId = spl_object_id($this->client);
+            $requestEvent->requestId = spl_object_id($request);
+
+            $this->logRequest($requestEvent);
+        }
+
+        $response = $this->client->send($request, $options);
+
+        if ($this->logger) {
+            $responseEvent = new LogEvent($requestEvent->timestamp);
+
+            $responseEvent->headers = $response->getHeaders();
+            $responseEvent->payload = $response->getBody()->getContents();
+            $responseEvent->status = $response->getStatusCode();
+            $responseEvent->clientId = $requestEvent->clientId;
+            $responseEvent->requestId = $requestEvent->requestId;
+
+            $this->logResponse($responseEvent);
+        }
+
+        return $response;
     }
 
     /**
