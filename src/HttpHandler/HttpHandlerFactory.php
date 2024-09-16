@@ -38,7 +38,8 @@ class HttpHandlerFactory
     public static function build(
         ?ClientInterface $client = null,
         LoggerInterface $logger = null,
-        bool $loggerDisabled = false)
+        bool $loggerDisabled = false
+    )
     {
         if (is_null($client)) {
             $stack = null;
