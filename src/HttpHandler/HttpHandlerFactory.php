@@ -56,7 +56,6 @@ class HttpHandlerFactory
             $logger = $logger ?? ApplicationDefaultCredentials::getDefaultLogger();
         }
 
-
         $version = null;
         if (defined('GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
             $version = ClientInterface::MAJOR_VERSION;
