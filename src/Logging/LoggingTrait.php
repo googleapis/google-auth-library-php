@@ -27,7 +27,7 @@ trait LoggingTrait
             'timestamp' => $event->timestamp,
             'severity' => strtoupper(LogLevel::DEBUG),
             'clientId' => $event->clientId,
-            'requestId' => $event->requestId,
+            'requestId' => $event->requestId ?? null,
         ];
 
         $jsonPayload = [
@@ -35,13 +35,11 @@ trait LoggingTrait
             'request.url' => $event->url,
             'request.headers' => $event->headers,
             'request.payload' => $event->payload,
-            'request.jwt' => $this->getJwtToken($event->headers),
+            'request.jwt' => $this->getJwtToken($event->headers ?? []),
             'retryAttempt' => $event->retryAttempt
         ];
 
-        // Filter out the falsey values
-        $jsonPayload = array_filter($jsonPayload);
-        $debugEvent['jsonPayload'] = $jsonPayload;
+        $debugEvent['jsonPayload'] = array_filter($jsonPayload);
 
         $this->logger->debug((string) json_encode($debugEvent));
     }
@@ -52,7 +50,7 @@ trait LoggingTrait
             'timestamp' => $event->timestamp,
             'severity' => strtoupper(LogLevel::DEBUG),
             'clientId' => $event->clientId,
-            'requestId' => $event->requestId,
+            'requestId' => $event->requestId ?? null,
             'jsonPayload' => [
                 'response.headers' => $event->headers,
                 'response.payload' => $event->payload,
@@ -60,18 +58,20 @@ trait LoggingTrait
             ]
         ];
 
+        $debugEvent['jsonPayload'] = array_filter($debugEvent['jsonPayload']);
         $this->logger->debug((string) json_encode($debugEvent));
 
         $infoEvent = [
             'timestamp' => $event->timestamp,
             'severity' => LogLevel::INFO,
             'clientId' => $event->clientId,
-            'requestId' => $event->requestId,
+            'requestId' => $event->requestId ?? null,
             'jsonPayload' => [
                 'response.status' => $event->status
             ]
         ];
 
+        $infoEvent['jsonPayload'] = array_filter($infoEvent['jsonPayload']);
         $this->logger->info((string) json_encode($infoEvent));
     }
 
@@ -80,6 +80,10 @@ trait LoggingTrait
      */
     private function getJwtToken(array $headers): null|array
     {
+        if (empty($headers)) {
+            return null;
+        }
+
         $tokenHeader = $headers['Authorization'] ?? '';
         $token = str_replace('Bearer ', '', $tokenHeader);
 
