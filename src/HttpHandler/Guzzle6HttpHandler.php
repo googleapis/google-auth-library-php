@@ -33,7 +33,7 @@ class Guzzle6HttpHandler
     private $client;
 
     /**
-     * @var LoggerInterface
+     * @var null|LoggerInterface
      */
     private $logger;
 
