@@ -109,6 +109,7 @@ class FetchAuthTokenTest extends BaseTest
             ['Google\Auth\Credentials\AppIdentityCredentials'],
             ['Google\Auth\Credentials\GCECredentials'],
             ['Google\Auth\Credentials\ServiceAccountCredentials'],
+            ['Google\Auth\Credentials\ImpersonatedServiceAccountCredentials'],
             ['Google\Auth\Credentials\ServiceAccountJwtAccessCredentials'],
             ['Google\Auth\Credentials\UserRefreshCredentials'],
             ['Google\Auth\OAuth2'],

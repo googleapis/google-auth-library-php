@@ -21,6 +21,7 @@ use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\CredentialSource;
@@ -153,6 +154,13 @@ class ApplicationDefaultCredentialsTest extends TestCase
         // did not use default scope
         $tokenUri = $uriProperty->getValue($creds);
         $this->assertStringContainsString('a+user+scope', $tokenUri);
+    }
+
+    public function testGetIdTokenCredentialsCanFindImpersonatedServiceAccountCredentials()
+    {
+        putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/fixtures3/impersonated_service_account_credentials.json');
+        $creds = ApplicationDefaultCredentials::getIdTokenCredentials('123@456.com');
+        $this->assertInstanceOf(ImpersonatedServiceAccountCredentials::class, $creds);
     }
 
     public function testImpersonatedServiceAccountCredentials()

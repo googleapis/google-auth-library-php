@@ -20,6 +20,7 @@ namespace Google\Auth;
 use DomainException;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
@@ -302,11 +303,13 @@ class ApplicationDefaultCredentials
                 throw new InvalidArgumentException('ID tokens are not supported for end user credentials');
             }
 
-            if ($jsonKey['type'] != 'service_account') {
+            if (! in_array($jsonKey['type'], ['service_account', 'impersonated_service_account'])) {
                 throw new InvalidArgumentException('invalid value in the type field');
             }
 
-            $creds = new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience);
+            $creds = $jsonKey['type'] === 'service_account'
+                ? new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience)
+                : new ImpersonatedServiceAccountCredentials(null, $jsonKey, null, $targetAudience);
         } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
             $creds = new GCECredentials(null, null, $targetAudience);
             $creds->setIsOnGce(true); // save the credentials a trip to the metadata server

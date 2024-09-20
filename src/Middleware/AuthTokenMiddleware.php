@@ -17,6 +17,7 @@
 
 namespace Google\Auth\Middleware;
 
+use Exception;
 use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\GetQuotaProjectInterface;
@@ -123,6 +124,7 @@ class AuthTokenMiddleware
      *
      * @param RequestInterface $request
      * @return RequestInterface
+     * @throws Exception
      */
     private function addAuthHeaders(RequestInterface $request)
     {
