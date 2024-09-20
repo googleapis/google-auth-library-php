@@ -52,7 +52,9 @@ class HttpHandlerFactory
             $client = new Client(['handler' => $stack]);
         }
 
-        if ($logger !== false) {
+        if ($logger === false) {
+            $logger = null;
+        } else {
             $logger = $logger ?? ApplicationDefaultCredentials::getDefaultLogger();
         }
 
