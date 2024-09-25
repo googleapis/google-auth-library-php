@@ -17,7 +17,7 @@
 
 namespace Google\Auth\Logging;
 
-use Exception;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Stringable;
@@ -52,50 +52,72 @@ class StdOutLogger implements LoggerInterface
         $this->level = $this->getLevelMap($level);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function emergency(string|Stringable $message, array $context = []): void
     {
         $this->log(LogLevel::EMERGENCY, $message);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function alert(string|Stringable $message, array $context = []): void
     {
         $this->log(LogLevel::ALERT, $message);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function critical(string|Stringable $message, array $context = []): void
     {
         $this->log(LogLevel::CRITICAL, $message);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function error(string|Stringable $message, array $context = []): void
     {
         $this->log(LogLevel::ERROR, $message);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function warning(string|Stringable $message, array $context = []): void
     {
         $this->log(LogLevel::WARNING, $message);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function notice(string|Stringable $message, array $context = []): void
     {
         $this->log(LogLevel::NOTICE, $message);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function info(string|Stringable $message, array $context = []): void
     {
         $this->log(LogLevel::INFO, $message);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function debug(string|Stringable $message, array $context = []): void
     {
         $this->log(LogLevel::DEBUG, $message);
     }
 
     /**
-     * @param string $level
-     * @param string|Stringable $message
-     * @param array<mixed> $context
+     * {@inheritdoc}
      */
     public function log($level, string|Stringable $message, array $context = []): void
     {
@@ -106,10 +128,15 @@ class StdOutLogger implements LoggerInterface
         print($message . "\n");
     }
 
+    /**
+     * @param string $levelName
+     * @return int
+     * @throws InvalidArgumentException
+     */
     private function getLevelMap(string $levelName): int
     {
         if (!array_key_exists($levelName, $this->levelMapping)) {
-            throw new Exception('The level supplied to the Logger is not valid');
+            throw new InvalidArgumentException('The level supplied to the Logger is not valid');
         }
 
         return $this->levelMapping[$levelName];

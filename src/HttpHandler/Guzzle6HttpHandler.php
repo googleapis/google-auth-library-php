@@ -39,6 +39,7 @@ class Guzzle6HttpHandler
 
     /**
      * @param ClientInterface $client
+     * @param null|LoggerInterface $logger
      */
     public function __construct(ClientInterface $client, LoggerInterface $logger = null)
     {

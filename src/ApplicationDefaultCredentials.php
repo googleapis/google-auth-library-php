@@ -325,6 +325,8 @@ class ApplicationDefaultCredentials
 
     /**
      * Returns a StdOutLogger instance
+     *
+     * @return null|LoggerInterface
      */
     public static function getDefaultLogger(): null|LoggerInterface
     {
