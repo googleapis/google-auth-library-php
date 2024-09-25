@@ -133,23 +133,4 @@ trait LoggingTrait
             'token' => base64_decode($token)
         ];
     }
-
-    /**
-     * @param array<string, mixed> $arr
-     * @return array<string, mixed>
-     */
-    private function removeNullsFromLog(array $arr): array
-    {
-        $result = [];
-
-        foreach ($arr as $key => $value) {
-            if (is_null($value)) {
-                continue;
-            }
-
-            if (is_array($value)) {
-
-            }
-        }
-    }
 }
