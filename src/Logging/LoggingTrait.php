@@ -30,6 +30,8 @@ trait LoggingTrait
             'requestId' => $event->requestId ?? null,
         ];
 
+        $debugEvent = array_filter($debugEvent, fn($value) => !is_null($value));
+
         $jsonPayload = [
             'request.method' => $event->method,
             'request.url' => $event->url,
@@ -39,7 +41,7 @@ trait LoggingTrait
             'retryAttempt' => $event->retryAttempt
         ];
 
-        $debugEvent['jsonPayload'] = array_filter($jsonPayload);
+        $debugEvent['jsonPayload'] = array_filter($jsonPayload, fn($value) => !is_null($value));
 
         $this->logger->debug((string) json_encode($debugEvent));
     }
@@ -58,7 +60,11 @@ trait LoggingTrait
             ]
         ];
 
-        $debugEvent['jsonPayload'] = array_filter($debugEvent['jsonPayload']);
+        $debugEvent = array_filter($debugEvent, fn($value) => !is_null($value));
+        $debugEvent['jsonPayload'] = array_filter(
+            $debugEvent['jsonPayload'],
+            fn($value) => !is_null($value)
+        );
         $this->logger->debug((string) json_encode($debugEvent));
 
         $infoEvent = [
@@ -71,7 +77,36 @@ trait LoggingTrait
             ]
         ];
 
-        $infoEvent['jsonPayload'] = array_filter($infoEvent['jsonPayload']);
+        $infoEvent = array_filter($infoEvent, fn($value) => !is_null($value));
+        $infoEvent['jsonPayload'] = array_filter(
+            $infoEvent['jsonPayload'],
+            fn($value) => !is_null($value)
+        );
+
+        $this->logger->info((string) json_encode($infoEvent));
+    }
+
+    /**
+     * @param LogEvent $status
+     */
+    private function logStatus(LogEvent $event): void
+    {
+        $infoEvent = [
+            'timestamp' => $event->timestamp,
+            'severity' => LogLevel::INFO,
+            'clientId' => $event->clientId,
+            'requestId' => $event->requestId ?? null,
+            'jsonPayload' => [
+                'response.status' => $event->status
+            ]
+        ];
+
+        $infoEvent = array_filter($infoEvent, fn($value) => !is_null($value));
+        $infoEvent['jsonPayload'] = array_filter(
+            $infoEvent['jsonPayload'],
+            fn($value) => !is_null($value)
+        );
+
         $this->logger->info((string) json_encode($infoEvent));
     }
 
@@ -97,5 +132,24 @@ trait LoggingTrait
             'header' => base64_decode($header),
             'token' => base64_decode($token)
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $arr
+     * @return array<string, mixed>
+     */
+    private function removeNullsFromLog(array $arr): array
+    {
+        $result = [];
+
+        foreach ($arr as $key => $value) {
+            if (is_null($value)) {
+                continue;
+            }
+
+            if (is_array($value)) {
+
+            }
+        }
     }
 }
