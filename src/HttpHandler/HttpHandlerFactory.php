@@ -31,7 +31,6 @@ class HttpHandlerFactory
      *
      * @param ClientInterface $client
      * @param null|false|LoggerInterface $logger
-     * @param bool $loggerDisabled
      * @return Guzzle6HttpHandler|Guzzle7HttpHandler
      * @throws \Exception
      */
