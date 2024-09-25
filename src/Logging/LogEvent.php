@@ -87,21 +87,21 @@ class LogEvent
      *
      * @var null|string $serviceName
      */
-    public null|string $serviceName;
+    public null|string $serviceName = null;
 
     /**
      * The Client Id for easy trace
      *
-     * @var int $clientId
+     * @var null|int $clientId
      */
-    public int $clientId;
+    public null|int $clientId = null;
 
     /**
      * The Request id for easy trace
      *
-     * @var int $requestId;
+     * @var null|int $requestId;
      */
-    public int $requestId;
+    public null|int $requestId = null;
 
     /**
      * Creates an object with all the fields required for logging
