@@ -87,7 +87,7 @@ trait LoggingTrait
     }
 
     /**
-     * @param LogEvent $status
+     * @param LogEvent $event
      */
     private function logStatus(LogEvent $event): void
     {
@@ -112,6 +112,7 @@ trait LoggingTrait
 
     /**
      * @param array<mixed> $headers
+     * @return null|array<mixed, mixed>
      */
     private function getJwtToken(array $headers): null|array
     {
