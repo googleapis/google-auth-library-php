@@ -21,6 +21,9 @@ use Psr\Log\LogLevel;
 
 trait LoggingTrait
 {
+    /**
+     * @param LogEvent $event
+     */
     private function logRequest(LogEvent $event): void
     {
         $debugEvent = [
@@ -46,6 +49,9 @@ trait LoggingTrait
         $this->logger->debug((string) json_encode($debugEvent));
     }
 
+    /**
+     * @param LogEvent $event
+     */
     private function logResponse(LogEvent $event): void
     {
         $debugEvent = [

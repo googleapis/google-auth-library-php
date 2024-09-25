@@ -17,16 +17,16 @@
 
 namespace Google\Auth\Tests\Logging;
 
-use Exception;
 use Google\Auth\Logging\StdOutLogger;
 use Google\Auth\Tests\BaseTest;
+use InvalidArgumentException;
 use Psr\Log\LogLevel;
 
 class StdOutLoggerTest extends BaseTest
 {
     public function testConstructsWithAnIncorrectLevelThrowsException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidArgumentException::class);
         new StdOutLogger('invalid level');
     }
 
