@@ -73,23 +73,25 @@ trait LoggingTrait
         );
         $this->logger->debug((string) json_encode($debugEvent));
 
-        $infoEvent = [
-            'timestamp' => $event->timestamp,
-            'severity' => LogLevel::INFO,
-            'clientId' => $event->clientId,
-            'requestId' => $event->requestId ?? null,
-            'jsonPayload' => [
-                'response.status' => $event->status
-            ]
-        ];
+        if ($event->status) {
+            $infoEvent = [
+                'timestamp' => $event->timestamp,
+                'severity' => LogLevel::INFO,
+                'clientId' => $event->clientId,
+                'requestId' => $event->requestId ?? null,
+                'jsonPayload' => [
+                    'response.status' => $event->status
+                ]
+            ];
 
-        $infoEvent = array_filter($infoEvent, fn ($value) => !is_null($value));
-        $infoEvent['jsonPayload'] = array_filter(
-            $infoEvent['jsonPayload'],
-            fn ($value) => !is_null($value)
-        );
+            $infoEvent = array_filter($infoEvent, fn ($value) => !is_null($value));
+            $infoEvent['jsonPayload'] = array_filter(
+                $infoEvent['jsonPayload'],
+                fn ($value) => !is_null($value)
+            );
 
-        $this->logger->info((string) json_encode($infoEvent));
+            $this->logger->info((string) json_encode($infoEvent));
+        }
     }
 
     /**
