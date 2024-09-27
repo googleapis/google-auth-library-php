@@ -85,10 +85,6 @@ trait LoggingTrait
             ];
 
             $infoEvent = array_filter($infoEvent, fn ($value) => !is_null($value));
-            $infoEvent['jsonPayload'] = array_filter(
-                $infoEvent['jsonPayload'],
-                fn ($value) => !is_null($value)
-            );
 
             $this->logger->info((string) json_encode($infoEvent));
         }
