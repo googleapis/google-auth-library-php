@@ -20,6 +20,7 @@ namespace Google\Auth;
 use DomainException;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
@@ -300,6 +301,10 @@ class ApplicationDefaultCredentials
 
             if ($jsonKey['type'] == 'authorized_user') {
                 throw new InvalidArgumentException('ID tokens are not supported for end user credentials');
+            }
+
+            if ($jsonKey['type'] == 'impersonated_service_account') {
+                return new ImpersonatedServiceAccountCredentials($scope, $jsonKey, $targetAudience);
             }
 
             if ($jsonKey['type'] != 'service_account') {
