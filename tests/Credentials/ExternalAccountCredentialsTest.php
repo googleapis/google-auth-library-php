@@ -520,4 +520,123 @@ class ExternalAccountCredentialsTest extends TestCase
         $this->assertEquals('def', $authToken['access_token']);
         $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
     }
+
+    public function testFileSourceCacheKey()
+    {
+        $this->baseCreds['credential_source'] = ['file' => 'fakeFile'];
+        $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
+        $cacheKey = $credentials->getCacheKey();
+        $expectedKey = 'fakeFile.scope1...';
+        $this->assertEquals($expectedKey, $cacheKey);
+    }
+
+    public function testAWSSourceCacheKey()
+    {
+        $this->baseCreds['credential_source'] = [
+            'environment_id' => 'aws1',
+            'regional_cred_verification_url' => 'us-east',
+            'region_url' => 'aws.us-east.com',
+            'url' => 'aws.us-east.token.com',
+            'imdsv2_session_token_url' => '12345'
+        ];
+        $this->baseCreds['audience'] = 'audience1';
+        $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
+        $cacheKey = $credentials->getCacheKey();
+        $expectedKey = '12345.aws.us-east.token.com.aws.us-east.com.us-east.audience1...';
+        $this->assertEquals($expectedKey, $cacheKey);
+    }
+
+    public function testUrlSourceCacheKey()
+    {
+        $this->baseCreds['credential_source'] = [
+            'url' => 'fakeUrl',
+            'format' => [
+                'type' => 'json',
+                'subject_token_field_name' => 'keyShouldBeHere'
+            ]
+        ];
+
+        $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
+        $cacheKey = $credentials->getCacheKey();
+        $expectedKey = 'fakeUrl.scope1...';
+        $this->assertEquals($expectedKey, $cacheKey);
+    }
+    
+    public function testExecutableSourceCacheKey()
+    {
+        $this->baseCreds['credential_source'] = [
+            'executable' => [
+                'command' => 'ls -al',
+                'output_file' => './output.txt'
+            ]
+        ];
+
+        $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
+        $cacheKey = $credentials->getCacheKey();
+
+        $expectedCacheKey = 'ls -al../output.txt.scope1...';
+        $this->assertEquals($cacheKey, $expectedCacheKey);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testExecutableCredentialSourceEnvironmentVars()
+    {
+        putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test');
+        $outputFile = tempnam(sys_get_temp_dir(), 'output');
+        $fileContents = 'foo-' . rand();
+        $successJson = json_encode([
+            'version' => 1,
+            'success' => true,
+            'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
+            'id_token' => 'abc',
+            'expiration_time' => time() + 100,
+        ]);
+        $json = [
+            'audience' => 'test-audience',
+            'subject_token_type' => 'test-token-type',
+            'credential_source' => [
+                'executable' => [
+                    'command' => sprintf(
+                        'echo $GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE,$GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE,%s > %s' .
+                        ' && echo \'%s\' > $GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE ' .
+                        ' && echo \'%s\'',
+                        $fileContents,
+                        $tmpFile,
+                        $successJson,
+                        $successJson,
+                    ),
+                    'timeout_millis' => 5000,
+                    'output_file' => $outputFile,
+                ],
+            ],
+        ] + $this->baseCreds;
+
+        $creds = new ExternalAccountCredentials('a-scope', $json);
+        $authToken = $creds->fetchAuthToken(function (RequestInterface $request) {
+            parse_str((string) $request->getBody(), $requestBody);
+            $this->assertEquals('abc', $requestBody['subject_token']);
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn('{"access_token": "def"}');
+
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+
+            $response->hasHeader('Content-Type')->willReturn(false);
+
+            return $response->reveal();
+        });
+
+        $this->assertArrayHasKey('access_token', $authToken);
+        $this->assertEquals('def', $authToken['access_token']);
+
+        $this->assertFileExists($tmpFile);
+        $this->assertEquals(
+            'test-audience,test-token-type,' . $fileContents . PHP_EOL,
+            file_get_contents($tmpFile)
+        );
+    }
 }

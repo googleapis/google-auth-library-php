@@ -17,6 +17,7 @@
 
 namespace Google\Auth\Tests\Credentials;
 
+use COM;
 use Exception;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
@@ -29,6 +30,7 @@ use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use ReflectionClass;
 
 /**
  * @group credentials
@@ -50,6 +52,24 @@ class GCECredentialsTest extends BaseTest
         $onGce = GCECredentials::onGce($dummyHandler);
         $this->assertTrue($hasHeader);
         $this->assertTrue($onGce);
+    }
+
+    public function testOnGceMetricsHeader()
+    {
+        $handerInvoked = false;
+        $dummyHandler = function ($request) use (&$handerInvoked) {
+            $header = $request->getHeaderLine('x-goog-api-client');
+            $handerInvoked = true;
+            $this->assertStringMatchesFormat(
+                'gl-php/%s auth/%s auth-request-type/mds',
+                $header
+            );
+
+            return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+        };
+
+        GCECredentials::onGce($dummyHandler);
+        $this->assertTrue($handerInvoked);
     }
 
     public function testOnGCEIsFalseOnClientErrorStatus()
@@ -78,7 +98,7 @@ class GCECredentialsTest extends BaseTest
     {
         $tmpFile = tempnam(sys_get_temp_dir(), 'gce-test-product-name');
 
-        $method = (new \ReflectionClass(GCECredentials::class))
+        $method = (new ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyLinux');
         $method->setAccessible(true);
 
@@ -104,6 +124,68 @@ class GCECredentialsTest extends BaseTest
         };
 
         $this->assertTrue(GCECredentials::onGCE($httpHandler));
+    }
+
+    public function testOnWindowsGceWithResidencyWithNoCom()
+    {
+        if (PHP_OS !== 'Windows' && PHP_OS !== 'WINNT') {
+            $this->markTestSkipped('This test only works while running on Windows');
+        }
+
+        if (class_exists(COM::class)) {
+            throw $this->markTestSkipped('This test in meant to handle when the COM extension is not present');
+        }
+
+        $method = (new ReflectionClass(GCECredentials::class))
+            ->getMethod('detectResidencyWindows');
+        
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke(null, 'thisShouldBeFalse'));
+    }
+
+    public function testOnWindowsGceWithResidencyNotOnGCE()
+    {
+        if (!class_exists(COM::class)) {
+            throw $this->markTestSkipped('This test only works while running on windows COM extension enabled');
+        }
+
+        if (GCECredentials::onGce()) {
+            $this->markTestSkipped('This test runs only on non GCE machines');
+        }
+
+        $keyPathProperty = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
+        $keyName = 'SystemProductName';
+
+        $method = (new ReflectionClass(GCECredentials::class))
+            ->getMethod('detectResidencyWindows');
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke(null, $keyPathProperty . $keyName));
+    }
+
+    public function testOnWindowsGceWithResidency()
+    {
+        if (PHP_OS !== 'Windows' && PHP_OS !== 'WINNT') {
+            $this->markTestSkipped('This test only works while running on Windows');
+        }
+
+        if (!class_exists(COM::class)) {
+            $this->markTestSkipped('This test only works with the COM extension enabled');
+        }
+
+        if (!GCECredentials::onGce()) {
+            $this->markTestSkipped('This test only works while running on GCE');
+        }
+
+        $keyPathProperty = 'HKEY_LOCAL_MACHINE\\SYSTEM\\HardwareConfig\\Current\\';
+        $keyName = 'SystemProductName';
+
+        $method = (new ReflectionClass(GCECredentials::class))
+            ->getMethod('detectResidencyWindows');
+        $method->setAccessible(true);
+
+        $this->assertTrue($method->invoke(null, $keyPathProperty . $keyName));
     }
 
     public function testOnGCEIsFalseOnOkStatusWithoutExpectedHeader()

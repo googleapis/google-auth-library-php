@@ -54,7 +54,7 @@ class ServiceAccountCredentialsTest extends TestCase
         );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey(),
+            $testJson['client_email'] . '.' . implode(' ', $scope),
             $sa->getCacheKey()
         );
     }
@@ -71,7 +71,7 @@ class ServiceAccountCredentialsTest extends TestCase
         );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
+            $testJson['client_email'] . '.' . implode(' ', $scope) . '.' . $sub,
             $sa->getCacheKey()
         );
     }
@@ -90,7 +90,7 @@ class ServiceAccountCredentialsTest extends TestCase
 
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
+            $testJson['client_email'] . '.' . implode(' ', $scope) . '.' . $sub,
             $sa->getCacheKey()
         );
     }
@@ -367,6 +367,13 @@ class ServiceAccountCredentialsTest extends TestCase
         $testJson = $this->createTestJson();
         $sa = new ServiceAccountCredentials('scope/1', $testJson);
         $this->assertEquals($testJson['client_email'], $sa->getClientName());
+    }
+
+    public function testReturnsPrivateKey()
+    {
+        $testJson = $this->createTestJson();
+        $sa = new ServiceAccountCredentials('scope/1', $testJson);
+        $this->assertEquals($testJson['private_key'], $sa->getPrivateKey());
     }
 
     public function testGetProjectId()
