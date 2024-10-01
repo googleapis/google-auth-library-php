@@ -39,7 +39,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     protected $impersonatedServiceAccountName;
 
     /**
-     * @var UserRefreshCredentials
+     * @var FetchAuthTokenInterface
      */
     protected $sourceCredentials;
 
