@@ -56,8 +56,14 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      *
      * @param string|string[]     $scope   The scope of the access request, expressed either as an
      *                                     array or as a space-delimited string.
-     * @param string|array<mixed> $jsonKey JSON credential file path or JSON credentials
-     *                                     as an associative array.
+     * @param string|array<mixed> $jsonKey JSON credential file path or JSON array credentials {
+     *    JSON credentials as an associative array.
+     *
+     *     @type string                           $service_account_impersonation_url The URL to the service account
+     *     @type string|FetchAuthTokenCredentials $source_credentials The source credentials to impersonate
+     *     @type int                              $lifetime The lifetime of the impersonated credentials
+     *     @type string[]                         $delegates The delegates to impersonate
+     * }
      */
     public function __construct(
         $scope,
@@ -90,10 +96,9 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             $this->serviceAccountImpersonationUrl
         );
 
-        $this->sourceCredentials = new UserRefreshCredentials(
-            $scope,
-            $jsonKey['source_credentials']
-        );
+        $this->sourceCredentials = $jsonKey['source_credentials'] instanceof FetchAuthTokenCredentials
+            ? $jsonKey['source_credentials']
+            : CredentialsLoader::makeCredentials($scope, $jsonKey['source_credentials']);
     }
 
     /**
