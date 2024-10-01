@@ -148,19 +148,16 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     {
         $httpHandler = $httpHandler ?? HttpHandlerFactory::build();
 
-        // We don't support id token endpoint requests as of now for Impersonated Cred
-        $authToken = $this->sourceCredentials->fetchAuthToken(
-            $httpHandler,
-            $this->applyTokenEndpointMetrics([], 'at')
+        $headers = $this->sourceCredentials->updateMetadata(
+            ['Content-Type' => 'application/json'],
+            null,
+            $httpHandler
         );
 
         $request = new Request(
             'POST',
             $this->serviceAccountImpersonationUrl,
-            [
-                'Authorization' => 'Bearer ' . $authToken['access_token'],
-                'Content-Type' => 'application/json',
-            ],
+            $headers,
             json_encode([
                 'scope' => $this->targetScope,
                 'delegates' => $this->delegates,
