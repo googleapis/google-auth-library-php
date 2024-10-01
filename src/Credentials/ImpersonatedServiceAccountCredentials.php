@@ -18,12 +18,16 @@
 
 namespace Google\Auth\Credentials;
 
+use Google\Auth\CacheTrait;
 use Google\Auth\CredentialsLoader;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
+use GuzzleHttp\Psr7\Request;
 
 class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface
 {
+    use CacheTrait;
     use IamSignerTrait;
 
     private const CRED_TYPE = 'imp';
@@ -38,9 +42,17 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     protected $sourceCredentials;
 
+    private string $serviceAccountImpersonationUrl;
+
+    private array $delegates;
+
+    private string|array $targetScope;
+
+    private int $lifetime;
+
     /**
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that
-     * has be created with the --impersonated-service-account flag.
+     * has be created with the --impersonate-service-account flag.
      *
      * @param string|string[]     $scope   The scope of the access request, expressed either as an
      *                                     array or as a space-delimited string.
@@ -69,8 +81,13 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             throw new \LogicException('json key is missing the source_credentials field');
         }
 
+        $this->targetScope = $scope ?? [];
+        $this->lifetime = $jsonKey['lifetime'] ?? 3600;
+        $this->delegates = $jsonKey['delegates'] ?? [];
+
+        $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'];
         $this->impersonatedServiceAccountName = $this->getImpersonatedServiceAccountNameFromUrl(
-            $jsonKey['service_account_impersonation_url']
+            $this->serviceAccountImpersonationUrl
         );
 
         $this->sourceCredentials = new UserRefreshCredentials(
@@ -123,11 +140,34 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
+        $httpHandler = $httpHandler ?? HttpHandlerFactory::build();
+
         // We don't support id token endpoint requests as of now for Impersonated Cred
-        return $this->sourceCredentials->fetchAuthToken(
+        $authToken = $this->sourceCredentials->fetchAuthToken(
             $httpHandler,
             $this->applyTokenEndpointMetrics([], 'at')
         );
+
+        $request = new Request(
+            'POST',
+            $this->serviceAccountImpersonationUrl,
+            [
+                'Authorization' => 'Bearer ' . $authToken['access_token'],
+                'Content-Type' => 'application/json',
+            ],
+            json_encode([
+                'scope' => $this->targetScope,
+                'delegates' => $this->delegates,
+                'lifetime' => sprintf('%ss', $this->lifetime),
+            ])
+        );
+
+        $response = $httpHandler($request);
+        $body = json_decode((string) $response->getBody(), true);
+        return [
+            'access_token' => $body['accessToken'],
+            'expires_at' => strtotime($body['expireTime']),
+        ];
     }
 
     /**
@@ -138,7 +178,9 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getCacheKey()
     {
-        return $this->sourceCredentials->getCacheKey();
+        return $this->getFullCacheKey(
+            $this->serviceAccountImpersonationUrl . $this->sourceCredentials->getCacheKey()
+        );
     }
 
     /**
