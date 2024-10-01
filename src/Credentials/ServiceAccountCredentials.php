@@ -215,8 +215,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
             return $accessToken;
         }
-        $authRequestType = $this->isIdTokenRequest() ? 'it' : 'at';
-        if ($this->isIdTokenRequest() && $this->getUniverseDomain() != self::DEFAULT_UNIVERSE_DOMAIN) {
+        if (
+            $this->isIdTokenRequest()
+            && $this->getUniverseDomain() != self::DEFAULT_UNIVERSE_DOMAIN
+        ) {
             $idToken = (new Iam($httpHandler, $this->getUniverseDomain()))->generateIdToken(
                 $this->auth->getIssuer(),
                 $this->auth->getAdditionalClaims()['target_audience'],
@@ -226,6 +228,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
             );
             return ['id_token' => $idToken];
         }
+        $authRequestType = $this->isIdTokenRequest() ? 'it' : 'at';
         return $this->auth->fetchAuthToken($httpHandler, $this->applyTokenEndpointMetrics([], $authRequestType));
     }
 

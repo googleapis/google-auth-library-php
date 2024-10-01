@@ -65,10 +65,12 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      *     @type int                            $lifetime The lifetime of the impersonated credentials
      *     @type string[]                       $delegates The delegates to impersonate
      * }
+     * @param string|null $targetAudience The audience to request an ID token for.
      */
     public function __construct(
         $scope,
-        $jsonKey
+        $jsonKey,
+        private ?string $targetAudience = null
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -149,24 +151,41 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         $httpHandler = $httpHandler ?? HttpHandlerFactory::build();
 
         $headers = $this->sourceCredentials->updateMetadata(
-            ['Content-Type' => 'application/json'],
+[
+                'Content-Type' => 'application/json',
+                'Cache-Control' => 'no-store',
+            ],
             null,
             $httpHandler
         );
+
+        if ($this->isIdTokenRequest()) {
+            $body = [
+                'audience' => $this->targetAudience,
+                'includeEmail' => true,
+            ];
+        } else {
+            $body = [
+                'scope' => $this->targetScope,
+                'delegates' => $this->delegates,
+                'lifetime' => sprintf('%ss', $this->lifetime),
+            ];
+        }
 
         $request = new Request(
             'POST',
             $this->serviceAccountImpersonationUrl,
             $headers,
-            json_encode([
-                'scope' => $this->targetScope,
-                'delegates' => $this->delegates,
-                'lifetime' => sprintf('%ss', $this->lifetime),
-            ])
+            json_encode($body)
         );
 
         $response = $httpHandler($request);
         $body = json_decode((string) $response->getBody(), true);
+
+        if ($this->isIdTokenRequest()) {
+            return ['id_token' => $body['token']];
+        }
+
         return [
             'access_token' => $body['accessToken'],
             'expires_at' => strtotime($body['expireTime']),
@@ -197,5 +216,10 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     protected function getCredType(): string
     {
         return self::CRED_TYPE;
+    }
+
+    private function isIdTokenRequest(): bool
+    {
+        return !is_null($this->targetAudience);
     }
 }
