@@ -21,6 +21,7 @@ namespace Google\Auth\Credentials;
 use Google\Auth\CacheTrait;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
 use GuzzleHttp\Psr7\Request;
@@ -59,10 +60,10 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      * @param string|array<mixed> $jsonKey JSON credential file path or JSON array credentials {
      *    JSON credentials as an associative array.
      *
-     *     @type string                           $service_account_impersonation_url The URL to the service account
-     *     @type string|FetchAuthTokenCredentials $source_credentials The source credentials to impersonate
-     *     @type int                              $lifetime The lifetime of the impersonated credentials
-     *     @type string[]                         $delegates The delegates to impersonate
+     *     @type string                         $service_account_impersonation_url The URL to the service account
+     *     @type string|FetchAuthTokenInterface $source_credentials The source credentials to impersonate
+     *     @type int                            $lifetime The lifetime of the impersonated credentials
+     *     @type string[]                       $delegates The delegates to impersonate
      * }
      */
     public function __construct(
@@ -96,7 +97,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             $this->serviceAccountImpersonationUrl
         );
 
-        $this->sourceCredentials = $jsonKey['source_credentials'] instanceof FetchAuthTokenCredentials
+        $this->sourceCredentials = $jsonKey['source_credentials'] instanceof FetchAuthTokenInterface
             ? $jsonKey['source_credentials']
             : CredentialsLoader::makeCredentials($scope, $jsonKey['source_credentials']);
     }
