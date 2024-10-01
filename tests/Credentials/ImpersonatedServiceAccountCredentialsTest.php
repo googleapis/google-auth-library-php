@@ -19,13 +19,68 @@
 namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\Credentials\UserRefreshCredentials;
 use LogicException;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class ImpersonatedServiceAccountCredentialsTest extends TestCase
 {
+    private const SCOPE = ['scope/1', 'scope/2'];
+
+    /**
+     * @dataProvider provideServiceAccountImpersonationJson
+     */
+    public function testGetServiceAccountNameEmail(array $testJson)
+    {
+        $creds = new ImpersonatedServiceAccountCredentials(self::SCOPE, $testJson);
+        $this->assertEquals('test@test-project.iam.gserviceaccount.com', $creds->getClientName());
+    }
+
+    /**
+     * @dataProvider provideServiceAccountImpersonationJson
+     */
+    public function testGetServiceAccountNameID(array $testJson)
+    {
+        $testJson['service_account_impersonation_url'] = 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/1234567890987654321:generateAccessToken';
+        $creds = new ImpersonatedServiceAccountCredentials(self::SCOPE, $testJson);
+        $this->assertEquals('1234567890987654321', $creds->getClientName());
+    }
+
+    /**
+     * @dataProvider provideServiceAccountImpersonationJson
+     */
+    public function testErrorCredentials(array $testJson)
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('json key is missing the service_account_impersonation_url field');
+
+        new ImpersonatedServiceAccountCredentials(self::SCOPE, $testJson['source_credentials']);
+    }
+
+    /**
+     * @dataProvider provideServiceAccountImpersonationJson
+     */
+    public function testSourceCredentialsFromJsonFiles(array $testJson, string $credClass)
+    {
+        $creds = new ImpersonatedServiceAccountCredentials(['scope/1', 'scope/2'], $testJson);
+
+        $sourceCredentialsProperty = (new ReflectionClass($creds))->getProperty('sourceCredentials');
+        $sourceCredentialsProperty->setAccessible(true);
+        $this->assertInstanceOf($credClass, $sourceCredentialsProperty->getValue($creds));
+    }
+
+    public function provideServiceAccountImpersonationJson()
+    {
+        return [
+            [$this->createUserISACTestJson(), UserRefreshCredentials::class],
+            [$this->createSAISACTestJson(), ServiceAccountCredentials::class],
+        ];
+    }
+
     // Creates a standard JSON auth object for testing.
-    private function createISACTestJson()
+    private function createUserISACTestJson()
     {
         return [
             'type' => 'impersonated_service_account',
@@ -39,34 +94,18 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         ];
     }
 
-    public function testGetServiceAccountNameEmail()
+    // Creates a standard JSON auth object for testing.
+    private function createSAISACTestJson()
     {
-        $testJson = $this->createISACTestJson();
-        $scope = ['scope/1', 'scope/2'];
-        $sa = new ImpersonatedServiceAccountCredentials(
-            $scope,
-            $testJson
-        );
-        $this->assertEquals('test@test-project.iam.gserviceaccount.com', $sa->getClientName());
+        return [
+            'type' => 'impersonated_service_account',
+            'service_account_impersonation_url' => 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/test@test-project.iam.gserviceaccount.com:generateAccessToken',
+            'source_credentials' => [
+                'client_email' => 'clientemail@clientemail.com',
+                'private_key' => 'privatekey123',
+                'type' => 'service_account',
+            ]
+        ];
     }
 
-    public function testGetServiceAccountNameID()
-    {
-        $testJson = $this->createISACTestJson();
-        $testJson['service_account_impersonation_url'] = 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/1234567890987654321:generateAccessToken';
-        $scope = ['scope/1', 'scope/2'];
-        $sa = new ImpersonatedServiceAccountCredentials(
-            $scope,
-            $testJson
-        );
-        $this->assertEquals('1234567890987654321', $sa->getClientName());
-    }
-
-    public function testErrorCredentials()
-    {
-        $testJson = $this->createISACTestJson();
-        $scope = ['scope/1', 'scope/2'];
-        $this->expectException(LogicException::class);
-        new ImpersonatedServiceAccountCredentials($scope, $testJson['source_credentials']);
-    }
 }

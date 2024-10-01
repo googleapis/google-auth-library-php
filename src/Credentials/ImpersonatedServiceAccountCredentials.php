@@ -18,12 +18,17 @@
 
 namespace Google\Auth\Credentials;
 
+use Google\Auth\CacheTrait;
 use Google\Auth\CredentialsLoader;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
+use GuzzleHttp\Psr7\Request;
 
 class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface
 {
+    use CacheTrait;
     use IamSignerTrait;
 
     private const CRED_TYPE = 'imp';
@@ -34,18 +39,32 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     protected $impersonatedServiceAccountName;
 
     /**
-     * @var UserRefreshCredentials
+     * @var FetchAuthTokenInterface
      */
     protected $sourceCredentials;
 
+    private string $serviceAccountImpersonationUrl;
+
+    private array $delegates;
+
+    private string|array $targetScope;
+
+    private int $lifetime;
+
     /**
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that
-     * has be created with the --impersonated-service-account flag.
+     * has be created with the --impersonate-service-account flag.
      *
      * @param string|string[]     $scope   The scope of the access request, expressed either as an
      *                                     array or as a space-delimited string.
-     * @param string|array<mixed> $jsonKey JSON credential file path or JSON credentials
-     *                                     as an associative array.
+     * @param string|array<mixed> $jsonKey JSON credential file path or JSON array credentials {
+     *    JSON credentials as an associative array.
+     *
+     *     @type string                         $service_account_impersonation_url The URL to the service account
+     *     @type string|FetchAuthTokenInterface $source_credentials The source credentials to impersonate
+     *     @type int                            $lifetime The lifetime of the impersonated credentials
+     *     @type string[]                       $delegates The delegates to impersonate
+     * }
      */
     public function __construct(
         $scope,
@@ -69,14 +88,18 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             throw new \LogicException('json key is missing the source_credentials field');
         }
 
+        $this->targetScope = $scope ?? [];
+        $this->lifetime = $jsonKey['lifetime'] ?? 3600;
+        $this->delegates = $jsonKey['delegates'] ?? [];
+
+        $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'];
         $this->impersonatedServiceAccountName = $this->getImpersonatedServiceAccountNameFromUrl(
-            $jsonKey['service_account_impersonation_url']
+            $this->serviceAccountImpersonationUrl
         );
 
-        $this->sourceCredentials = new UserRefreshCredentials(
-            $scope,
-            $jsonKey['source_credentials']
-        );
+        $this->sourceCredentials = $jsonKey['source_credentials'] instanceof FetchAuthTokenInterface
+            ? $jsonKey['source_credentials']
+            : CredentialsLoader::makeCredentials($scope, $jsonKey['source_credentials']);
     }
 
     /**
@@ -123,11 +146,31 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        // We don't support id token endpoint requests as of now for Impersonated Cred
-        return $this->sourceCredentials->fetchAuthToken(
-            $httpHandler,
-            $this->applyTokenEndpointMetrics([], 'at')
+        $httpHandler = $httpHandler ?? HttpHandlerFactory::build();
+
+        $headers = $this->sourceCredentials->updateMetadata(
+            ['Content-Type' => 'application/json'],
+            null,
+            $httpHandler
         );
+
+        $request = new Request(
+            'POST',
+            $this->serviceAccountImpersonationUrl,
+            $headers,
+            json_encode([
+                'scope' => $this->targetScope,
+                'delegates' => $this->delegates,
+                'lifetime' => sprintf('%ss', $this->lifetime),
+            ])
+        );
+
+        $response = $httpHandler($request);
+        $body = json_decode((string) $response->getBody(), true);
+        return [
+            'access_token' => $body['accessToken'],
+            'expires_at' => strtotime($body['expireTime']),
+        ];
     }
 
     /**
@@ -138,7 +181,9 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getCacheKey()
     {
-        return $this->sourceCredentials->getCacheKey();
+        return $this->getFullCacheKey(
+            $this->serviceAccountImpersonationUrl . $this->sourceCredentials->getCacheKey()
+        );
     }
 
     /**
