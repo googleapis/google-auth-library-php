@@ -19,6 +19,7 @@ namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\Iam;
 use Google\Auth\OAuth2;
 use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\ServiceAccountSignerTrait;
@@ -165,6 +166,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
             'scope' => $scope,
             'signingAlgorithm' => 'RS256',
             'signingKey' => $jsonKey['private_key'],
+            'signingKeyId' => $jsonKey['private_key_id'] ?? null,
             'sub' => $sub,
             'tokenCredentialUri' => self::TOKEN_CREDENTIAL_URI,
             'additionalClaims' => $additionalClaims,
@@ -213,8 +215,17 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
             return $accessToken;
         }
-        $authRequestType = empty($this->auth->getAdditionalClaims()['target_audience'])
-            ? 'at' : 'it';
+        $authRequestType = $this->isIdTokenRequest() ? 'it' : 'at';
+        if ($this->isIdTokenRequest() && $this->getUniverseDomain() != self::DEFAULT_UNIVERSE_DOMAIN) {
+            $idToken = (new Iam($httpHandler, $this->getUniverseDomain()))->generateIdToken(
+                $this->auth->getIssuer(),
+                $this->auth->getAdditionalClaims()['target_audience'],
+                $this->auth->getSigningKey(),
+                $this->auth->getSigningAlgorithm(),
+                $this->auth->getSigningKeyId()
+            );
+            return ['id_token' => $idToken];
+        }
         return $this->auth->fetchAuthToken($httpHandler, $this->applyTokenEndpointMetrics([], $authRequestType));
     }
 
@@ -399,8 +410,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements
             return false;
         }
 
-        // If claims are set, this call is for "id_tokens"
-        if ($this->auth->getAdditionalClaims()) {
+        // Do not use self-signed JWT for ID tokens
+        if ($this->isIdTokenRequest()) {
             return false;
         }
 
@@ -415,5 +426,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         }
 
         return is_null($this->auth->getScope());
+    }
+
+    private function isIdTokenRequest(): bool
+    {
+        return !empty($this->auth->getAdditionalClaims()['target_audience']);
     }
 }
