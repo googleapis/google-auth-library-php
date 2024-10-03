@@ -21,19 +21,19 @@ use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
-use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
-use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\CredentialSource;
+use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\GCECache;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
-use Psr\Cache\CacheItemPoolInterface;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Cache\CacheItemPoolInterface;
 use ReflectionClass;
 
 /**

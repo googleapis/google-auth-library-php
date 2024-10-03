@@ -727,7 +727,7 @@ class OAuth2 implements FetchAuthTokenInterface
      */
     public function parseTokenResponse(ResponseInterface $resp)
     {
-        $body = (string)$resp->getBody();
+        $body = (string) $resp->getBody();
         if ($resp->hasHeader('Content-Type') &&
             $resp->getHeaderLine('Content-Type') == 'application/x-www-form-urlencoded'
         ) {
@@ -1012,13 +1012,13 @@ class OAuth2 implements FetchAuthTokenInterface
         if (!$this->isAbsoluteUri($uri)) {
             // "postmessage" is a reserved URI string in Google-land
             // @see https://developers.google.com/identity/sign-in/web/server-side-flow
-            if ('postmessage' !== (string)$uri) {
+            if ('postmessage' !== (string) $uri) {
                 throw new InvalidArgumentException(
                     'Redirect URI must be absolute'
                 );
             }
         }
-        $this->redirectUri = (string)$uri;
+        $this->redirectUri = (string) $uri;
     }
 
     /**
@@ -1130,7 +1130,7 @@ class OAuth2 implements FetchAuthTokenInterface
                     'invalid grant type'
                 );
             }
-            $this->grantType = (string)$grantType;
+            $this->grantType = (string) $grantType;
         }
     }
 
@@ -1463,7 +1463,7 @@ class OAuth2 implements FetchAuthTokenInterface
             $this->issuedAt = null;
         } else {
             $this->issuedAt = time();
-            $this->expiresIn = (int)$expiresIn;
+            $this->expiresIn = (int) $expiresIn;
         }
     }
 
@@ -1771,7 +1771,8 @@ class OAuth2 implements FetchAuthTokenInterface
                 throw new \InvalidArgumentException(
                     'To have multiple allowed algorithms, You must provide an'
                     . ' array of Firebase\JWT\Key objects.'
-                    . ' See https://github.com/firebase/php-jwt for more information.');
+                    . ' See https://github.com/firebase/php-jwt for more information.'
+                );
             }
             $allowedAlg = array_pop($allowedAlgs);
         } else {
