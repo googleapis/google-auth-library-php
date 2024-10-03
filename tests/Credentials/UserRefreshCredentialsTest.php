@@ -271,6 +271,15 @@ class UserRefreshCredentialsTest extends TestCase
         $this->assertEquals(1, $timesCalled);
     }
 
+    public function testSettingBothScopeAndTargetAudienceThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Scope and targetAudience cannot both be supplied');
+
+        $testJson = $this->createTestJson();
+        $sa = new UserRefreshCredentials('a-scope', $testJson, 'a-target-audience');
+    }
+
     public function testGetQuotaProject()
     {
         $keyFile = __DIR__ . '/../fixtures2' . '/private.json';

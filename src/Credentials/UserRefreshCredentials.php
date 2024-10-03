@@ -20,6 +20,8 @@ namespace Google\Auth\Credentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
+use InvalidArgumentException;
+use LogicException;
 
 /**
  * Authenticates requests using User Refresh credentials.
@@ -58,39 +60,44 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     /**
      * Create a new UserRefreshCredentials.
      *
-     * @param string|string[] $scope the scope of the access request, expressed
+     * @param string|string[]|null $scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
      * @param string|array<mixed> $jsonKey JSON credential file path or JSON credentials
      *   as an associative array
-     * @param string $targetAudience The audience for the ID token.
+     * @param string|null $targetAudience The audience for the ID token.
      */
     public function __construct(
         $scope,
         $jsonKey,
-        $targetAudience = null
+        string $targetAudience = null
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
-                throw new \InvalidArgumentException('file does not exist');
+                throw new InvalidArgumentException('file does not exist');
             }
             $json = file_get_contents($jsonKey);
             if (!$jsonKey = json_decode((string) $json, true)) {
-                throw new \LogicException('invalid json for auth config');
+                throw new LogicException('invalid json for auth config');
             }
         }
         if (!array_key_exists('client_id', $jsonKey)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'json key is missing the client_id field'
             );
         }
         if (!array_key_exists('client_secret', $jsonKey)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'json key is missing the client_secret field'
             );
         }
         if (!array_key_exists('refresh_token', $jsonKey)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'json key is missing the refresh_token field'
+            );
+        }
+        if ($scope && $targetAudience) {
+            throw new InvalidArgumentException(
+                'Scope and targetAudience cannot both be supplied'
             );
         }
         $additionalClaims = [];
