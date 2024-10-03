@@ -304,7 +304,7 @@ class ApplicationDefaultCredentials
             }
 
             if ($jsonKey['type'] == 'impersonated_service_account') {
-                return new ImpersonatedServiceAccountCredentials($scope, $jsonKey, $targetAudience);
+                return new ImpersonatedServiceAccountCredentials(null, $jsonKey, $targetAudience);
             }
 
             if ($jsonKey['type'] != 'service_account') {

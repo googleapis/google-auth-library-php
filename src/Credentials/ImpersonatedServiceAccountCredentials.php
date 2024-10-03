@@ -22,6 +22,7 @@ use Google\Auth\CacheTrait;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
 use GuzzleHttp\Psr7\Request;
@@ -38,15 +39,18 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     protected $impersonatedServiceAccountName;
 
-    /**
-     * @var FetchAuthTokenInterface
-     */
-    protected $sourceCredentials;
+    protected FetchAuthTokenInterface $sourceCredentials;
 
     private string $serviceAccountImpersonationUrl;
 
+    /**
+     * @var string[]
+     */
     private array $delegates;
 
+    /**
+     * @var string|string[]
+     */
     private string|array $targetScope;
 
     private int $lifetime;
@@ -55,17 +59,17 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that
      * has be created with the --impersonate-service-account flag.
      *
-     * @param string|string[]     $scope   The scope of the access request, expressed either as an
-     *                                     array or as a space-delimited string.
-     * @param string|array<mixed> $jsonKey JSON credential file path or JSON array credentials {
-     *    JSON credentials as an associative array.
+     * @param string|string[]|null $scope   The scope of the access request, expressed either as an
+     *                                      array or as a space-delimited string.
+     * @param string|array<mixed>  $jsonKey JSON credential file path or JSON array credentials {
+     *     JSON credentials as an associative array.
      *
      *     @type string                         $service_account_impersonation_url The URL to the service account
      *     @type string|FetchAuthTokenInterface $source_credentials The source credentials to impersonate
      *     @type int                            $lifetime The lifetime of the impersonated credentials
      *     @type string[]                       $delegates The delegates to impersonate
      * }
-     * @param string|null $targetAudience The audience to request an ID token for.
+     * @param string|null $targetAudience The audience to request an ID token.
      */
     public function __construct(
         $scope,
@@ -148,48 +152,45 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
-        $httpHandler = $httpHandler ?? HttpHandlerFactory::build();
+        $httpHandler = $httpHandler ?? HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
-        $headers = $this->sourceCredentials->updateMetadata(
-[
-                'Content-Type' => 'application/json',
-                'Cache-Control' => 'no-store',
-            ],
-            null,
-            $httpHandler
+        $authToken = $this->sourceCredentials->fetchAuthToken(
+            $httpHandler,
+            $this->applyTokenEndpointMetrics([], 'at')
         );
 
-        if ($this->isIdTokenRequest()) {
-            $body = [
+        $headers = $this->applyTokenEndpointMetrics([
+            'Content-Type' => 'application/json',
+            'Cache-Control' => 'no-store',
+            'Authorization' => sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token']),
+        ], 'at');
+
+        $body = $this->isIdTokenRequest()
+            ? [
                 'audience' => $this->targetAudience,
                 'includeEmail' => true,
-            ];
-        } else {
-            $body = [
+            ] : [
                 'scope' => $this->targetScope,
                 'delegates' => $this->delegates,
                 'lifetime' => sprintf('%ss', $this->lifetime),
             ];
-        }
 
         $request = new Request(
             'POST',
             $this->serviceAccountImpersonationUrl,
             $headers,
-            json_encode($body)
+            (string) json_encode($body)
         );
 
         $response = $httpHandler($request);
         $body = json_decode((string) $response->getBody(), true);
 
-        if ($this->isIdTokenRequest()) {
-            return ['id_token' => $body['token']];
-        }
-
-        return [
-            'access_token' => $body['accessToken'],
-            'expires_at' => strtotime($body['expireTime']),
-        ];
+        return $this->isIdTokenRequest()
+            ? ['id_token' => $body['token']]
+            : [
+                'access_token' => $body['accessToken'],
+                'expires_at' => strtotime($body['expireTime']),
+            ];
     }
 
     /**
