@@ -20,10 +20,9 @@ namespace Google\Auth\Credentials;
 
 use Google\Auth\CacheTrait;
 use Google\Auth\CredentialsLoader;
-use Google\Auth\HttpHandler\HttpHandlerFactory;
-use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\FetchAuthTokenInterface;
-use Google\Auth\UpdateMetadataInterface;
+use Google\Auth\HttpHandler\HttpClientCache;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
 use GuzzleHttp\Psr7\Request;

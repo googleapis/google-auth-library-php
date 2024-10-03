@@ -290,7 +290,7 @@ class OAuth2Test extends TestCase
         ]);
         $this->assertEquals('postmessage', $o->getRedirectUri());
         $url = $o->buildFullAuthorizationUri();
-        $parts = parse_url((string)$url);
+        $parts = parse_url((string) $url);
         parse_str($parts['query'], $query);
         $this->assertArrayHasKey('redirect_uri', $query);
         $this->assertEquals('postmessage', $query['redirect_uri']);
@@ -726,7 +726,7 @@ class OAuth2Test extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Query::parse((string)$req->getBody());
+        $fields = Query::parse((string) $req->getBody());
         $this->assertEquals('authorization_code', $fields['grant_type']);
         $this->assertEquals('an_auth_code', $fields['code']);
     }
@@ -745,7 +745,7 @@ class OAuth2Test extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Query::parse((string)$req->getBody());
+        $fields = Query::parse((string) $req->getBody());
         $this->assertEquals('password', $fields['grant_type']);
         $this->assertEquals('a_password', $fields['password']);
         $this->assertEquals('a_username', $fields['username']);
@@ -764,7 +764,7 @@ class OAuth2Test extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Query::parse((string)$req->getBody());
+        $fields = Query::parse((string) $req->getBody());
         $this->assertEquals('refresh_token', $fields['grant_type']);
         $this->assertEquals('a_refresh_token', $fields['refresh_token']);
     }
@@ -780,7 +780,7 @@ class OAuth2Test extends TestCase
         $o = new OAuth2($testConfig);
         $o->setCode('an_auth_code');
         $request = $o->generateCredentialsRequest();
-        $fields = Query::parse((string)$request->getBody());
+        $fields = Query::parse((string) $request->getBody());
         $this->assertEquals('a_client_secret', $fields['client_secret']);
     }
 
@@ -794,7 +794,7 @@ class OAuth2Test extends TestCase
         $o = new OAuth2($testConfig);
         $o->setRefreshToken('a_refresh_token');
         $request = $o->generateCredentialsRequest();
-        $fields = Query::parse((string)$request->getBody());
+        $fields = Query::parse((string) $request->getBody());
         $this->assertEquals('a_client_secret', $fields['client_secret']);
     }
 
@@ -809,7 +809,7 @@ class OAuth2Test extends TestCase
         $o->setUsername('a_username');
         $o->setPassword('a_password');
         $request = $o->generateCredentialsRequest();
-        $fields = Query::parse((string)$request->getBody());
+        $fields = Query::parse((string) $request->getBody());
         $this->assertEquals('a_client_secret', $fields['client_secret']);
     }
 
@@ -827,7 +827,7 @@ class OAuth2Test extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Query::parse((string)$req->getBody());
+        $fields = Query::parse((string) $req->getBody());
         $this->assertEquals(OAuth2::JWT_URN, $fields['grant_type']);
         $this->assertArrayHasKey('assertion', $fields);
     }
@@ -846,7 +846,7 @@ class OAuth2Test extends TestCase
         $req = $o->generateCredentialsRequest();
         $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $req);
         $this->assertEquals('POST', $req->getMethod());
-        $fields = Query::parse((string)$req->getBody());
+        $fields = Query::parse((string) $req->getBody());
         $this->assertEquals('my_value', $fields['my_param']);
         $this->assertEquals('urn:my_test_grant_type', $fields['grant_type']);
     }
@@ -1289,7 +1289,7 @@ class OAuth2StsTest extends TestCase
         $request = $o->generateCredentialsRequest();
         $this->assertEquals('POST', $request->getMethod());
         $this->assertEquals($this->stsMinimal['tokenCredentialUri'], (string) $request->getUri());
-        parse_str((string)$request->getBody(), $requestParams);
+        parse_str((string) $request->getBody(), $requestParams);
         $this->assertCount(4, $requestParams);
         $this->assertEquals(OAuth2::STS_URN, $requestParams['grant_type']);
         $this->assertEquals('xyz', $requestParams['subject_token']);
@@ -1314,7 +1314,7 @@ class OAuth2StsTest extends TestCase
         $request = $o->generateCredentialsRequest();
         $this->assertEquals('POST', $request->getMethod());
         $this->assertEquals($this->stsMinimal['tokenCredentialUri'], (string) $request->getUri());
-        parse_str((string)$request->getBody(), $requestParams);
+        parse_str((string) $request->getBody(), $requestParams);
 
         $this->assertCount(9, $requestParams);
         $this->assertEquals(OAuth2::STS_URN, $requestParams['grant_type']);

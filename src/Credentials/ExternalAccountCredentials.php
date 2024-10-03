@@ -263,7 +263,7 @@ class ExternalAccountCredentials implements
      *     @type string $token_type (identity pool only)
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null, array $headers = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $headers = [])
     {
         $stsToken = $this->auth->fetchAuthToken($httpHandler, $headers);
 

@@ -43,7 +43,7 @@ class FileSystemCacheItemPoolTest extends TestCase
     {
         $files = scandir($this->defaultCacheDirectory);
 
-        foreach($files as $fileName) {
+        foreach ($files as $fileName) {
             if ($fileName === '.' || $fileName === '..') {
                 continue;
             }
