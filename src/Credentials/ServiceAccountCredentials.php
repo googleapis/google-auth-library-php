@@ -190,6 +190,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
     /**
      * @param callable $httpHandler
+     * @param array<mixed> $headers [optional] Headers to be inserted
+     *     into the token endpoint request present.
      *
      * @return array<mixed> {
      *     A set of auth related metadata, containing the following
@@ -199,7 +201,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      *     @type string $token_type
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(callable $httpHandler = null, array $headers = [])
     {
         if ($this->useSelfSignedJwt()) {
             $jwtCreds = $this->createJwtAccessCredentials();
@@ -215,7 +217,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         }
         $authRequestType = empty($this->auth->getAdditionalClaims()['target_audience'])
             ? 'at' : 'it';
-        return $this->auth->fetchAuthToken($httpHandler, $this->applyTokenEndpointMetrics([], $authRequestType));
+        return $this->auth->fetchAuthToken(
+            $httpHandler,
+            $this->applyTokenEndpointMetrics($headers, $authRequestType)
+        );
     }
 
     /**

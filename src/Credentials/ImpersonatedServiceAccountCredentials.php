@@ -21,6 +21,7 @@ namespace Google\Auth\Credentials;
 use Google\Auth\CacheTrait;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\IamSignerTrait;
@@ -154,6 +155,10 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     {
         $httpHandler = $httpHandler ?? HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
+        // The FetchAuthTokenInterface technically does not have a "headers" argument, but all of
+        // the implementations do. Additionally, passing in more parameters than the function has
+        // defined is allowed in PHP. So we'll just ignore the phpstan error here.
+        // @phpstan-ignore-next-line
         $authToken = $this->sourceCredentials->fetchAuthToken(
             $httpHandler,
             $this->applyTokenEndpointMetrics([], 'at')

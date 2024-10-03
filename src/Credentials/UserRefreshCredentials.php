@@ -120,12 +120,12 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      *     @type string $id_token
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null, array $metricsHeader = [])
+    public function fetchAuthToken(callable $httpHandler = null, array $headers = [])
     {
         // We don't support id token endpoint requests as of now for User Cred
         return $this->auth->fetchAuthToken(
             $httpHandler,
-            $this->applyTokenEndpointMetrics($metricsHeader, 'at')
+            $this->applyTokenEndpointMetrics($headers, 'at')
         );
     }
 
