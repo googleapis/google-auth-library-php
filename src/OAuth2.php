@@ -611,6 +611,9 @@ class OAuth2 implements FetchAuthTokenInterface
                 break;
             case 'refresh_token':
                 $params['refresh_token'] = $this->getRefreshToken();
+                if (isset($this->getAdditionalClaims()['target_audience'])) {
+                    $params['target_audience'] = $this->getAdditionalClaims()['target_audience'];
+                }
                 $this->addClientCredentials($params);
                 break;
             case self::JWT_URN:

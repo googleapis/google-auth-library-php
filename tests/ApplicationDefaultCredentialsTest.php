@@ -22,6 +22,9 @@ use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\Credentials\UserRefreshCredentials;
+use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
+use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\CredentialSource;
 use Google\Auth\GCECache;
@@ -29,6 +32,7 @@ use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\TestCase;
+use Psr\Cache\CacheItemPoolInterface;
 use Prophecy\PhpUnit\ProphecyTrait;
 use ReflectionClass;
 
@@ -103,7 +107,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         ]);
 
         $this->assertInstanceOf(
-            'Google\Auth\Credentials\GCECredentials',
+            GCECredentials::class,
             ApplicationDefaultCredentials::getCredentials('a scope', $httpHandler)
         );
     }
@@ -126,10 +130,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             'a+default+scope' // $defaultScope
         );
 
-        $this->assertInstanceOf(
-            'Google\Auth\Credentials\GCECredentials',
-            $creds
-        );
+        $this->assertInstanceOf(GCECredentials::class, $creds);
 
         $uriProperty = (new ReflectionClass($creds))->getProperty('tokenUri');
         $uriProperty->setAccessible(true);
@@ -166,9 +167,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             null,
             'a default scope'
         );
-        $this->assertInstanceOf(
-            'Google\Auth\Credentials\ImpersonatedServiceAccountCredentials',
-            $creds);
+        $this->assertInstanceOf(ImpersonatedServiceAccountCredentials::class, $creds);
 
         $this->assertEquals('service_account_name@namespace.iam.gserviceaccount.com', $creds->getClientName());
 
@@ -177,9 +176,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         // used default scope
         $sourceCredentials = $sourceCredentialsProperty->getValue($creds);
-        $this->assertInstanceOf(
-            'Google\Auth\Credentials\UserRefreshCredentials',
-            $sourceCredentials);
+        $this->assertInstanceOf(UserRefreshCredentials::class, $sourceCredentials);
     }
 
     public function testUserRefreshCredentials()
@@ -195,10 +192,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             'a default scope' // $defaultScope
         );
 
-        $this->assertInstanceOf(
-            'Google\Auth\Credentials\UserRefreshCredentials',
-            $creds
-        );
+        $this->assertInstanceOf(UserRefreshCredentials::class, $creds);
 
         $authProperty = (new ReflectionClass($creds))->getProperty('auth');
         $authProperty->setAccessible(true);
@@ -234,10 +228,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             'a default scope' // $defaultScope
         );
 
-        $this->assertInstanceOf(
-            'Google\Auth\Credentials\ServiceAccountCredentials',
-            $creds
-        );
+        $this->assertInstanceOf(ServiceAccountCredentials::class, $creds);
 
         $authProperty = (new ReflectionClass($creds))->getProperty('auth');
         $authProperty->setAccessible(true);
@@ -329,7 +320,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         ]);
 
         $cacheOptions = [];
-        $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $cachePool = $this->prophesize(CacheItemPoolInterface::class);
 
         $middleware = ApplicationDefaultCredentials::getMiddleware(
             'a scope',
@@ -372,7 +363,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn(false);
 
-        $mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $mockCache = $this->prophesize(CacheItemPoolInterface::class);
         $mockCache->getItem(GCECache::GCE_CACHE_KEY)
             ->shouldBeCalledTimes(1)
             ->willReturn($mockCacheItem->reveal());
@@ -404,7 +395,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($mockCacheItem->reveal());
 
-        $mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $mockCache = $this->prophesize(CacheItemPoolInterface::class);
         $mockCache->getItem(GCECache::GCE_CACHE_KEY)
             ->shouldBeCalledTimes(2)
             ->willReturn($mockCacheItem->reveal());
@@ -443,7 +434,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($mockCacheItem->reveal());
 
-        $mockCache = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $mockCache = $this->prophesize(CacheItemPoolInterface::class);
         $mockCache->getItem($prefix . GCECache::GCE_CACHE_KEY)
             ->shouldBeCalledTimes(2)
             ->willReturn($mockCacheItem->reveal());
@@ -475,20 +466,20 @@ class ApplicationDefaultCredentialsTest extends TestCase
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
-
-        $this->assertNotNull($creds);
+        $this->assertInstanceOf(ServiceAccountCredentials::class, $creds);
     }
 
     public function testGetIdTokenCredentialsLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
         putenv('HOME=' . __DIR__ . '/fixtures');
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
-        $this->assertNotNull($creds);
+        $this->assertInstanceOf(ServiceAccountCredentials::class, $creds);
     }
 
     public function testGetIdTokenCredentialsFailsIfNotOnGceAndNoDefaultFileFound()
     {
         $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Your default credentials were not found');
 
         putenv('HOME=' . __DIR__ . '/not_exist_fixtures');
 
@@ -499,12 +490,10 @@ class ApplicationDefaultCredentialsTest extends TestCase
             new Response(500)
         ]);
 
-        $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
+        ApplicationDefaultCredentials::getIdTokenCredentials(
             $this->targetAudience,
             $httpHandler
         );
-
-        $this->assertNotNull($creds);
     }
 
     public function testGetIdTokenCredentialsWithCacheOptions()
@@ -517,7 +506,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         ]);
 
         $cacheOptions = [];
-        $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $cachePool = $this->prophesize(CacheItemPoolInterface::class);
 
         $credentials = ApplicationDefaultCredentials::getIdTokenCredentials(
             $this->targetAudience,
@@ -526,7 +515,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             $cachePool->reveal()
         );
 
-        $this->assertInstanceOf('Google\Auth\FetchAuthTokenCache', $credentials);
+        $this->assertInstanceOf(FetchAuthTokenCache::class, $credentials);
     }
 
     public function testGetIdTokenCredentialsSuccedsIfNoDefaultFilesButIsOnGCE()
@@ -550,10 +539,27 @@ class ApplicationDefaultCredentialsTest extends TestCase
             $httpHandler
         );
 
-        $this->assertInstanceOf(
-            'Google\Auth\Credentials\GCECredentials',
-            $credentials
+        $this->assertInstanceOf(GCECredentials::class, $credentials);
+    }
+
+    public function testGetIdTokenCredentialsWithUserRefreshCredentials()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures2');
+
+        $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
+            $this->targetAudience,
         );
+
+        $this->assertInstanceOf(UserRefreshCredentials::class, $creds);
+
+        $authProperty = (new ReflectionClass($creds))->getProperty('auth');
+        $authProperty->setAccessible(true);
+
+        // used default scope
+        $auth = $authProperty->getValue($creds);
+        $additionalClaims = $auth->getAdditionalClaims();
+        $this->assertArrayHasKey('target_audience', $additionalClaims);
+        $this->assertEquals($this->targetAudience, $additionalClaims['target_audience']);
     }
 
     public function testWithServiceAccountCredentialsAndExplicitQuotaProject()
@@ -569,10 +575,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             $this->quotaProject
         );
 
-        $this->assertInstanceOf(
-            'Google\Auth\Credentials\ServiceAccountCredentials',
-            $credentials
-        );
+        $this->assertInstanceOf(ServiceAccountCredentials::class, $credentials);
 
         $this->assertEquals(
             $this->quotaProject,
@@ -656,7 +659,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         ]);
 
         $cacheOptions = [];
-        $cachePool = $this->prophesize('Psr\Cache\CacheItemPoolInterface');
+        $cachePool = $this->prophesize(CacheItemPoolInterface::class);
 
         $credentials = ApplicationDefaultCredentials::getCredentials(
             null,
@@ -666,7 +669,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             $this->quotaProject
         );
 
-        $this->assertInstanceOf('Google\Auth\FetchAuthTokenCache', $credentials);
+        $this->assertInstanceOf(FetchAuthTokenCache::class, $credentials);
 
         $this->assertEquals(
             $this->quotaProject,
@@ -698,10 +701,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             $this->quotaProject
         );
 
-        $this->assertInstanceOf(
-            'Google\Auth\Credentials\GCECredentials',
-            $credentials
-        );
+        $this->assertInstanceOf(GCECredentials::class, $credentials);
 
         $this->assertEquals(
             $this->quotaProject,
@@ -728,7 +728,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         ]);
         $this->assertInstanceOf(
-            'Google\Auth\Credentials\GCECredentials',
+            GCECredentials::class,
             ApplicationDefaultCredentials::getCredentials(null, $httpHandler)
         );
     }
@@ -745,10 +745,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             $this->targetAudience,
             $httpHandler
         );
-        $this->assertInstanceOf(
-            'Google\Auth\Credentials\GCECredentials',
-            $creds
-        );
+        $this->assertInstanceOf(GCECredentials::class, $creds);
     }
 
     /**
