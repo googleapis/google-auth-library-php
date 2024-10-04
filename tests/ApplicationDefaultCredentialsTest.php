@@ -167,7 +167,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
             null,
             'a default scope'
         );
-      
+
         $this->assertInstanceOf(ImpersonatedServiceAccountCredentials::class, $creds);
         $this->assertEquals('service_account_name@namespace.iam.gserviceaccount.com', $creds->getClientName());
 
