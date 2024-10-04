@@ -26,6 +26,8 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
 use GuzzleHttp\Psr7\Request;
+use InvalidArgumentException;
+use LogicException;
 
 class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface
 {
@@ -78,20 +80,28 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
-                throw new \InvalidArgumentException('file does not exist');
+                throw new InvalidArgumentException('file does not exist');
             }
             $json = file_get_contents($jsonKey);
             if (!$jsonKey = json_decode((string) $json, true)) {
-                throw new \LogicException('invalid json for auth config');
+                throw new LogicException('invalid json for auth config');
             }
         }
         if (!array_key_exists('service_account_impersonation_url', $jsonKey)) {
-            throw new \LogicException(
+            throw new LogicException(
                 'json key is missing the service_account_impersonation_url field'
             );
         }
         if (!array_key_exists('source_credentials', $jsonKey)) {
-            throw new \LogicException('json key is missing the source_credentials field');
+            throw new LogicException('json key is missing the source_credentials field');
+        }
+        if (!array_key_exists('type', $jsonKey['source_credentials'])) {
+            throw new InvalidArgumentException('json key source credentials are missing the type field');
+        }
+        if ($scope && $targetAudience) {
+            throw new InvalidArgumentException(
+                'Scope and targetAudience cannot both be supplied'
+            );
         }
 
         $this->targetScope = $scope ?? [];
@@ -102,6 +112,15 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         $this->impersonatedServiceAccountName = $this->getImpersonatedServiceAccountNameFromUrl(
             $this->serviceAccountImpersonationUrl
         );
+
+        if (
+            $targetAudience !== null
+            && $jsonKey['source_credentials']['type'] === 'service_account'
+        ) {
+            // Service account tokens MUST request a scope, and as this token is only used to impersonate
+            // an ID token, the narrowest scope we can request is `cloud-platform`.
+            $scope = 'https://www.googleapis.com/auth/cloud-platform';
+        }
 
         $this->sourceCredentials = $jsonKey['source_credentials'] instanceof FetchAuthTokenInterface
             ? $jsonKey['source_credentials']

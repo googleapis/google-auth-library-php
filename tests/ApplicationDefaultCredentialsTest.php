@@ -22,6 +22,7 @@ use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\CredentialSource;
 use Google\Auth\GCECache;
@@ -507,6 +508,13 @@ class ApplicationDefaultCredentialsTest extends TestCase
         );
 
         $this->assertNotNull($creds);
+    }
+
+    public function testGetIdTokenCredentialsWithImpersonatedServiceAccountCredentials()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures5');
+        $creds = ApplicationDefaultCredentials::getIdTokenCredentials('123@456.com');
+        $this->assertInstanceOf(ImpersonatedServiceAccountCredentials::class, $creds);
     }
 
     public function testGetIdTokenCredentialsWithCacheOptions()
