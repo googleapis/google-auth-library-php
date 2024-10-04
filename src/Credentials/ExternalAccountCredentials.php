@@ -252,6 +252,8 @@ class ExternalAccountCredentials implements
 
     /**
      * @param callable $httpHandler
+     * @param array<mixed> $headers [optional] Metrics headers to be inserted
+     *     into the token endpoint request present.
      *
      * @return array<mixed> {
      *     A set of auth related metadata, containing the following
