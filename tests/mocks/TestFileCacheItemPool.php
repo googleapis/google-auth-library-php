@@ -37,7 +37,6 @@ final class TestFileCacheItemPool implements CacheItemPoolInterface
      */
     private $deferredItems;
 
-
     public function __construct(string $cacheDir)
     {
         $this->cacheDir = $cacheDir;

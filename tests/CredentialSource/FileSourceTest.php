@@ -45,7 +45,6 @@ class FileSourceTest extends TestCase
         $file1 = tempnam(sys_get_temp_dir(), 'test1');
         file_put_contents($file1, 'abc');
 
-
         $file2 = tempnam(sys_get_temp_dir(), 'test2');
         file_put_contents($file2, json_encode(['token' => 'def']));
 
