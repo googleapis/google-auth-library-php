@@ -168,7 +168,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
         );
         $this->assertInstanceOf(
             'Google\Auth\Credentials\ImpersonatedServiceAccountCredentials',
-            $creds);
+            $creds
+        );
 
         $this->assertEquals('service_account_name@namespace.iam.gserviceaccount.com', $creds->getClientName());
 
@@ -179,7 +180,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $sourceCredentials = $sourceCredentialsProperty->getValue($creds);
         $this->assertInstanceOf(
             'Google\Auth\Credentials\UserRefreshCredentials',
-            $sourceCredentials);
+            $sourceCredentials
+        );
     }
 
     public function testUserRefreshCredentials()

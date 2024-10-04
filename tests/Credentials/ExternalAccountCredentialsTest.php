@@ -561,7 +561,7 @@ class ExternalAccountCredentialsTest extends TestCase
         $expectedKey = 'fakeUrl.scope1...';
         $this->assertEquals($expectedKey, $cacheKey);
     }
-    
+
     public function testExecutableSourceCacheKey()
     {
         $this->baseCreds['credential_source'] = [

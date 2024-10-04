@@ -1,0 +1,18 @@
+name: Lint
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+jobs:
+    style:
+      name: PHP Style Check
+      uses: GoogleCloudPlatform/php-tools/.github/workflows/code-standards.yml@main
+
+    staticanalysis:
+      name: PHPStan Static Analysis
+      uses: GoogleCloudPlatform/php-tools/.github/workflows/static-analysis.yml@main
+      with:
+        autoload-file: tests/phpstan-autoload.php
