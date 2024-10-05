@@ -58,6 +58,12 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     protected $quotaProject;
 
     /**
+     * Whether this is an ID token request or an access token request. Used when
+     * building the metric header.
+     */
+    private bool $isIdTokenRequest = false;
+
+    /**
      * Create a new UserRefreshCredentials.
      *
      * @param string|string[]|null $scope the scope of the access request, expressed
@@ -103,6 +109,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
         $additionalClaims = [];
         if ($targetAudience) {
             $additionalClaims = ['target_audience' => $targetAudience];
+            $this->isIdTokenRequest = true;
         }
         $this->auth = new OAuth2([
             'clientId' => $jsonKey['client_id'],
@@ -136,10 +143,9 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      */
     public function fetchAuthToken(callable $httpHandler = null, array $metricsHeader = [])
     {
-        // We don't support id token endpoint requests as of now for User Cred
         return $this->auth->fetchAuthToken(
             $httpHandler,
-            $this->applyTokenEndpointMetrics($metricsHeader, 'at')
+            $this->applyTokenEndpointMetrics($metricsHeader, $this->isIdTokenRequest ? 'it' : 'at')
         );
     }
 

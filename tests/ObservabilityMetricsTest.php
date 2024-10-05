@@ -131,10 +131,6 @@ class ObservabilityMetricsTest extends TestCase
         $this->assertUpdateMetadata($impersonatedCred, $handler, 'imp', $handlerCalled);
     }
 
-    /**
-     * UserRefreshCredentials haven't enabled identity token support hence
-     * they don't have 'auth-request-type/it' observability metric header check.
-     */
     public function testUserRefreshCredentials()
     {
         $keyFile = __DIR__ . '/fixtures2/gcloud.json';
@@ -142,6 +138,16 @@ class ObservabilityMetricsTest extends TestCase
         $handler = $this->getCustomHandler('u', 'auth-request-type/at', $handlerCalled);
 
         $userRefreshCred = new UserRefreshCredentials('exampleScope', $keyFile);
+        $this->assertUpdateMetadata($userRefreshCred, $handler, 'u', $handlerCalled);
+    }
+
+    public function testUserRefreshCredentialsWithIdTokens()
+    {
+        $keyFile = __DIR__ . '/fixtures2/gcloud.json';
+        $handlerCalled = false;
+        $handler = $this->getCustomHandler('u', 'auth-request-type/it', $handlerCalled);
+
+        $userRefreshCred = new UserRefreshCredentials(null, $keyFile, 'test-target-audience');
         $this->assertUpdateMetadata($userRefreshCred, $handler, 'u', $handlerCalled);
     }
 
