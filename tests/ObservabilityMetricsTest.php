@@ -117,10 +117,6 @@ class ObservabilityMetricsTest extends TestCase
         );
     }
 
-    /**
-     * ImpersonatedServiceAccountCredentials haven't enabled identity token support hence
-     * they don't have 'auth-request-type/it' observability metric header check.
-     */
     public function testImpersonatedServiceAccountCredentials()
     {
         $keyFile = __DIR__ . '/fixtures5/.config/gcloud/application_default_credentials.json';
@@ -132,6 +128,20 @@ class ObservabilityMetricsTest extends TestCase
         ]);
 
         $impersonatedCred = new ImpersonatedServiceAccountCredentials('exampleScope', $keyFile);
+        $this->assertUpdateMetadata($impersonatedCred, $handler, 'imp', $handlerCalled);
+    }
+
+    public function testImpersonatedServiceAccountCredentialsWithIdTokens()
+    {
+        $keyFile = __DIR__ . '/fixtures5/.config/gcloud/application_default_credentials.json';
+        $handlerCalled = false;
+        $responseFromIam = json_encode(['token' => '1/abdef1234567890']);
+        $handler = getHandler([
+            $this->getExpectedRequest('imp', 'auth-request-type/at', $handlerCalled, $this->jsonTokens),
+            $this->getExpectedRequest('imp', 'auth-request-type/it', $handlerCalled, $responseFromIam),
+        ]);
+
+        $impersonatedCred = new ImpersonatedServiceAccountCredentials(null, $keyFile, 'test-target-audience');
         $this->assertUpdateMetadata($impersonatedCred, $handler, 'imp', $handlerCalled);
     }
 

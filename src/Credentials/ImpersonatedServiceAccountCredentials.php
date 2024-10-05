@@ -186,7 +186,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             'Content-Type' => 'application/json',
             'Cache-Control' => 'no-store',
             'Authorization' => sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token']),
-        ], 'at');
+        ], $this->isIdTokenRequest() ? 'it' : 'at');
 
         $body = $this->isIdTokenRequest()
             ? [
