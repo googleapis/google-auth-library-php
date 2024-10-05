@@ -95,13 +95,24 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         if (!array_key_exists('source_credentials', $jsonKey)) {
             throw new LogicException('json key is missing the source_credentials field');
         }
-        if (!array_key_exists('type', $jsonKey['source_credentials'])) {
-            throw new InvalidArgumentException('json key source credentials are missing the type field');
-        }
         if ($scope && $targetAudience) {
             throw new InvalidArgumentException(
                 'Scope and targetAudience cannot both be supplied'
             );
+        }
+        if (is_array($jsonKey['source_credentials'])) {
+            if (!array_key_exists('type', $jsonKey['source_credentials'])) {
+                throw new InvalidArgumentException('json key source credentials are missing the type field');
+            }
+            if (
+                $targetAudience !== null
+                && $jsonKey['source_credentials']['type'] === 'service_account'
+            ) {
+                // Service account tokens MUST request a scope, and as this token is only used to impersonate
+                // an ID token, the narrowest scope we can request is `cloud-platform`.
+                $scope = 'https://www.googleapis.com/auth/cloud-platform';
+            }
+            $jsonKey['source_credentials'] = CredentialsLoader::makeCredentials($scope, $jsonKey['source_credentials']);
         }
 
         $this->targetScope = $scope ?? [];
@@ -113,18 +124,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             $this->serviceAccountImpersonationUrl
         );
 
-        if (
-            $targetAudience !== null
-            && $jsonKey['source_credentials']['type'] === 'service_account'
-        ) {
-            // Service account tokens MUST request a scope, and as this token is only used to impersonate
-            // an ID token, the narrowest scope we can request is `cloud-platform`.
-            $scope = 'https://www.googleapis.com/auth/cloud-platform';
-        }
-
-        $this->sourceCredentials = $jsonKey['source_credentials'] instanceof FetchAuthTokenInterface
-            ? $jsonKey['source_credentials']
-            : CredentialsLoader::makeCredentials($scope, $jsonKey['source_credentials']);
+        $this->sourceCredentials = $jsonKey['source_credentials'];
     }
 
     /**
@@ -188,15 +188,17 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             'Authorization' => sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token']),
         ], $this->isIdTokenRequest() ? 'it' : 'at');
 
-        $body = $this->isIdTokenRequest()
-            ? [
+        $body = match($this->isIdTokenRequest()) {
+            true => [
                 'audience' => $this->targetAudience,
                 'includeEmail' => true,
-            ] : [
+            ],
+            false => [
                 'scope' => $this->targetScope,
                 'delegates' => $this->delegates,
                 'lifetime' => sprintf('%ss', $this->lifetime),
-            ];
+            ]
+        };
 
         $request = new Request(
             'POST',
@@ -208,12 +210,13 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         $response = $httpHandler($request);
         $body = json_decode((string) $response->getBody(), true);
 
-        return $this->isIdTokenRequest()
-            ? ['id_token' => $body['token']]
-            : [
+        return match($this->isIdTokenRequest()) {
+            true => ['id_token' => $body['token']],
+            false => [
                 'access_token' => $body['accessToken'],
                 'expires_at' => strtotime($body['expireTime']),
-            ];
+            ]
+        };
     }
 
     /**
