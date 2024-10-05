@@ -22,16 +22,21 @@ use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\Middleware\AuthTokenMiddleware;
+use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use LogicException;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PHPUnit\ProphecyTrait;
+use Prophecy\Argument;
 use Psr\Http\Message\RequestInterface;
 use ReflectionClass;
 
 class ImpersonatedServiceAccountCredentialsTest extends TestCase
 {
+    use ProphecyTrait;
+
     private const SCOPE = ['scope/1', 'scope/2'];
     private const TARGET_AUDIENCE = 'test-target-audience';
 
@@ -94,8 +99,6 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
      */
     public function testGetIdTokenWithServiceAccountImpersonationCredentials($json, $grantType)
     {
-        $creds = new ImpersonatedServiceAccountCredentials(null, $json, self::TARGET_AUDIENCE);
-
         $requestCount = 0;
         // getting an id token will take two requests
         $httpHandler = function (RequestInterface $request) use (&$requestCount, $json, $grantType) {
@@ -117,14 +120,67 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
                 ['Content-Type' => 'application/json'],
                 json_encode(match ($requestCount) {
                     1 => ['access_token' => 'test-access-token'],
-                    2 => ['token' => 'test-id-token']
+                    2 => ['token' => 'test-impersonated-id-token']
                 })
             );
         };
 
+        $creds = new ImpersonatedServiceAccountCredentials(null, $json, self::TARGET_AUDIENCE);
         $token = $creds->fetchAuthToken($httpHandler);
+        $this->assertEquals('test-impersonated-id-token', $token['id_token']);
         $this->assertEquals(2, $requestCount);
-        $this->assertEquals('test-id-token', $token['id_token']);
+    }
+
+    public function testGetIdTokenWithArbitraryCredentials()
+    {
+        $httpHandler = function (RequestInterface $request) {
+            $this->assertEquals('https://some/url', (string) $request->getUri());
+            $this->assertEquals('Bearer test-access-token', $request->getHeader('authorization')[0] ?? null);
+            return new Response(200, [], json_encode(['token' => 'test-impersonated-id-token']));
+        };
+
+        $credentials = $this->prophesize(FetchAuthTokenInterface::class);
+        $credentials->fetchAuthToken($httpHandler, Argument::type('array'))
+            ->shouldBeCalledOnce()
+            ->willReturn(['access_token' => 'test-access-token']);
+
+        $json = [
+            'type' => 'impersonated_service_account',
+            'service_account_impersonation_url' => 'https://some/url',
+            'source_credentials' => $credentials->reveal(),
+        ];
+        $creds = new ImpersonatedServiceAccountCredentials(null, $json, self::TARGET_AUDIENCE);
+
+        $token = $creds->fetchAuthToken($httpHandler);
+        $this->assertEquals('test-impersonated-id-token', $token['id_token']);
+    }
+
+    public function testGetAccessTokenWithArbitraryCredentials()
+    {
+        $httpHandler = function (RequestInterface $request) {
+            $this->assertEquals('https://some/url', (string) $request->getUri());
+            $this->assertEquals('Bearer test-access-token', $request->getHeader('authorization')[0] ?? null);
+            return new Response(
+                200,
+                [],
+                json_encode(['accessToken' => 'test-impersonated-access-token', 'expireTime' => 123])
+            );
+        };
+
+        $credentials = $this->prophesize(FetchAuthTokenInterface::class);
+        $credentials->fetchAuthToken($httpHandler, Argument::type('array'))
+            ->shouldBeCalledOnce()
+            ->willReturn(['access_token' => 'test-access-token']);
+
+        $json = [
+            'type' => 'impersonated_service_account',
+            'service_account_impersonation_url' => 'https://some/url',
+            'source_credentials' => $credentials->reveal(),
+        ];
+        $creds = new ImpersonatedServiceAccountCredentials(self::SCOPE, $json);
+
+        $token = $creds->fetchAuthToken($httpHandler);
+        $this->assertEquals('test-impersonated-access-token', $token['access_token']);
     }
 
     public function provideServiceAccountImpersonationIdTokenJson()
