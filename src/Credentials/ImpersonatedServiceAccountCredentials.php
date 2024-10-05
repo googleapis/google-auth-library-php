@@ -188,7 +188,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             'Authorization' => sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token']),
         ], $this->isIdTokenRequest() ? 'it' : 'at');
 
-        $body = match($this->isIdTokenRequest()) {
+        $body = match ($this->isIdTokenRequest()) {
             true => [
                 'audience' => $this->targetAudience,
                 'includeEmail' => true,
@@ -210,7 +210,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         $response = $httpHandler($request);
         $body = json_decode((string) $response->getBody(), true);
 
-        return match($this->isIdTokenRequest()) {
+        return match ($this->isIdTokenRequest()) {
             true => ['id_token' => $body['token']],
             false => [
                 'access_token' => $body['accessToken'],
