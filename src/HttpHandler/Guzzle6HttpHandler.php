@@ -16,23 +16,34 @@
  */
 namespace Google\Auth\HttpHandler;
 
+use Google\Auth\Logger\LogEvent;
+use Google\Auth\Logger\LoggingTrait;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
 class Guzzle6HttpHandler
 {
+    use LoggingTrait;
+
     /**
      * @var ClientInterface
      */
     private $client;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param ClientInterface $client
      */
-    public function __construct(ClientInterface $client)
+    public function __construct(ClientInterface $client, LoggerInterface $logger = null)
     {
         $this->client = $client;
+        $this->logger = $logger;
     }
 
     /**
@@ -57,6 +68,37 @@ class Guzzle6HttpHandler
      */
     public function async(RequestInterface $request, array $options = [])
     {
-        return $this->client->sendAsync($request, $options);
+        $requestEvent = null;
+
+        if ($this->logger) {
+            $requestEvent = new LogEvent();
+
+            $requestEvent->method = $request->getMethod();
+            $requestEvent->url = $request->getUri()->__toString();
+            $requestEvent->headers = $request->getHeaders();
+            $requestEvent->payload = $request->getBody()->getContents();
+            $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
+            $requestEvent->serviceName = $options['serviceName'];
+            $requestEvent->clientId = $options['clientId'];
+            $requestEvent->requestId = spl_object_id($request);
+
+            $this->logRequest($requestEvent);
+        }
+
+        return $this->client->sendAsync($request, $options)->then(function (ResponseInterface $response) use ($requestEvent) {
+            if ($this->logger) {
+                $responseEvent = new LogEvent($requestEvent->timestamp);
+
+                $responseEvent->headers = $response->getHeaders();
+                $responseEvent->payload = json_decode($response->getBody()->getContents()) ?: null;
+                $responseEvent->status = $response->getStatusCode();
+                $responseEvent->clientId = $requestEvent->clientId;
+                $responseEvent->requestId = $requestEvent->requestId;
+
+                $this->logResponse($responseEvent);
+            }
+
+            return $response;
+        });
     }
 }
