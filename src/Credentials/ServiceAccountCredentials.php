@@ -17,6 +17,7 @@
 
 namespace Google\Auth\Credentials;
 
+use Firebase\JWT\JWT;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\Iam;
@@ -72,6 +73,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      * @var string
      */
     private const CRED_TYPE = 'sa';
+    private const IAM_SCOPE = 'https://www.googleapis.com/auth/iam';
 
     /**
      * The OAuth2 instance used to conduct authorization.
@@ -215,18 +217,33 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
             return $accessToken;
         }
-        $authRequestType = $this->isIdTokenRequest() ? 'it' : 'at';
-        if ($this->isIdTokenRequest() && $this->getUniverseDomain() != self::DEFAULT_UNIVERSE_DOMAIN) {
-            $idToken = (new Iam($httpHandler, $this->getUniverseDomain()))->generateIdToken(
-                $this->auth->getIssuer(),
-                $this->auth->getAdditionalClaims()['target_audience'],
+
+        if ($this->isIdTokenRequest() && $this->getUniverseDomain() !== self::DEFAULT_UNIVERSE_DOMAIN) {
+            $now = time();
+            $jwt = Jwt::encode(
+                [
+                    'iss' => $this->auth->getIssuer(),
+                    'sub' => $this->auth->getIssuer(),
+                    'scope' => self::IAM_SCOPE,
+                    'exp' => ($now + $this->auth->getExpiry()),
+                    'iat' => ($now - OAuth2::DEFAULT_SKEW_SECONDS),
+                ],
                 $this->auth->getSigningKey(),
                 $this->auth->getSigningAlgorithm(),
                 $this->auth->getSigningKeyId()
             );
+            // We create a new instance of Iam each time because the `$httpHandler` might change.
+            $idToken = (new Iam($httpHandler, $this->getUniverseDomain()))->generateIdToken(
+                $this->auth->getIssuer(),
+                $this->auth->getAdditionalClaims()['target_audience'],
+                $jwt
+            );
             return ['id_token' => $idToken];
         }
-        return $this->auth->fetchAuthToken($httpHandler, $this->applyTokenEndpointMetrics([], $authRequestType));
+        return $this->auth->fetchAuthToken(
+            $httpHandler,
+            $this->applyTokenEndpointMetrics([], $this->isIdTokenRequest() ? 'it' : 'at')
+        );
     }
 
     /**

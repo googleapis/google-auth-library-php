@@ -117,39 +117,25 @@ class Iam
      *
      * @param string $clientEmail The service account email.
      * @param string $targetAudience The audience for the ID token.
-     * @param string $signingKey The private key to sign the ID token.
-     * @param string $signingAlg The algorithm to sign the ID token.
-     * @param string $signingKeyId The key ID to sign the ID token.
+     * @param string $bearerToken The token to authenticate the IAM request.
+     *
      * @return string The signed string, base64-encoded.
      */
     public function generateIdToken(
         string $clientEmail,
         string $targetAudience,
-        string $signingKey,
-        string $signingAlg,
-        string $signingKeyId
-    ) {
-        $auth = new OAuth2([
-            'issuer' => $clientEmail,
-            'sub' => $clientEmail,
-            'scope' => 'https://www.googleapis.com/auth/iam',
-            'signingKey' => $signingKey,
-            'signingKeyId' => $signingKeyId,
-            'signingAlgorithm' => $signingAlg,
-        ]);
-
+        string $bearerToken
+    ): string {
         $name = sprintf(self::SERVICE_ACCOUNT_NAME, $clientEmail);
         $apiRoot = str_replace('UNIVERSE_DOMAIN', $this->universeDomain, self::IAM_API_ROOT_TEMPLATE);
         $uri = $apiRoot . '/' . sprintf(self::GENERATE_ID_TOKEN_PATH, $name);
+
+        $headers = ['Authorization' => 'Bearer ' . $bearerToken];
 
         $body = [
             'audience' => $targetAudience,
             'includeEmail' => true,
             'useEmailAzp' => true,
-        ];
-
-        $headers = [
-            'Authorization' => 'Bearer ' . $auth->toJwt(),
         ];
 
         $request = new Psr7\Request(
