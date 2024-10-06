@@ -660,7 +660,7 @@ class GCECredentialsTest extends BaseTest
         $httpHandler = function ($request) use (&$timesCalled, $expected) {
             $timesCalled++;
             $this->assertEquals(
-                '/computeMetadata/v1/universe/universe_domain',
+                '/computeMetadata/v1/universe/universe-domain',
                 $request->getUri()->getPath()
             );
             $this->assertEquals(1, $timesCalled, 'should only be called once');
@@ -682,7 +682,7 @@ class GCECredentialsTest extends BaseTest
         // Pretend we are on GCE and mock the MDS returning an empty string for the universe domain.
         $httpHandler = function ($request) {
             $this->assertEquals(
-                '/computeMetadata/v1/universe/universe_domain',
+                '/computeMetadata/v1/universe/universe-domain',
                 $request->getUri()->getPath()
             );
             return new Psr7\Response(200, [], Utils::streamFor(''));
