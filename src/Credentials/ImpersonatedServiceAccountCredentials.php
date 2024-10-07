@@ -35,6 +35,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     use IamSignerTrait;
 
     private const CRED_TYPE = 'imp';
+    private const IAM_SCOPE = 'https://www.googleapis.com/auth/iam';
 
     /**
      * @var string
@@ -109,8 +110,8 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
                 && $jsonKey['source_credentials']['type'] === 'service_account'
             ) {
                 // Service account tokens MUST request a scope, and as this token is only used to impersonate
-                // an ID token, the narrowest scope we can request is `cloud-platform`.
-                $scope = 'https://www.googleapis.com/auth/cloud-platform';
+                // an ID token, the narrowest scope we can request is `iam`.
+                $scope = self::IAM_SCOPE;
             }
             $jsonKey['source_credentials'] = CredentialsLoader::makeCredentials($scope, $jsonKey['source_credentials']);
         }
