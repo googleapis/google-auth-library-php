@@ -23,12 +23,15 @@ use Google\Auth\Credentials\GCECredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\Logging\StdOutLogger;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\Middleware\ProxyAuthTokenMiddleware;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
+use PHPUnit\TextUI\XmlConfiguration\Logging\Logging;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * ApplicationDefaultCredentials obtains the default credentials for
@@ -69,6 +72,8 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 class ApplicationDefaultCredentials
 {
+    private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_DEBUG_LOGGING';
+
     /**
      * @deprecated
      *
@@ -319,6 +324,40 @@ class ApplicationDefaultCredentials
             $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
         }
         return $creds;
+    }
+
+    /**
+     * Returns a StdOutLogger instance
+     *
+     * @return null|LoggerInterface
+     */
+    public static function getDefaultLogger(): null|LoggerInterface
+    {
+        $loggingFlag = getenv(self::SDK_DEBUG_FLAG);
+
+        // Env var is not set
+        if (!is_string($loggingFlag)) {
+            if (is_array($loggingFlag)) {
+                trigger_error('The ' . self::SDK_DEBUG_FLAG . ' is set, but it is set to another value than false, true, 0 or 1. Logging is disabled');
+                return null;
+            }
+
+            return null;
+        }
+
+        $loggingFlag = strtolower($loggingFlag);
+
+        // Env Var is not true
+        if ($loggingFlag !== 'true' && $loggingFlag !== '1') {
+            // Env var is set to a non valid value
+            if ($loggingFlag !== 'false' && $loggingFlag !== '0') {
+                trigger_error('The ' . self::SDK_DEBUG_FLAG . ' is set, but it is set to another value than false, true, 0 or 1. Logging is disabled');
+            }
+
+            return null;
+        }
+
+        return new StdOutLogger();
     }
 
     /**
