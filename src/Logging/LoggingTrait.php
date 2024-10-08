@@ -44,9 +44,17 @@ trait LoggingTrait
             'retryAttempt' => $event->retryAttempt
         ];
 
+        // Remove null values
         $debugEvent['jsonPayload'] = array_filter($jsonPayload, fn ($value) => !is_null($value));
 
-        $this->logger->debug((string) json_encode($debugEvent));
+        $stringifiedEvent = json_encode($debugEvent);
+
+        // There was an error stringifying the event, return to not break execution
+        if ($stringifiedEvent === false) {
+            return;
+        }
+
+        $this->logger->debug($stringifiedEvent);
     }
 
     /**
@@ -66,12 +74,21 @@ trait LoggingTrait
             ]
         ];
 
+        // Remove null values
         $debugEvent = array_filter($debugEvent, fn ($value) => !is_null($value));
         $debugEvent['jsonPayload'] = array_filter(
             $debugEvent['jsonPayload'],
             fn ($value) => !is_null($value)
         );
-        $this->logger->debug((string) json_encode($debugEvent));
+
+        $stringifiedEvent = json_encode($debugEvent);
+
+        // There was an error stringifying the event, return to not break execution
+        if ($stringifiedEvent === false) {
+            return;
+        }
+
+        $this->logger->debug($stringifiedEvent);
 
         if ($event->status) {
             $infoEvent = [
@@ -84,9 +101,17 @@ trait LoggingTrait
                 ]
             ];
 
+            // Remove null values
             $infoEvent = array_filter($infoEvent, fn ($value) => !is_null($value));
 
-            $this->logger->info((string) json_encode($infoEvent));
+            $stringifiedEvent = json_encode($debugEvent);
+
+            // There was an error stringifying the event, return to not break execution
+            if ($stringifiedEvent === false) {
+                return;
+            }
+
+            $this->logger->info($stringifiedEvent);
         }
     }
 
