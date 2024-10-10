@@ -50,9 +50,9 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
     public function __construct(
         string $audience,
         string $regionalCredVerificationUrl,
-        string $regionUrl = null,
-        string $securityCredentialsUrl = null,
-        string $imdsv2SessionTokenUrl = null
+        ?string $regionUrl = null,
+        ?string $securityCredentialsUrl = null,
+        ?string $imdsv2SessionTokenUrl = null
     ) {
         $this->audience = $audience;
         $this->regionalCredVerificationUrl = $regionalCredVerificationUrl;

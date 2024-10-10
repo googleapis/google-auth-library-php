@@ -45,13 +45,13 @@ class FetchAuthTokenCache implements
 
     /**
      * @param FetchAuthTokenInterface $fetcher A credentials fetcher
-     * @param array<mixed> $cacheConfig Configuration for the cache
+     * @param array<mixed>|null $cacheConfig Configuration for the cache
      * @param CacheItemPoolInterface $cache
      */
     public function __construct(
         FetchAuthTokenInterface $fetcher,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null
     ) {
         $this->fetcher = $fetcher;
         $this->cache = $cache;
@@ -227,7 +227,7 @@ class FetchAuthTokenCache implements
      *
      * @param array<mixed> $metadata metadata hashmap
      * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable|null $httpHandler callback which delivers psr7 request
      * @return array<mixed> updated metadata hashmap
      * @throws \RuntimeException If the fetcher does not implement
      *     `Google\Auth\UpdateMetadataInterface`.
@@ -235,7 +235,7 @@ class FetchAuthTokenCache implements
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null
+        ?callable $httpHandler = null
     ) {
         if (!$this->fetcher instanceof UpdateMetadataInterface) {
             throw new \RuntimeException(

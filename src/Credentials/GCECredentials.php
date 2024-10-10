@@ -199,7 +199,7 @@ class GCECredentials extends CredentialsLoader implements
     private ?string $universeDomain;
 
     /**
-     * @param Iam $iam [optional] An IAM instance.
+     * @param Iam|null $iam [optional] An IAM instance.
      * @param string|string[] $scope [optional] the scope of the access request,
      *        expressed either as an array or as a space-delimited string.
      * @param string $targetAudience [optional] The audience for the ID token.
@@ -207,16 +207,16 @@ class GCECredentials extends CredentialsLoader implements
      *   charges associated with the request.
      * @param string $serviceAccountIdentity [optional] Specify a service
      *   account identity name to use instead of "default".
-     * @param string $universeDomain [optional] Specify a universe domain to use
+     * @param string|null $universeDomain [optional] Specify a universe domain to use
      *   instead of fetching one from the metadata server.
      */
     public function __construct(
-        Iam $iam = null,
+        ?Iam $iam = null,
         $scope = null,
         $targetAudience = null,
         $quotaProject = null,
         $serviceAccountIdentity = null,
-        string $universeDomain = null
+        ?string $universeDomain = null
     ) {
         $this->iam = $iam;
 

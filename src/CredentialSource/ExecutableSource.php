@@ -88,12 +88,12 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
 
     /**
      * @param string $command    The string command to run to get the subject token.
-     * @param string $outputFile
+     * @param string|null $outputFile
      */
     public function __construct(
         string $command,
         ?string $outputFile,
-        ExecutableHandler $executableHandler = null,
+        ?ExecutableHandler $executableHandler = null,
     ) {
         $this->command = $command;
         $this->outputFile = $outputFile;
