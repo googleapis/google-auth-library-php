@@ -61,7 +61,7 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
         $this->imdsv2SessionTokenUrl = $imdsv2SessionTokenUrl;
     }
 
-    public function fetchSubjectToken(callable $httpHandler = null): string
+    public function fetchSubjectToken(?callable $httpHandler = null): string
     {
         if (is_null($httpHandler)) {
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());

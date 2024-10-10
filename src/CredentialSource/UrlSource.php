@@ -64,7 +64,7 @@ class UrlSource implements ExternalAccountCredentialSourceInterface
         $this->headers = $headers;
     }
 
-    public function fetchSubjectToken(callable $httpHandler = null): string
+    public function fetchSubjectToken(?callable $httpHandler = null): string
     {
         if (is_null($httpHandler)) {
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());

@@ -355,10 +355,10 @@ class GCECredentials extends CredentialsLoader implements
      * host.
      * If $httpHandler is not specified a the default HttpHandler is used.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable|null $httpHandler callback which delivers psr7 request
      * @return bool True if this a GCEInstance, false otherwise
      */
-    public static function onGce(callable $httpHandler = null)
+    public static function onGce(?callable $httpHandler = null)
     {
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
@@ -441,7 +441,7 @@ class GCECredentials extends CredentialsLoader implements
      * Fetches the auth tokens from the GCE metadata host if it is available.
      * If $httpHandler is not specified a the default HttpHandler is used.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable|null $httpHandler callback which delivers psr7 request
      *
      * @return array<mixed> {
      *     A set of auth related metadata, based on the token type.
@@ -453,7 +453,7 @@ class GCECredentials extends CredentialsLoader implements
      * }
      * @throws \Exception
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
@@ -524,10 +524,10 @@ class GCECredentials extends CredentialsLoader implements
      *
      * Subsequent calls will return a cached value.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable|null $httpHandler callback which delivers psr7 request
      * @return string
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(?callable $httpHandler = null)
     {
         if ($this->clientName) {
             return $this->clientName;
@@ -558,10 +558,10 @@ class GCECredentials extends CredentialsLoader implements
      *
      * Returns null if called outside GCE.
      *
-     * @param callable $httpHandler Callback which delivers psr7 request
+     * @param callable|null $httpHandler Callback which delivers psr7 request
      * @return string|null
      */
-    public function getProjectId(callable $httpHandler = null)
+    public function getProjectId(?callable $httpHandler = null)
     {
         if ($this->projectId) {
             return $this->projectId;
@@ -586,10 +586,10 @@ class GCECredentials extends CredentialsLoader implements
     /**
      * Fetch the default universe domain from the metadata server.
      *
-     * @param callable $httpHandler Callback which delivers psr7 request
+     * @param callable|null $httpHandler Callback which delivers psr7 request
      * @return string
      */
-    public function getUniverseDomain(callable $httpHandler = null): string
+    public function getUniverseDomain(?callable $httpHandler = null): string
     {
         if (null !== $this->universeDomain) {
             return $this->universeDomain;

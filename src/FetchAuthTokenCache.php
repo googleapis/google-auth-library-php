@@ -76,11 +76,11 @@ class FetchAuthTokenCache implements
      * Checks the cache for a valid auth token and fetches the auth tokens
      * from the supplied fetcher.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable|null $httpHandler callback which delivers psr7 request
      * @return array<mixed> the response
      * @throws \Exception
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         if ($cached = $this->fetchAuthTokenFromCache()) {
             return $cached;
@@ -112,10 +112,10 @@ class FetchAuthTokenCache implements
     /**
      * Get the client name from the fetcher.
      *
-     * @param callable $httpHandler An HTTP handler to deliver PSR7 requests.
+     * @param callable|null $httpHandler An HTTP handler to deliver PSR7 requests.
      * @return string
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(?callable $httpHandler = null)
     {
         if (!$this->fetcher instanceof SignBlobInterface) {
             throw new \RuntimeException(
@@ -176,15 +176,15 @@ class FetchAuthTokenCache implements
         return null;
     }
 
-    /*
+    /**
      * Get the Project ID from the fetcher.
      *
-     * @param callable $httpHandler Callback which delivers psr7 request
+     * @param callable|null $httpHandler Callback which delivers psr7 request
      * @return string|null
      * @throws \RuntimeException If the fetcher does not implement
      *     `Google\Auth\ProvidesProjectIdInterface`.
      */
-    public function getProjectId(callable $httpHandler = null)
+    public function getProjectId(?callable $httpHandler = null)
     {
         if (!$this->fetcher instanceof ProjectIdProviderInterface) {
             throw new \RuntimeException(

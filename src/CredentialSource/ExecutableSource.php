@@ -113,12 +113,12 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
     }
 
     /**
-     * @param callable $httpHandler unused.
+     * @param callable|null $httpHandler unused.
      * @return string
      * @throws RuntimeException if the executable is not allowed to run.
      * @throws ExecutableResponseError if the executable response is invalid.
      */
-    public function fetchSubjectToken(callable $httpHandler = null): string
+    public function fetchSubjectToken(?callable $httpHandler = null): string
     {
         // Check if the executable is allowed to run.
         if (getenv(self::GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES) !== '1') {
