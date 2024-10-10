@@ -89,7 +89,7 @@ class ExecutableSourceTest extends TestCase
         int $returnCode,
         string $output,
         string $expectedExceptionMessage,
-        string $outputFile = null
+        ?string $outputFile = null
     ) {
         $this->expectException(ExecutableResponseError::class);
         $this->expectExceptionMessage($expectedExceptionMessage);
