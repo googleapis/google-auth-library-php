@@ -104,7 +104,7 @@ trait LoggingTrait
             // Remove null values
             $infoEvent = array_filter($infoEvent, fn ($value) => !is_null($value));
 
-            $stringifiedEvent = json_encode($debugEvent);
+            $stringifiedEvent = json_encode($infoEvent);
 
             // There was an error stringifying the event, return to not break execution
             if ($stringifiedEvent === false) {
