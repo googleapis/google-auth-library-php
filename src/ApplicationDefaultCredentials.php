@@ -151,7 +151,8 @@ class ApplicationDefaultCredentials
      *   user-defined scopes exist, expressed either as an Array or as a
      *   space-delimited string.
      * @param string|null $universeDomain Specifies a universe domain to use for the
-     *   calling client library
+     *   calling client library.
+     * @param null|false|LoggerInterface $logger A PSR3 compliant LoggerInterface.
      *
      * @return FetchAuthTokenInterface
      * @throws DomainException if no implementation can be obtained.
@@ -163,7 +164,8 @@ class ApplicationDefaultCredentials
         ?CacheItemPoolInterface $cache = null,
         $quotaProject = null,
         $defaultScope = null,
-        ?string $universeDomain = null
+        ?string $universeDomain = null,
+        null|false|LoggerInterface $logger = null,
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -176,7 +178,7 @@ class ApplicationDefaultCredentials
                 HttpClientCache::setHttpClient($client);
             }
 
-            $httpHandler = HttpHandlerFactory::build($client);
+            $httpHandler = HttpHandlerFactory::build($client, $logger);
         }
 
         if (is_null($quotaProject)) {
