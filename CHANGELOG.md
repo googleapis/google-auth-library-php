@@ -2,6 +2,14 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.42.0](https://github.com/googleapis/google-auth-library-php/compare/v1.41.0...v1.42.0) (2024-08-26)
+
+
+### Features
+
+* Add a file system cache class ([#571](https://github.com/googleapis/google-auth-library-php/issues/571)) ([8555cb0](https://github.com/googleapis/google-auth-library-php/commit/8555cb063caa5571f80d9605969411b894ee6eb0))
+* Private key getters on service account credentials (https://github.com/googleapis/google-auth-library-php/pull/557) ([d2fa07b](https://github.com/googleapis/google-auth-library-php/commit/d2fa07b8a8edfa65c1bd732dac794c070e3451bc))
+
 ## [1.41.0](https://github.com/googleapis/google-auth-library-php/compare/v1.40.0...v1.41.0) (2024-07-10)
 
 
