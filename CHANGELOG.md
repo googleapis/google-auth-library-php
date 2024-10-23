@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.42.1](https://github.com/googleapis/google-auth-library-php/compare/v1.42.0...v1.42.1) (2024-10-23)
+
+
+### Bug Fixes
+
+* Compatability with php 8.4 ([#584](https://github.com/googleapis/google-auth-library-php/issues/584)) ([da1f02a](https://github.com/googleapis/google-auth-library-php/commit/da1f02a8dcbbbafd325cf0c9ac3462a72eb387fb))
+
 ## [1.42.0](https://github.com/googleapis/google-auth-library-php/compare/v1.41.0...v1.42.0) (2024-08-26)
 
 
