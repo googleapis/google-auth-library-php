@@ -80,18 +80,18 @@ class ApplicationDefaultCredentials
      *
      * @param string|string[] $scope the scope of the access request, expressed
      *        either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array<mixed> $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @param array<mixed>|null $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface|null $cache A cache implementation, may be
      *        provided if you have one already available for use.
      * @return AuthTokenSubscriber
      * @throws DomainException if no implementation can be obtained.
      */
     public static function getSubscriber(// @phpstan-ignore-line
         $scope = null,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        ?callable $httpHandler = null,
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null
     ) {
         $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache);
 
@@ -108,9 +108,9 @@ class ApplicationDefaultCredentials
      *
      * @param string|string[] $scope the scope of the access request, expressed
      *        either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array<mixed> $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @param array<mixed>|null $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface|null $cache A cache implementation, may be
      *        provided if you have one already available for use.
      * @param string $quotaProject specifies a project to bill for access
      *   charges associated with the request.
@@ -119,9 +119,9 @@ class ApplicationDefaultCredentials
      */
     public static function getMiddleware(
         $scope = null,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null,
+        ?callable $httpHandler = null,
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null,
         $quotaProject = null
     ) {
         $creds = self::getCredentials($scope, $httpHandler, $cacheConfig, $cache, $quotaProject);
@@ -135,16 +135,16 @@ class ApplicationDefaultCredentials
      *
      * @param string|string[] $scope the scope of the access request, expressed
      *        either as an Array or as a space-delimited String.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array<mixed> $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @param array<mixed>|null $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface|null $cache A cache implementation, may be
      *        provided if you have one already available for use.
-     * @param string $quotaProject specifies a project to bill for access
+     * @param string|null $quotaProject specifies a project to bill for access
      *   charges associated with the request.
-     * @param string|string[] $defaultScope The default scope to use if no
+     * @param string|string[]|null $defaultScope The default scope to use if no
      *   user-defined scopes exist, expressed either as an Array or as a
      *   space-delimited string.
-     * @param string $universeDomain Specifies a universe domain to use for the
+     * @param string|null $universeDomain Specifies a universe domain to use for the
      *   calling client library
      *
      * @return FetchAuthTokenInterface
@@ -152,12 +152,12 @@ class ApplicationDefaultCredentials
      */
     public static function getCredentials(
         $scope = null,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null,
+        ?callable $httpHandler = null,
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null,
         $quotaProject = null,
         $defaultScope = null,
-        string $universeDomain = null
+        ?string $universeDomain = null
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -215,18 +215,18 @@ class ApplicationDefaultCredentials
      * ID token.
      *
      * @param string $targetAudience The audience for the ID token.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array<mixed> $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @param array<mixed>|null $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface|null $cache A cache implementation, may be
      *        provided if you have one already available for use.
      * @return AuthTokenMiddleware
      * @throws DomainException if no implementation can be obtained.
      */
     public static function getIdTokenMiddleware(
         $targetAudience,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        ?callable $httpHandler = null,
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null
     ) {
         $creds = self::getIdTokenCredentials($targetAudience, $httpHandler, $cacheConfig, $cache);
 
@@ -242,18 +242,18 @@ class ApplicationDefaultCredentials
      * ID token.
      *
      * @param string $targetAudience The audience for the ID token.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array<mixed> $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @param array<mixed>|null $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface|null $cache A cache implementation, may be
      *        provided if you have one already available for use.
      * @return ProxyAuthTokenMiddleware
      * @throws DomainException if no implementation can be obtained.
      */
     public static function getProxyIdTokenMiddleware(
         $targetAudience,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        ?callable $httpHandler = null,
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null
     ) {
         $creds = self::getIdTokenCredentials($targetAudience, $httpHandler, $cacheConfig, $cache);
 
@@ -266,9 +266,9 @@ class ApplicationDefaultCredentials
      * token.
      *
      * @param string $targetAudience The audience for the ID token.
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @param array<mixed> $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache A cache implementation, may be
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @param array<mixed>|null $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface|null $cache A cache implementation, may be
      *        provided if you have one already available for use.
      * @return FetchAuthTokenInterface
      * @throws DomainException if no implementation can be obtained.
@@ -276,9 +276,9 @@ class ApplicationDefaultCredentials
      */
     public static function getIdTokenCredentials(
         $targetAudience,
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        ?callable $httpHandler = null,
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -334,15 +334,15 @@ class ApplicationDefaultCredentials
     }
 
     /**
-     * @param callable $httpHandler
-     * @param array<mixed> $cacheConfig
-     * @param CacheItemPoolInterface $cache
+     * @param callable|null $httpHandler
+     * @param array<mixed>|null $cacheConfig
+     * @param CacheItemPoolInterface|null $cache
      * @return bool
      */
     private static function onGce(
-        callable $httpHandler = null,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        ?callable $httpHandler = null,
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null
     ) {
         $gceCacheConfig = [];
         foreach (['lifetime', 'prefix'] as $key) {
