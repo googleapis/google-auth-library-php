@@ -23,6 +23,7 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
@@ -304,6 +305,36 @@ class ServiceAccountCredentialsTest extends TestCase
         };
         $sa = new ServiceAccountCredentials(null, $testJson, null, 'a target audience');
         $this->assertEquals($expectedToken, $sa->fetchAuthToken($httpHandler));
+        $this->assertEquals(1, $timesCalled);
+    }
+
+    public function testShouldUseIamWhenTargetAudienceAndUniverseDomainIsSet()
+    {
+        $testJson = $this->createTestJson();
+        $testJson['universe_domain'] = 'abc.xyz';
+
+        $timesCalled = 0;
+        $httpHandler = function (Request $request) use (&$timesCalled) {
+            $timesCalled++;
+
+            // Verify Request
+            $this->assertStringContainsString(':generateIdToken', $request->getUri());
+            $json = json_decode($request->getBody(), true);
+            $this->assertArrayHasKey('audience', $json);
+            $this->assertEquals('a target audience', $json['audience']);
+
+            // Verify JWT Bearer Token
+            $jwt = str_replace('Bearer ', '', $request->getHeaderLine('Authorization'));
+            list($header, $payload, $sig) = explode('.', $jwt);
+            $jwtParams = json_decode(base64_decode($payload), true);
+            $this->assertArrayHasKey('iss', $jwtParams);
+            $this->assertEquals('test@example.com', $jwtParams['iss']);
+
+            // return expected IAM ID token response
+            return new Psr7\Response(200, [], json_encode(['token' => 'idtoken12345']));
+        };
+        $sa = new ServiceAccountCredentials(null, $testJson, null, 'a target audience');
+        $this->assertEquals('idtoken12345', $sa->fetchAuthToken($httpHandler)['id_token']);
         $this->assertEquals(1, $timesCalled);
     }
 
