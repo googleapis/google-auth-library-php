@@ -38,8 +38,8 @@ class UrlSourceTest extends TestCase
     public function testFetchSubjectToken(
         string $responseBody,
         string $expectedToken,
-        string $format = null,
-        string $subjectTokenFieldName = null
+        ?string $format = null,
+        ?string $subjectTokenFieldName = null
     ) {
         $handler = function (RequestInterface $request) use ($responseBody): ResponseInterface {
             $this->assertEquals('GET', $request->getMethod());

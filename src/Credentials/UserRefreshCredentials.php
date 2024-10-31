@@ -125,7 +125,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     }
 
     /**
-     * @param callable $httpHandler
+     * @param callable|null $httpHandler
      * @param array<mixed> $metricsHeader [optional] Metrics headers to be inserted
      *     into the token endpoint request present.
      *     This could be passed from ImersonatedServiceAccountCredentials as it uses
@@ -141,7 +141,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      *     @type string $id_token
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null, array $metricsHeader = [])
+    public function fetchAuthToken(?callable $httpHandler = null, array $metricsHeader = [])
     {
         return $this->auth->fetchAuthToken(
             $httpHandler,
