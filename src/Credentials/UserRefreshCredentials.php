@@ -79,7 +79,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
-                throw new InvalidArgumentException('file does not exist');
+                throw new InvalidArgumentException('file does not exist or is unreadable');
             }
             $json = file_get_contents($jsonKey);
             if (!$jsonKey = json_decode((string) $json, true)) {
