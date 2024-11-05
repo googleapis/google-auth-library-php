@@ -20,7 +20,6 @@ namespace Google\Auth;
 use DomainException;
 use Google\Auth\Credentials\AppIdentityCredentials;
 use Google\Auth\Credentials\GCECredentials;
-use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
@@ -302,7 +301,6 @@ class ApplicationDefaultCredentials
 
             $creds = match ($jsonKey['type']) {
                 'authorized_user' => new UserRefreshCredentials(null, $jsonKey, $targetAudience),
-                'impersonated_service_account' => new ImpersonatedServiceAccountCredentials(null, $jsonKey, $targetAudience),
                 'service_account' => new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience),
                 default => throw new InvalidArgumentException('invalid value in the type field')
             };

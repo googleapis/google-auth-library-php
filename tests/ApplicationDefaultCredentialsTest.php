@@ -496,13 +496,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
         );
     }
 
-    public function testGetIdTokenCredentialsWithImpersonatedServiceAccountCredentials()
-    {
-        putenv('HOME=' . __DIR__ . '/fixtures5');
-        $creds = ApplicationDefaultCredentials::getIdTokenCredentials('123@456.com');
-        $this->assertInstanceOf(ImpersonatedServiceAccountCredentials::class, $creds);
-    }
-
     public function testGetIdTokenCredentialsWithCacheOptions()
     {
         $keyFile = __DIR__ . '/fixtures' . '/private.json';

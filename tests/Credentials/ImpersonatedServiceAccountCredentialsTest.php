@@ -23,14 +23,12 @@ use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\FetchAuthTokenInterface;
-use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\OAuth2;
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Prophecy\PHPUnit\ProphecyTrait;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use ReflectionClass;
 
@@ -135,44 +133,6 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $this->assertEquals(2, $requestCount);
     }
 
-    /**
-     * Test ID token impersonation for Service Account and User Refresh Credentials.
-     *
-     * @dataProvider provideAuthTokenJson
-     */
-    public function testGetIdTokenWithServiceAccountAndUserRefreshCredentials($json, $grantType)
-    {
-        $requestCount = 0;
-        // getting an id token will take two requests
-        $httpHandler = function (RequestInterface $request) use (&$requestCount, $json, $grantType) {
-            if (++$requestCount == 1) {
-                // the call to swap the refresh token for an access token
-                $this->assertEquals(UserRefreshCredentials::TOKEN_CREDENTIAL_URI, (string) $request->getUri());
-                parse_str((string) $request->getBody(), $result);
-                $this->assertEquals($grantType, $result['grant_type']);
-            } elseif ($requestCount == 2) {
-                // the call to swap the access token for an id token
-                $this->assertEquals($json['service_account_impersonation_url'], (string) $request->getUri());
-                $this->assertEquals(self::TARGET_AUDIENCE, json_decode($request->getBody(), true)['audience'] ?? '');
-                $this->assertEquals('Bearer test-access-token', $request->getHeader('authorization')[0] ?? null);
-            }
-
-            return new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                json_encode(match ($requestCount) {
-                    1 => ['access_token' => 'test-access-token'],
-                    2 => ['token' => 'test-impersonated-id-token']
-                })
-            );
-        };
-
-        $creds = new ImpersonatedServiceAccountCredentials(null, $json, self::TARGET_AUDIENCE);
-        $token = $creds->fetchAuthToken($httpHandler);
-        $this->assertEquals('test-impersonated-id-token', $token['id_token']);
-        $this->assertEquals(2, $requestCount);
-    }
-
     public function provideAuthTokenJson()
     {
         return [
@@ -221,72 +181,6 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
     }
 
     /**
-     * Test ID token impersonation for Exernal Account Credentials.
-     */
-    public function testGetIdTokenWithExternalAccountCredentials()
-    {
-        $json = self::EXTERNAL_ACCOUNT_TO_SERVICE_ACCOUNT_JSON;
-        $httpHandler = function (RequestInterface $request) use (&$requestCount, $json) {
-            if (++$requestCount == 1) {
-                // the call to swap the refresh token for an access token
-                $this->assertEquals(
-                    $json['source_credentials']['credential_source']['url'],
-                    (string) $request->getUri()
-                );
-            } elseif ($requestCount == 2) {
-                $this->assertEquals($json['source_credentials']['token_url'], (string) $request->getUri());
-            } elseif ($requestCount == 3) {
-                // the call to swap the access token for an id token
-                $this->assertEquals($json['service_account_impersonation_url'], (string) $request->getUri());
-                $this->assertEquals(self::TARGET_AUDIENCE, json_decode($request->getBody(), true)['audience'] ?? '');
-                $this->assertEquals('Bearer test-access-token', $request->getHeader('authorization')[0] ?? null);
-            }
-
-            return new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                json_encode(match ($requestCount) {
-                    1 => ['access_token' => 'test-access-token'],
-                    2 => ['access_token' => 'test-access-token'],
-                    3 => ['token' => 'test-impersonated-id-token']
-                })
-            );
-        };
-
-        $creds = new ImpersonatedServiceAccountCredentials(null, $json, self::TARGET_AUDIENCE);
-        $token = $creds->fetchAuthToken($httpHandler);
-        $this->assertEquals('test-impersonated-id-token', $token['id_token']);
-        $this->assertEquals(3, $requestCount);
-    }
-
-    /**
-     * Test ID token impersonation for an arbitrary credential fetcher.
-     */
-    public function testGetIdTokenWithArbitraryCredentials()
-    {
-        $httpHandler = function (RequestInterface $request) {
-            $this->assertEquals('https://some/url', (string) $request->getUri());
-            $this->assertEquals('Bearer test-access-token', $request->getHeader('authorization')[0] ?? null);
-            return new Response(200, [], json_encode(['token' => 'test-impersonated-id-token']));
-        };
-
-        $credentials = $this->prophesize(FetchAuthTokenInterface::class);
-        $credentials->fetchAuthToken($httpHandler, Argument::type('array'))
-            ->shouldBeCalledOnce()
-            ->willReturn(['access_token' => 'test-access-token']);
-
-        $json = [
-            'type' => 'impersonated_service_account',
-            'service_account_impersonation_url' => 'https://some/url',
-            'source_credentials' => $credentials->reveal(),
-        ];
-        $creds = new ImpersonatedServiceAccountCredentials(null, $json, self::TARGET_AUDIENCE);
-
-        $token = $creds->fetchAuthToken($httpHandler);
-        $this->assertEquals('test-impersonated-id-token', $token['id_token']);
-    }
-
-    /**
      * Test access token impersonation for an arbitrary credential fetcher.
      */
     public function testGetAccessTokenWithArbitraryCredentials()
@@ -315,34 +209,6 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
 
         $token = $creds->fetchAuthToken($httpHandler);
         $this->assertEquals('test-impersonated-access-token', $token['access_token']);
-    }
-
-    public function testIdTokenWithAuthTokenMiddleware()
-    {
-        $targetAudience = 'test-target-audience';
-        $credentials = new ImpersonatedServiceAccountCredentials(null, self::USER_TO_SERVICE_ACCOUNT_JSON, $targetAudience);
-
-        // this handler is for the middleware constructor, which will pass it to the ISAC to fetch tokens
-        $httpHandler = getHandler([
-            new Response(200, ['Content-Type' => 'application/json'], '{"access_token":"this.is.an.access.token"}'),
-            new Response(200, ['Content-Type' => 'application/json'], '{"token":"this.is.an.id.token"}'),
-        ]);
-        $middleware = new AuthTokenMiddleware($credentials, $httpHandler);
-
-        // this handler is the actual handler that makes the authenticated request
-        $requestCount = 0;
-        $httpHandler = function (RequestInterface $request) use (&$requestCount) {
-            $requestCount++;
-            $this->assertTrue($request->hasHeader('authorization'));
-            $this->assertEquals('Bearer this.is.an.id.token', $request->getHeader('authorization')[0] ?? null);
-        };
-
-        $middleware($httpHandler)(
-            new Request('GET', 'https://www.google.com'),
-            ['auth' => 'google_auth']
-        );
-
-        $this->assertEquals(1, $requestCount);
     }
 
     // User Refresh to Service Account Impersonation JSON Credentials
