@@ -59,6 +59,12 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     private int $lifetime;
 
     /**
+     * Whether this is an ID token request or an access token request. Used when
+     * building the metric header.
+     */
+    private bool $isIdTokenRequest = false;
+
+    /**
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that
      * has be created with the --impersonate-service-account flag.
      *
@@ -152,13 +158,13 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      * @param callable|null $unusedHttpHandler not used by this credentials type.
      * @return string Token issuer email
      */
-    public function getClientName(callable $unusedHttpHandler = null)
+    public function getClientName(?callable $unusedHttpHandler = null)
     {
         return $this->impersonatedServiceAccountName;
     }
 
     /**
-     * @param callable $httpHandler
+     * @param callable|null $httpHandler
      *
      * @return array<mixed> {
      *     A set of auth related metadata, containing the following
@@ -170,7 +176,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      *     @type string $id_token
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         $httpHandler = $httpHandler ?? HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
@@ -187,9 +193,9 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             'Content-Type' => 'application/json',
             'Cache-Control' => 'no-store',
             'Authorization' => sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token']),
-        ], $this->isIdTokenRequest() ? 'it' : 'at');
+        ], $this->isIdTokenRequest ? 'it' : 'at');
 
-        $body = match ($this->isIdTokenRequest()) {
+        $body = match ($this->isIdTokenRequest) {
             true => [
                 'audience' => $this->targetAudience,
                 'includeEmail' => true,
@@ -211,7 +217,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         $response = $httpHandler($request);
         $body = json_decode((string) $response->getBody(), true);
 
-        return match ($this->isIdTokenRequest()) {
+        return match ($this->isIdTokenRequest) {
             true => ['id_token' => $body['token']],
             false => [
                 'access_token' => $body['accessToken'],
@@ -246,7 +252,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         return self::CRED_TYPE;
     }
 
-    private function isIdTokenRequest(): bool
+    private function isIdTokenRequest: bool
     {
         return !is_null($this->targetAudience);
     }

@@ -159,6 +159,16 @@ class ObservabilityMetricsTest extends TestCase
         $this->assertUpdateMetadata($userRefreshCred, $handler, 'u', $handlerCalled);
     }
 
+    public function testUserRefreshCredentialsWithIdTokens()
+    {
+        $keyFile = __DIR__ . '/fixtures2/gcloud.json';
+        $handlerCalled = false;
+        $handler = $this->getCustomHandler('u', 'auth-request-type/it', $handlerCalled);
+
+        $userRefreshCred = new UserRefreshCredentials(null, $keyFile, 'test-target-audience');
+        $this->assertUpdateMetadata($userRefreshCred, $handler, 'u', $handlerCalled);
+    }
+
     /**
      * Invokes the 'updateMetadata' method of cred fetcher with empty metadata argument
      * and asserts for proper service api usage observability metrics header.
