@@ -442,6 +442,8 @@ class GCECredentials extends CredentialsLoader implements
      * If $httpHandler is not specified a the default HttpHandler is used.
      *
      * @param callable|null $httpHandler callback which delivers psr7 request
+     * @param array<mixed> $headers [optional] Headers to be inserted
+     *     into the token endpoint request present.
      *
      * @return array<mixed> {
      *     A set of auth related metadata, based on the token type.
@@ -453,7 +455,7 @@ class GCECredentials extends CredentialsLoader implements
      * }
      * @throws \Exception
      */
-    public function fetchAuthToken(?callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null, array $headers = [])
     {
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
@@ -469,7 +471,7 @@ class GCECredentials extends CredentialsLoader implements
         $response = $this->getFromMetadata(
             $httpHandler,
             $this->tokenUri,
-            $this->applyTokenEndpointMetrics([], $this->targetAudience ? 'it' : 'at')
+            $this->applyTokenEndpointMetrics($headers, $this->targetAudience ? 'it' : 'at')
         );
 
         if ($this->targetAudience) {
