@@ -30,7 +30,7 @@ use GuzzleHttp\Psr7\Response;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Prophecy\PHPUnit\ProphecyTrait;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use ReflectionClass;
 
