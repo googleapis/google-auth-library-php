@@ -118,19 +118,21 @@ class Iam
      * @param string $clientEmail The service account email.
      * @param string $targetAudience The audience for the ID token.
      * @param string $bearerToken The token to authenticate the IAM request.
+     * @param array<string, string> $headers [optional] Additional headers to send with the request.
      *
      * @return string The signed string, base64-encoded.
      */
     public function generateIdToken(
         string $clientEmail,
         string $targetAudience,
-        string $bearerToken
+        string $bearerToken,
+        array $headers = []
     ): string {
         $name = sprintf(self::SERVICE_ACCOUNT_NAME, $clientEmail);
         $apiRoot = str_replace('UNIVERSE_DOMAIN', $this->universeDomain, self::IAM_API_ROOT_TEMPLATE);
         $uri = $apiRoot . '/' . sprintf(self::GENERATE_ID_TOKEN_PATH, $name);
 
-        $headers = ['Authorization' => 'Bearer ' . $bearerToken];
+        $headers['Authorization'] = 'Bearer ' . $bearerToken;
 
         $body = [
             'audience' => $targetAudience,

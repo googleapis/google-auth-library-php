@@ -236,7 +236,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements
             $idToken = (new Iam($httpHandler, $this->getUniverseDomain()))->generateIdToken(
                 $this->auth->getIssuer(),
                 $this->auth->getAdditionalClaims()['target_audience'],
-                $jwt
+                $jwt,
+                $this->applyTokenEndpointMetrics([], 'it')
             );
             return ['id_token' => $idToken];
         }

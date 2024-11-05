@@ -330,6 +330,10 @@ class ServiceAccountCredentialsTest extends TestCase
             $this->assertArrayHasKey('iss', $jwtParams);
             $this->assertEquals('test@example.com', $jwtParams['iss']);
 
+            // Verify header contains the auth headers
+            $parts = explode(' ', $request->getHeaderLine('x-goog-api-client'));
+            $this->assertContains('auth-request-type/it', $parts);
+
             // return expected IAM ID token response
             return new Psr7\Response(200, [], json_encode(['token' => 'idtoken12345']));
         };
