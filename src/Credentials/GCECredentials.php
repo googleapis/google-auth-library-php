@@ -445,7 +445,6 @@ class GCECredentials extends CredentialsLoader implements
      * @param array<mixed> $headers [optional] Headers to be inserted
      *     into the token endpoint request present.
      *
-     *
      * @return array<mixed> {
      *     A set of auth related metadata, based on the token type.
      *
