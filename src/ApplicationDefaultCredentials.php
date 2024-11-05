@@ -300,7 +300,7 @@ class ApplicationDefaultCredentials
                 throw new \InvalidArgumentException('json key is missing the type field');
             }
 
-            $creds = match($jsonKey['type']) {
+            $creds = match ($jsonKey['type']) {
                 'authorized_user' => new UserRefreshCredentials(null, $jsonKey, $targetAudience),
                 'impersonated_service_account' => new ImpersonatedServiceAccountCredentials(null, $jsonKey, $targetAudience),
                 'service_account' => new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience),
