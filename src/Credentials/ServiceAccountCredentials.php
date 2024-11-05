@@ -193,7 +193,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     }
 
     /**
-     * @param callable $httpHandler
+     * @param callable|null $httpHandler
      *
      * @return array<mixed> {
      *     A set of auth related metadata, containing the following
@@ -203,7 +203,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      *     @type string $token_type
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         if ($this->useSelfSignedJwt()) {
             $jwtCreds = $this->createJwtAccessCredentials();
@@ -287,10 +287,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      *
      * Returns null if the project ID does not exist in the keyfile.
      *
-     * @param callable $httpHandler Not used by this credentials type.
+     * @param callable|null $httpHandler Not used by this credentials type.
      * @return string|null
      */
-    public function getProjectId(callable $httpHandler = null)
+    public function getProjectId(?callable $httpHandler = null)
     {
         return $this->projectId;
     }
@@ -300,13 +300,13 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      *
      * @param array<mixed> $metadata metadata hashmap
      * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
+     * @param callable|null $httpHandler callback which delivers psr7 request
      * @return array<mixed> updated metadata hashmap
      */
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null
+        ?callable $httpHandler = null
     ) {
         // scope exists. use oauth implementation
         if (!$this->useSelfSignedJwt()) {
@@ -364,10 +364,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      *
      * In this case, it returns the keyfile's client_email key.
      *
-     * @param callable $httpHandler Not used by this credentials type.
+     * @param callable|null $httpHandler Not used by this credentials type.
      * @return string
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(?callable $httpHandler = null)
     {
         return $this->auth->getIssuer();
     }
