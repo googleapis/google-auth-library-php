@@ -42,7 +42,7 @@ class StdOutLoggerTest extends BaseTest
     public function testLoggingOnHigherLeverWritesToStdOut()
     {
         $expectedString = 'test';
-        $this->expectOutputString($expectedString. "\n");
+        $this->expectOutputString($expectedString . "\n");
 
         $logger = new StdOutLogger(LogLevel::WARNING);
         $logger->error($expectedString);

@@ -37,8 +37,7 @@ class HttpHandlerFactory
     public static function build(
         ?ClientInterface $client = null,
         null|false|LoggerInterface $logger = null,
-    )
-    {
+    ) {
         if (is_null($client)) {
             $stack = null;
             if (class_exists(BodySummarizer::class)) {
