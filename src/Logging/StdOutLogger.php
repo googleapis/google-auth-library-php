@@ -19,6 +19,7 @@ namespace Google\Auth\Logging;
 
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerTrait;
 use Psr\Log\LogLevel;
 use Stringable;
 
@@ -27,6 +28,8 @@ use Stringable;
  */
 class StdOutLogger implements LoggerInterface
 {
+    use LoggerTrait;
+
     /**
      * @var array<string,int>
      */
@@ -50,70 +53,6 @@ class StdOutLogger implements LoggerInterface
     public function __construct(string $level = LogLevel::DEBUG)
     {
         $this->level = $this->getLevelMap($level);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function emergency(string|Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::EMERGENCY, $message);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function alert(string|Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::ALERT, $message);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function critical(string|Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::CRITICAL, $message);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function error(string|Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::ERROR, $message);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function warning(string|Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::WARNING, $message);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function notice(string|Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::NOTICE, $message);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function info(string|Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::INFO, $message);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function debug(string|Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::DEBUG, $message);
     }
 
     /**
