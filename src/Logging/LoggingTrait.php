@@ -84,11 +84,9 @@ trait LoggingTrait
         $stringifiedEvent = json_encode($debugEvent);
 
         // There was an error stringifying the event, return to not break execution
-        if ($stringifiedEvent === false) {
-            return;
+        if ($stringifiedEvent !== false) {
+            $this->logger->debug($stringifiedEvent);
         }
-
-        $this->logger->debug($stringifiedEvent);
 
         if ($event->status) {
             $infoEvent = [
@@ -136,12 +134,19 @@ trait LoggingTrait
             fn ($value) => !is_null($value)
         );
 
-        $this->logger->info((string) json_encode($infoEvent));
+        $stringifiedEvent = json_encode($infoEvent);
+
+        // There was an error stringifying the event, return to not break execution
+        if ($stringifiedEvent === false) {
+            return;
+        }
+
+        $this->logger->info($stringifiedEvent);
     }
 
     /**
      * @param array<mixed> $headers
-     * @return null|array<mixed, mixed>
+     * @return null|array<string, string|false>
      */
     private function getJwtToken(array $headers): null|array
     {

@@ -32,43 +32,28 @@ class StdOutLoggerTest extends BaseTest
 
     public function testLoggingOnSameLevelWritesToStdOut()
     {
-        ob_start();
+        $expectedString = 'test';
+        $this->expectOutputString($expectedString . "\n");
 
         $logger = new StdOutLogger(LogLevel::DEBUG);
-        $expectedString = 'test';
         $logger->debug($expectedString);
-        $buffer = ob_get_contents();
-
-        $this->assertEquals($expectedString . "\n", $buffer);
-
-        ob_end_clean();
     }
 
     public function testLoggingOnHigherLeverWritesToStdOut()
     {
-        ob_start();
+        $expectedString = 'test';
+        $this->expectOutputString($expectedString. "\n");
 
         $logger = new StdOutLogger(LogLevel::WARNING);
-        $expectedString = 'test';
         $logger->error($expectedString);
-        $buffer = ob_get_contents();
-
-        $this->assertEquals($expectedString . "\n", $buffer);
-
-        ob_end_clean();
     }
 
     public function testLoggingOnLowerLeverDoesNotWriteToStdOut()
     {
-        ob_start();
+        $this->expectOutputString('');
 
         $logger = new StdOutLogger(LogLevel::WARNING);
         $expectedString = 'test';
         $logger->debug($expectedString);
-        $buffer = ob_get_contents();
-
-        $this->assertEmpty($buffer);
-
-        ob_end_clean();
     }
 }

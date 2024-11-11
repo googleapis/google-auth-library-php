@@ -780,10 +780,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
         putenv($this::SDK_DEBUG_FLAG . '=true');
         $logger = ApplicationDefaultCredentials::getDefaultLogger();
         $this->assertTrue($logger instanceof StdOutLogger);
-
-        putenv($this::SDK_DEBUG_FLAG . '=1');
-        $logger = ApplicationDefaultCredentials::getDefaultLogger();
-        $this->assertTrue($logger instanceof StdOutLogger);
     }
 
     public function testGetDefaultLoggerReturnsNullIfNotEnvVar()

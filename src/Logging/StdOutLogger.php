@@ -52,7 +52,7 @@ class StdOutLogger implements LoggerInterface
      */
     public function __construct(string $level = LogLevel::DEBUG)
     {
-        $this->level = $this->getLevelMap($level);
+        $this->level = $this->getLevelFromName($level);
     }
 
     /**
@@ -60,7 +60,7 @@ class StdOutLogger implements LoggerInterface
      */
     public function log($level, string|Stringable $message, array $context = []): void
     {
-        if ($this->getLevelMap($level) < $this->level) {
+        if ($this->getLevelFromName($level) < $this->level) {
             return;
         }
 
@@ -72,7 +72,7 @@ class StdOutLogger implements LoggerInterface
      * @return int
      * @throws InvalidArgumentException
      */
-    private function getLevelMap(string $levelName): int
+    private function getLevelFromName(string $levelName): int
     {
         if (!array_key_exists($levelName, $this->levelMapping)) {
             throw new InvalidArgumentException('The level supplied to the Logger is not valid');

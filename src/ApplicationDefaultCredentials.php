@@ -30,7 +30,6 @@ use Google\Auth\Middleware\ProxyAuthTokenMiddleware;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
-use PHPUnit\TextUI\XmlConfiguration\Logging\Logging;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 
@@ -335,22 +334,16 @@ class ApplicationDefaultCredentials
         $loggingFlag = getenv(self::SDK_DEBUG_FLAG);
 
         // Env var is not set
-        if (!is_string($loggingFlag)) {
-            if (is_array($loggingFlag)) {
-                trigger_error('The ' . self::SDK_DEBUG_FLAG . ' is set, but it is set to another value than false, true, 0 or 1. Logging is disabled');
-                return null;
-            }
-
+        if (!$loggingFlag) {
             return null;
         }
 
         $loggingFlag = strtolower($loggingFlag);
 
         // Env Var is not true
-        if ($loggingFlag !== 'true' && $loggingFlag !== '1') {
-            // Env var is set to a non valid value
-            if ($loggingFlag !== 'false' && $loggingFlag !== '0') {
-                trigger_error('The ' . self::SDK_DEBUG_FLAG . ' is set, but it is set to another value than false, true, 0 or 1. Logging is disabled');
+        if ($loggingFlag !== 'true') {
+            if ($loggingFlag !== 'false') {
+                trigger_error('The ' . self::SDK_DEBUG_FLAG . ' is set, but it is set to another value than false or true. Logging is disabled');
             }
 
             return null;

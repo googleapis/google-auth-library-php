@@ -51,11 +51,9 @@ class HttpHandlerFactory
             $client = new Client(['handler' => $stack]);
         }
 
-        if ($logger === false) {
-            $logger = null;
-        } else {
-            $logger = $logger ?? ApplicationDefaultCredentials::getDefaultLogger();
-        }
+        $logger = ($logger === false)
+            ? null
+            : $logger ?? ApplicationDefaultCredentials::getDefaultLogger();
 
         $version = null;
         if (defined('GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
