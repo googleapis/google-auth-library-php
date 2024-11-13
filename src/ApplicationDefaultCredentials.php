@@ -299,13 +299,11 @@ class ApplicationDefaultCredentials
                 throw new \InvalidArgumentException('json key is missing the type field');
             }
 
-            if ($jsonKey['type'] == 'authorized_user') {
-                $creds = new UserRefreshCredentials(null, $jsonKey, $targetAudience);
-            } elseif ($jsonKey['type'] == 'service_account') {
-                $creds = new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience);
-            } else {
-                throw new InvalidArgumentException('invalid value in the type field');
-            }
+            $creds = match ($jsonKey['type']) {
+                'authorized_user' => new UserRefreshCredentials(null, $jsonKey, $targetAudience),
+                'service_account' => new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience),
+                default => throw new InvalidArgumentException('invalid value in the type field')
+            };
         } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
             $creds = new GCECredentials(null, null, $targetAudience);
             $creds->setIsOnGce(true); // save the credentials a trip to the metadata server

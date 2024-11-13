@@ -117,20 +117,24 @@ class ObservabilityMetricsTest extends TestCase
         );
     }
 
-    /**
-     * ImpersonatedServiceAccountCredentials haven't enabled identity token support hence
-     * they don't have 'auth-request-type/it' observability metric header check.
-     */
     public function testImpersonatedServiceAccountCredentials()
     {
         $keyFile = __DIR__ . '/fixtures5/.config/gcloud/application_default_credentials.json';
         $handlerCalled = false;
-        $handler = $this->getCustomHandler('imp', 'auth-request-type/at', $handlerCalled);
+        $responseFromIam = json_encode(['accessToken' => '1/abdef1234567890', 'expireTime' => '2024-01-01T00:00:00Z']);
+        $handler = getHandler([
+            $this->getExpectedRequest('imp', 'auth-request-type/at', $handlerCalled, $this->jsonTokens),
+            $this->getExpectedRequest('imp', 'auth-request-type/at', $handlerCalled, $responseFromIam),
+        ]);
 
         $impersonatedCred = new ImpersonatedServiceAccountCredentials('exampleScope', $keyFile);
         $this->assertUpdateMetadata($impersonatedCred, $handler, 'imp', $handlerCalled);
     }
 
+    /**
+     * UserRefreshCredentials haven't enabled identity token support hence
+     * they don't have 'auth-request-type/it' observability metric header check.
+     */
     public function testUserRefreshCredentials()
     {
         $keyFile = __DIR__ . '/fixtures2/gcloud.json';
@@ -180,23 +184,46 @@ class ObservabilityMetricsTest extends TestCase
      */
     private function getCustomHandler($credShortform, $requestTypeHeaderValue, &$handlerCalled)
     {
-        $jsonTokens = $this->jsonTokens;
         return getHandler([
-            function ($request, $options) use (
-                $jsonTokens,
-                &$handlerCalled,
+            $this->getExpectedRequest(
+                $credShortform,
                 $requestTypeHeaderValue,
-                $credShortform
-            ) {
-                $handlerCalled = true;
-                // This confirms that token endpoint requests have proper observability metric headers
-                $this->assertStringContainsString(
-                    sprintf('%s %s cred-type/%s', $this->langAndVersion, $requestTypeHeaderValue, $credShortform),
-                    $request->getHeaderLine(self::$headerKey)
-                );
-                return new Response(200, [], Utils::streamFor($jsonTokens));
-            }
+                $handlerCalled,
+                $this->jsonTokens
+            )
         ]);
+    }
+
+    /**
+     * @param string $credShortform The short form of the credential type
+     *        used in observability metric header value.
+     * @param string $requestTypeHeaderValue Expected header value of the form
+     *        'auth-request-type/<>'
+     * @param bool $handlerCalled Reference to the handlerCalled flag asserted later
+     *        in the test.
+     * @param string $jsonTokens The json tokens to be returned in the response.
+     * @return callable
+     */
+    private function getExpectedRequest(
+        string $credShortform,
+        string $requestTypeHeaderValue,
+        bool &$handlerCalled,
+        string $jsonTokens
+    ): callable {
+        return function ($request, $options) use (
+            $jsonTokens,
+            &$handlerCalled,
+            $requestTypeHeaderValue,
+            $credShortform
+        ) {
+            $handlerCalled = true;
+            // This confirms that token endpoint requests have proper observability metric headers
+            $this->assertStringContainsString(
+                sprintf('%s %s cred-type/%s', $this->langAndVersion, $requestTypeHeaderValue, $credShortform),
+                $request->getHeaderLine(self::$headerKey)
+            );
+            return new Response(200, [], Utils::streamFor($jsonTokens));
+        };
     }
 
     public function tokenRequestType()

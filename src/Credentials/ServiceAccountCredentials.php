@@ -115,6 +115,12 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     private string $universeDomain;
 
     /**
+     * Whether this is an ID token request or an access token request. Used when
+     * building the metric header.
+     */
+    private bool $isIdTokenRequest = false;
+
+    /**
      * Create a new ServiceAccountCredentials.
      *
      * @param string|string[]|null $scope the scope of the access request, expressed
@@ -161,6 +167,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         $additionalClaims = [];
         if ($targetAudience) {
             $additionalClaims = ['target_audience' => $targetAudience];
+            $this->isIdTokenRequest = true;
         }
         $this->auth = new OAuth2([
             'audience' => self::TOKEN_CREDENTIAL_URI,
@@ -194,6 +201,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
     /**
      * @param callable|null $httpHandler
+     * @param array<mixed> $headers [optional] Headers to be inserted
+     *     into the token endpoint request present.
      *
      * @return array<mixed> {
      *     A set of auth related metadata, containing the following
@@ -203,7 +212,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      *     @type string $token_type
      * }
      */
-    public function fetchAuthToken(?callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null, array $headers = [])
     {
         if ($this->useSelfSignedJwt()) {
             $jwtCreds = $this->createJwtAccessCredentials();
@@ -218,7 +227,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
             return $accessToken;
         }
 
-        if ($this->isIdTokenRequest() && $this->getUniverseDomain() !== self::DEFAULT_UNIVERSE_DOMAIN) {
+        if ($this->isIdTokenRequest && $this->getUniverseDomain() !== self::DEFAULT_UNIVERSE_DOMAIN) {
             $now = time();
             $jwt = Jwt::encode(
                 [
@@ -237,13 +246,13 @@ class ServiceAccountCredentials extends CredentialsLoader implements
                 $this->auth->getIssuer(),
                 $this->auth->getAdditionalClaims()['target_audience'],
                 $jwt,
-                $this->applyTokenEndpointMetrics([], 'it')
+                $this->applyTokenEndpointMetrics($headers, 'it')
             );
             return ['id_token' => $idToken];
         }
         return $this->auth->fetchAuthToken(
             $httpHandler,
-            $this->applyTokenEndpointMetrics([], $this->isIdTokenRequest() ? 'it' : 'at')
+            $this->applyTokenEndpointMetrics($headers, $this->isIdTokenRequest ? 'it' : 'at')
         );
     }
 
@@ -429,7 +438,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         }
 
         // Do not use self-signed JWT for ID tokens
-        if ($this->isIdTokenRequest()) {
+        if ($this->isIdTokenRequest) {
             return false;
         }
 
@@ -444,10 +453,5 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         }
 
         return is_null($this->auth->getScope());
-    }
-
-    private function isIdTokenRequest(): bool
-    {
-        return !empty($this->auth->getAdditionalClaims()['target_audience']);
     }
 }
