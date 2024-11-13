@@ -2,6 +2,20 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.43.0](https://github.com/googleapis/google-auth-library-php/compare/v1.42.0...v1.43.0) (2024-11-05)
+
+
+### Features
+
+* Add ID tokens for user refresh credentials ([#468](https://github.com/googleapis/google-auth-library-php/issues/468)) ([1601efc](https://github.com/googleapis/google-auth-library-php/commit/1601efc2f1f362437beda2c4212f1f471568dee6))
+* Call IamCredentials endpoint for generating ID tokens outside GDU ([#581](https://github.com/googleapis/google-auth-library-php/issues/581)) ([2d7d03d](https://github.com/googleapis/google-auth-library-php/commit/2d7d03d0cac08c8d6e03276f14ef260ccb980b7c))
+
+
+### Bug Fixes
+
+* Compatability with php 8.4 ([#584](https://github.com/googleapis/google-auth-library-php/issues/584)) ([da1f02a](https://github.com/googleapis/google-auth-library-php/commit/da1f02a8dcbbbafd325cf0c9ac3462a72eb387fb))
+* Update universe domain URI ([#572](https://github.com/googleapis/google-auth-library-php/issues/572)) ([6b00b66](https://github.com/googleapis/google-auth-library-php/commit/6b00b66f9a879b545ffb6f2416cc2add88be3be1))
+
 ## [1.42.0](https://github.com/googleapis/google-auth-library-php/compare/v1.41.0...v1.42.0) (2024-08-26)
 
 
