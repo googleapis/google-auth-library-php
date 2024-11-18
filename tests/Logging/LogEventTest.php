@@ -36,7 +36,8 @@ class LogEventTest extends BaseTest
 
     public function testConstructorWithParameterHasLatencySet()
     {
-        $item = new LogEvent(date(DATE_RFC3339));
+        $currentMicrotimeInMillis = microtime(true) * 1000;
+        $item = new LogEvent($currentMicrotimeInMillis);
         $this->assertNotNull($item->latency);
     }
 }
