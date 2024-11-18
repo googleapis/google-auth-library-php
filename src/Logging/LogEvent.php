@@ -22,9 +22,16 @@ class LogEvent
     /**
      * Timestamp in format RFC3339 representing when this event ocurred
      *
-     * @var null|string
+     * @var string
      */
-    public null|string $timestamp = null;
+    public readonly string $timestamp;
+
+    /**
+     * The time in milliseconds at time on creation for calculating latency
+     *
+     * @var float
+     */
+    public readonly float $milliseconds;
 
     /**
      * Rest method type
@@ -90,14 +97,14 @@ class LogEvent
     public null|string $serviceName = null;
 
     /**
-     * The Client Id for easy trace
+     * The Client Id for tracing
      *
      * @var null|int $clientId
      */
     public null|int $clientId = null;
 
     /**
-     * The Request id for easy trace
+     * The Request id for tracing
      *
      * @var null|int $requestId;
      */
@@ -110,12 +117,13 @@ class LogEvent
      *
      * @param null|string $startTime (Optional) Parameter to calculate the latency
      */
-    public function __construct(null|string $startTime = null)
+    public function __construct(null|float $startTime = null)
     {
         $this->timestamp = date(DATE_RFC3339);
+        $this->milliseconds = round(microtime(true) * 1000);
 
         if ($startTime) {
-            $this->latency = (int) strtotime($this->timestamp) - strtotime($startTime);
+            $this->latency = (int) $this->milliseconds - $startTime;
         }
     }
 }

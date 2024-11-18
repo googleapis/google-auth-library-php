@@ -76,7 +76,7 @@ class Guzzle6HttpHandler
         $response = $this->client->send($request, $options);
 
         if ($this->logger) {
-            $responseEvent = new LogEvent($requestEvent->timestamp);
+            $responseEvent = new LogEvent($requestEvent->milliseconds);
 
             $responseEvent->headers = $response->getHeaders();
             $responseEvent->payload = $response->getBody()->getContents();
@@ -121,7 +121,7 @@ class Guzzle6HttpHandler
 
         if ($this->logger) {
             $promise->then(function (ResponseInterface $response) use ($requestEvent) {
-                $responseEvent = new LogEvent($requestEvent->timestamp);
+                $responseEvent = new LogEvent($requestEvent->milliseconds);
 
                 $responseEvent->headers = $response->getHeaders();
                 $responseEvent->payload = $response->getBody()->getContents();
