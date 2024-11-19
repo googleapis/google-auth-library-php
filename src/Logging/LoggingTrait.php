@@ -88,7 +88,7 @@ trait LoggingTrait
             $this->logger->debug($stringifiedEvent);
         }
 
-        if ($event->status) {
+        if (!is_null($event->status)) {
             $infoEvent = [
                 'timestamp' => $event->timestamp,
                 'severity' => LogLevel::INFO,
