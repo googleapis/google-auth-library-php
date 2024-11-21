@@ -68,7 +68,7 @@ class Guzzle6HttpHandler
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
             $requestEvent->serviceName = $options['serviceName'] ?? null;
             $requestEvent->clientId = spl_object_id($this->client);
-            $requestEvent->requestId = spl_object_id($request);
+            $requestEvent->requestId = $options['requestId'] ?? spl_object_id($request);
 
             $this->logRequest($requestEvent);
         }
