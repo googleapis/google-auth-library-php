@@ -16,8 +16,8 @@
  */
 namespace Google\Auth\HttpHandler;
 
-use Google\Auth\Logging\LogEvent;
 use Google\Auth\Logging\LoggingTrait;
+use Google\Auth\Logging\RpcLogEvent;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -59,7 +59,7 @@ class Guzzle6HttpHandler
         $requestEvent = null;
 
         if ($this->logger) {
-            $requestEvent = new LogEvent();
+            $requestEvent = new RpcLogEvent();
 
             $requestEvent->method = $request->getMethod();
             $requestEvent->url = $request->getUri()->__toString();
@@ -76,7 +76,7 @@ class Guzzle6HttpHandler
         $response = $this->client->send($request, $options);
 
         if ($this->logger) {
-            $responseEvent = new LogEvent($requestEvent->milliseconds);
+            $responseEvent = new RpcLogEvent($requestEvent->milliseconds);
 
             $responseEvent->headers = $response->getHeaders();
             $responseEvent->payload = $response->getBody()->getContents();
@@ -103,7 +103,7 @@ class Guzzle6HttpHandler
         $requestEvent = null;
 
         if ($this->logger) {
-            $requestEvent = new LogEvent();
+            $requestEvent = new RpcLogEvent();
 
             $requestEvent->method = $request->getMethod();
             $requestEvent->url = (string) $request->getUri();
@@ -121,7 +121,7 @@ class Guzzle6HttpHandler
 
         if ($this->logger) {
             $promise->then(function (ResponseInterface $response) use ($requestEvent) {
-                $responseEvent = new LogEvent($requestEvent->milliseconds);
+                $responseEvent = new RpcLogEvent($requestEvent->milliseconds);
 
                 $responseEvent->headers = $response->getHeaders();
                 $responseEvent->payload = $response->getBody()->getContents();

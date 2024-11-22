@@ -24,7 +24,7 @@ trait LoggingTrait
     /**
      * @param LogEvent $event
      */
-    private function logRequest(LogEvent $event): void
+    private function logRequest(RpcLogEvent $event): void
     {
         $debugEvent = [
             'timestamp' => $event->timestamp,
@@ -60,7 +60,7 @@ trait LoggingTrait
     /**
      * @param LogEvent $event
      */
-    private function logResponse(LogEvent $event): void
+    private function logResponse(RpcLogEvent $event): void
     {
         $debugEvent = [
             'timestamp' => $event->timestamp,
@@ -116,7 +116,7 @@ trait LoggingTrait
     /**
      * @param LogEvent $event
      */
-    private function logStatus(LogEvent $event): void
+    private function logStatus(RpcLogEvent $event): void
     {
         $infoEvent = [
             'timestamp' => $event->timestamp,

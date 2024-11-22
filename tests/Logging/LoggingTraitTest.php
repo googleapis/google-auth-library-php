@@ -17,8 +17,8 @@
 
 namespace Google\Auth\Tests\Logging;
 
-use Google\Auth\Logging\LogEvent;
 use Google\Auth\Logging\LoggingTrait;
+use Google\Auth\Logging\RpcLogEvent;
 use Google\Auth\Logging\StdOutLogger;
 use Google\Auth\Tests\BaseTest;
 use Psr\Log\LoggerInterface;
@@ -92,9 +92,9 @@ class LoggingTraitTest extends BaseTest
         $this->assertEquals($event->status, $parsedInfoEvent['jsonPayload']['response.status']);
     }
 
-    private function getNewLogEvent(): LogEvent
+    private function getNewLogEvent(): RpcLogEvent
     {
-        $event = new LogEvent();
+        $event = new RpcLogEvent();
         $event->clientId = 123;
         $event->method = 'get';
         $event->url = 'test.com';
@@ -124,12 +124,12 @@ class MockClassWithLogger
         $this->logger = new StdOutLogger();
     }
 
-    public function logRequestEvent(LogEvent $event): void
+    public function logRequestEvent(RpcLogEvent $event): void
     {
         $this->logRequest($event);
     }
 
-    public function logResponseEvent(LogEvent $event): void
+    public function logResponseEvent(RpcLogEvent $event): void
     {
         $this->logResponse($event);
     }

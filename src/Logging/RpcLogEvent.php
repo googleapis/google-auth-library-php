@@ -17,7 +17,7 @@
 
 namespace Google\Auth\Logging;
 
-class LogEvent
+class RpcLogEvent
 {
     /**
      * Timestamp in format RFC3339 representing when this event ocurred
@@ -120,6 +120,8 @@ class LogEvent
     public function __construct(null|float $startTime = null)
     {
         $this->timestamp = date(DATE_RFC3339);
+
+        // Takes the micro time and convets it to millis
         $this->milliseconds = round(microtime(true) * 1000);
 
         if ($startTime) {
