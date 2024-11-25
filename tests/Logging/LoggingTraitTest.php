@@ -102,7 +102,7 @@ class LoggingTraitTest extends BaseTest
             'header1' => 'test',
             'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.cThIIoDvwdueQB468K5xDc5633seEFoqwxjF_xSJyQQ'
         ];
-        $event->payload = ['param' => 'test'];
+        $event->payload = json_encode(['param' => 'test']);
         $event->status = 200;
         $event->retryAttempt = 0;
         $event->rpcName = 'Rpc NameTest';

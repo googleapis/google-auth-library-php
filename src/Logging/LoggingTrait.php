@@ -22,7 +22,7 @@ use Psr\Log\LogLevel;
 trait LoggingTrait
 {
     /**
-     * @param LogEvent $event
+     * @param RpcLogEvent $event
      */
     private function logRequest(RpcLogEvent $event): void
     {
@@ -39,7 +39,7 @@ trait LoggingTrait
             'request.method' => $event->method,
             'request.url' => $event->url,
             'request.headers' => $event->headers,
-            'request.payload' => $event->payload,
+            'request.payload' => $this->truncatePayload($event->payload),
             'request.jwt' => $this->getJwtToken($event->headers ?? []),
             'retryAttempt' => $event->retryAttempt
         ];
@@ -58,7 +58,7 @@ trait LoggingTrait
     }
 
     /**
-     * @param LogEvent $event
+     * @param RpcLogEvent $event
      */
     private function logResponse(RpcLogEvent $event): void
     {
@@ -69,7 +69,7 @@ trait LoggingTrait
             'requestId' => $event->requestId ?? null,
             'jsonPayload' => [
                 'response.headers' => $event->headers,
-                'response.payload' => $event->payload,
+                'response.payload' => $this->truncatePayload($event->payload),
                 'latency' => $event->latency,
             ]
         ];
@@ -89,32 +89,12 @@ trait LoggingTrait
         }
 
         if (!is_null($event->status)) {
-            $infoEvent = [
-                'timestamp' => $event->timestamp,
-                'severity' => LogLevel::INFO,
-                'clientId' => $event->clientId,
-                'requestId' => $event->requestId ?? null,
-                'jsonPayload' => [
-                    'response.status' => $event->status
-                ]
-            ];
-
-            // Remove null values
-            $infoEvent = array_filter($infoEvent, fn ($value) => !is_null($value));
-
-            $stringifiedEvent = json_encode($infoEvent);
-
-            // There was an error stringifying the event, return to not break execution
-            if ($stringifiedEvent === false) {
-                return;
-            }
-
-            $this->logger->info($stringifiedEvent);
+            $this->logStatus($event);
         }
     }
 
     /**
-     * @param LogEvent $event
+     * @param RpcLogEvent $event
      */
     private function logStatus(RpcLogEvent $event): void
     {
@@ -167,5 +147,18 @@ trait LoggingTrait
             'header' => base64_decode($header),
             'token' => base64_decode($token)
         ];
+    }
+
+    /**
+     * @param string $payload
+     * @return string
+     */
+    private function truncatePayload(string $payload): string
+    {
+        if (strlen($payload) <= 500) {
+            return $payload;
+        }
+
+        return substr($payload, 0, 500) . '...';
     }
 }

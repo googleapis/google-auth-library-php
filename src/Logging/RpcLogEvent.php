@@ -57,9 +57,9 @@ class RpcLogEvent
     /**
      * An array representation of JSON for the response or request
      *
-     * @var null|string|array<string, mixed>
+     * @var null|string
      */
-    public null|string|array $payload = null;
+    public null|string $payload = null;
 
     /**
      * Status code for REST or gRPC methods
