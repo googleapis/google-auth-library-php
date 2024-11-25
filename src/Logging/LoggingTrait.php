@@ -150,12 +150,12 @@ trait LoggingTrait
     }
 
     /**
-     * @param string $payload
+     * @param null|string $payload
      * @return string
      */
-    private function truncatePayload(string $payload): string
+    private function truncatePayload(null|string $payload): null|string
     {
-        if (strlen($payload) <= 500) {
+        if (is_null($payload) || strlen($payload) <= 500) {
             return $payload;
         }
 
