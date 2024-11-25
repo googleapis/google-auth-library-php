@@ -17,27 +17,31 @@
 
 namespace Google\Auth\Tests\Logging;
 
-use Google\Auth\Logging\LogEvent;
+use Google\Auth\Logging\RpcLogEvent;
 use Google\Auth\Tests\BaseTest;
 
-class LogEventTest extends BaseTest
+class RpcLogEventTest extends BaseTest
 {
     public function testInstanceAddsTimestamp()
     {
-        $item = new LogEvent();
+        $item = new RpcLogEvent();
         $this->assertNotNull($item->timestamp);
     }
 
     public function testConstructorWithoutParameterHasNoLatency()
     {
-        $item = new LogEvent();
+        $item = new RpcLogEvent();
         $this->assertNull($item->latency);
     }
 
     public function testConstructorWithParameterHasLatencySet()
     {
-        $currentMicrotimeInMillis = microtime(true) * 1000;
-        $item = new LogEvent($currentMicrotimeInMillis);
+        // We sustract 1000 ms to simulate a microtime 1000ms in the past
+        $previousMicrotimeInMillis = (microtime(true) * 1000) - 1000;
+        $item = new RpcLogEvent($previousMicrotimeInMillis);
         $this->assertNotNull($item->latency);
+
+        // Adding a delta to the test due timing on how this executes
+        $this->assertEqualsWithDelta(1000, $item->latency, 5);
     }
 }

@@ -125,7 +125,7 @@ class RpcLogEvent
         $this->milliseconds = round(microtime(true) * 1000);
 
         if ($startTime) {
-            $this->latency = (int) $this->milliseconds - $startTime;
+            $this->latency = (int) round($this->milliseconds - $startTime);
         }
     }
 }
