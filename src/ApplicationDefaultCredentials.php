@@ -72,7 +72,7 @@ use Psr\Log\LoggerInterface;
  */
 class ApplicationDefaultCredentials
 {
-    private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_DEBUG_LOGGING';
+    private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_PHP_LOGGING';
 
     /**
      * @deprecated

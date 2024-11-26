@@ -49,7 +49,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     private $targetAudience = 'a target audience';
     private $quotaProject = 'a-quota-project';
     private $originalServiceAccount;
-    private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_DEBUG_LOGGING';
+    private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_PHP_LOGGING';
 
     public function testGetCredentialsFailsIfEnvSpecifiesNonExistentFile()
     {
