@@ -62,7 +62,7 @@ class Guzzle6HttpHandler
             $requestEvent = new RpcLogEvent();
 
             $requestEvent->method = $request->getMethod();
-            $requestEvent->url = $request->getUri()->__toString();
+            $requestEvent->url = (string) $request->getUri();
             $requestEvent->headers = $request->getHeaders();
             $requestEvent->payload = $request->getBody()->getContents();
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
