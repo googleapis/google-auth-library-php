@@ -115,7 +115,7 @@ class RpcLogEvent
      * Passing a string representation of a timestamp calculates the difference between
      * these two times and sets the latency field with the result.
      *
-     * @param null|string $startTime (Optional) Parameter to calculate the latency
+     * @param null|float $startTime (Optional) Parameter to calculate the latency
      */
     public function __construct(null|float $startTime = null)
     {
