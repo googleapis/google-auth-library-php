@@ -17,6 +17,11 @@
 
 namespace Google\Auth\Logging;
 
+/**
+ * A class that contains all the required information for logging.
+ *
+ * @internal
+ */
 class RpcLogEvent
 {
     /**

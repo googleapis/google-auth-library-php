@@ -24,7 +24,9 @@ use Psr\Log\LogLevel;
 use Stringable;
 
 /**
- * A basic logger class to log into stdOut for GCP logging
+ * A basic logger class to log into stdOut for GCP logging.
+ *
+ * @internal
  */
 class StdOutLogger implements LoggerInterface
 {

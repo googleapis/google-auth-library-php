@@ -19,6 +19,11 @@ namespace Google\Auth\Logging;
 
 use Psr\Log\LogLevel;
 
+/**
+ * A trait used to call a PSR-3 logging interface.
+ *
+ * @internal
+ */
 trait LoggingTrait
 {
     /**
@@ -47,7 +52,7 @@ trait LoggingTrait
         // Remove null values
         $debugEvent['jsonPayload'] = array_filter($jsonPayload, fn ($value) => !is_null($value));
 
-        $stringifiedEvent = json_encode($debugEvent);
+        $stringifiedEvent = json_encode($debugEvent, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         // There was an error stringifying the event, return to not break execution
         if ($stringifiedEvent === false) {
@@ -70,7 +75,7 @@ trait LoggingTrait
             'jsonPayload' => [
                 'response.headers' => $event->headers,
                 'response.payload' => $this->truncatePayload($event->payload),
-                'latency' => $event->latency,
+                'latencyMillis' => $event->latency,
             ]
         ];
 
@@ -81,7 +86,7 @@ trait LoggingTrait
             fn ($value) => !is_null($value)
         );
 
-        $stringifiedEvent = json_encode($debugEvent);
+        $stringifiedEvent = json_encode($debugEvent, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         // There was an error stringifying the event, return to not break execution
         if ($stringifiedEvent !== false) {
@@ -114,7 +119,7 @@ trait LoggingTrait
             fn ($value) => !is_null($value)
         );
 
-        $stringifiedEvent = json_encode($infoEvent);
+        $stringifiedEvent = json_encode($infoEvent, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         // There was an error stringifying the event, return to not break execution
         if ($stringifiedEvent === false) {
