@@ -75,7 +75,7 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
     public function __construct(
         $scope,
         $jsonKey,
-        string $targetAudience = null
+        ?string $targetAudience = null
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
