@@ -188,7 +188,7 @@ class ExternalAccountCredentials implements
      *     @type int $expires_at
      * }
      */
-    private function getImpersonatedAccessToken(string $stsToken, callable $httpHandler = null): array
+    private function getImpersonatedAccessToken(string $stsToken, ?callable $httpHandler = null): array
     {
         if (!isset($this->serviceAccountImpersonationUrl)) {
             throw new InvalidArgumentException(
@@ -231,7 +231,7 @@ class ExternalAccountCredentials implements
      *     @type string $token_type (identity pool only)
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         $stsToken = $this->auth->fetchAuthToken($httpHandler);
 
@@ -281,7 +281,7 @@ class ExternalAccountCredentials implements
      *        token. **Defaults to** `null`.
      * @return string|null
      */
-    public function getProjectId(callable $httpHandler = null, string $accessToken = null)
+    public function getProjectId(?callable $httpHandler = null, ?string $accessToken = null)
     {
         if (isset($this->projectId)) {
             return $this->projectId;

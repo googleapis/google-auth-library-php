@@ -101,7 +101,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      * @param callable|null $unusedHttpHandler not used by this credentials type.
      * @return string Token issuer email
      */
-    public function getClientName(callable $unusedHttpHandler = null)
+    public function getClientName(?callable $unusedHttpHandler = null)
     {
         return $this->impersonatedServiceAccountName;
     }
@@ -119,7 +119,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      *     @type string $id_token
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         return $this->sourceCredentials->fetchAuthToken($httpHandler);
     }
