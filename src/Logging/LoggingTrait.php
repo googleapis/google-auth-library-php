@@ -67,6 +67,10 @@ trait LoggingTrait
      */
     private function logResponse(RpcLogEvent $event): void
     {
+        if (!is_null($event->status)) {
+            $this->logStatus($event);
+        }
+
         $debugEvent = [
             'timestamp' => $event->timestamp,
             'severity' => strtoupper(LogLevel::DEBUG),
@@ -92,10 +96,6 @@ trait LoggingTrait
         if ($stringifiedEvent !== false) {
             $this->logger->debug($stringifiedEvent);
         }
-
-        if (!is_null($event->status)) {
-            $this->logStatus($event);
-        }
     }
 
     /**
@@ -105,7 +105,7 @@ trait LoggingTrait
     {
         $infoEvent = [
             'timestamp' => $event->timestamp,
-            'severity' => LogLevel::INFO,
+            'severity' => strtoupper(LogLevel::INFO),
             'clientId' => $event->clientId,
             'requestId' => $event->requestId ?? null,
             'jsonPayload' => [
