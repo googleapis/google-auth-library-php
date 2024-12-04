@@ -163,7 +163,7 @@ class TestCredentialsLoader extends CredentialsLoader
         return 'test';
     }
 
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         return 'test';
     }

@@ -32,8 +32,8 @@ class FileSourceTest extends TestCase
     public function testFetchSubjectToken(
         string $filename,
         string $expectedToken,
-        string $format = null,
-        string $subjectTokenFieldName = null
+        ?string $format = null,
+        ?string $subjectTokenFieldName = null
     ) {
         $source = new FileSource($filename, $format, $subjectTokenFieldName);
         $subjectToken = $source->fetchSubjectToken();

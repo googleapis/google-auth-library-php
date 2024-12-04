@@ -48,7 +48,7 @@ trait UpdateMetadataTrait
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null
+        ?callable $httpHandler = null
     ) {
         if (isset($metadata[self::AUTH_METADATA_KEY])) {
             // Auth metadata has already been set

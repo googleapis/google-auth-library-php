@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-error_reporting(E_ALL | E_STRICT);
+error_reporting(E_ALL);
 require dirname(__DIR__) . '/vendor/autoload.php';
 date_default_timezone_set('UTC');
 
