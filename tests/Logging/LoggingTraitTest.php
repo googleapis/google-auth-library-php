@@ -69,7 +69,7 @@ class LoggingTraitTest extends BaseTest
     public function testLogResponse()
     {
         $event = $this->getNewLogEvent();
-        $event->headers = ['Thisis' => "a header"];
+        $event->headers = ['Thisis' => 'a header'];
         $this->loggerContainer->logResponseEvent($event);
 
         $buffer = $this->getActualOutput();
