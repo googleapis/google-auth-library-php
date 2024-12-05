@@ -16,23 +16,35 @@
  */
 namespace Google\Auth\HttpHandler;
 
+use Google\Auth\Logging\LoggingTrait;
+use Google\Auth\Logging\RpcLogEvent;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
 class Guzzle6HttpHandler
 {
+    use LoggingTrait;
+
     /**
      * @var ClientInterface
      */
     private $client;
 
     /**
-     * @param ClientInterface $client
+     * @var null|LoggerInterface
      */
-    public function __construct(ClientInterface $client)
+    private $logger;
+
+    /**
+     * @param ClientInterface $client
+     * @param null|LoggerInterface $logger
+     */
+    public function __construct(ClientInterface $client, ?LoggerInterface $logger = null)
     {
         $this->client = $client;
+        $this->logger = $logger;
     }
 
     /**
@@ -44,7 +56,38 @@ class Guzzle6HttpHandler
      */
     public function __invoke(RequestInterface $request, array $options = [])
     {
-        return $this->client->send($request, $options);
+        $requestEvent = null;
+
+        if ($this->logger) {
+            $requestEvent = new RpcLogEvent();
+
+            $requestEvent->method = $request->getMethod();
+            $requestEvent->url = (string) $request->getUri();
+            $requestEvent->headers = $request->getHeaders();
+            $requestEvent->payload = $request->getBody()->getContents();
+            $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
+            $requestEvent->serviceName = $options['serviceName'] ?? null;
+            $requestEvent->clientId = $options['clientId'];
+            $requestEvent->requestId = $options['requestId'] ?? spl_object_id($request);
+
+            $this->logRequest($requestEvent);
+        }
+
+        $response = $this->client->send($request, $options);
+
+        if ($this->logger) {
+            $responseEvent = new RpcLogEvent($requestEvent->milliseconds);
+
+            $responseEvent->headers = $response->getHeaders();
+            $responseEvent->payload = $response->getBody()->getContents();
+            $responseEvent->status = $response->getStatusCode();
+            $responseEvent->clientId = $requestEvent->clientId;
+            $responseEvent->requestId = $requestEvent->requestId;
+
+            $this->logResponse($responseEvent);
+        }
+
+        return $response;
     }
 
     /**
@@ -57,6 +100,41 @@ class Guzzle6HttpHandler
      */
     public function async(RequestInterface $request, array $options = [])
     {
-        return $this->client->sendAsync($request, $options);
+        $requestEvent = null;
+
+        if ($this->logger) {
+            $requestEvent = new RpcLogEvent();
+
+            $requestEvent->method = $request->getMethod();
+            $requestEvent->url = (string) $request->getUri();
+            $requestEvent->headers = $request->getHeaders();
+            $requestEvent->payload = $request->getBody()->getContents();
+            $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
+            $requestEvent->serviceName = $options['serviceName'] ?? null;
+            $requestEvent->clientId = $options['clientId'];
+            $requestEvent->requestId = $options['requestId'] ?? spl_object_id($request);
+
+            $this->logRequest($requestEvent);
+        }
+
+        $promise = $this->client->sendAsync($request, $options);
+
+        if ($this->logger) {
+            $promise->then(function (ResponseInterface $response) use ($requestEvent) {
+                $responseEvent = new RpcLogEvent($requestEvent->milliseconds);
+
+                $responseEvent->headers = $response->getHeaders();
+                $responseEvent->payload = $response->getBody()->getContents();
+                $responseEvent->status = $response->getStatusCode();
+                $responseEvent->clientId = $requestEvent->clientId;
+                $responseEvent->requestId = $requestEvent->requestId;
+
+                $this->logResponse($responseEvent);
+
+                return $response;
+            });
+        }
+
+        return $promise;
     }
 }
