@@ -68,20 +68,18 @@ class LoggingTraitTest extends BaseTest
 
     public function testLogResponse()
     {
-        ob_start();
-
         $event = $this->getNewLogEvent();
+        $event->headers = ['Thisis' => "a header"];
         $this->loggerContainer->logResponseEvent($event);
 
-        $buffer = ob_get_contents();
-        ob_end_clean();
+        $buffer = $this->getActualOutput();
 
         $buffer = str_replace("\n", '', $buffer);
 
-        // The LogResponse method logs two evnets, one for info and one for debug.
-        [$debugEvent, $infoEvent] = explode('}{', $buffer);
-        $debugEvent .= '}';
-        $infoEvent = '{' . $infoEvent;
+        // The LogResponse method logs two events, one for info and one for debug.
+        [$infoEvent, $debugEvent] = explode('}{', $buffer);
+        $infoEvent .= '}';
+        $debugEvent = '{' . $debugEvent;
 
         $parsedDebugEvent = json_decode($debugEvent, true);
         $this->assertEquals($event->clientId, $parsedDebugEvent['clientId']);
