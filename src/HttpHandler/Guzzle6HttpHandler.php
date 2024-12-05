@@ -67,7 +67,7 @@ class Guzzle6HttpHandler
             $requestEvent->payload = $request->getBody()->getContents();
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
             $requestEvent->serviceName = $options['serviceName'] ?? null;
-            $requestEvent->clientId = spl_object_id($this->client);
+            $requestEvent->clientId = $options['clientId'];
             $requestEvent->requestId = $options['requestId'] ?? spl_object_id($request);
 
             $this->logRequest($requestEvent);
@@ -111,8 +111,8 @@ class Guzzle6HttpHandler
             $requestEvent->payload = $request->getBody()->getContents();
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
             $requestEvent->serviceName = $options['serviceName'] ?? null;
-            $requestEvent->clientId = spl_object_id($this->client);
-            $requestEvent->requestId = spl_object_id($request);
+            $requestEvent->clientId = $options['clientId'];
+            $requestEvent->requestId = $options['requestId'] ?? spl_object_id($request);
 
             $this->logRequest($requestEvent);
         }
