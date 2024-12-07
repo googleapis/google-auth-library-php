@@ -669,13 +669,13 @@ class OAuth2 implements FetchAuthTokenInterface
      *        endpoint request.
      * @return array<mixed> the response
      */
-    public function fetchAuthToken(?callable $httpHandler = null, array $headers = [])
+    public function fetchAuthToken(?callable $httpHandler = null, array $headers = [], string $clientId = null)
     {
         if (is_null($httpHandler)) {
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
-        $response = $httpHandler($this->generateCredentialsRequest($httpHandler, $headers));
+        $response = $httpHandler($this->generateCredentialsRequest($httpHandler, $headers), ['clientId' => $clientId ]);
         $credentials = $this->parseTokenResponse($response);
         $this->updateToken($credentials);
         if (isset($credentials['scope'])) {

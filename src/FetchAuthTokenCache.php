@@ -80,13 +80,13 @@ class FetchAuthTokenCache implements
      * @return array<mixed> the response
      * @throws \Exception
      */
-    public function fetchAuthToken(?callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null, ?string $clientId = null)
     {
         if ($cached = $this->fetchAuthTokenFromCache()) {
             return $cached;
         }
 
-        $auth_token = $this->fetcher->fetchAuthToken($httpHandler);
+        $auth_token = $this->fetcher->fetchAuthToken($httpHandler, [], $clientId);
 
         $this->saveAuthTokenInCache($auth_token);
 
@@ -235,7 +235,8 @@ class FetchAuthTokenCache implements
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        ?callable $httpHandler = null
+        ?callable $httpHandler = null,
+        ?string $clientId = null,
     ) {
         if (!$this->fetcher instanceof UpdateMetadataInterface) {
             throw new \RuntimeException(
@@ -263,7 +264,8 @@ class FetchAuthTokenCache implements
         $newMetadata = $this->fetcher->updateMetadata(
             $metadata,
             $authUri,
-            $httpHandler
+            $httpHandler,
+            $clientId
         );
 
         if (!$cached && $token = $this->fetcher->getLastReceivedToken()) {

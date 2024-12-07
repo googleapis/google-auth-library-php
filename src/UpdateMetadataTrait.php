@@ -50,7 +50,8 @@ trait UpdateMetadataTrait
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        ?callable $httpHandler = null
+        ?callable $httpHandler = null,
+        ?string $clientId = null,
     ) {
         $metadata_copy = $metadata;
 
@@ -63,7 +64,7 @@ trait UpdateMetadataTrait
             // Auth metadata has already been set
             return $metadata_copy;
         }
-        $result = $this->fetchAuthToken($httpHandler);
+        $result = $this->fetchAuthToken($httpHandler, [], $clientId);
         if (isset($result['access_token'])) {
             $metadata_copy[self::AUTH_METADATA_KEY] = ['Bearer ' . $result['access_token']];
         } elseif (isset($result['id_token'])) {

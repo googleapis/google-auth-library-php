@@ -141,11 +141,12 @@ class UserRefreshCredentials extends CredentialsLoader implements GetQuotaProjec
      *     @type string $id_token
      * }
      */
-    public function fetchAuthToken(?callable $httpHandler = null, array $headers = [])
+    public function fetchAuthToken(?callable $httpHandler = null, array $headers = [], ?string $clientId = null)
     {
         return $this->auth->fetchAuthToken(
             $httpHandler,
-            $this->applyTokenEndpointMetrics($headers, $this->isIdTokenRequest ? 'it' : 'at')
+            $this->applyTokenEndpointMetrics($headers, $this->isIdTokenRequest ? 'it' : 'at'),
+            $clientId
         );
     }
 
