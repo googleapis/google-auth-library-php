@@ -67,7 +67,7 @@ class Guzzle6HttpHandler
             $requestEvent->payload = $request->getBody()->getContents();
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
             $requestEvent->serviceName = $options['serviceName'] ?? null;
-            $requestEvent->clientId = $options['clientId'];
+            $requestEvent->processId = getmypid();
             $requestEvent->requestId = $options['requestId'] ?? spl_object_id($request);
 
             $this->logRequest($requestEvent);
@@ -81,7 +81,7 @@ class Guzzle6HttpHandler
             $responseEvent->headers = $response->getHeaders();
             $responseEvent->payload = $response->getBody()->getContents();
             $responseEvent->status = $response->getStatusCode();
-            $responseEvent->clientId = $requestEvent->clientId;
+            $responseEvent->processId = $requestEvent->processId;
             $responseEvent->requestId = $requestEvent->requestId;
 
             $this->logResponse($responseEvent);
@@ -111,7 +111,7 @@ class Guzzle6HttpHandler
             $requestEvent->payload = $request->getBody()->getContents();
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
             $requestEvent->serviceName = $options['serviceName'] ?? null;
-            $requestEvent->clientId = $options['clientId'];
+            $requestEvent->processId = getmypid();
             $requestEvent->requestId = $options['requestId'] ?? spl_object_id($request);
 
             $this->logRequest($requestEvent);
@@ -126,7 +126,7 @@ class Guzzle6HttpHandler
                 $responseEvent->headers = $response->getHeaders();
                 $responseEvent->payload = $response->getBody()->getContents();
                 $responseEvent->status = $response->getStatusCode();
-                $responseEvent->clientId = $requestEvent->clientId;
+                $responseEvent->processId = $requestEvent->processId;
                 $responseEvent->requestId = $requestEvent->requestId;
 
                 $this->logResponse($responseEvent);

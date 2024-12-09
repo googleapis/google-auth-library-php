@@ -74,7 +74,7 @@ class RpcLogEvent
     public null|int|string $status = null;
 
     /**
-     * The latency in miliseconds
+     * The latency in milliseconds
      *
      * @var null|int
      */
@@ -102,14 +102,14 @@ class RpcLogEvent
     public null|string $serviceName = null;
 
     /**
-     * The Client Id for tracing
+     * The Process ID for tracing logs
      *
-     * @var null|int $clientId
+     * @var null|int $processId
      */
-    public null|int $clientId = null;
+    public null|int $processId = null;
 
     /**
-     * The Request id for tracing
+     * The Request id for tracing logs
      *
      * @var null|int $requestId;
      */

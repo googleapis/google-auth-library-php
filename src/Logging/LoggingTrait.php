@@ -34,7 +34,7 @@ trait LoggingTrait
         $debugEvent = [
             'timestamp' => $event->timestamp,
             'severity' => strtoupper(LogLevel::DEBUG),
-            'clientId' => $event->clientId,
+            'processId' => $event->processId ?? null,
             'requestId' => $event->requestId ?? null,
         ];
 
@@ -74,7 +74,7 @@ trait LoggingTrait
         $debugEvent = [
             'timestamp' => $event->timestamp,
             'severity' => strtoupper(LogLevel::DEBUG),
-            'clientId' => $event->clientId,
+            'processId' => $event->processId,
             'requestId' => $event->requestId ?? null,
             'jsonPayload' => [
                 'response.headers' => $event->headers,
@@ -106,7 +106,7 @@ trait LoggingTrait
         $infoEvent = [
             'timestamp' => $event->timestamp,
             'severity' => strtoupper(LogLevel::INFO),
-            'clientId' => $event->clientId,
+            'processId' => $event->processId,
             'requestId' => $event->requestId ?? null,
             'jsonPayload' => [
                 'response.status' => $event->status

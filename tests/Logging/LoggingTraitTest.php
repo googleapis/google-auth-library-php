@@ -34,17 +34,14 @@ class LoggingTraitTest extends BaseTest
 
     public function testLogRequest()
     {
-        ob_start();
-
         $event = $this->getNewLogEvent();
         $this->loggerContainer->logRequestEvent($event);
 
-        $buffer = ob_get_contents();
-        ob_end_clean();
+        $buffer = $this->getActualOutput();
         $jsonParsed = json_decode($buffer, true);
 
         $this->assertEquals($event->timestamp, $jsonParsed['timestamp']);
-        $this->assertEquals($event->clientId, $jsonParsed['clientId']);
+        $this->assertEquals($event->processId, $jsonParsed['processId']);
         $this->assertEquals($event->method, $jsonParsed['jsonPayload']['request.method']);
         $this->assertEquals($event->url, $jsonParsed['jsonPayload']['request.url']);
         $this->assertEquals($event->headers, $jsonParsed['jsonPayload']['request.headers']);
@@ -53,14 +50,11 @@ class LoggingTraitTest extends BaseTest
 
     public function testRequestWithoutJwtShouldNotPrintAJwt()
     {
-        ob_start();
-
         $event = $this->getNewLogEvent();
         $event->headers = ['no jwt' => true];
         $this->loggerContainer->logRequestEvent($event);
 
-        $buffer = ob_get_contents();
-        ob_end_clean();
+        $buffer = $this->getActualOutput();
         $jsonParsed = json_decode($buffer, true);
 
         $this->assertArrayNotHasKey('request.jwt', $jsonParsed['jsonPayload']);
@@ -82,7 +76,7 @@ class LoggingTraitTest extends BaseTest
         $debugEvent = '{' . $debugEvent;
 
         $parsedDebugEvent = json_decode($debugEvent, true);
-        $this->assertEquals($event->clientId, $parsedDebugEvent['clientId']);
+        $this->assertEquals($event->processId, $parsedDebugEvent['processId']);
         $this->assertEquals($event->requestId, $parsedDebugEvent['requestId']);
         $this->assertEquals($event->headers, $parsedDebugEvent['jsonPayload']['response.headers']);
 
@@ -93,7 +87,7 @@ class LoggingTraitTest extends BaseTest
     private function getNewLogEvent(): RpcLogEvent
     {
         $event = new RpcLogEvent();
-        $event->clientId = 123;
+        $event->processId = 123;
         $event->method = 'get';
         $event->url = 'test.com';
         $event->headers = [
