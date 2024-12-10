@@ -68,20 +68,10 @@ class LoggingTraitTest extends BaseTest
 
         $buffer = $this->getActualOutput();
 
-        $buffer = str_replace("\n", '', $buffer);
-
-        // The LogResponse method logs two events, one for info and one for debug.
-        [$infoEvent, $debugEvent] = explode('}{', $buffer);
-        $infoEvent .= '}';
-        $debugEvent = '{' . $debugEvent;
-
-        $parsedDebugEvent = json_decode($debugEvent, true);
+        $parsedDebugEvent = json_decode($buffer, true);
         $this->assertEquals($event->processId, $parsedDebugEvent['processId']);
         $this->assertEquals($event->requestId, $parsedDebugEvent['requestId']);
         $this->assertEquals($event->headers, $parsedDebugEvent['jsonPayload']['response.headers']);
-
-        $parsedInfoEvent = json_decode($infoEvent, true);
-        $this->assertEquals($event->status, $parsedInfoEvent['jsonPayload']['response.status']);
     }
 
     private function getNewLogEvent(): RpcLogEvent

@@ -49,8 +49,6 @@ class Guzzle7HttpHandlerTest extends Guzzle6HttpHandlerTest
         $mockLogger = $this->prophesize(StdOutLogger::class);
         $mockLogger->debug(Argument::cetera())
             ->shouldBeCalledTimes(2);
-        $mockLogger->info(Argument::cetera())
-            ->shouldBeCalledTimes(1);
 
         $this->client->sendAsync(Argument::cetera())
             ->willReturn($requestPromise);

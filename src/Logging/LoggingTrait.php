@@ -67,16 +67,13 @@ trait LoggingTrait
      */
     private function logResponse(RpcLogEvent $event): void
     {
-        if (!is_null($event->status)) {
-            $this->logStatus($event);
-        }
-
         $debugEvent = [
             'timestamp' => $event->timestamp,
             'severity' => strtoupper(LogLevel::DEBUG),
             'processId' => $event->processId ?? null,
             'requestId' => $event->requestId ?? null,
             'jsonPayload' => [
+                'response.status' => $event->status,
                 'response.headers' => $event->headers,
                 'response.payload' => $this->truncatePayload($event->payload),
                 'latencyMillis' => $event->latency,
@@ -96,37 +93,6 @@ trait LoggingTrait
         if ($stringifiedEvent !== false) {
             $this->logger->debug($stringifiedEvent);
         }
-    }
-
-    /**
-     * @param RpcLogEvent $event
-     */
-    private function logStatus(RpcLogEvent $event): void
-    {
-        $infoEvent = [
-            'timestamp' => $event->timestamp,
-            'severity' => strtoupper(LogLevel::INFO),
-            'processId' => $event->processId,
-            'requestId' => $event->requestId ?? null,
-            'jsonPayload' => [
-                'response.status' => $event->status
-            ]
-        ];
-
-        $infoEvent = array_filter($infoEvent, fn ($value) => !is_null($value));
-        $infoEvent['jsonPayload'] = array_filter(
-            $infoEvent['jsonPayload'],
-            fn ($value) => !is_null($value)
-        );
-
-        $stringifiedEvent = json_encode($infoEvent, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
-        // There was an error stringifying the event, return to not break execution
-        if ($stringifiedEvent === false) {
-            return;
-        }
-
-        $this->logger->info($stringifiedEvent);
     }
 
     /**
