@@ -67,7 +67,7 @@ class Guzzle6HttpHandler
             $requestEvent->payload = $request->getBody()->getContents();
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
             $requestEvent->serviceName = $options['serviceName'] ?? null;
-            $requestEvent->processId = getmypid();
+            $requestEvent->processId = (int) getmypid();
             $requestEvent->requestId = $options['requestId'] ?? crc32((string) spl_object_id($request) . getmypid());
 
             $this->logRequest($requestEvent);
@@ -111,7 +111,7 @@ class Guzzle6HttpHandler
             $requestEvent->payload = $request->getBody()->getContents();
             $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
             $requestEvent->serviceName = $options['serviceName'] ?? null;
-            $requestEvent->processId = getmypid();
+            $requestEvent->processId = (int) getmypid();
             $requestEvent->requestId = $options['requestId'] ?? crc32((string) spl_object_id($request) . getmypid());
 
             $this->logRequest($requestEvent);
