@@ -793,6 +793,11 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $logger = ApplicationDefaultCredentials::getDefaultLogger();
 
         $this->assertNull($logger);
+
+        putenv($this::SDK_DEBUG_ENV_VAR . '=');
+        $logger = ApplicationDefaultCredentials::getDefaultLogger();
+
+        $this->assertNull($logger);
     }
 
     public function testGetDefaultLoggerRaiseAWarningIfMisconfiguredAndReturnsNull()

@@ -65,7 +65,7 @@ class Guzzle6HttpHandler
         $response = $this->client->send($request, $options);
 
         if ($this->logger) {
-           $this->responseLog($response, $requestEvent);
+            $this->responseLog($response, $requestEvent);
         }
 
         return $response;
@@ -120,6 +120,11 @@ class Guzzle6HttpHandler
         return $requestEvent;
     }
 
+    /**
+     * @internal
+     * @param RequestInterface $request
+     * @param array<mixed> $options
+     */
     public function responseLog(ResponseInterface $response, RpcLogEvent $requestEvent): void
     {
         $responseEvent = new RpcLogEvent($requestEvent->milliseconds);

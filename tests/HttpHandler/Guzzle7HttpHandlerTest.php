@@ -74,11 +74,9 @@ class Guzzle7HttpHandlerTest extends Guzzle6HttpHandlerTest
         $request = new Request('GET', 'https://domain.tld');
         $options = ['key' => 'value'];
 
-        /**
-         * @var LoggerInterface $mockLogger
-         * @var ClientInterface $mockClient
-         */
         $handler = new Guzzle7HttpHandler($this->client->reveal());
         $handler->async($request, $options)->wait();
+
+        $this->expectOutputString('');
     }
 }

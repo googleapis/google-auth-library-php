@@ -126,10 +126,12 @@ trait LoggingTrait
      */
     private function truncatePayload(null|string $payload): null|string
     {
-        if (is_null($payload) || strlen($payload) <= 500) {
+        $maxLength = 500;
+
+        if (is_null($payload) || strlen($payload) <= $maxLength) {
             return $payload;
         }
 
-        return substr($payload, 0, 500) . '...';
+        return substr($payload, 0, $maxLength) . '...';
     }
 }

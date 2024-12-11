@@ -25,11 +25,23 @@ use Psr\Log\LoggerInterface;
 
 class LoggingTraitTest extends BaseTest
 {
-    private MockClassWithLogger $loggerContainer;
+    private $loggerContainer;
 
     public function setUp(): void
     {
-        $this->loggerContainer = new MockClassWithLogger();
+        $this->loggerContainer = new class() {
+            use LoggingTrait {
+                logRequest as public;
+                logResponse as public;
+            }
+
+            private LoggerInterface $logger;
+
+            public function __construct()
+            {
+                $this->logger = new StdOutLogger();
+            }
+        };
     }
 
     public function testLogRequest()
