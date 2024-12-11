@@ -35,6 +35,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     use IamSignerTrait;
 
     private const CRED_TYPE = 'imp';
+    private const IAM_SCOPE = 'https://www.googleapis.com/auth/iam';
 
     /**
      * @var string
@@ -71,10 +72,12 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      *     @type int                            $lifetime The lifetime of the impersonated credentials
      *     @type string[]                       $delegates The delegates to impersonate
      * }
+     * @param string|null $targetAudience The audience to request an ID token.
      */
     public function __construct(
         $scope,
-        $jsonKey
+        $jsonKey,
+        private ?string $targetAudience = null
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -93,9 +96,22 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         if (!array_key_exists('source_credentials', $jsonKey)) {
             throw new LogicException('json key is missing the source_credentials field');
         }
+        if ($scope && $targetAudience) {
+            throw new InvalidArgumentException(
+                'Scope and targetAudience cannot both be supplied'
+            );
+        }
         if (is_array($jsonKey['source_credentials'])) {
             if (!array_key_exists('type', $jsonKey['source_credentials'])) {
                 throw new InvalidArgumentException('json key source credentials are missing the type field');
+            }
+            if (
+                $targetAudience !== null
+                && $jsonKey['source_credentials']['type'] === 'service_account'
+            ) {
+                // Service account tokens MUST request a scope, and as this token is only used to impersonate
+                // an ID token, the narrowest scope we can request is `iam`.
+                $scope = self::IAM_SCOPE;
             }
             $jsonKey['source_credentials'] = CredentialsLoader::makeCredentials($scope, $jsonKey['source_credentials']);
         }
@@ -171,13 +187,19 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             'Content-Type' => 'application/json',
             'Cache-Control' => 'no-store',
             'Authorization' => sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token']),
-        ], 'at');
+        ], $this->isIdTokenRequest() ? 'it' : 'at');
 
-        $body = [
-            'scope' => $this->targetScope,
-            'delegates' => $this->delegates,
-            'lifetime' => sprintf('%ss', $this->lifetime),
-        ];
+        $body = match ($this->isIdTokenRequest()) {
+            true => [
+                'audience' => $this->targetAudience,
+                'includeEmail' => true,
+            ],
+            false => [
+                'scope' => $this->targetScope,
+                'delegates' => $this->delegates,
+                'lifetime' => sprintf('%ss', $this->lifetime),
+            ]
+        };
 
         $request = new Request(
             'POST',
@@ -189,10 +211,13 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         $response = $httpHandler($request);
         $body = json_decode((string) $response->getBody(), true);
 
-        return [
-            'access_token' => $body['accessToken'],
-            'expires_at' => strtotime($body['expireTime']),
-        ];
+        return match ($this->isIdTokenRequest()) {
+            true => ['id_token' => $body['token']],
+            false => [
+                'access_token' => $body['accessToken'],
+                'expires_at' => strtotime($body['expireTime']),
+            ]
+        };
     }
 
     /**
@@ -219,5 +244,10 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     protected function getCredType(): string
     {
         return self::CRED_TYPE;
+    }
+
+    private function isIdTokenRequest(): bool
+    {
+        return !is_null($this->targetAudience);
     }
 }
