@@ -2,6 +2,18 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.44.0](https://github.com/googleapis/google-auth-library-php/compare/v1.43.0...v1.44.0) (2024-12-04)
+
+
+### Features
+
+* Add service account impersonation for access tokens ([#586](https://github.com/googleapis/google-auth-library-php/issues/586)) ([ba137b2](https://github.com/googleapis/google-auth-library-php/commit/ba137b2db9ed7ce002cfb4034a1e8d354a85e2fc))
+
+
+### Bug Fixes
+
+* Add support for php 8.4, remove implicit nullable ([#591](https://github.com/googleapis/google-auth-library-php/issues/591)) ([3e1061b](https://github.com/googleapis/google-auth-library-php/commit/3e1061bba19d9340407a9ff70b7b7294c344d17c))
+
 ## [1.43.0](https://github.com/googleapis/google-auth-library-php/compare/v1.42.0...v1.43.0) (2024-11-05)
 
 
