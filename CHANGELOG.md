@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.45.0](https://github.com/googleapis/google-auth-library-php/compare/v1.44.0...v1.45.0) (2024-12-11)
+
+
+### Features
+
+* Add StdOutLogger and LoggingTrait ([#578](https://github.com/googleapis/google-auth-library-php/issues/578)) ([4f793fe](https://github.com/googleapis/google-auth-library-php/commit/4f793fe3e31db8f71a3a0f17ae528a4d93d6bd2a))
+
 ## [1.44.0](https://github.com/googleapis/google-auth-library-php/compare/v1.43.0...v1.44.0) (2024-12-04)
 
 
