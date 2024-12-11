@@ -19,12 +19,10 @@ namespace Google\Auth\Tests\HttpHandler;
 
 use Google\Auth\HttpHandler\Guzzle7HttpHandler;
 use Google\Auth\Logging\StdOutLogger;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
-use Psr\Log\LoggerInterface;
 
 /**
  * @group http-handler
