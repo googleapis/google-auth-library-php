@@ -29,14 +29,14 @@ class RpcLogEvent
      *
      * @var string
      */
-    public readonly string $timestamp;
+    public string $timestamp;
 
     /**
      * The time in milliseconds at time on creation for calculating latency
      *
      * @var float
      */
-    public readonly float $milliseconds;
+    public float $milliseconds;
 
     /**
      * Rest method type
