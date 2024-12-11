@@ -47,7 +47,7 @@ class LoggingTraitTest extends BaseTest
     public function testLogRequest()
     {
         $event = $this->getNewLogEvent();
-        $this->loggerContainer->logRequestEvent($event);
+        $this->loggerContainer->logRequest($event);
 
         $buffer = $this->getActualOutput();
         $jsonParsed = json_decode($buffer, true);
@@ -64,7 +64,7 @@ class LoggingTraitTest extends BaseTest
     {
         $event = $this->getNewLogEvent();
         $event->headers = ['no jwt' => true];
-        $this->loggerContainer->logRequestEvent($event);
+        $this->loggerContainer->logRequest($event);
 
         $buffer = $this->getActualOutput();
         $jsonParsed = json_decode($buffer, true);
@@ -76,7 +76,7 @@ class LoggingTraitTest extends BaseTest
     {
         $event = $this->getNewLogEvent();
         $event->headers = ['Thisis' => 'a header'];
-        $this->loggerContainer->logResponseEvent($event);
+        $this->loggerContainer->logResponse($event);
 
         $buffer = $this->getActualOutput();
 
@@ -105,26 +105,5 @@ class LoggingTraitTest extends BaseTest
         $event->latency = 555;
 
         return $event;
-    }
-}
-
-class MockClassWithLogger
-{
-    use LoggingTrait;
-    private LoggerInterface $logger;
-
-    public function __construct()
-    {
-        $this->logger = new StdOutLogger();
-    }
-
-    public function logRequestEvent(RpcLogEvent $event): void
-    {
-        $this->logRequest($event);
-    }
-
-    public function logResponseEvent(RpcLogEvent $event): void
-    {
-        $this->logResponse($event);
     }
 }
