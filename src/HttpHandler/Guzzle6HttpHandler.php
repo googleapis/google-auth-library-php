@@ -101,6 +101,8 @@ class Guzzle6HttpHandler
 
     /**
      * @internal
+     * @param RequestInterface $request
+     * @param array<mixed> $options
      */
     public function requestLog(RequestInterface $request, array $options): RpcLogEvent
     {
@@ -122,8 +124,6 @@ class Guzzle6HttpHandler
 
     /**
      * @internal
-     * @param RequestInterface $request
-     * @param array<mixed> $options
      */
     public function responseLog(ResponseInterface $response, RpcLogEvent $requestEvent): void
     {
