@@ -72,7 +72,7 @@ use Psr\Log\LoggerInterface;
  */
 class ApplicationDefaultCredentials
 {
-    private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_PHP_LOGGING';
+    private const SDK_DEBUG_ENV_VAR = 'GOOGLE_SDK_PHP_LOGGING';
 
     /**
      * @deprecated
@@ -333,10 +333,10 @@ class ApplicationDefaultCredentials
      */
     public static function getDefaultLogger(): null|LoggerInterface
     {
-        $loggingFlag = getenv(self::SDK_DEBUG_FLAG);
+        $loggingFlag = getenv(self::SDK_DEBUG_ENV_VAR);
 
         // Env var is not set
-        if (!$loggingFlag) {
+        if (empty($loggingFlag)) {
             return null;
         }
 
@@ -345,7 +345,7 @@ class ApplicationDefaultCredentials
         // Env Var is not true
         if ($loggingFlag !== 'true') {
             if ($loggingFlag !== 'false') {
-                trigger_error('The ' . self::SDK_DEBUG_FLAG . ' is set, but it is set to another value than false or true. Logging is disabled');
+                trigger_error('The ' . self::SDK_DEBUG_ENV_VAR . ' is set, but it is set to another value than false or true. Logging is disabled');
             }
 
             return null;

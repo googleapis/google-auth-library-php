@@ -59,32 +59,13 @@ class Guzzle6HttpHandler
         $requestEvent = null;
 
         if ($this->logger) {
-            $requestEvent = new RpcLogEvent();
-
-            $requestEvent->method = $request->getMethod();
-            $requestEvent->url = (string) $request->getUri();
-            $requestEvent->headers = $request->getHeaders();
-            $requestEvent->payload = $request->getBody()->getContents();
-            $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
-            $requestEvent->serviceName = $options['serviceName'] ?? null;
-            $requestEvent->processId = (int) getmypid();
-            $requestEvent->requestId = $options['requestId'] ?? crc32((string) spl_object_id($request) . getmypid());
-
-            $this->logRequest($requestEvent);
+            $requestEvent = $this->requestLog($request, $options);
         }
 
         $response = $this->client->send($request, $options);
 
         if ($this->logger) {
-            $responseEvent = new RpcLogEvent($requestEvent->milliseconds);
-
-            $responseEvent->headers = $response->getHeaders();
-            $responseEvent->payload = $response->getBody()->getContents();
-            $responseEvent->status = $response->getStatusCode();
-            $responseEvent->processId = $requestEvent->processId;
-            $responseEvent->requestId = $requestEvent->requestId;
-
-            $this->logResponse($responseEvent);
+           $this->responseLog($response, $requestEvent);
         }
 
         return $response;
@@ -103,38 +84,52 @@ class Guzzle6HttpHandler
         $requestEvent = null;
 
         if ($this->logger) {
-            $requestEvent = new RpcLogEvent();
-
-            $requestEvent->method = $request->getMethod();
-            $requestEvent->url = (string) $request->getUri();
-            $requestEvent->headers = $request->getHeaders();
-            $requestEvent->payload = $request->getBody()->getContents();
-            $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
-            $requestEvent->serviceName = $options['serviceName'] ?? null;
-            $requestEvent->processId = (int) getmypid();
-            $requestEvent->requestId = $options['requestId'] ?? crc32((string) spl_object_id($request) . getmypid());
-
-            $this->logRequest($requestEvent);
+            $requestEvent = $this->requestLog($request, $options);
         }
 
         $promise = $this->client->sendAsync($request, $options);
 
         if ($this->logger) {
             $promise->then(function (ResponseInterface $response) use ($requestEvent) {
-                $responseEvent = new RpcLogEvent($requestEvent->milliseconds);
-
-                $responseEvent->headers = $response->getHeaders();
-                $responseEvent->payload = $response->getBody()->getContents();
-                $responseEvent->status = $response->getStatusCode();
-                $responseEvent->processId = $requestEvent->processId;
-                $responseEvent->requestId = $requestEvent->requestId;
-
-                $this->logResponse($responseEvent);
-
+                $this->responseLog($response, $requestEvent);
                 return $response;
             });
         }
 
         return $promise;
+    }
+
+    /**
+     * @internal
+     */
+    public function requestLog(RequestInterface $request, array $options): RpcLogEvent
+    {
+        $requestEvent = new RpcLogEvent();
+
+        $requestEvent->method = $request->getMethod();
+        $requestEvent->url = (string) $request->getUri();
+        $requestEvent->headers = $request->getHeaders();
+        $requestEvent->payload = $request->getBody()->getContents();
+        $requestEvent->retryAttempt = $options['retryAttempt'] ?? null;
+        $requestEvent->serviceName = $options['serviceName'] ?? null;
+        $requestEvent->processId = (int) getmypid();
+        $requestEvent->requestId = $options['requestId'] ?? crc32((string) spl_object_id($request) . getmypid());
+
+        $this->logRequest($requestEvent);
+
+        return $requestEvent;
+    }
+
+    public function responseLog(ResponseInterface $response, RpcLogEvent $requestEvent): void
+    {
+        $responseEvent = new RpcLogEvent($requestEvent->milliseconds);
+
+        $responseEvent->headers = $response->getHeaders();
+        $responseEvent->payload = $response->getBody()->getContents();
+        $responseEvent->status = $response->getStatusCode();
+        $responseEvent->processId = $requestEvent->processId;
+        $responseEvent->requestId = $requestEvent->requestId;
+
+        $this->logResponse($responseEvent);
     }
 }

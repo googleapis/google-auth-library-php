@@ -49,7 +49,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     private $targetAudience = 'a target audience';
     private $quotaProject = 'a-quota-project';
     private $originalServiceAccount;
-    private const SDK_DEBUG_FLAG = 'GOOGLE_SDK_PHP_LOGGING';
+    private const SDK_DEBUG_ENV_VAR = 'GOOGLE_SDK_PHP_LOGGING';
 
     public function testGetCredentialsFailsIfEnvSpecifiesNonExistentFile()
     {
@@ -777,19 +777,19 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetDefaultLoggerReturnStdOutLoggerIfEnvVarIsPresent()
     {
-        putenv($this::SDK_DEBUG_FLAG . '=true');
+        putenv($this::SDK_DEBUG_ENV_VAR . '=true');
         $logger = ApplicationDefaultCredentials::getDefaultLogger();
         $this->assertTrue($logger instanceof StdOutLogger);
     }
 
     public function testGetDefaultLoggerReturnsNullIfNotEnvVar()
     {
-        putenv($this::SDK_DEBUG_FLAG . '=false');
+        putenv($this::SDK_DEBUG_ENV_VAR . '=false');
         $logger = ApplicationDefaultCredentials::getDefaultLogger();
 
         $this->assertNull($logger);
 
-        putenv($this::SDK_DEBUG_FLAG . '=0');
+        putenv($this::SDK_DEBUG_ENV_VAR . '=0');
         $logger = ApplicationDefaultCredentials::getDefaultLogger();
 
         $this->assertNull($logger);
@@ -797,7 +797,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetDefaultLoggerRaiseAWarningIfMisconfiguredAndReturnsNull()
     {
-        putenv($this::SDK_DEBUG_FLAG . '=invalid');
+        putenv($this::SDK_DEBUG_ENV_VAR . '=invalid');
         $this->expectException(Notice::class);
         $logger = ApplicationDefaultCredentials::getDefaultLogger();
 
