@@ -69,6 +69,12 @@ use Psr\Log\LoggerInterface;
  *
  * $res = $client->get('myproject/taskqueues/myqueue');
  * ```
+ *
+ * **Important**: If you accept a credential configuration (credential JSON/File/Stream) from an
+ * external source for authentication to Google Cloud Platform, you must validate it before
+ * providing it to any Google API or library. Providing an unvalidated credential configuration to
+ * Google APIs can compromise the security of your systems and data. For more information
+ * {@see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials}
  */
 class ApplicationDefaultCredentials
 {
