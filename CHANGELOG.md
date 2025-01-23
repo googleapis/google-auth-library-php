@@ -2,6 +2,54 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.45.0](https://github.com/googleapis/google-auth-library-php/compare/v1.44.0...v1.45.0) (2024-12-11)
+
+
+### Features
+
+* Add StdOutLogger and LoggingTrait ([#578](https://github.com/googleapis/google-auth-library-php/issues/578)) ([4f793fe](https://github.com/googleapis/google-auth-library-php/commit/4f793fe3e31db8f71a3a0f17ae528a4d93d6bd2a))
+
+## [1.44.0](https://github.com/googleapis/google-auth-library-php/compare/v1.43.0...v1.44.0) (2024-12-04)
+
+
+### Features
+
+* Add service account impersonation for access tokens ([#586](https://github.com/googleapis/google-auth-library-php/issues/586)) ([ba137b2](https://github.com/googleapis/google-auth-library-php/commit/ba137b2db9ed7ce002cfb4034a1e8d354a85e2fc))
+
+
+### Bug Fixes
+
+* Add support for php 8.4, remove implicit nullable ([#591](https://github.com/googleapis/google-auth-library-php/issues/591)) ([3e1061b](https://github.com/googleapis/google-auth-library-php/commit/3e1061bba19d9340407a9ff70b7b7294c344d17c))
+
+## [1.43.0](https://github.com/googleapis/google-auth-library-php/compare/v1.42.0...v1.43.0) (2024-11-05)
+
+
+### Features
+
+* Add ID tokens for user refresh credentials ([#468](https://github.com/googleapis/google-auth-library-php/issues/468)) ([1601efc](https://github.com/googleapis/google-auth-library-php/commit/1601efc2f1f362437beda2c4212f1f471568dee6))
+* Call IamCredentials endpoint for generating ID tokens outside GDU ([#581](https://github.com/googleapis/google-auth-library-php/issues/581)) ([2d7d03d](https://github.com/googleapis/google-auth-library-php/commit/2d7d03d0cac08c8d6e03276f14ef260ccb980b7c))
+
+
+### Bug Fixes
+
+* Compatability with php 8.4 ([#584](https://github.com/googleapis/google-auth-library-php/issues/584)) ([da1f02a](https://github.com/googleapis/google-auth-library-php/commit/da1f02a8dcbbbafd325cf0c9ac3462a72eb387fb))
+* Update universe domain URI ([#572](https://github.com/googleapis/google-auth-library-php/issues/572)) ([6b00b66](https://github.com/googleapis/google-auth-library-php/commit/6b00b66f9a879b545ffb6f2416cc2add88be3be1))
+
+## [1.42.0](https://github.com/googleapis/google-auth-library-php/compare/v1.41.0...v1.42.0) (2024-08-26)
+
+
+### Features
+
+* Add a file system cache class ([#571](https://github.com/googleapis/google-auth-library-php/issues/571)) ([8555cb0](https://github.com/googleapis/google-auth-library-php/commit/8555cb063caa5571f80d9605969411b894ee6eb0))
+* Private key getters on service account credentials (https://github.com/googleapis/google-auth-library-php/pull/557) ([d2fa07b](https://github.com/googleapis/google-auth-library-php/commit/d2fa07b8a8edfa65c1bd732dac794c070e3451bc))
+
+## [1.41.0](https://github.com/googleapis/google-auth-library-php/compare/v1.40.0...v1.41.0) (2024-07-10)
+
+
+### Features
+
+* Change getCacheKey implementation for more unique keys ([#560](https://github.com/googleapis/google-auth-library-php/issues/560)) ([a35c4db](https://github.com/googleapis/google-auth-library-php/commit/a35c4dbb52e01faedacd09d23634939ced4a8a63))
+
 ## [1.40.0](https://github.com/googleapis/google-auth-library-php/compare/v1.39.0...v1.40.0) (2024-05-31)
 
 

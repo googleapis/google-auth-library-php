@@ -10,7 +10,7 @@ if (!class_exists(COM::class)) {
         {
             //do nothing
         }
-        
+
         public function regRead(string $key): string
         {
             // do nothing

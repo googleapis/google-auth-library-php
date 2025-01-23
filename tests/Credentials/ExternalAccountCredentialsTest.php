@@ -521,6 +521,63 @@ class ExternalAccountCredentialsTest extends TestCase
         $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
     }
 
+    public function testFileSourceCacheKey()
+    {
+        $this->baseCreds['credential_source'] = ['file' => 'fakeFile'];
+        $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
+        $cacheKey = $credentials->getCacheKey();
+        $expectedKey = 'fakeFile.scope1...';
+        $this->assertEquals($expectedKey, $cacheKey);
+    }
+
+    public function testAWSSourceCacheKey()
+    {
+        $this->baseCreds['credential_source'] = [
+            'environment_id' => 'aws1',
+            'regional_cred_verification_url' => 'us-east',
+            'region_url' => 'aws.us-east.com',
+            'url' => 'aws.us-east.token.com',
+            'imdsv2_session_token_url' => '12345'
+        ];
+        $this->baseCreds['audience'] = 'audience1';
+        $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
+        $cacheKey = $credentials->getCacheKey();
+        $expectedKey = '12345.aws.us-east.token.com.aws.us-east.com.us-east.audience1...';
+        $this->assertEquals($expectedKey, $cacheKey);
+    }
+
+    public function testUrlSourceCacheKey()
+    {
+        $this->baseCreds['credential_source'] = [
+            'url' => 'fakeUrl',
+            'format' => [
+                'type' => 'json',
+                'subject_token_field_name' => 'keyShouldBeHere'
+            ]
+        ];
+
+        $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
+        $cacheKey = $credentials->getCacheKey();
+        $expectedKey = 'fakeUrl.scope1...';
+        $this->assertEquals($expectedKey, $cacheKey);
+    }
+
+    public function testExecutableSourceCacheKey()
+    {
+        $this->baseCreds['credential_source'] = [
+            'executable' => [
+                'command' => 'ls -al',
+                'output_file' => './output.txt'
+            ]
+        ];
+
+        $credentials = new ExternalAccountCredentials('scope1', $this->baseCreds);
+        $cacheKey = $credentials->getCacheKey();
+
+        $expectedCacheKey = 'ls -al../output.txt.scope1...';
+        $this->assertEquals($cacheKey, $expectedCacheKey);
+    }
+
     /**
      * @runInSeparateProcess
      */

@@ -18,6 +18,11 @@
 namespace Google\Auth\Tests\HttpHandler;
 
 use Google\Auth\HttpHandler\Guzzle7HttpHandler;
+use Google\Auth\Logging\StdOutLogger;
+use GuzzleHttp\Promise\Promise;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use Prophecy\Argument;
 
 /**
  * @group http-handler
@@ -30,5 +35,46 @@ class Guzzle7HttpHandlerTest extends Guzzle6HttpHandlerTest
 
         $this->client = $this->prophesize('GuzzleHttp\ClientInterface');
         $this->handler = new Guzzle7HttpHandler($this->client->reveal());
+    }
+
+    public function testLoggerGetsCalledIfLoggerIsPassed()
+    {
+        $requestPromise = new Promise(function () use (&$requestPromise) {
+            $response = new Response(200);
+            $requestPromise->resolve($response);
+        });
+
+        $mockLogger = $this->prophesize(StdOutLogger::class);
+        $mockLogger->debug(Argument::cetera())
+            ->shouldBeCalledTimes(2);
+
+        $this->client->sendAsync(Argument::cetera())
+            ->willReturn($requestPromise);
+
+        $request = new Request('GET', 'https://domain.tld');
+        $options = ['key' => 'value'];
+
+        $handler = new Guzzle7HttpHandler($this->client->reveal(), $mockLogger->reveal());
+        $handler->async($request, $options)->wait();
+    }
+
+    public function testLoggerDoesNotGetsCalledIfLoggerIsNotPassed()
+    {
+        $requestPromise = new Promise(function () use (&$requestPromise) {
+            $response = new Response(200);
+            $requestPromise->resolve($response);
+        });
+
+        $this->client->sendAsync(Argument::cetera())
+            ->willReturn($requestPromise)
+            ->shouldBeCalledTimes(1);
+
+        $request = new Request('GET', 'https://domain.tld');
+        $options = ['key' => 'value'];
+
+        $handler = new Guzzle7HttpHandler($this->client->reveal());
+        $handler->async($request, $options)->wait();
+
+        $this->expectOutputString('');
     }
 }

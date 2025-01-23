@@ -23,6 +23,7 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
@@ -54,7 +55,7 @@ class ServiceAccountCredentialsTest extends TestCase
         );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey(),
+            $testJson['client_email'] . '.' . implode(' ', $scope),
             $sa->getCacheKey()
         );
     }
@@ -71,7 +72,7 @@ class ServiceAccountCredentialsTest extends TestCase
         );
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
+            $testJson['client_email'] . '.' . implode(' ', $scope) . '.' . $sub,
             $sa->getCacheKey()
         );
     }
@@ -90,7 +91,7 @@ class ServiceAccountCredentialsTest extends TestCase
 
         $o = new OAuth2(['scope' => $scope]);
         $this->assertSame(
-            $testJson['client_email'] . ':' . $o->getCacheKey() . ':' . $sub,
+            $testJson['client_email'] . '.' . implode(' ', $scope) . '.' . $sub,
             $sa->getCacheKey()
         );
     }
@@ -307,6 +308,40 @@ class ServiceAccountCredentialsTest extends TestCase
         $this->assertEquals(1, $timesCalled);
     }
 
+    public function testShouldUseIamWhenTargetAudienceAndUniverseDomainIsSet()
+    {
+        $testJson = $this->createTestJson();
+        $testJson['universe_domain'] = 'abc.xyz';
+
+        $timesCalled = 0;
+        $httpHandler = function (Request $request) use (&$timesCalled) {
+            $timesCalled++;
+
+            // Verify Request
+            $this->assertStringContainsString(':generateIdToken', $request->getUri());
+            $json = json_decode($request->getBody(), true);
+            $this->assertArrayHasKey('audience', $json);
+            $this->assertEquals('a target audience', $json['audience']);
+
+            // Verify JWT Bearer Token
+            $jwt = str_replace('Bearer ', '', $request->getHeaderLine('Authorization'));
+            list($header, $payload, $sig) = explode('.', $jwt);
+            $jwtParams = json_decode(base64_decode($payload), true);
+            $this->assertArrayHasKey('iss', $jwtParams);
+            $this->assertEquals('test@example.com', $jwtParams['iss']);
+
+            // Verify header contains the auth headers
+            $parts = explode(' ', $request->getHeaderLine('x-goog-api-client'));
+            $this->assertContains('auth-request-type/it', $parts);
+
+            // return expected IAM ID token response
+            return new Psr7\Response(200, [], json_encode(['token' => 'idtoken12345']));
+        };
+        $sa = new ServiceAccountCredentials(null, $testJson, null, 'a target audience');
+        $this->assertEquals('idtoken12345', $sa->fetchAuthToken($httpHandler)['id_token']);
+        $this->assertEquals(1, $timesCalled);
+    }
+
     public function testShouldBeOAuthRequestWhenSubIsSet()
     {
         $testJson = $this->createTestJson();
@@ -367,6 +402,13 @@ class ServiceAccountCredentialsTest extends TestCase
         $testJson = $this->createTestJson();
         $sa = new ServiceAccountCredentials('scope/1', $testJson);
         $this->assertEquals($testJson['client_email'], $sa->getClientName());
+    }
+
+    public function testReturnsPrivateKey()
+    {
+        $testJson = $this->createTestJson();
+        $sa = new ServiceAccountCredentials('scope/1', $testJson);
+        $this->assertEquals($testJson['private_key'], $sa->getPrivateKey());
     }
 
     public function testGetProjectId()

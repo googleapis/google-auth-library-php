@@ -98,9 +98,7 @@ class ExternalAccountCredentials implements
             );
         }
 
-        if (array_key_exists('service_account_impersonation_url', $jsonKey)) {
-            $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'];
-        }
+        $this->serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'] ?? null;
 
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
         $this->workforcePoolUserProject = $jsonKey['workforce_pool_user_project'] ?? null;
@@ -213,7 +211,7 @@ class ExternalAccountCredentials implements
 
     /**
      * @param string $stsToken
-     * @param callable $httpHandler
+     * @param callable|null $httpHandler
      *
      * @return array<mixed> {
      *     A set of auth related metadata, containing the following
@@ -222,7 +220,7 @@ class ExternalAccountCredentials implements
      *     @type int $expires_at
      * }
      */
-    private function getImpersonatedAccessToken(string $stsToken, callable $httpHandler = null): array
+    private function getImpersonatedAccessToken(string $stsToken, ?callable $httpHandler = null): array
     {
         if (!isset($this->serviceAccountImpersonationUrl)) {
             throw new InvalidArgumentException(
@@ -253,7 +251,9 @@ class ExternalAccountCredentials implements
     }
 
     /**
-     * @param callable $httpHandler
+     * @param callable|null $httpHandler
+     * @param array<mixed> $headers [optional] Metrics headers to be inserted
+     *     into the token endpoint request present.
      *
      * @return array<mixed> {
      *     A set of auth related metadata, containing the following
@@ -265,9 +265,9 @@ class ExternalAccountCredentials implements
      *     @type string $token_type (identity pool only)
      * }
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null, array $headers = [])
     {
-        $stsToken = $this->auth->fetchAuthToken($httpHandler);
+        $stsToken = $this->auth->fetchAuthToken($httpHandler, $headers);
 
         if (isset($this->serviceAccountImpersonationUrl)) {
             return $this->getImpersonatedAccessToken($stsToken['access_token'], $httpHandler);
@@ -276,9 +276,27 @@ class ExternalAccountCredentials implements
         return $stsToken;
     }
 
-    public function getCacheKey()
+    /**
+     * Get the cache token key for the credentials.
+     * The cache token key format depends on the type of source
+     * The format for the cache key one of the following:
+     * FetcherCacheKey.Scope.[ServiceAccount].[TokenType].[WorkforcePoolUserProject]
+     * FetcherCacheKey.Audience.[ServiceAccount].[TokenType].[WorkforcePoolUserProject]
+     *
+     * @return ?string;
+     */
+    public function getCacheKey(): ?string
     {
-        return $this->auth->getCacheKey();
+        $scopeOrAudience = $this->auth->getAudience();
+        if (!$scopeOrAudience) {
+            $scopeOrAudience = $this->auth->getScope();
+        }
+
+        return $this->auth->getSubjectTokenFetcher()->getCacheKey() .
+            '.' . $scopeOrAudience .
+            '.' . ($this->serviceAccountImpersonationUrl ?? '') .
+            '.' . ($this->auth->getSubjectTokenType() ?? '') .
+            '.' . ($this->workforcePoolUserProject ?? '');
     }
 
     public function getLastReceivedToken()
@@ -309,13 +327,13 @@ class ExternalAccountCredentials implements
     /**
      * Get the project ID.
      *
-     * @param callable $httpHandler Callback which delivers psr7 request
-     * @param string $accessToken The access token to use to sign the blob. If
+     * @param callable|null $httpHandler Callback which delivers psr7 request
+     * @param string|null $accessToken The access token to use to sign the blob. If
      *        provided, saves a call to the metadata server for a new access
      *        token. **Defaults to** `null`.
      * @return string|null
      */
-    public function getProjectId(callable $httpHandler = null, string $accessToken = null)
+    public function getProjectId(?callable $httpHandler = null, ?string $accessToken = null)
     {
         if (isset($this->projectId)) {
             return $this->projectId;

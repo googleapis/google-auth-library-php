@@ -62,12 +62,12 @@ class AccessToken
     private JWT $jwt;
 
     /**
-     * @param callable $httpHandler [optional] An HTTP Handler to deliver PSR-7 requests.
-     * @param CacheItemPoolInterface $cache [optional] A PSR-6 compatible cache implementation.
+     * @param callable|null $httpHandler [optional] An HTTP Handler to deliver PSR-7 requests.
+     * @param CacheItemPoolInterface|null $cache [optional] A PSR-6 compatible cache implementation.
      */
     public function __construct(
-        callable $httpHandler = null,
-        CacheItemPoolInterface $cache = null,
+        ?callable $httpHandler = null,
+        ?CacheItemPoolInterface $cache = null,
         JWT $jwt = null
     ) {
         $this->httpHandler = $httpHandler
