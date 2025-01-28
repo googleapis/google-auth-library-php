@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.45.2](https://github.com/googleapis/google-auth-library-php/compare/v1.45.1...v1.45.2) (2025-01-28)
+
+
+### Bug Fixes
+
+* Minor changes to allow for refdoc regeneration ([#600](https://github.com/googleapis/google-auth-library-php/issues/600)) ([608115c](https://github.com/googleapis/google-auth-library-php/commit/608115cd17fda4498ddb7d22a47ee06316e0d0cf))
+
 ## [1.45.0](https://github.com/googleapis/google-auth-library-php/compare/v1.44.0...v1.45.0) (2024-12-11)
 
 
