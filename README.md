@@ -41,6 +41,14 @@ Application Default Credentials provides a simple way to get authorization
 credentials for use in calling Google APIs, and is
 the recommended approach to authorize calls to Cloud APIs.
 
+**Important**: If you accept a credential configuration (credential JSON/File/Stream) from an
+external source for authentication to Google Cloud Platform, you must validate it before providing
+it to any Google API or library. Providing an unvalidated credential configuration to Google APIs
+can compromise the security of your systems and data. For more information, refer to
+[Validate credential configurations from external sources][externally-sourced-credentials].
+
+[externally-sourced-credentials]: https://cloud.google.com/docs/authentication/external/externally-sourced-credentials
+
 ### Set up ADC
 
 To use ADC, you must set it up by providing credentials.
@@ -302,7 +310,7 @@ $middleware = ApplicationDefaultCredentials::getCredentials($scope, cache: $memo
 
 ### FileSystemCacheItemPool Cache
 The `FileSystemCacheItemPool` class is a `PSR-6` compliant cache that stores its
-serialized objects on disk, caching data between processes and making it possible 
+serialized objects on disk, caching data between processes and making it possible
 to use data between different requests.
 
 ```php
