@@ -52,6 +52,7 @@ class ExternalAccountCredentials implements
     private ?string $serviceAccountImpersonationUrl;
     private ?string $workforcePoolUserProject;
     private ?string $projectId;
+    /** @var array<mixed> */
     private ?array $lastImpersonatedAccessToken;
     private string $universeDomain;
 
