@@ -293,7 +293,7 @@ class ExternalAccountCredentialsTest extends TestCase
                     $this->assertEquals('service-account-impersonation-url.com', (string) $request->getUri());
                     $requestBody = json_decode((string) $request->getBody(), true);
                     $this->assertEquals(['a-scope'], $requestBody['scope']);
-                    $responseBody = json_encode(['accessToken' => 'def', 'expireTime' => $expiry]);
+                    $responseBody = json_encode(['accessToken' => 'ghi', 'expireTime' => $expiry]);
                     break;
             }
 
@@ -311,8 +311,11 @@ class ExternalAccountCredentialsTest extends TestCase
 
         $authToken = $creds->fetchAuthToken($httpHandler);
         $this->assertArrayHasKey('access_token', $authToken);
-        $this->assertEquals('def', $authToken['access_token']);
+        $this->assertEquals('ghi', $authToken['access_token']);
         $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
+
+        // test that getLastReceivedToken() returns the correct token
+        $this->assertEquals($authToken, $creds->getLastReceivedToken());
     }
 
     public function testGetQuotaProject()
