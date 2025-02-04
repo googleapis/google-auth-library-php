@@ -48,6 +48,7 @@ class ExternalAccountCredentials implements
     private const CLOUD_RESOURCE_MANAGER_URL = 'https://cloudresourcemanager.UNIVERSE_DOMAIN/v1/projects/%s';
 
     private OAuth2 $auth;
+    private ?string $lastImpersonatedAccessToken = null;
     private ?string $quotaProject;
     private ?string $serviceAccountImpersonationUrl;
     private ?string $workforcePoolUserProject;
@@ -267,10 +268,17 @@ class ExternalAccountCredentials implements
      */
     public function fetchAuthToken(?callable $httpHandler = null, array $headers = [])
     {
+        $this->lastImpersonatedAccessToken = null;
+
         $stsToken = $this->auth->fetchAuthToken($httpHandler, $headers);
 
         if (isset($this->serviceAccountImpersonationUrl)) {
-            return $this->getImpersonatedAccessToken($stsToken['access_token'], $httpHandler);
+            $this->lastImpersonatedAccessToken = $this->getImpersonatedAccessToken(
+                $stsToken['access_token'],
+                $httpHandler
+            );
+
+            return $this->lastImpersonatedAccessToken;
         }
 
         return $stsToken;
@@ -301,7 +309,7 @@ class ExternalAccountCredentials implements
 
     public function getLastReceivedToken()
     {
-        return $this->auth->getLastReceivedToken();
+        return $this->lastImpersonatedAccessToken ?? $this->auth->getLastReceivedToken();
     }
 
     /**
