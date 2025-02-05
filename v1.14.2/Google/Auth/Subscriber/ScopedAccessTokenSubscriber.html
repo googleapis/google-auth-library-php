@@ -387,18 +387,18 @@
         </div>
                 <div id="page-content">
     <div class="page-header">
-        <h1>ScopedAccessTokenSubscriber    
+        <h1>ScopedAccessTokenSubscriber
             </h1>
     </div>
 
-    
+
     <p>        class
     <strong>ScopedAccessTokenSubscriber</strong>        implements        <abbr title="GuzzleHttp\Event\SubscriberInterface">SubscriberInterface</abbr>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.14.2/src/Subscriber/ScopedAccessTokenSubscriber.php">View source</a>)
 </p>
 
-        
-    
-        
+
+
+
 
             <div class="description">
             <p><p>ScopedAccessTokenSubscriber is a Guzzle Subscriber that adds an Authorization
@@ -407,10 +407,10 @@ string or an array of strings, as its value.  If provided, a cache will be
 used to preserve the access token for a given lifetime.</p>
 <p>Requests will be accessed with the authorization header:</p>
 <p>'authorization' 'Bearer <access token obtained from the closure>'</p></p>        </div>
-            
+
                 <h2>Traits</h2>
 
-        
+
     <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-6">
@@ -418,7 +418,7 @@ used to preserve the access token for a given lifetime.</p>
                 <div class="col-md-6"></div>
             </div>
             </div>
-    
+
             <h2>Constants</h2>    <table class="table table-condensed">
                     <tr>
                 <td>
@@ -431,18 +431,18 @@ used to preserve the access token for a given lifetime.</p>
             </tr>
             </table>
 
-    
-    
+
+
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(callable $tokenFunc, array|string $scopes, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
-        
+
                                             <p><p>Creates a new ScopedAccessTokenSubscriber.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -452,18 +452,18 @@ used to preserve the access token for a given lifetime.</p>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getEvents">getEvents</a>()
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method_onBefore">onBefore</a>(<abbr title="GuzzleHttp\Event\BeforeEvent">BeforeEvent</abbr> $event)
-        
+
                                             <p><p>Updates the request with an Authorization header when auth is 'scoped'.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -476,16 +476,16 @@ used to preserve the access token for a given lifetime.</p>
                     <div class="method-item">
                     <h3 id="method___construct">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.14.2/src/Subscriber/ScopedAccessTokenSubscriber.php#L72">at line 72</a></div>
-        <code>                    
+        <code>
     <strong>__construct</strong>(callable $tokenFunc, array|string $scopes, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Creates a new ScopedAccessTokenSubscriber.</p></p>                        
+                            <p><p>Creates a new ScopedAccessTokenSubscriber.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -513,10 +513,10 @@ used to preserve the access token for a given lifetime.</p>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
@@ -528,16 +528,16 @@ used to preserve the access token for a given lifetime.</p>
     <strong>getEvents</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -547,9 +547,9 @@ used to preserve the access token for a given lifetime.</p>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -557,13 +557,13 @@ used to preserve the access token for a given lifetime.</p>
                     <div class="method-item">
                     <h3 id="method_onBefore">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.14.2/src/Subscriber/ScopedAccessTokenSubscriber.php#L133">at line 133</a></div>
-        <code>                    
+        <code>
     <strong>onBefore</strong>(<abbr title="GuzzleHttp\Event\BeforeEvent">BeforeEvent</abbr> $event)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Updates the request with an Authorization header when auth is 'scoped'.</p></p>                <p><p>E.g this could be used to authenticate using the AppEngine AppIdentityService.</p>
@@ -586,7 +586,7 @@ $client = new Client([
 ]);
 $client-&gt;getEmitter()-&gt;attach($subscriber);
 
-$res = $client-&gt;get('myproject/taskqueues/myqueue');</code></pre></p>        
+$res = $client-&gt;get('myproject/taskqueues/myqueue');</code></pre></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -599,20 +599,30 @@ $res = $client-&gt;get('myproject/taskqueues/myqueue');</code></pre></p>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
             </div>
             </div>
 
-    
+
 </div><div id="footer">
         Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
-    </body>
+    <script>
+function doRedirect(url) {
+    matches = url.match(/\/Google\/Auth\/(.*).html/);
+    if (matches) {
+        return window.location = "https://cloud.google.com/php/docs/reference/auth/latest/" + matches[1].replaceAll('/', '.');
+    }
+    return window.location = "https://cloud.google.com/php/docs/reference/auth/latest";
+}
+doRedirect(window.location.href);
+</script>
+</body>
 
 </html>

@@ -387,25 +387,25 @@
         </div>
                 <div id="page-content">
     <div class="page-header">
-        <h1>SignBlobInterface    
+        <h1>SignBlobInterface
             </h1>
     </div>
 
-    
+
     <p>        interface
     <strong>SignBlobInterface</strong>        implements        <a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.12.1/src/SignBlobInterface.php">View source</a>)
 </p>
 
-        
-    
-        
+
+
+
 
             <div class="description">
             <p><p>Describes a class which supports signing arbitrary strings.</p></p>                    </div>
-            
-        
-    
-    
+
+
+
+
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
@@ -415,7 +415,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_fetchAuthToken">fetchAuthToken</a>(callable $httpHandler = null)
-        
+
                                             <p><p>Fetches the auth tokens based on the current state.</p></p>                </div>
                 <div class="col-md-2"><small>from&nbsp;<a href="../../Google/Auth/FetchAuthTokenInterface.html#method_fetchAuthToken">
 <abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a></small></div>
@@ -426,7 +426,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getCacheKey">getCacheKey</a>()
-        
+
                                             <p><p>Obtains a key that can used to cache the results of #fetchAuthToken.</p></p>                </div>
                 <div class="col-md-2"><small>from&nbsp;<a href="../../Google/Auth/FetchAuthTokenInterface.html#method_getCacheKey">
 <abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a></small></div>
@@ -437,7 +437,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getLastReceivedToken">getLastReceivedToken</a>()
-        
+
                                             <p><p>Returns an associative array with the token and
 expiration time.</p></p>                </div>
                 <div class="col-md-2"><small>from&nbsp;<a href="../../Google/Auth/FetchAuthTokenInterface.html#method_getLastReceivedToken">
@@ -449,7 +449,7 @@ expiration time.</p></p>                </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_signBlob">signBlob</a>(string $stringToSign, bool $forceOpenssl = false)
-        
+
                                             <p><p>Sign a string using the method which is best for a given credentials type.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -459,7 +459,7 @@ expiration time.</p></p>                </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getClientName">getClientName</a>(callable $httpHandler = null)
-        
+
                                             <p><p>Returns the current Client Name.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -477,12 +477,12 @@ expiration time.</p></p>                </div>
     <strong>fetchAuthToken</strong>(callable $httpHandler = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Fetches the auth tokens based on the current state.</p></p>                        
+                            <p><p>Fetches the auth tokens based on the current state.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -495,7 +495,7 @@ expiration time.</p></p>                </div>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -505,9 +505,9 @@ expiration time.</p></p>                </div>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -520,15 +520,15 @@ expiration time.</p></p>                </div>
     <strong>getCacheKey</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Obtains a key that can used to cache the results of #fetchAuthToken.</p></p>                <p><p>If the value is empty, the auth token is not cached.</p></p>        
+                            <p><p>Obtains a key that can used to cache the results of #fetchAuthToken.</p></p>                <p><p>If the value is empty, the auth token is not cached.</p></p>
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -538,9 +538,9 @@ expiration time.</p></p>                </div>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -553,16 +553,16 @@ expiration time.</p></p>                </div>
     <strong>getLastReceivedToken</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Returns an associative array with the token and
-expiration time.</p></p>                        
+expiration time.</p></p>
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -576,9 +576,9 @@ The last received access token.</p>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -590,12 +590,12 @@ The last received access token.</p>
     <strong>signBlob</strong>(string $stringToSign, bool $forceOpenssl = false)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Sign a string using the method which is best for a given credentials type.</p></p>                        
+                            <p><p>Sign a string using the method which is best for a given credentials type.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -615,7 +615,7 @@ not apply to signing done using external services. <strong>Defaults to</strong>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -625,9 +625,9 @@ not apply to signing done using external services. <strong>Defaults to</strong>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -639,12 +639,12 @@ not apply to signing done using external services. <strong>Defaults to</strong>
     <strong>getClientName</strong>(callable $httpHandler = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Returns the current Client Name.</p></p>                        
+                            <p><p>Returns the current Client Name.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -658,7 +658,7 @@ one is required to obtain a client name.</p></td>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -668,19 +668,29 @@ one is required to obtain a client name.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
             </div>
             </div>
 
-    
+
 </div><div id="footer">
         Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
-    </body>
+    <script>
+function doRedirect(url) {
+    matches = url.match(/\/Google\/Auth\/(.*).html/);
+    if (matches) {
+        return window.location = "https://cloud.google.com/php/docs/reference/auth/latest/" + matches[1].replaceAll('/', '.');
+    }
+    return window.location = "https://cloud.google.com/php/docs/reference/auth/latest";
+}
+doRedirect(window.location.href);
+</script>
+</body>
 
 </html>

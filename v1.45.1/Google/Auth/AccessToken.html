@@ -387,23 +387,23 @@
         </div>
                 <div id="page-content">
     <div class="page-header">
-        <h1>AccessToken    
+        <h1>AccessToken
             </h1>
     </div>
 
-    
+
     <p>        class
     <strong>AccessToken</strong>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.45.1/src/AccessToken.php">View source</a>)
 </p>
 
-        
-    
-        
+
+
+
 
             <div class="description">
             <p><p>Wrapper around Google Access Tokens which provides convenience functions.</p></p>                    </div>
-            
-        
+
+
             <h2>Constants</h2>    <table class="table table-condensed">
                     <tr>
                 <td>
@@ -461,18 +461,18 @@
             </tr>
             </table>
 
-    
-    
+
+
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(callable|null $httpHandler = null, <abbr title="Google\Auth\Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr>|null $cache = null)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -483,7 +483,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_verify">verify</a>(string $token, array $options = [])
-        
+
                                             <p><p>Verifies an id token and returns the authenticated apiLoginTicket.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -493,7 +493,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_revoke">revoke</a>(string|array $token, array $options = [])
-        
+
                                             <p><p>Revoke an OAuth2 access token or refresh token. This method will revoke the current access
 token, if a token isn't provided.</p></p>                </div>
                 <div class="col-md-2"></div>
@@ -504,7 +504,7 @@ token, if a token isn't provided.</p></p>                </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_callJwtStatic">callJwtStatic</a>(string $method, array $args = [])
-        
+
                                             <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -514,7 +514,7 @@ token, if a token isn't provided.</p></p>                </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_callSimpleJwtDecode">callSimpleJwtDecode</a>(array $args = [])
-        
+
                                             <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -527,17 +527,17 @@ token, if a token isn't provided.</p></p>                </div>
                     <div class="method-item">
                     <h3 id="method___construct">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.45.1/src/AccessToken.php#L71">at line 71</a></div>
-        <code>                    
+        <code>
     <strong>__construct</strong>(callable|null $httpHandler = null, <abbr title="Google\Auth\Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr>|null $cache = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -555,10 +555,10 @@ token, if a token isn't provided.</p></p>                </div>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
@@ -570,14 +570,14 @@ token, if a token isn't provided.</p></p>                </div>
     <strong>verify</strong>(string $token, array $options = [])
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Verifies an id token and returns the authenticated apiLoginTicket.</p></p>                <p><p>Throws an exception if the id token is not valid.
 The audience parameter can be used to control which id tokens are
-accepted.  By default, the id token must have been issued to this OAuth2 client.</p></p>        
+accepted.  By default, the id token must have been issued to this OAuth2 client.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -609,7 +609,7 @@ determining the reason verification failed.
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -619,7 +619,7 @@ determining the reason verification failed.
         </tr>
     </table>
 
-            
+
                             <h4>Exceptions</h4>
 
                     <table class="table table-condensed">
@@ -649,8 +649,8 @@ determining the reason verification failed.
             </tr>
             </table>
 
-            
-            
+
+
                     </div>
     </div>
 
@@ -662,13 +662,13 @@ determining the reason verification failed.
     <strong>revoke</strong>(string|array $token, array $options = [])
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Revoke an OAuth2 access token or refresh token. This method will revoke the current access
-token, if a token isn't provided.</p></p>                        
+token, if a token isn't provided.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -686,7 +686,7 @@ token, if a token isn't provided.</p></p>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -696,9 +696,9 @@ token, if a token isn't provided.</p></p>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -710,12 +710,12 @@ token, if a token isn't provided.</p></p>
     <strong>callJwtStatic</strong>(string $method, array $args = [])
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>                        
+                            <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -733,7 +733,7 @@ token, if a token isn't provided.</p></p>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -743,9 +743,9 @@ token, if a token isn't provided.</p></p>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -757,12 +757,12 @@ token, if a token isn't provided.</p></p>
     <strong>callSimpleJwtDecode</strong>(array $args = [])
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>                        
+                            <p><p>Provide a hook to mock calls to the JWT static methods.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -775,7 +775,7 @@ token, if a token isn't provided.</p></p>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -785,19 +785,29 @@ token, if a token isn't provided.</p></p>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
             </div>
             </div>
 
-    
+
 </div><div id="footer">
         Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
-    </body>
+    <script>
+function doRedirect(url) {
+    matches = url.match(/\/Google\/Auth\/(.*).html/);
+    if (matches) {
+        return window.location = "https://cloud.google.com/php/docs/reference/auth/latest/" + matches[1].replaceAll('/', '.');
+    }
+    return window.location = "https://cloud.google.com/php/docs/reference/auth/latest";
+}
+doRedirect(window.location.href);
+</script>
+</body>
 
 </html>

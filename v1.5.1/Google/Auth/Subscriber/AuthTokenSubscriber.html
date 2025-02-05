@@ -387,18 +387,18 @@
         </div>
                 <div id="page-content">
     <div class="page-header">
-        <h1>AuthTokenSubscriber    
+        <h1>AuthTokenSubscriber
             </h1>
     </div>
 
-    
+
     <p>        class
     <strong>AuthTokenSubscriber</strong>        implements        <abbr title="GuzzleHttp\Event\SubscriberInterface">SubscriberInterface</abbr>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.5.1/src/Subscriber/AuthTokenSubscriber.php">View source</a>)
 </p>
 
-        
-    
-        
+
+
+
 
             <div class="description">
             <p><p>AuthTokenSubscriber is a Guzzle Subscriber that adds an Authorization header
@@ -406,20 +406,20 @@ provided by an object implementing FetchAuthTokenInterface.</p></p>            <
 the values value in that hash is added as the authorization header.</p>
 <p>Requests will be accessed with the authorization header:</p>
 <p>'authorization' 'Bearer <value of auth_token>'</p></p>        </div>
-            
-        
-    
-    
+
+
+
+
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(<a href="../../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a> $fetcher, callable $httpHandler = null, callable $tokenCallback = null)
-        
+
                                             <p><p>Creates a new AuthTokenSubscriber.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -429,18 +429,18 @@ the values value in that hash is added as the authorization header.</p>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getEvents">getEvents</a>()
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method_onBefore">onBefore</a>(<abbr title="GuzzleHttp\Event\BeforeEvent">BeforeEvent</abbr> $event)
-        
+
                                             <p><p>Updates the request with an Authorization header when auth is 'fetched_auth_token'.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -453,16 +453,16 @@ the values value in that hash is added as the authorization header.</p>
                     <div class="method-item">
                     <h3 id="method___construct">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.5.1/src/Subscriber/AuthTokenSubscriber.php#L60">at line 60</a></div>
-        <code>                    
+        <code>
     <strong>__construct</strong>(<a href="../../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a> $fetcher, callable $httpHandler = null, callable $tokenCallback = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Creates a new AuthTokenSubscriber.</p></p>                        
+                            <p><p>Creates a new AuthTokenSubscriber.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -485,10 +485,10 @@ the values value in that hash is added as the authorization header.</p>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
@@ -500,16 +500,16 @@ the values value in that hash is added as the authorization header.</p>
     <strong>getEvents</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -519,9 +519,9 @@ the values value in that hash is added as the authorization header.</p>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -529,13 +529,13 @@ the values value in that hash is added as the authorization header.</p>
                     <div class="method-item">
                     <h3 id="method_onBefore">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.5.1/src/Subscriber/AuthTokenSubscriber.php#L99">at line 99</a></div>
-        <code>                    
+        <code>
     <strong>onBefore</strong>(<abbr title="GuzzleHttp\Event\BeforeEvent">BeforeEvent</abbr> $event)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Updates the request with an Authorization header when auth is 'fetched_auth_token'.</p></p>                <p><p>use GuzzleHttp\Client;
@@ -549,7 +549,7 @@ $subscriber = new AuthTokenSubscriber($oauth2);</p>
 'defaults' =&gt; ['auth' =&gt; 'google_auth']
 ]);
 $client-&gt;getEmitter()-&gt;attach($subscriber);</p>
-<p>$res = $client-&gt;get('myproject/taskqueues/myqueue');</p></p>        
+<p>$res = $client-&gt;get('myproject/taskqueues/myqueue');</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -562,20 +562,30 @@ $client-&gt;getEmitter()-&gt;attach($subscriber);</p>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
             </div>
             </div>
 
-    
+
 </div><div id="footer">
         Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
-    </body>
+    <script>
+function doRedirect(url) {
+    matches = url.match(/\/Google\/Auth\/(.*).html/);
+    if (matches) {
+        return window.location = "https://cloud.google.com/php/docs/reference/auth/latest/" + matches[1].replaceAll('/', '.');
+    }
+    return window.location = "https://cloud.google.com/php/docs/reference/auth/latest";
+}
+doRedirect(window.location.href);
+</script>
+</body>
 
 </html>

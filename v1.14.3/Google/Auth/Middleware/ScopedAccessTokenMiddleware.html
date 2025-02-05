@@ -387,18 +387,18 @@
         </div>
                 <div id="page-content">
     <div class="page-header">
-        <h1>ScopedAccessTokenMiddleware    
+        <h1>ScopedAccessTokenMiddleware
             </h1>
     </div>
 
-    
+
     <p>        class
     <strong>ScopedAccessTokenMiddleware</strong>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.14.3/src/Middleware/ScopedAccessTokenMiddleware.php">View source</a>)
 </p>
 
-        
-    
-        
+
+
+
 
             <div class="description">
             <p><p>ScopedAccessTokenMiddleware is a Guzzle Middleware that adds an Authorization
@@ -407,10 +407,10 @@ string or an array of strings, as its value.  If provided, a cache will be
 used to preserve the access token for a given lifetime.</p>
 <p>Requests will be accessed with the authorization header:</p>
 <p>'authorization' 'Bearer <value of auth_token>'</p></p>        </div>
-            
+
                 <h2>Traits</h2>
 
-        
+
     <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-6">
@@ -418,7 +418,7 @@ used to preserve the access token for a given lifetime.</p>
                 <div class="col-md-6"></div>
             </div>
             </div>
-    
+
             <h2>Constants</h2>    <table class="table table-condensed">
                     <tr>
                 <td>
@@ -431,18 +431,18 @@ used to preserve the access token for a given lifetime.</p>
             </tr>
             </table>
 
-    
-    
+
+
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(callable $tokenFunc, array|string $scopes, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
-        
+
                                             <p><p>Creates a new ScopedAccessTokenMiddleware.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -452,7 +452,7 @@ used to preserve the access token for a given lifetime.</p>
                 </div>
                 <div class="col-md-8">
                     <a href="#method___invoke">__invoke</a>(callable $handler)
-        
+
                                             <p><p>Updates the request with an Authorization header when auth is 'scoped'.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -465,16 +465,16 @@ used to preserve the access token for a given lifetime.</p>
                     <div class="method-item">
                     <h3 id="method___construct">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.14.3/src/Middleware/ScopedAccessTokenMiddleware.php#L70">at line 70</a></div>
-        <code>                    
+        <code>
     <strong>__construct</strong>(callable $tokenFunc, array|string $scopes, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Creates a new ScopedAccessTokenMiddleware.</p></p>                        
+                            <p><p>Creates a new ScopedAccessTokenMiddleware.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -502,10 +502,10 @@ used to preserve the access token for a given lifetime.</p>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
@@ -517,9 +517,9 @@ used to preserve the access token for a given lifetime.</p>
     <strong>__invoke</strong>(callable $handler)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Updates the request with an Authorization header when auth is 'scoped'.</p></p>                <p><p>E.g this could be used to authenticate using the AppEngine
@@ -542,7 +542,7 @@ $stack-&gt;push($middleware);</p>
 'base_url' =&gt; '<a href="https://www.googleapis.com/taskqueue/v1beta2/projects/">https://www.googleapis.com/taskqueue/v1beta2/projects/</a>',
 'auth' =&gt; 'scoped' // authorize all requests
 ]);</p>
-<p>$res = $client-&gt;get('myproject/taskqueues/myqueue');</p></p>        
+<p>$res = $client-&gt;get('myproject/taskqueues/myqueue');</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -555,7 +555,7 @@ $stack-&gt;push($middleware);</p>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -565,19 +565,29 @@ $stack-&gt;push($middleware);</p>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
             </div>
             </div>
 
-    
+
 </div><div id="footer">
         Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
-    </body>
+    <script>
+function doRedirect(url) {
+    matches = url.match(/\/Google\/Auth\/(.*).html/);
+    if (matches) {
+        return window.location = "https://cloud.google.com/php/docs/reference/auth/latest/" + matches[1].replaceAll('/', '.');
+    }
+    return window.location = "https://cloud.google.com/php/docs/reference/auth/latest";
+}
+doRedirect(window.location.href);
+</script>
+</body>
 
 </html>

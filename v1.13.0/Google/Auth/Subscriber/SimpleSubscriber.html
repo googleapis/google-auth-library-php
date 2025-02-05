@@ -387,36 +387,36 @@
         </div>
                 <div id="page-content">
     <div class="page-header">
-        <h1>SimpleSubscriber    
+        <h1>SimpleSubscriber
             </h1>
     </div>
 
-    
+
     <p>        class
     <strong>SimpleSubscriber</strong>        implements        <abbr title="GuzzleHttp\Event\SubscriberInterface">SubscriberInterface</abbr>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.13.0/src/Subscriber/SimpleSubscriber.php">View source</a>)
 </p>
 
-        
-    
-        
+
+
+
 
             <div class="description">
             <p><p>SimpleSubscriber is a Guzzle Subscriber that implements Google's Simple API
 access.</p></p>            <p><p>Requests are accessed using the Simple API access developer key.</p></p>        </div>
-            
-        
-    
-    
+
+
+
+
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(array $config)
-        
+
                                             <p><p>Create a new Simple plugin.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -426,18 +426,18 @@ access.</p></p>            <p><p>Requests are accessed using the Simple API acce
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getEvents">getEvents</a>()
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
             </div>
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method_onBefore">onBefore</a>(<abbr title="GuzzleHttp\Event\BeforeEvent">BeforeEvent</abbr> $event)
-        
+
                                             <p><p>Updates the request query with the developer key if auth is set to simple.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -450,19 +450,19 @@ access.</p></p>            <p><p>Requests are accessed using the Simple API acce
                     <div class="method-item">
                     <h3 id="method___construct">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.13.0/src/Subscriber/SimpleSubscriber.php#L45">at line 45</a></div>
-        <code>                    
+        <code>
     <strong>__construct</strong>(array $config)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Create a new Simple plugin.</p></p>                <p><p>The configuration array expects one option</p>
 <ul>
 <li>key: required, otherwise InvalidArgumentException is thrown</li>
-</ul></p>        
+</ul></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -475,10 +475,10 @@ access.</p></p>            <p><p>Requests are accessed using the Simple API acce
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
@@ -490,16 +490,16 @@ access.</p></p>            <p><p>Requests are accessed using the Simple API acce
     <strong>getEvents</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -509,9 +509,9 @@ access.</p></p>            <p><p>Requests are accessed using the Simple API acce
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -519,13 +519,13 @@ access.</p></p>            <p><p>Requests are accessed using the Simple API acce
                     <div class="method-item">
                     <h3 id="method_onBefore">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.13.0/src/Subscriber/SimpleSubscriber.php#L84">at line 84</a></div>
-        <code>                    
+        <code>
     <strong>onBefore</strong>(<abbr title="GuzzleHttp\Event\BeforeEvent">BeforeEvent</abbr> $event)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Updates the request query with the developer key if auth is set to simple.</p></p>                <p><p>Example:</p>
@@ -541,7 +541,7 @@ $client = new Client([
 ]);
 $client-&gt;getEmitter()-&gt;attach($subscriber);
 
-$res = $client-&gt;get('drive/v2/rest');</code></pre></p>        
+$res = $client-&gt;get('drive/v2/rest');</code></pre></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -554,20 +554,30 @@ $res = $client-&gt;get('drive/v2/rest');</code></pre></p>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
             </div>
             </div>
 
-    
+
 </div><div id="footer">
         Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
-    </body>
+    <script>
+function doRedirect(url) {
+    matches = url.match(/\/Google\/Auth\/(.*).html/);
+    if (matches) {
+        return window.location = "https://cloud.google.com/php/docs/reference/auth/latest/" + matches[1].replaceAll('/', '.');
+    }
+    return window.location = "https://cloud.google.com/php/docs/reference/auth/latest";
+}
+doRedirect(window.location.href);
+</script>
+</body>
 
 </html>

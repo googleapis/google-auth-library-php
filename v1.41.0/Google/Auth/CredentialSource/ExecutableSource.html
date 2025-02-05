@@ -387,18 +387,18 @@
         </div>
                 <div id="page-content">
     <div class="page-header">
-        <h1>ExecutableSource    
+        <h1>ExecutableSource
             </h1>
     </div>
 
-    
+
     <p>        class
     <strong>ExecutableSource</strong>        implements        <a href="../../../Google/Auth/ExternalAccountCredentialSourceInterface.html"><abbr title="Google\Auth\ExternalAccountCredentialSourceInterface">ExternalAccountCredentialSourceInterface</abbr></a>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.41.0/src/CredentialSource/ExecutableSource.php">View source</a>)
 </p>
 
-        
-    
-        
+
+
+
 
             <div class="description">
             <p><p>ExecutableSource enables the exchange of workload identity pool external credentials for
@@ -445,8 +445,8 @@ responses when an output file was specified in the credential configuration</p>
 executable, such as: GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE, GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE,
 GOOGLE_EXTERNAL_ACCOUNT_INTERACTIVE, GOOGLE_EXTERNAL_ACCOUNT_IMPERSONATED_EMAIL, and
 GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE.</p></p>        </div>
-            
-        
+
+
             <h2>Constants</h2>    <table class="table table-condensed">
                     <tr>
                 <td>
@@ -490,18 +490,18 @@ GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE.</p></p>        </div>
             </tr>
             </table>
 
-    
-    
+
+
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(string $command, string|null $outputFile, <a href="../../../Google/Auth/ExecutableHandler/ExecutableHandler.html"><abbr title="Google\Auth\ExecutableHandler\ExecutableHandler">ExecutableHandler</abbr></a> $executableHandler = null)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -512,7 +512,7 @@ GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE.</p></p>        </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getCacheKey">getCacheKey</a>()
-        
+
                                             <p><p>Gets the unique key for caching
 The format for the cache key is:
 Command.OutputFile</p></p>                </div>
@@ -524,7 +524,7 @@ Command.OutputFile</p></p>                </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_fetchSubjectToken">fetchSubjectToken</a>(callable $httpHandler = null)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -538,17 +538,17 @@ Command.OutputFile</p></p>                </div>
                     <div class="method-item">
                     <h3 id="method___construct">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.41.0/src/CredentialSource/ExecutableSource.php#L93">at line 93</a></div>
-        <code>                    
+        <code>
     <strong>__construct</strong>(string $command, string|null $outputFile, <a href="../../../Google/Auth/ExecutableHandler/ExecutableHandler.html"><abbr title="Google\Auth\ExecutableHandler\ExecutableHandler">ExecutableHandler</abbr></a> $executableHandler = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -571,10 +571,10 @@ Command.OutputFile</p></p>                </div>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
@@ -586,17 +586,17 @@ Command.OutputFile</p></p>                </div>
     <strong>getCacheKey</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Gets the unique key for caching
 The format for the cache key is:
-Command.OutputFile</p></p>                        
+Command.OutputFile</p></p>
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -606,9 +606,9 @@ Command.OutputFile</p></p>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -620,13 +620,13 @@ Command.OutputFile</p></p>
     <strong>fetchSubjectToken</strong>(callable $httpHandler = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -639,7 +639,7 @@ Command.OutputFile</p></p>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -649,7 +649,7 @@ Command.OutputFile</p></p>
         </tr>
     </table>
 
-            
+
                             <h4>Exceptions</h4>
 
                     <table class="table table-condensed">
@@ -663,18 +663,28 @@ Command.OutputFile</p></p>
             </tr>
             </table>
 
-            
-            
+
+
                     </div>
     </div>
 
             </div>
             </div>
 
-    
+
 </div><div id="footer">
         Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
-    </body>
+    <script>
+function doRedirect(url) {
+    matches = url.match(/\/Google\/Auth\/(.*).html/);
+    if (matches) {
+        return window.location = "https://cloud.google.com/php/docs/reference/auth/latest/" + matches[1].replaceAll('/', '.');
+    }
+    return window.location = "https://cloud.google.com/php/docs/reference/auth/latest";
+}
+doRedirect(window.location.href);
+</script>
+</body>
 
 </html>

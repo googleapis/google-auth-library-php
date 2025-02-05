@@ -387,23 +387,23 @@
         </div>
                 <div id="page-content">
     <div class="page-header">
-        <h1>AwsNativeSource    
+        <h1>AwsNativeSource
             </h1>
     </div>
 
-    
+
     <p>        class
     <strong>AwsNativeSource</strong>        implements        <a href="../../../Google/Auth/ExternalAccountCredentialSourceInterface.html"><abbr title="Google\Auth\ExternalAccountCredentialSourceInterface">ExternalAccountCredentialSourceInterface</abbr></a>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.39.0/src/CredentialSource/AwsNativeSource.php">View source</a>)
 </p>
 
-        
-    
-        
+
+
+
 
             <div class="description">
             <p><p>Authenticates requests using AWS credentials.</p></p>                    </div>
-            
-        
+
+
             <h2>Constants</h2>    <table class="table table-condensed">
                     <tr>
                 <td>
@@ -417,18 +417,18 @@
             </tr>
             </table>
 
-    
-    
+
+
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(string $audience, string $regionalCredVerificationUrl, string $regionUrl = null, string $securityCredentialsUrl = null, string $imdsv2SessionTokenUrl = null)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -439,7 +439,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_fetchSubjectToken">fetchSubjectToken</a>(callable $httpHandler = null)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -450,7 +450,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getImdsV2SessionToken">getImdsV2SessionToken</a>(string $imdsV2Url, callable $httpHandler)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -461,7 +461,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getSignedRequestHeaders">getSignedRequestHeaders</a>(string $region, string $host, string $accessKeyId, string $secretAccessKey, string|null $securityToken)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -472,7 +472,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getRegionFromEnv">getRegionFromEnv</a>()
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -483,7 +483,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getRegionFromUrl">getRegionFromUrl</a>(callable $httpHandler, string $regionUrl, array $headers)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -494,7 +494,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getRoleName">getRoleName</a>(callable $httpHandler, string $securityCredentialsUrl, array $headers)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -505,7 +505,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getSigningVarsFromUrl">getSigningVarsFromUrl</a>(callable $httpHandler, string $securityCredentialsUrl, string $roleName, array $headers)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -516,7 +516,7 @@
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getSigningVarsFromEnv">getSigningVarsFromEnv</a>()
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -530,17 +530,17 @@
                     <div class="method-item">
                     <h3 id="method___construct">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.39.0/src/CredentialSource/AwsNativeSource.php#L50">at line 50</a></div>
-        <code>                    
+        <code>
     <strong>__construct</strong>(string $audience, string $regionalCredVerificationUrl, string $regionUrl = null, string $securityCredentialsUrl = null, string $imdsv2SessionTokenUrl = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -578,10 +578,10 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
@@ -593,13 +593,13 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
     <strong>fetchSubjectToken</strong>(callable $httpHandler = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -612,7 +612,7 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -622,9 +622,9 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -636,8 +636,8 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
     <strong>getImdsV2SessionToken</strong>(string $imdsV2Url, callable $httpHandler)
         </code>
     </h3>
-    <div class="details">    
-    
+    <div class="details">
+
                             <table>
             <tr>
                 <td><span class="label label-warning">internal</span></td>
@@ -645,11 +645,11 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
         </table>
                 &nbsp;
-    
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -667,7 +667,7 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -677,9 +677,9 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -691,8 +691,8 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
     <strong>getSignedRequestHeaders</strong>(string $region, string $host, string $accessKeyId, string $secretAccessKey, string|null $securityToken)
         </code>
     </h3>
-    <div class="details">    
-    
+    <div class="details">
+
                             <table>
             <tr>
                 <td><span class="label label-warning">internal</span></td>
@@ -700,11 +700,11 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
         </table>
                 &nbsp;
-    
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -737,7 +737,7 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -747,8 +747,8 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
         </tr>
     </table>
 
-            
-            
+
+
                             <h4>See also</h4>
 
                     <table class="table table-condensed">
@@ -760,7 +760,7 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
             </table>
 
-            
+
                     </div>
     </div>
 
@@ -772,8 +772,8 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
     <strong>getRegionFromEnv</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
+    <div class="details">
+
                             <table>
             <tr>
                 <td><span class="label label-warning">internal</span></td>
@@ -781,14 +781,14 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
         </table>
                 &nbsp;
-    
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -798,9 +798,9 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -812,8 +812,8 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
     <strong>getRegionFromUrl</strong>(callable $httpHandler, string $regionUrl, array $headers)
         </code>
     </h3>
-    <div class="details">    
-    
+    <div class="details">
+
                             <table>
             <tr>
                 <td><span class="label label-warning">internal</span></td>
@@ -821,11 +821,11 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
         </table>
                 &nbsp;
-    
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -848,7 +848,7 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -858,9 +858,9 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -872,8 +872,8 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
     <strong>getRoleName</strong>(callable $httpHandler, string $securityCredentialsUrl, array $headers)
         </code>
     </h3>
-    <div class="details">    
-    
+    <div class="details">
+
                             <table>
             <tr>
                 <td><span class="label label-warning">internal</span></td>
@@ -881,11 +881,11 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
         </table>
                 &nbsp;
-    
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -908,7 +908,7 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -918,9 +918,9 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -932,8 +932,8 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
     <strong>getSigningVarsFromUrl</strong>(callable $httpHandler, string $securityCredentialsUrl, string $roleName, array $headers)
         </code>
     </h3>
-    <div class="details">    
-    
+    <div class="details">
+
                             <table>
             <tr>
                 <td><span class="label label-warning">internal</span></td>
@@ -941,11 +941,11 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
         </table>
                 &nbsp;
-    
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -973,7 +973,7 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -983,9 +983,9 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -997,8 +997,8 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
     <strong>getSigningVarsFromEnv</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
+    <div class="details">
+
                             <table>
             <tr>
                 <td><span class="label label-warning">internal</span></td>
@@ -1006,14 +1006,14 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
             </tr>
         </table>
                 &nbsp;
-    
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -1023,19 +1023,29 @@ Token from AWS. This field is required for EC2 instances using IMDSv2.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
             </div>
             </div>
 
-    
+
 </div><div id="footer">
         Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
-    </body>
+    <script>
+function doRedirect(url) {
+    matches = url.match(/\/Google\/Auth\/(.*).html/);
+    if (matches) {
+        return window.location = "https://cloud.google.com/php/docs/reference/auth/latest/" + matches[1].replaceAll('/', '.');
+    }
+    return window.location = "https://cloud.google.com/php/docs/reference/auth/latest";
+}
+doRedirect(window.location.href);
+</script>
+</body>
 
 </html>

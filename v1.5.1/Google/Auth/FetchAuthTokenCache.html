@@ -387,26 +387,26 @@
         </div>
                 <div id="page-content">
     <div class="page-header">
-        <h1>FetchAuthTokenCache    
+        <h1>FetchAuthTokenCache
             </h1>
     </div>
 
-    
+
     <p>        class
     <strong>FetchAuthTokenCache</strong>        implements        <a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a>, <a href="../../Google/Auth/SignBlobInterface.html"><abbr title="Google\Auth\SignBlobInterface">SignBlobInterface</abbr></a>        (<a href="https://github.com/googleapis/google-auth-library-php/blob/v1.5.1/src/FetchAuthTokenCache.php">View source</a>)
 </p>
 
-        
-    
-        
+
+
+
 
             <div class="description">
             <p><p>A class to implement caching for any object implementing
 FetchAuthTokenInterface</p></p>                    </div>
-            
+
                 <h2>Traits</h2>
 
-        
+
     <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-6">
@@ -414,19 +414,19 @@ FetchAuthTokenInterface</p></p>                    </div>
                 <div class="col-md-6"></div>
             </div>
             </div>
-    
-    
-    
+
+
+
             <h2>Methods</h2>
 
             <div class="container-fluid underlined">
                     <div class="row">
                 <div class="col-md-2 type">
-                    
+
                 </div>
                 <div class="col-md-8">
                     <a href="#method___construct">__construct</a>(<a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a> $fetcher, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache)
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -437,7 +437,7 @@ FetchAuthTokenInterface</p></p>                    </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_fetchAuthToken">fetchAuthToken</a>(callable $httpHandler = null)
-        
+
                                             <p><p>Implements FetchAuthTokenInterface#fetchAuthToken.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -447,7 +447,7 @@ FetchAuthTokenInterface</p></p>                    </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getCacheKey">getCacheKey</a>()
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -458,7 +458,7 @@ FetchAuthTokenInterface</p></p>                    </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getLastReceivedToken">getLastReceivedToken</a>()
-        
+
                                             <p class="no-description">No description</p>
                                     </div>
                 <div class="col-md-2"></div>
@@ -469,7 +469,7 @@ FetchAuthTokenInterface</p></p>                    </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_getClientName">getClientName</a>(callable $httpHandler = null)
-        
+
                                             <p><p>Get the client name from the fetcher.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -479,7 +479,7 @@ FetchAuthTokenInterface</p></p>                    </div>
                 </div>
                 <div class="col-md-8">
                     <a href="#method_signBlob">signBlob</a>(string $stringToSign, $forceOpenSsl = false)
-        
+
                                             <p><p>Sign a blob using the fetcher.</p></p>                </div>
                 <div class="col-md-2"></div>
             </div>
@@ -492,17 +492,17 @@ FetchAuthTokenInterface</p></p>                    </div>
                     <div class="method-item">
                     <h3 id="method___construct">
         <div class="location"><a href="https://github.com/googleapis/google-auth-library-php/blob/v1.5.1/src/FetchAuthTokenCache.php#L45">at line 45</a></div>
-        <code>                    
+        <code>
     <strong>__construct</strong>(<a href="../../Google/Auth/FetchAuthTokenInterface.html"><abbr title="Google\Auth\FetchAuthTokenInterface">FetchAuthTokenInterface</abbr></a> $fetcher, array $cacheConfig = null, <abbr title="Psr\Cache\CacheItemPoolInterface">CacheItemPoolInterface</abbr> $cache)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -525,10 +525,10 @@ FetchAuthTokenInterface</p></p>                    </div>
             </tr>
             </table>
 
-            
-            
-            
-            
+
+
+
+
                     </div>
     </div>
 
@@ -540,13 +540,13 @@ FetchAuthTokenInterface</p></p>                    </div>
     <strong>fetchAuthToken</strong>(callable $httpHandler = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p><p>Implements FetchAuthTokenInterface#fetchAuthToken.</p></p>                <p><p>Checks the cache for a valid auth token and fetches the auth tokens
-from the supplied fetcher.</p></p>        
+from the supplied fetcher.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -559,7 +559,7 @@ from the supplied fetcher.</p></p>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -569,7 +569,7 @@ from the supplied fetcher.</p></p>
         </tr>
     </table>
 
-            
+
                             <h4>Exceptions</h4>
 
                     <table class="table table-condensed">
@@ -579,8 +579,8 @@ from the supplied fetcher.</p></p>
             </tr>
             </table>
 
-            
-            
+
+
                     </div>
     </div>
 
@@ -592,16 +592,16 @@ from the supplied fetcher.</p></p>
     <strong>getCacheKey</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -611,9 +611,9 @@ from the supplied fetcher.</p></p>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -625,16 +625,16 @@ from the supplied fetcher.</p></p>
     <strong>getLastReceivedToken</strong>()
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
                             <p class="no-description">No description</p>
-                    
+
         </div>
         <div class="tags">
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -645,9 +645,9 @@ The last received access token.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -659,12 +659,12 @@ The last received access token.</p></td>
     <strong>getClientName</strong>(callable $httpHandler = null)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Get the client name from the fetcher.</p></p>                        
+                            <p><p>Get the client name from the fetcher.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -678,7 +678,7 @@ one is required to obtain a client name.</p></td>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -688,9 +688,9 @@ one is required to obtain a client name.</p></td>
         </tr>
     </table>
 
-            
-            
-            
+
+
+
                     </div>
     </div>
 
@@ -702,12 +702,12 @@ one is required to obtain a client name.</p></td>
     <strong>signBlob</strong>(string $stringToSign, $forceOpenSsl = false)
         </code>
     </h3>
-    <div class="details">    
-    
-            
+    <div class="details">
+
+
 
         <div class="method-description">
-                            <p><p>Sign a blob using the fetcher.</p></p>                        
+                            <p><p>Sign a blob using the fetcher.</p></p>
         </div>
         <div class="tags">
                             <h4>Parameters</h4>
@@ -725,7 +725,7 @@ one is required to obtain a client name.</p></td>
             </tr>
             </table>
 
-            
+
                             <h4>Return Value</h4>
 
                     <table class="table table-condensed">
@@ -735,7 +735,7 @@ one is required to obtain a client name.</p></td>
         </tr>
     </table>
 
-            
+
                             <h4>Exceptions</h4>
 
                     <table class="table table-condensed">
@@ -745,18 +745,28 @@ one is required to obtain a client name.</p></td>
             </tr>
             </table>
 
-            
-            
+
+
                     </div>
     </div>
 
             </div>
             </div>
 
-    
+
 </div><div id="footer">
         Generated by <a href="https://github.com/code-lts/doctum">Doctum, a API Documentation generator and fork of Sami</a>.</div></div>
     </div>
-    </body>
+    <script>
+function doRedirect(url) {
+    matches = url.match(/\/Google\/Auth\/(.*).html/);
+    if (matches) {
+        return window.location = "https://cloud.google.com/php/docs/reference/auth/latest/" + matches[1].replaceAll('/', '.');
+    }
+    return window.location = "https://cloud.google.com/php/docs/reference/auth/latest";
+}
+doRedirect(window.location.href);
+</script>
+</body>
 
 </html>
