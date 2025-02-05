@@ -1,15 +1,6 @@
 # Google Auth Library for PHP
 
-<dl>
-  <dt>Homepage</dt><dd><a href="http://www.github.com/google/google-auth-library-php">http://www.github.com/google/google-auth-library-php</a></dd>
-  <dt>Reference Docs</dt><dd><a href="https://googleapis.github.io/google-auth-library-php/main/">https://googleapis.github.io/google-auth-library-php/main/</a></dd>
-  <dt>Authors</dt>
-    <dd><a href="mailto:temiola@google.com">Tim Emiola</a></dd>
-    <dd><a href="mailto:stanleycheung@google.com">Stanley Cheung</a></dd>
-    <dd><a href="mailto:betterbrent@google.com">Brent Shaffer</a></dd>
-  <dt>Copyright</dt><dd>Copyright © 2015 Google, Inc.</dd>
-  <dt>License</dt><dd>Apache 2.0</dd>
-</dl>
+<a href="https://cloud.google.com/php/docs/reference/auth/latest">Reference Docs</a>
 
 ## Description
 
