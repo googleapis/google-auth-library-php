@@ -2,6 +2,46 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.45.4](https://github.com/googleapis/google-auth-library-php/compare/v1.45.3...v1.45.4) (2025-02-05)
+
+
+### Bug Fixes
+
+* Return impersonated token as lastReceivedToken ([#606](https://github.com/googleapis/google-auth-library-php/issues/606)) ([33c3c85](https://github.com/googleapis/google-auth-library-php/commit/33c3c850973487951c6cb943d200702ba6debbb0))
+
+## [1.45.3](https://github.com/googleapis/google-auth-library-php/compare/v1.45.2...v1.45.3) (2025-02-05)
+
+
+### Documentation
+
+* fix broken reference (#602)
+
+## [1.45.2](https://github.com/googleapis/google-auth-library-php/compare/v1.45.1...v1.45.2) (2025-01-28)
+
+
+### Bug Fixes
+
+* Minor changes to allow for refdoc regeneration ([#600](https://github.com/googleapis/google-auth-library-php/issues/600)) ([608115c](https://github.com/googleapis/google-auth-library-php/commit/608115cd17fda4498ddb7d22a47ee06316e0d0cf))
+
+## [1.45.0](https://github.com/googleapis/google-auth-library-php/compare/v1.44.0...v1.45.0) (2024-12-11)
+
+
+### Features
+
+* Add StdOutLogger and LoggingTrait ([#578](https://github.com/googleapis/google-auth-library-php/issues/578)) ([4f793fe](https://github.com/googleapis/google-auth-library-php/commit/4f793fe3e31db8f71a3a0f17ae528a4d93d6bd2a))
+
+## [1.44.0](https://github.com/googleapis/google-auth-library-php/compare/v1.43.0...v1.44.0) (2024-12-04)
+
+
+### Features
+
+* Add service account impersonation for access tokens ([#586](https://github.com/googleapis/google-auth-library-php/issues/586)) ([ba137b2](https://github.com/googleapis/google-auth-library-php/commit/ba137b2db9ed7ce002cfb4034a1e8d354a85e2fc))
+
+
+### Bug Fixes
+
+* Add support for php 8.4, remove implicit nullable ([#591](https://github.com/googleapis/google-auth-library-php/issues/591)) ([3e1061b](https://github.com/googleapis/google-auth-library-php/commit/3e1061bba19d9340407a9ff70b7b7294c344d17c))
+
 ## [1.43.0](https://github.com/googleapis/google-auth-library-php/compare/v1.42.0...v1.43.0) (2024-11-05)
 
 

@@ -25,12 +25,14 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\Logging\StdOutLogger;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\Middleware\ProxyAuthTokenMiddleware;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * ApplicationDefaultCredentials obtains the default credentials for
@@ -71,6 +73,8 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 class ApplicationDefaultCredentials
 {
+    private const SDK_DEBUG_ENV_VAR = 'GOOGLE_SDK_PHP_LOGGING';
+
     /**
      * @deprecated
      *
@@ -147,7 +151,8 @@ class ApplicationDefaultCredentials
      *   user-defined scopes exist, expressed either as an Array or as a
      *   space-delimited string.
      * @param string|null $universeDomain Specifies a universe domain to use for the
-     *   calling client library
+     *   calling client library.
+     * @param null|false|LoggerInterface $logger A PSR3 compliant LoggerInterface.
      *
      * @return FetchAuthTokenInterface
      * @throws DomainException if no implementation can be obtained.
@@ -159,7 +164,8 @@ class ApplicationDefaultCredentials
         ?CacheItemPoolInterface $cache = null,
         $quotaProject = null,
         $defaultScope = null,
-        ?string $universeDomain = null
+        ?string $universeDomain = null,
+        null|false|LoggerInterface $logger = null,
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -172,7 +178,7 @@ class ApplicationDefaultCredentials
                 HttpClientCache::setHttpClient($client);
             }
 
-            $httpHandler = HttpHandlerFactory::build($client);
+            $httpHandler = HttpHandlerFactory::build($client, $logger);
         }
 
         if (is_null($quotaProject)) {
@@ -318,6 +324,36 @@ class ApplicationDefaultCredentials
             $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
         }
         return $creds;
+    }
+
+    /**
+     * Returns a StdOutLogger instance
+     *
+     * @internal
+     *
+     * @return null|LoggerInterface
+     */
+    public static function getDefaultLogger(): null|LoggerInterface
+    {
+        $loggingFlag = getenv(self::SDK_DEBUG_ENV_VAR);
+
+        // Env var is not set
+        if (empty($loggingFlag)) {
+            return null;
+        }
+
+        $loggingFlag = strtolower($loggingFlag);
+
+        // Env Var is not true
+        if ($loggingFlag !== 'true') {
+            if ($loggingFlag !== 'false') {
+                trigger_error('The ' . self::SDK_DEBUG_ENV_VAR . ' is set, but it is set to another value than false or true. Logging is disabled');
+            }
+
+            return null;
+        }
+
+        return new StdOutLogger();
     }
 
     /**
