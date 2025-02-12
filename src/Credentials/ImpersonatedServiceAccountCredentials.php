@@ -80,8 +80,8 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      * @param string|null $targetAudience The audience to request an ID token.
      */
     public function __construct(
-        $scope,
-        $jsonKey,
+        string|array|null $scope,
+        string|array $jsonKey,
         private ?string $targetAudience = null
     ) {
         if (is_string($jsonKey)) {
