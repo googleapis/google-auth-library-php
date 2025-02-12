@@ -272,7 +272,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $json['service_account_impersonation_url'] = 'https://invalid/url';
 
         // mock access token call for source credentials
-        $httpHandler = fn() => new Response(
+        $httpHandler = fn () => new Response(
             200,
             ['Content-Type' => 'application/json'],
             json_encode(['access_token' => 'test-access-token'])
@@ -383,7 +383,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
             ->shouldBeCalledOnce()
             ->willReturn(['access_token' => 'test-access-token']);
 
-            $json = [
+        $json = [
             'type' => 'impersonated_service_account',
             'service_account_impersonation_url' => 'https://some/url/serviceAccounts/123:generateAccessToken',
             'source_credentials' => $credentials->reveal(),

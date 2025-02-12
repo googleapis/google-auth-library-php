@@ -36,8 +36,8 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
 
     private const CRED_TYPE = 'imp';
     private const IAM_SCOPE = 'https://www.googleapis.com/auth/iam';
-    private const ID_TOKEN_IMPERSONATION_URL_TEMPLATE =
-        'https://iamcredentials.UNIVERSE_DOMAIN/v1/projects/-/serviceAccounts/SERVICE_ACCOUNT_EMAIL:generateIdToken';
+    private const ID_TOKEN_IMPERSONATION_URL =
+        'https://iamcredentials.UNIVERSE_DOMAIN/v1/projects/-/serviceAccounts/%s:generateIdToken';
 
     /**
      * @var string
@@ -203,24 +203,24 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             ]
         };
 
-        $serviceAccountImpersonationUrl = $this->serviceAccountImpersonationUrl;
+        $url = $this->serviceAccountImpersonationUrl;
         if ($this->isIdTokenRequest()) {
             $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
-            if (!preg_match($regex, $serviceAccountImpersonationUrl, $matches)) {
+            if (!preg_match($regex, $url, $matches)) {
                 throw new InvalidArgumentException(
                     'Invalid service account impersonation URL - unable to parse service account email'
                 );
             }
-            $serviceAccountImpersonationUrl = str_replace(
-                ['UNIVERSE_DOMAIN', 'SERVICE_ACCOUNT_EMAIL'],
-                [$this->getUniverseDomain(), $matches['email']],
-                self::ID_TOKEN_IMPERSONATION_URL_TEMPLATE
+            $url = str_replace(
+                'UNIVERSE_DOMAIN',
+                $this->getUniverseDomain(),
+                sprintf(self::ID_TOKEN_IMPERSONATION_URL, $matches['email'])
             );
         }
 
         $request = new Request(
             'POST',
-            $serviceAccountImpersonationUrl,
+            $url,
             $headers,
             (string) json_encode($body)
         );
