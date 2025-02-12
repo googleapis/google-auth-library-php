@@ -44,7 +44,6 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
     private const IMPERSONATION_URL = 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/test@test-project.iam.gserviceaccount.com:generateAccessToken';
     private const UNIVERSE_DOMAIN = 'example.com';
 
-
     // User Refresh to Service Account Impersonation JSON Credentials
     private const USER_TO_SERVICE_ACCOUNT_JSON = [
         'type' => 'impersonated_service_account',
