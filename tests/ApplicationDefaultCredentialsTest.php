@@ -32,7 +32,6 @@ use Google\Auth\Logging\StdOutLogger;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
-use PHPUnit\Framework\Error\Notice;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Cache\CacheItemPoolInterface;
@@ -499,6 +498,13 @@ class ApplicationDefaultCredentialsTest extends TestCase
         );
     }
 
+    public function testGetIdTokenCredentialsWithImpersonatedServiceAccountCredentials()
+    {
+        putenv('HOME=' . __DIR__ . '/fixtures5');
+        $creds = ApplicationDefaultCredentials::getIdTokenCredentials('123@456.com');
+        $this->assertInstanceOf(ImpersonatedServiceAccountCredentials::class, $creds);
+    }
+
     public function testGetIdTokenCredentialsWithCacheOptions()
     {
         $keyFile = __DIR__ . '/fixtures' . '/private.json';
@@ -803,10 +809,16 @@ class ApplicationDefaultCredentialsTest extends TestCase
     public function testGetDefaultLoggerRaiseAWarningIfMisconfiguredAndReturnsNull()
     {
         putenv($this::SDK_DEBUG_ENV_VAR . '=invalid');
-        $this->expectException(Notice::class);
-        $logger = ApplicationDefaultCredentials::getDefaultLogger();
 
-        $this->assertNull($logger);
+        $this->expectExceptionMessage(
+            'The GOOGLE_SDK_PHP_LOGGING is set, but it is set to another value than false or true'
+        );
+
+        set_error_handler(static function (int $errno, string $errstr): never {
+            throw new \Exception($errstr, $errno);
+        }, E_USER_NOTICE);
+
+        ApplicationDefaultCredentials::getDefaultLogger();
     }
 
     public function provideExternalAccountCredentials()
