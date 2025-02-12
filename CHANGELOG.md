@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.46.0](https://github.com/googleapis/google-auth-library-php/compare/v1.45.4...v1.46.0) (2025-02-12)
+
+
+### Features
+
+* Add support for Impersonating ID Tokens ([#580](https://github.com/googleapis/google-auth-library-php/issues/580)) ([66db27c](https://github.com/googleapis/google-auth-library-php/commit/66db27c671c229ff561ecab51e0b6379c6109b93))
+
 ## [1.45.4](https://github.com/googleapis/google-auth-library-php/compare/v1.45.3...v1.45.4) (2025-02-05)
 
 
