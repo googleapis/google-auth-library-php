@@ -36,6 +36,8 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
 
     private const CRED_TYPE = 'imp';
     private const IAM_SCOPE = 'https://www.googleapis.com/auth/iam';
+    private const ID_TOKEN_IMPERSONATION_URL_TEMPLATE =
+        'https://iamcredentials.UNIVERSE_DOMAIN/v1/projects/-/serviceAccounts/SERVICE_ACCOUNT_EMAIL:generateIdToken';
 
     /**
      * @var string
@@ -201,9 +203,24 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             ]
         };
 
+        $serviceAccountImpersonationUrl = $this->serviceAccountImpersonationUrl;
+        if ($this->isIdTokenRequest()) {
+            $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
+            if (!preg_match($regex, $serviceAccountImpersonationUrl, $matches)) {
+                throw new InvalidArgumentException(
+                    'Invalid service account impersonation URL - unable to parse service account email'
+                );
+            }
+            $serviceAccountImpersonationUrl = str_replace(
+                ['UNIVERSE_DOMAIN', 'SERVICE_ACCOUNT_EMAIL'],
+                [$this->getUniverseDomain(), $matches['email']],
+                self::ID_TOKEN_IMPERSONATION_URL_TEMPLATE
+            );
+        }
+
         $request = new Request(
             'POST',
-            $this->serviceAccountImpersonationUrl,
+            $serviceAccountImpersonationUrl,
             $headers,
             (string) json_encode($body)
         );
@@ -249,5 +266,12 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     private function isIdTokenRequest(): bool
     {
         return !is_null($this->targetAudience);
+    }
+
+    public function getUniverseDomain(): string
+    {
+        return method_exists($this->sourceCredentials, 'getUniverseDomain')
+            ? $this->sourceCredentials->getUniverseDomain()
+            : parent::getUniverseDomain();
     }
 }
