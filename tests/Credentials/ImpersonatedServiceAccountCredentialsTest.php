@@ -23,6 +23,7 @@ use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\Middleware\AuthTokenMiddleware;
 use Google\Auth\OAuth2;
 use GuzzleHttp\Psr7\Request;
@@ -176,6 +177,45 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
     }
 
     /**
+     * Test access token impersonation for Exernal Account Credentials.
+     */
+    public function testGetAccessTokenWithExternalAccountCredentials()
+    {
+        $json = self::EXTERNAL_ACCOUNT_TO_SERVICE_ACCOUNT_JSON;
+        $httpHandler = function (RequestInterface $request) use (&$requestCount, $json) {
+            if (++$requestCount == 1) {
+                // the call to swap the refresh token for an access token
+                $this->assertEquals(
+                    $json['source_credentials']['credential_source']['url'],
+                    (string) $request->getUri()
+                );
+            } elseif ($requestCount == 2) {
+                $this->assertEquals($json['source_credentials']['token_url'], (string) $request->getUri());
+            } elseif ($requestCount == 3) {
+                // the call to swap the access token for an id token
+                $this->assertEquals($json['service_account_impersonation_url'], (string) $request->getUri());
+                $this->assertEquals(self::SCOPE, json_decode($request->getBody(), true)['scope'] ?? '');
+                $this->assertEquals('Bearer test-access-token', $request->getHeader('authorization')[0] ?? null);
+            }
+
+            return new Response(
+                200,
+                ['Content-Type' => 'application/json'],
+                json_encode(match ($requestCount) {
+                    1 => ['access_token' => 'test-access-token'],
+                    2 => ['access_token' => 'test-access-token'],
+                    3 => ['accessToken' => 'test-impersonated-access-token', 'expireTime' => 123]
+                })
+            );
+        };
+
+        $creds = new ImpersonatedServiceAccountCredentials(self::SCOPE, $json);
+        $token = $creds->fetchAuthToken($httpHandler);
+        $this->assertEquals('test-impersonated-access-token', $token['access_token']);
+        $this->assertEquals(3, $requestCount);
+    }
+
+    /**
      * Test ID token impersonation for Service Account and User Refresh Credentials.
      *
      * @dataProvider provideAuthTokenJson
@@ -282,51 +322,16 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
     }
 
     /**
-     * Test access token impersonation for Exernal Account Credentials.
-     */
-    public function testGetAccessTokenWithExternalAccountCredentials()
-    {
-        $json = self::EXTERNAL_ACCOUNT_TO_SERVICE_ACCOUNT_JSON;
-        $httpHandler = function (RequestInterface $request) use (&$requestCount, $json) {
-            if (++$requestCount == 1) {
-                // the call to swap the refresh token for an access token
-                $this->assertEquals(
-                    $json['source_credentials']['credential_source']['url'],
-                    (string) $request->getUri()
-                );
-            } elseif ($requestCount == 2) {
-                $this->assertEquals($json['source_credentials']['token_url'], (string) $request->getUri());
-            } elseif ($requestCount == 3) {
-                // the call to swap the access token for an id token
-                $this->assertEquals($json['service_account_impersonation_url'], (string) $request->getUri());
-                $this->assertEquals(self::SCOPE, json_decode($request->getBody(), true)['scope'] ?? '');
-                $this->assertEquals('Bearer test-access-token', $request->getHeader('authorization')[0] ?? null);
-            }
-
-            return new Response(
-                200,
-                ['Content-Type' => 'application/json'],
-                json_encode(match ($requestCount) {
-                    1 => ['access_token' => 'test-access-token'],
-                    2 => ['access_token' => 'test-access-token'],
-                    3 => ['accessToken' => 'test-impersonated-access-token', 'expireTime' => 123]
-                })
-            );
-        };
-
-        $creds = new ImpersonatedServiceAccountCredentials(self::SCOPE, $json);
-        $token = $creds->fetchAuthToken($httpHandler);
-        $this->assertEquals('test-impersonated-access-token', $token['access_token']);
-        $this->assertEquals(3, $requestCount);
-    }
-
-    /**
      * Test ID token impersonation for Exernal Account Credentials.
+     * @dataProvider provideUniverseDomain
      */
-    public function testGetIdTokenWithExternalAccountCredentials()
+    public function testGetIdTokenWithExternalAccountCredentials(?string $universeDomain = null)
     {
         $json = self::EXTERNAL_ACCOUNT_TO_SERVICE_ACCOUNT_JSON;
-        $httpHandler = function (RequestInterface $request) use (&$requestCount, $json) {
+        if ($universeDomain) {
+            $json['source_credentials']['universe_domain'] = $universeDomain;
+        }
+        $httpHandler = function (RequestInterface $request) use (&$requestCount, $json, $universeDomain) {
             if (++$requestCount == 1) {
                 // the call to swap the refresh token for an access token
                 $this->assertEquals(
@@ -337,10 +342,11 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
                 $this->assertEquals($json['source_credentials']['token_url'], (string) $request->getUri());
             } elseif ($requestCount == 3) {
                 // the call to swap the access token for an id token
-                $this->assertEquals(
-                    str_replace(':generateAccessToken', ':generateIdToken', $json['service_account_impersonation_url']),
-                    (string) $request->getUri()
-                );
+                $url = str_replace(':generateAccessToken', ':generateIdToken', $json['service_account_impersonation_url']);
+                if ($universeDomain) {
+                    $url = str_replace('googleapis.com', $universeDomain, $url);
+                }
+                $this->assertEquals($url, (string) $request->getUri());
                 $this->assertEquals(self::TARGET_AUDIENCE, json_decode($request->getBody(), true)['audience'] ?? '');
                 $this->assertEquals('Bearer test-access-token', $request->getHeader('authorization')[0] ?? null);
             }
@@ -364,23 +370,29 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
 
     /**
      * Test ID token impersonation for an arbitrary credential fetcher.
+     * @dataProvider provideUniverseDomain
      */
-    public function testGetIdTokenWithArbitraryCredentials()
+    public function testGetIdTokenWithArbitraryCredentials(?string $universeDomain = null)
     {
-        $httpHandler = function (RequestInterface $request) {
+        $url = $universeDomain
+            ? 'https://iamcredentials.' . self::UNIVERSE_DOMAIN . '/v1/projects/-/serviceAccounts/123:generateIdToken'
+            : 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/123:generateIdToken';
+
+        $httpHandler = function (RequestInterface $request) use ($url) {
             // The URL is coerced to match the googleapis URL pattern
-            $this->assertEquals(
-                'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/123:generateIdToken',
-                (string) $request->getUri()
-            );
+            $this->assertEquals($url, (string) $request->getUri());
             $this->assertEquals('Bearer test-access-token', $request->getHeader('authorization')[0] ?? null);
             return new Response(200, [], json_encode(['token' => 'test-impersonated-id-token']));
         };
 
-        $credentials = $this->prophesize(FetchAuthTokenInterface::class);
+        $credentials = $this->prophesize(FetchAuthTokenInterface::class)
+            ->willImplement(GetUniverseDomainInterface::class);
         $credentials->fetchAuthToken($httpHandler, Argument::type('array'))
             ->shouldBeCalledOnce()
             ->willReturn(['access_token' => 'test-access-token']);
+        $credentials->getUniverseDomain()
+            ->shouldBeCalledOnce()
+            ->willReturn($universeDomain ?: GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN);
 
         $json = [
             'type' => 'impersonated_service_account',
@@ -392,6 +404,14 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
 
         $token = $creds->fetchAuthToken($httpHandler);
         $this->assertEquals('test-impersonated-id-token', $token['id_token']);
+    }
+
+    public function provideUniverseDomain()
+    {
+        return [
+            [null],
+            [self::UNIVERSE_DOMAIN],
+        ];
     }
 
     /**

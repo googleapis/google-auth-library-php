@@ -21,6 +21,7 @@ namespace Google\Auth\Credentials;
 use Google\Auth\CacheTrait;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\FetchAuthTokenInterface;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\IamSignerTrait;
@@ -29,7 +30,9 @@ use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use LogicException;
 
-class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements SignBlobInterface
+class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
+    SignBlobInterface,
+    GetUniverseDomainInterface
 {
     use CacheTrait;
     use IamSignerTrait;
@@ -270,8 +273,8 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
 
     public function getUniverseDomain(): string
     {
-        return method_exists($this->sourceCredentials, 'getUniverseDomain')
+        return $this->sourceCredentials instanceof GetUniverseDomainInterface
             ? $this->sourceCredentials->getUniverseDomain()
-            : parent::getUniverseDomain();
+            : self::DEFAULT_UNIVERSE_DOMAIN;
     }
 }
