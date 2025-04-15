@@ -154,6 +154,59 @@ class CredentialsLoaderTest extends TestCase
 
         $this->assertTrue(CredentialsLoader::shouldLoadClientCertSource());
     }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testLoadJsonFromGetEnv(): void
+    {
+        putenv(CredentialsLoader::ENV_VAR . '=' . __DIR__ . '/fixtures7/getenv.json');
+
+        $json = CredentialsLoader::fromEnv();
+
+        $this->assertArrayHasKey('type', $json);
+        $this->assertEquals('getenv', $json['type']);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testLoadJsonFromServer(): void
+    {
+        $_SERVER[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures7/server.json';
+
+        $json = CredentialsLoader::fromEnv();
+
+        $this->assertArrayHasKey('type', $json);
+        $this->assertEquals('server', $json['type']);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testLoadJsonFromEnv(): void
+    {
+        $_ENV[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures7/env.json';
+
+        $json = CredentialsLoader::fromEnv();
+
+        $this->assertArrayHasKey('type', $json);
+        $this->assertEquals('env', $json['type']);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testLoadJsonFromGetEnvBackwardsCompatibility(): void
+    {
+        $_SERVER[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures7/server.json';
+        putenv(CredentialsLoader::ENV_VAR . '=' . __DIR__ . '/fixtures7/getenv.json');
+
+        $json = CredentialsLoader::fromEnv();
+
+        $this->assertArrayHasKey('type', $json);
+        $this->assertEquals('getenv', $json['type']);
+    }
 }
 
 class TestCredentialsLoader extends CredentialsLoader
