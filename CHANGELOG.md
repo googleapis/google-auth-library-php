@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.47.0](https://github.com/googleapis/google-auth-library-php/compare/v1.46.0...v1.47.0) (2025-04-15)
+
+
+### Features
+
+* Add support for $_ENV in CredentialsLoader ([#612](https://github.com/googleapis/google-auth-library-php/issues/612)) ([3e63576](https://github.com/googleapis/google-auth-library-php/commit/3e63576bf73ab8c7a0cccecd741601c4d6800e6d))
+
 ## [1.46.0](https://github.com/googleapis/google-auth-library-php/compare/v1.45.4...v1.46.0) (2025-02-12)
 
 
