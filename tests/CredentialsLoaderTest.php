@@ -171,19 +171,6 @@ class CredentialsLoaderTest extends TestCase
     /**
      * @runInSeparateProcess
      */
-    public function testLoadJsonFromServer(): void
-    {
-        $_SERVER[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures7/server.json';
-
-        $json = CredentialsLoader::fromEnv();
-
-        $this->assertArrayHasKey('type', $json);
-        $this->assertEquals('server', $json['type']);
-    }
-
-    /**
-     * @runInSeparateProcess
-     */
     public function testLoadJsonFromEnv(): void
     {
         $_ENV[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures7/env.json';
@@ -199,7 +186,7 @@ class CredentialsLoaderTest extends TestCase
      */
     public function testLoadJsonFromGetEnvBackwardsCompatibility(): void
     {
-        $_SERVER[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures7/server.json';
+        $_ENV[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures7/env.json';
         putenv(CredentialsLoader::ENV_VAR . '=' . __DIR__ . '/fixtures7/getenv.json');
 
         $json = CredentialsLoader::fromEnv();

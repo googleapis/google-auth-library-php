@@ -295,6 +295,6 @@ abstract class CredentialsLoader implements
 
     private static function getEnv(string $env): mixed
     {
-        return getenv($env) ?: $_SERVER[$env] ?? $_ENV[$env] ?? null;
+        return getenv($env) ?: $_ENV[$env] ?? null;
     }
 }
