@@ -98,6 +98,19 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $this->assertEquals('1234567890987654321', $creds->getClientName());
     }
 
+    public function testGetCacheKey()
+    {
+        $creds = new ImpersonatedServiceAccountCredentials(self::SCOPE, [
+            'service_account_impersonation_url' => 'foo',
+            'source_credentials' => [
+                'type' => 'service_account',
+                'client_email' => '123',
+                'private_key' => 'abc'
+            ]
+        ]);
+        $this->assertEquals('foo123.scope1scope2', $creds->getCacheKey());
+    }
+
     public function testMissingImpersonationUriThrowsException()
     {
         $this->expectException(LogicException::class);
