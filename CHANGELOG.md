@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.47.1](https://github.com/googleapis/google-auth-library-php/compare/v1.47.0...v1.47.1) (2025-07-08)
+
+
+### Bug Fixes
+
+* Undefined index error in cache trait ([#617](https://github.com/googleapis/google-auth-library-php/issues/617)) ([ff7ece6](https://github.com/googleapis/google-auth-library-php/commit/ff7ece65bab1e5131ef57181678cc83e04c93aef))
+
 ## [1.47.0](https://github.com/googleapis/google-auth-library-php/compare/v1.46.0...v1.47.0) (2025-04-15)
 
 
