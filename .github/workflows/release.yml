@@ -10,7 +10,7 @@ jobs:
     name: Run googleapis/google-cloud-php tests against latest version
     if: github.event.pull_request.user.login == 'release-please[bot]'
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Clone googleapis/google-cloud-php
       uses: actions/checkout@master
       with:
