@@ -18,7 +18,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         name: PHP ${{ matrix.php }} Unit Test${{ matrix.os == 'windows-latest' && ' on Windows' || '' }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -36,7 +36,7 @@ jobs:
         runs-on: ubuntu-latest
         name: Test Prefer Lowest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
