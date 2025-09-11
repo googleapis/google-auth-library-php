@@ -171,11 +171,19 @@ $jsonKey = ['key' => 'value'];
 // define the scopes for your API call
 $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
 
-// Load credentials
-$creds = CredentialsLoader::makeCredentials($scopes, $jsonKey);
+// Load credentials from JSON containing service account credentials.
+$creds = new ServiceAccountCredentials($scopes, $jsonKey),
+
+// For other credentials types, create those classes explicitly using the
+// "type" field in the JSON key, for example:
+$creds = match ($jsonKey['type']) {
+    'service_account' => new ServiceAccountCredentials($scope, $jsonKey),
+    'authorized_user' => new UserRefreshCredentials($scope, $jsonKey),
+    default => throw new InvalidArgumentException('This application only supports service account and user account credentials'),
+};
 
 // optional caching
-// $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
+$creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
 
 // create middleware
 $middleware = new AuthTokenMiddleware($creds);

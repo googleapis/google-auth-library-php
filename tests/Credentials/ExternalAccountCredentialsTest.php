@@ -586,7 +586,12 @@ class ExternalAccountCredentialsTest extends TestCase
      */
     public function testExecutableCredentialSourceEnvironmentVars()
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('This test does not work on Windows');
+        }
+
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
+
         $tmpFile = tempnam(sys_get_temp_dir(), 'test');
         $outputFile = tempnam(sys_get_temp_dir(), 'output');
         $fileContents = 'foo-' . rand();
@@ -597,20 +602,23 @@ class ExternalAccountCredentialsTest extends TestCase
             'id_token' => 'abc',
             'expiration_time' => time() + 100,
         ]);
+
+        $command = sprintf(
+            'echo $GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE,$GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE,%s > %s' .
+            ' && echo \'%s\' > $GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE' .
+            ' && echo \'%s\'',
+            $fileContents,
+            $tmpFile,
+            $successJson,
+            $successJson
+        );
+
         $json = [
             'audience' => 'test-audience',
             'subject_token_type' => 'test-token-type',
             'credential_source' => [
                 'executable' => [
-                    'command' => sprintf(
-                        'echo $GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE,$GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE,%s > %s' .
-                        ' && echo \'%s\' > $GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE ' .
-                        ' && echo \'%s\'',
-                        $fileContents,
-                        $tmpFile,
-                        $successJson,
-                        $successJson,
-                    ),
+                    'command' => $command,
                     'timeout_millis' => 5000,
                     'output_file' => $outputFile,
                 ],

@@ -36,6 +36,7 @@ trait LoggingTrait
             'severity' => strtoupper(LogLevel::DEBUG),
             'processId' => $event->processId ?? null,
             'requestId' => $event->requestId ?? null,
+            'rpcName' => $event->rpcName ?? null,
         ];
 
         $debugEvent = array_filter($debugEvent, fn ($value) => !is_null($value));

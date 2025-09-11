@@ -40,7 +40,7 @@ class UserRefreshCredentialsTest extends TestCase
     {
         putenv(UserRefreshCredentials::ENV_VAR);  // removes it from
         if ($this->originalHome != getenv('HOME')) {
-            putenv('HOME=' . $this->originalHome);
+            setHomeEnv($this->originalHome);
         }
     }
 
@@ -179,7 +179,7 @@ class UserRefreshCredentialsTest extends TestCase
 
     public function testIsNullIfFileDoesNotExist()
     {
-        putenv('HOME=' . __DIR__ . '/../not_exist_fixtures');
+        setHomeEnv(__DIR__ . '/../not_exist_fixtures');
         $this->assertNull(
             UserRefreshCredentials::fromWellKnownFile('a scope')
         );
@@ -187,7 +187,7 @@ class UserRefreshCredentialsTest extends TestCase
 
     public function testSucceedIfFileIsPresent()
     {
-        putenv('HOME=' . __DIR__ . '/../fixtures2');
+        setHomeEnv(__DIR__ . '/../fixtures2');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );

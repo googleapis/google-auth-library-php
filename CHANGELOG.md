@@ -2,6 +2,38 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.49.0](https://github.com/googleapis/google-auth-library-php/compare/v1.48.1...v1.49.0) (2025-11-06)
+
+
+### Features
+
+* Add semaphore locking to Sysv cache ([#640](https://github.com/googleapis/google-auth-library-php/issues/640)) ([38ea069](https://github.com/googleapis/google-auth-library-php/commit/38ea069652278928f55335fc6c4ed92be866cf0f))
+* Json key scopes in ImpersonatedServiceAccountCredentials ([#638](https://github.com/googleapis/google-auth-library-php/issues/638)) ([b6b6966](https://github.com/googleapis/google-auth-library-php/commit/b6b696696245519bbf50222514189dc7a1010bf7))
+
+
+### Bug Fixes
+
+* Filecache race condition ([#637](https://github.com/googleapis/google-auth-library-php/issues/637)) ([09042be](https://github.com/googleapis/google-auth-library-php/commit/09042be363a275b5055dce28e8c7ce10455376d9))
+
+## [1.48.1](https://github.com/googleapis/google-auth-library-php/compare/v1.48.0...v1.48.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* Remove deprecated Item class for the CacheItemPool ([#631](https://github.com/googleapis/google-auth-library-php/issues/631)) ([7ec42c6](https://github.com/googleapis/google-auth-library-php/commit/7ec42c6ccc678865958766a32e888ae986a13608))
+
+## [1.48.0](https://github.com/googleapis/google-auth-library-php/compare/v1.47.1...v1.48.0) (2025-09-16)
+
+
+### Features
+
+* Add the rpcName to the logged event ([#630](https://github.com/googleapis/google-auth-library-php/issues/630)) ([d1d9e21](https://github.com/googleapis/google-auth-library-php/commit/d1d9e214af6a67bba4f06a2906be1be7da469419))
+
+
+### Bug Fixes
+
+* Deprecate Credentials::makeCredentials ([#624](https://github.com/googleapis/google-auth-library-php/issues/624)) ([12bb6e8](https://github.com/googleapis/google-auth-library-php/commit/12bb6e8a137f0dce5e2f1c193d59df8596fde3e4))
+
 ## [1.47.1](https://github.com/googleapis/google-auth-library-php/compare/v1.47.0...v1.47.1) (2025-07-08)
 
 

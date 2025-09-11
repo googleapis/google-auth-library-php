@@ -192,7 +192,7 @@ class ServiceAccountCredentialsTest extends TestCase
     /** @runInSeparateProcess */
     public function testIsNullIfFileDoesNotExist()
     {
-        putenv('HOME=' . __DIR__ . '/../not_exists_fixtures');
+        setHomeEnv(__DIR__ . '/../not_exists_fixtures');
         $this->assertNull(
             ServiceAccountCredentials::fromWellKnownFile()
         );
@@ -201,7 +201,7 @@ class ServiceAccountCredentialsTest extends TestCase
     /** @runInSeparateProcess */
     public function testSucceedIfFileIsPresent()
     {
-        putenv('HOME=' . __DIR__ . '/../fixtures');
+        setHomeEnv(__DIR__ . '/../fixtures');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
