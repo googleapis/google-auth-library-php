@@ -119,6 +119,7 @@ abstract class CredentialsLoader implements
 
     /**
      * Create a new Credentials instance.
+     *
      * @deprecated This method is being deprecated because of a potential security risk.
      *
      * This method does not validate the credential configuration. The security
@@ -148,6 +149,9 @@ abstract class CredentialsLoader implements
      *
      * @see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials
      *
+     * @param string|string[] $scope
+     * @param array<mixed> $jsonKey
+     * @param string|string[] $defaultScope
      * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials
      */
     public static function makeCredentials(
