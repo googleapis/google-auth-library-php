@@ -31,7 +31,7 @@ jobs:
                 max_attempts: 3
                 command: composer install
             - name: Run Script
-              run: vendor/bin/phpunit ${{ matrix.os == 'windows-latest' && '--filter GCECredentialsTest' || '' }}
+              run: vendor/bin/phpunit
     test_lowest:
         runs-on: ubuntu-latest
         name: Test Prefer Lowest
