@@ -2,6 +2,18 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.48.0](https://github.com/googleapis/google-auth-library-php/compare/v1.47.1...v1.48.0) (2025-09-16)
+
+
+### Features
+
+* Add the rpcName to the logged event ([#630](https://github.com/googleapis/google-auth-library-php/issues/630)) ([d1d9e21](https://github.com/googleapis/google-auth-library-php/commit/d1d9e214af6a67bba4f06a2906be1be7da469419))
+
+
+### Bug Fixes
+
+* Deprecate Credentials::makeCredentials ([#624](https://github.com/googleapis/google-auth-library-php/issues/624)) ([12bb6e8](https://github.com/googleapis/google-auth-library-php/commit/12bb6e8a137f0dce5e2f1c193d59df8596fde3e4))
+
 ## [1.47.1](https://github.com/googleapis/google-auth-library-php/compare/v1.47.0...v1.47.1) (2025-07-08)
 
 
