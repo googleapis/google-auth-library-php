@@ -42,7 +42,7 @@ use InvalidArgumentException;
  * is used.
  * When the credential configuration is accepted from an
  * untrusted source, you should validate it before creating this class.
- * [documentation] https://cloud.google.com/docs/authentication/external/externally-sourced-credentials for more details.
+ * @see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials
  */
 class ExternalAccountCredentials implements
     FetchAuthTokenInterface,
