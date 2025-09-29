@@ -30,6 +30,15 @@ use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use LogicException;
 
+/**
+ * **IMPORTANT**:
+ * This class does not validate the credential configuration. A security
+ * risk occurs when a credential configuration configured with malicious urls
+ * is used.
+ * When the credential configuration is accepted from an
+ * untrusted source, you should validate it before creating this class.
+ * @see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials
+ */
 class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     SignBlobInterface,
     GetUniverseDomainInterface
