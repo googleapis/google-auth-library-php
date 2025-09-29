@@ -41,7 +41,7 @@ use InvalidArgumentException;
  * risk occurs when a credential configuration configured with malicious urls
  * is used.
  * When the credential configuration is accepted from an
- * untrusted source, you should validate it before using with this method.
+ * untrusted source, you should validate it before creating this class.
  * [documentation] https://cloud.google.com/docs/authentication/external/externally-sourced-credentials for more details.
  */
 class ExternalAccountCredentials implements
