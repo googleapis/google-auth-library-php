@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.48.1](https://github.com/googleapis/google-auth-library-php/compare/v1.48.0...v1.48.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* Remove deprecated Item class for the CacheItemPool ([#631](https://github.com/googleapis/google-auth-library-php/issues/631)) ([7ec42c6](https://github.com/googleapis/google-auth-library-php/commit/7ec42c6ccc678865958766a32e888ae986a13608))
+
 ## [1.48.0](https://github.com/googleapis/google-auth-library-php/compare/v1.47.1...v1.48.0) (2025-09-16)
 
 
