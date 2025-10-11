@@ -68,6 +68,16 @@ class ApplicationDefaultCredentialsTest extends TestCase
         );
     }
 
+    public function testLoadsOKIfEnvSpecifiedIsAJsonString()
+    {
+        $json = file_get_contents(__DIR__ . '/fixtures' . '/private.json');
+
+        putenv(ServiceAccountCredentials::ENV_VAR . '=' . $json);
+        $this->assertNotNull(
+            ApplicationDefaultCredentials::getCredentials('a scope')
+        );
+    }
+
     public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
         putenv('HOME=' . __DIR__ . '/fixtures');

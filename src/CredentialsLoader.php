@@ -80,10 +80,16 @@ abstract class CredentialsLoader implements
         if (empty($path)) {
             return null;
         }
+
+        if (is_string($path) && str_starts_with($path, '{')) {
+            return json_decode($path, true);
+        }
+
         if (!file_exists($path)) {
             $cause = 'file ' . $path . ' does not exist';
             throw new \DomainException(self::unableToReadEnv($cause));
         }
+
         $jsonKey = file_get_contents($path);
 
         return json_decode((string) $jsonKey, true);
