@@ -21,10 +21,12 @@ use Google\Auth\Cache\FileSystemCacheItemPool;
 use Google\Auth\Cache\TypedItem;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Filesystem\Filesystem;
 
 class FileSystemCacheItemPoolTest extends TestCase
 {
-    private string $defaultCacheDirectory = '.cache';
+    private string $cachePath;
+    private Filesystem $filesystem;
     private FileSystemCacheItemPool $pool;
     private array $invalidChars = [
         '`', '~', '!', '@', '#', '$',
@@ -36,28 +38,21 @@ class FileSystemCacheItemPoolTest extends TestCase
 
     public function setUp(): void
     {
-        $this->pool = new FileSystemCacheItemPool($this->defaultCacheDirectory);
+        $this->cachePath = sys_get_temp_dir() . '/google_auth_php_test/';
+        $this->filesystem = new Filesystem();
+        $this->filesystem->remove($this->cachePath);
+        $this->pool = new FileSystemCacheItemPool($this->cachePath);
     }
 
     public function tearDown(): void
     {
-        $files = scandir($this->defaultCacheDirectory);
-
-        foreach ($files as $fileName) {
-            if ($fileName === '.' || $fileName === '..') {
-                continue;
-            }
-
-            unlink($this->defaultCacheDirectory . '/' . $fileName);
-        }
-
-        rmdir($this->defaultCacheDirectory);
+        $this->filesystem->remove($this->cachePath);
     }
 
     public function testInstanceCreatesCacheFolder()
     {
-        $this->assertTrue(file_exists($this->defaultCacheDirectory));
-        $this->assertTrue(is_dir($this->defaultCacheDirectory));
+        $this->assertTrue(file_exists($this->cachePath));
+        $this->assertTrue(is_dir($this->cachePath));
     }
 
     public function testSaveAndGetItem()
@@ -134,10 +129,10 @@ class FileSystemCacheItemPoolTest extends TestCase
     {
         $item = $this->getNewItem();
         $this->pool->save($item);
-        $this->assertLessThan(scandir($this->defaultCacheDirectory), 2);
+        $this->assertLessThan(scandir($this->cachePath), 2);
         $this->pool->clear();
         // Clear removes all the files, but scandir returns `.` and `..` as files
-        $this->assertEquals(count(scandir($this->defaultCacheDirectory)), 2);
+        $this->assertEquals(count(scandir($this->cachePath)), 2);
     }
 
     public function testSaveDeferredAndCommit()
@@ -148,6 +143,52 @@ class FileSystemCacheItemPoolTest extends TestCase
 
         $this->pool->commit();
         $this->assertTrue($this->pool->getItem($item->getKey())->isHit());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testRaceCondition()
+    {
+        for ($i = 0; $i < 100; $i++) {
+            $cachePath = $this->cachePath . '/google_auth_php_test-' . rand();
+            if (!function_exists('pcntl_fork')) {
+                $this->markTestSkipped('pcntl_fork is not available');
+            }
+
+            $pids = [];
+            for ($j = 0; $j < 4; $j++) {
+                $pid = pcntl_fork();
+                if ($pid == -1) {
+                    $this->fail('Could not fork');
+                }
+                $pool = new FileSystemCacheItemPool($cachePath);
+                $item = $pool->getItem('foo');
+                $item->set('bar');
+                $pool->save($item);
+
+                if ($pid) {
+                    // parent
+                    $pids[] = $pid;
+                } else {
+                    // child
+                    exit(0);
+                }
+            }
+
+            // parent
+            $pool->save($item);
+
+            foreach ($pids as $pid) {
+                pcntl_waitpid($pid, $status);
+                $this->assertEquals(0, $status);
+            }
+
+            $this->assertTrue($pool->hasItem('foo'));
+            $cachedItem = $pool->getItem('foo');
+            $this->assertEquals('bar', $cachedItem->get());
+        }
+        $this->filesystem->remove($this->cachePath);
     }
 
     /**

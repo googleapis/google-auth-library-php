@@ -46,7 +46,9 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
             return;
         }
 
-        if (!mkdir($this->cachePath) && !is_dir($this->cachePath)) {
+        // Suppress the error for when the directory already exists because of a
+        // race condition
+        if (!@mkdir($this->cachePath, 0777, true) && !is_dir($this->cachePath)) {
             throw new ErrorException("Cache folder couldn't be created.");
         }
     }
