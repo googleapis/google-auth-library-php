@@ -507,11 +507,25 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $this->assertEquals($expectedScope, $scopeProp->getValue($credentials));
     }
 
+    public function testScopePrecedenceWithNoJsonKey()
+    {
+        $defaultScope = 'a-default-scope';
+        $jsonKey = self::SERVICE_ACCOUNT_TO_SERVICE_ACCOUNT_JSON;
+        $credentials = new ImpersonatedServiceAccountCredentials(
+            scope: null,
+            jsonKey: $jsonKey,
+            defaultScope: $defaultScope,
+        );
+
+        $scopeProp = (new ReflectionClass($credentials))->getProperty('targetScope');
+        $this->assertEquals($defaultScope, $scopeProp->getValue($credentials));
+    }
+
     public function provideScopePrecedence()
     {
         $userScope = 'a-user-scope';
-        $jsonKeyScope = 'a-user-scope';
-        $defaultScope = 'a-user-scope';
+        $jsonKeyScope = 'a-json-key-scope';
+        $defaultScope = 'a-default-scope';
         return [
             // User scope always takes precendence
             [$userScope, $jsonKeyScope, $defaultScope, 'expectedScope' => $userScope],
@@ -525,8 +539,8 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
 
             // Default Scope is last
             [null, null, $defaultScope, 'expectedScope' => $defaultScope],
-            // JSON Key scope is exists but is an empty array
-            [null, [], $defaultScope, 'expectedScope' => []],
+            // JSON Key scope is exists but is an empty array, still return default
+            [null, [], $defaultScope, 'expectedScope' => $defaultScope],
 
             // No scope is empty array
             [null, null, null, 'expectedScope' => []],

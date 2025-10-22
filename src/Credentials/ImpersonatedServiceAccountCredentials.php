@@ -114,7 +114,8 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             throw new LogicException('json key is missing the source_credentials field');
         }
 
-        $scope = $scope ?? $jsonKey['scopes'] ?? $defaultScope;
+        $jsonKeyScope = $jsonKey['scopes'] ?? null;
+        $scope = $scope ?: $jsonKeyScope ?: $defaultScope;
         if ($scope && $targetAudience) {
             throw new InvalidArgumentException(
                 'Scope and targetAudience cannot both be supplied'
