@@ -490,8 +490,8 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
      * @dataProvider provideScopePrecedence
      */
     public function testScopePrecedence(
-        string|null $userScope,
-        string|null|array $jsonKeyScope,
+        string|array|null $userScope,
+        string|array|null $jsonKeyScope,
         string|null $defaultScope,
         string|array $expectedScope
     ) {
@@ -544,6 +544,10 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
 
             // No scope is empty array
             [null, null, null, 'expectedScope' => []],
+
+            // Test empty strings and arrays
+            ['', $jsonKeyScope, null, 'expectedScope' => $jsonKeyScope],
+            [[], $jsonKeyScope, null, 'expectedScope' => $jsonKeyScope],
         ];
     }
 }
