@@ -46,7 +46,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
             return;
         }
 
-        if (!mkdir($this->cachePath)) {
+        if (!mkdir($this->cachePath) && !is_dir($this->cachePath)) {
             throw new ErrorException("Cache folder couldn't be created.");
         }
     }
@@ -111,7 +111,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
         $itemPath = $this->cacheFilePath($item->getKey());
         $serializedItem = serialize($item->get());
 
-        $result = file_put_contents($itemPath, $serializedItem);
+        $result = file_put_contents($itemPath, $serializedItem, LOCK_EX);
 
         // 0 bytes write is considered a successful operation
         if ($result === false) {
