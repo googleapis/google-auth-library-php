@@ -548,6 +548,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
             // Test empty strings and arrays
             ['', $jsonKeyScope, null, 'expectedScope' => $jsonKeyScope],
             [[], $jsonKeyScope, null, 'expectedScope' => $jsonKeyScope],
+            [[], '', $defaultScope, 'expectedScope' => $defaultScope],
         ];
     }
 }
