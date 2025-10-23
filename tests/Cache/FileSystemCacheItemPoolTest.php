@@ -150,12 +150,11 @@ class FileSystemCacheItemPoolTest extends TestCase
      */
     public function testRaceCondition()
     {
+        if (!function_exists('pcntl_fork')) {
+            $this->markTestSkipped('pcntl_fork is not available');
+        }
         for ($i = 0; $i < 100; $i++) {
             $cachePath = $this->cachePath . '/google_auth_php_test-' . rand();
-            if (!function_exists('pcntl_fork')) {
-                $this->markTestSkipped('pcntl_fork is not available');
-            }
-
             $pids = [];
             for ($j = 0; $j < 4; $j++) {
                 $pid = pcntl_fork();
