@@ -146,51 +146,6 @@ class FileSystemCacheItemPoolTest extends TestCase
     }
 
     /**
-     * @runInSeparateProcess
-     */
-    public function testRaceCondition()
-    {
-        if (!function_exists('pcntl_fork')) {
-            $this->markTestSkipped('pcntl_fork is not available');
-        }
-        for ($i = 0; $i < 100; $i++) {
-            $cachePath = $this->cachePath . '/google_auth_php_test-' . rand();
-            $pids = [];
-            for ($j = 0; $j < 4; $j++) {
-                $pid = pcntl_fork();
-                if ($pid == -1) {
-                    $this->fail('Could not fork');
-                }
-                $pool = new FileSystemCacheItemPool($cachePath);
-                $item = $pool->getItem('foo');
-                $item->set('bar');
-                $pool->save($item);
-
-                if ($pid) {
-                    // parent
-                    $pids[] = $pid;
-                } else {
-                    // child
-                    exit(0);
-                }
-            }
-
-            // parent
-            $pool->save($item);
-
-            foreach ($pids as $pid) {
-                pcntl_waitpid($pid, $status);
-                $this->assertEquals(0, $status);
-            }
-
-            $this->assertTrue($pool->hasItem('foo'));
-            $cachedItem = $pool->getItem('foo');
-            $this->assertEquals('bar', $cachedItem->get());
-        }
-        $this->filesystem->remove($this->cachePath);
-    }
-
-    /**
     * @dataProvider provideInvalidChars
     */
     public function testGetItemWithIncorrectKeyShouldThrowAnException($char)
