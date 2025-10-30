@@ -126,11 +126,12 @@ class SysVCacheItemPool implements CacheItemPoolInterface
 
         $currentPid = getmypid();
         if ($this->lockOwnerPid === $currentPid) {
+            // We already have the lock
             return true;
         }
 
         if (sem_acquire($this->semId)) {
-            $this->lockOwnerPid = $currentPid;
+            $this->lockOwnerPid = (int) $currentPid;
             return true;
         }
         return false;
