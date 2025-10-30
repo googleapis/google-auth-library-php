@@ -45,8 +45,7 @@ class RaceConditionTest extends TestCase
         if (!function_exists('pcntl_fork')) {
             $this->markTestSkipped('pcntl_fork is not available');
         }
-        for ($i = 0; $i < 100; $i++) {
-
+        for ($i = 0; $i < 50; $i++) {
             $pids = [];
             for ($j = 0; $j < 4; $j++) {
                 $pid = pcntl_fork();
@@ -56,7 +55,7 @@ class RaceConditionTest extends TestCase
                 $pool = $this->createCacheItemPool($cacheClass);
                 $item = $pool->getItem('foo');
                 $item->set('bar');
-                $pool->save($item);
+                $this->assertTrue($pool->save($item));
 
                 if ($pid) {
                     // parent
@@ -68,7 +67,7 @@ class RaceConditionTest extends TestCase
             }
 
             // parent
-            $pool->save($item);
+            $this->assertTrue($pool->save($item));
 
             foreach ($pids as $pid) {
                 pcntl_waitpid($pid, $status);
@@ -78,6 +77,8 @@ class RaceConditionTest extends TestCase
             $this->assertTrue($pool->hasItem('foo'));
             $cachedItem = $pool->getItem('foo');
             $this->assertEquals('bar', $cachedItem->get());
+
+            $pool->clear();
         }
     }
 

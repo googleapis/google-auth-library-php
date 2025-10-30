@@ -23,6 +23,8 @@ use Google\Auth\Tests\BaseTest;
 
 class SysVCacheItemPoolTest extends BaseTest
 {
+    const VARIABLE_KEY = 99;
+
     private $pool;
 
     public function setUp(): void
@@ -32,8 +34,15 @@ class SysVCacheItemPoolTest extends BaseTest
                 'sysvshm extension is required for running the test'
             );
         }
-        $this->pool = new SysVCacheItemPool(['variableKey' => 99]);
+        $this->pool = new SysVCacheItemPool(['variableKey' => self::VARIABLE_KEY]);
         $this->pool->clear();
+    }
+
+    public function tearDown(): void
+    {
+        if (extension_loaded('sysvshm')) {
+            $this->pool->clear();
+        }
     }
 
     public function saveItem($key, $value)
@@ -157,5 +166,40 @@ class SysVCacheItemPoolTest extends BaseTest
             $item->get(),
             $this->pool->getItem($keys[1])->get()
         );
+    }
+
+    public function testRaceCondition()
+    {
+        if (!extension_loaded('sysvsem')) {
+            $this->markTestSkipped(
+                'sysvsem extension is required for running the race condition test'
+            );
+        }
+
+        $key = 'race-item';
+        $initialValue = 0;
+        $this->saveItem($key, $initialValue);
+
+        $numProcesses = 100;
+        $processes = [];
+        for ($i = 0; $i < $numProcesses; $i++) {
+            $command = sprintf(
+                'php %s/sysv_cache_race_condition_writer.php %s %s',
+                __DIR__,
+                $key,
+                self::VARIABLE_KEY
+            );
+            $processes[] = proc_open($command, [], $pipes);
+        }
+
+        foreach ($processes as $process) {
+            // proc_close waits for the process to terminate and returns its exit code.
+            // This ensures that all child processes have completed their writes
+            // before the parent process proceeds to read the final value.
+            proc_close($process);
+        }
+
+        $finalValue = $this->pool->getItem($key)->get();
+        $this->assertEquals($numProcesses, $finalValue);
     }
 }
