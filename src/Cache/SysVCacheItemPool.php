@@ -19,6 +19,7 @@ namespace Google\Auth\Cache;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use SysvSemaphore;
+use SysvSharedMemory;
 
 /**
  * SystemV shared memory based CacheItemPool implementation.
@@ -118,38 +119,6 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         }
     }
 
-    private function acquireLock(): bool
-    {
-        if ($this->semId === false) {
-            // if `sysvsem` isn't loaded, or if `sem_get` fails, return true
-            // this ensures BC with previous versions of the auth library.
-            // @TODO consider better handling when `sem_get` fails.
-            return true;
-        }
-
-        $currentPid = getmypid();
-        if ($this->lockOwnerPid === $currentPid) {
-            // We already have the lock
-            return true;
-        }
-
-        if (sem_acquire($this->semId)) {
-            $this->lockOwnerPid = (int) $currentPid;
-            return true;
-        }
-        return false;
-    }
-
-    private function releaseLock(): bool
-    {
-        if ($this->semId === false || $this->lockOwnerPid !== getmypid()) {
-            return true;
-        }
-
-        $this->lockOwnerPid = null;
-        return sem_release($this->semId);
-    }
-
     /**
      * @param mixed $key
      * @return CacheItemInterface
@@ -198,20 +167,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->deferredItems = [];
         $ret = $this->saveCurrentItems();
 
-        // Remove the shared memory segment and semaphore when clearing the cache
-        $shmid = @shm_attach($this->sysvKey);
-        if ($shmid !== false) {
-            @shm_remove($shmid);
-            @shm_detach($shmid);
-        }
-        if ($this->semId !== false) {
-            @sem_remove($this->semId);
-            $this->lockOwnerPid = null;
-            // Re-initialize semaphore after removal to allow future use
-            $semKey = ftok(__FILE__, 'B');
-            $this->semId = sem_get($semKey, 1, $this->options['perm'], true);
-        }
-
+        $this->resetShm();
         $this->releaseLock();
         return $ret;
     }
@@ -242,22 +198,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         }
         $ret = $this->saveCurrentItems();
 
-        // If the cache is empty after deletion, remove the shared memory segment and semaphore
-        if (empty($this->items)) {
-            $shmid = @shm_attach($this->sysvKey);
-            if ($shmid !== false) {
-                @shm_remove($shmid);
-                @shm_detach($shmid);
-            }
-            if ($this->semId !== false) {
-                @sem_remove($this->semId);
-                // Re-initialize semaphore after removal to allow future use
-                $semKey = ftok(__FILE__, $this->options['semProj']);
-                $this->semId = sem_get($semKey, 1, $this->options['perm'], true);
-                $this->lockOwnerPid = null;
-            }
-        }
-
+        $this->resetShm();
         $this->releaseLock();
         return $ret;
     }
@@ -321,20 +262,15 @@ class SysVCacheItemPool implements CacheItemPoolInterface
             return false;
         }
 
-        $shmid = shm_attach(
-            $this->sysvKey,
-            $this->options['memsize'],
-            $this->options['perm']
-        );
-        if ($shmid !== false) {
-            $ret = shm_put_var(
+        if (false !== $shmid = $this->attachShm()) {
+            $success = shm_put_var(
                 $shmid,
                 $this->options['variableKey'],
                 $this->items
             );
             shm_detach($shmid);
             $this->releaseLock();
-            return $ret;
+            return $success;
         }
         $this->releaseLock();
         return false;
@@ -351,18 +287,9 @@ class SysVCacheItemPool implements CacheItemPoolInterface
             return false;
         }
 
-        $shmid = shm_attach(
-            $this->sysvKey,
-            $this->options['memsize'],
-            $this->options['perm']
-        );
-        if ($shmid !== false) {
+        if (false !== $shmid = $this->attachShm()) {
             $data = @shm_get_var($shmid, $this->options['variableKey']);
-            if (!empty($data)) {
-                $this->items = $data;
-            } else {
-                $this->items = [];
-            }
+            $this->items = $data ?: [];
             shm_detach($shmid);
             $this->hasLoadedItems = true;
             $this->releaseLock();
@@ -370,5 +297,56 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         }
         $this->releaseLock();
         return false;
+    }
+
+    private function acquireLock(): bool
+    {
+        if ($this->semId === false) {
+            // if `sysvsem` isn't loaded, or if `sem_get` fails, return true
+            // this ensures BC with previous versions of the auth library.
+            // @TODO consider better handling when `sem_get` fails.
+            return true;
+        }
+
+        $currentPid = getmypid();
+        if ($this->lockOwnerPid === $currentPid) {
+            // We already have the lock
+            return true;
+        }
+
+        if (sem_acquire($this->semId)) {
+            $this->lockOwnerPid = (int) $currentPid;
+            return true;
+        }
+        return false;
+    }
+
+    private function releaseLock(): bool
+    {
+        if ($this->semId === false || $this->lockOwnerPid !== getmypid()) {
+            return true;
+        }
+
+        $this->lockOwnerPid = null;
+        return sem_release($this->semId);
+    }
+
+    private function resetShm(): void
+    {
+        // Remove the shared memory segment and semaphore when clearing the cache
+        $shmid = @shm_attach($this->sysvKey);
+        if ($shmid !== false) {
+            @shm_remove($shmid);
+            @shm_detach($shmid);
+        }
+    }
+
+    private function attachShm(): SysvSharedMemory|false
+    {
+        return shm_attach(
+            $this->sysvKey,
+            $this->options['memsize'],
+            $this->options['perm']
+        );
     }
 }
