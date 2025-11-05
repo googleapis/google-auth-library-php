@@ -485,4 +485,70 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
 
         $this->assertEquals(1, $requestCount);
     }
+
+    /**
+     * @dataProvider provideScopePrecedence
+     */
+    public function testScopePrecedence(
+        string|array|null $userScope,
+        string|array|null $jsonKeyScope,
+        string|null $defaultScope,
+        string|array $expectedScope
+    ) {
+        $jsonKey = self::SERVICE_ACCOUNT_TO_SERVICE_ACCOUNT_JSON;
+        $jsonKey['scopes'] = $jsonKeyScope;
+        $credentials = new ImpersonatedServiceAccountCredentials(
+            scope: $userScope,
+            jsonKey: $jsonKey,
+            defaultScope: $defaultScope,
+        );
+
+        $scopeProp = (new ReflectionClass($credentials))->getProperty('targetScope');
+        $this->assertEquals($expectedScope, $scopeProp->getValue($credentials));
+    }
+
+    public function testScopePrecedenceWithNoJsonKey()
+    {
+        $defaultScope = 'a-default-scope';
+        $jsonKey = self::SERVICE_ACCOUNT_TO_SERVICE_ACCOUNT_JSON;
+        $credentials = new ImpersonatedServiceAccountCredentials(
+            scope: null,
+            jsonKey: $jsonKey,
+            defaultScope: $defaultScope,
+        );
+
+        $scopeProp = (new ReflectionClass($credentials))->getProperty('targetScope');
+        $this->assertEquals($defaultScope, $scopeProp->getValue($credentials));
+    }
+
+    public function provideScopePrecedence()
+    {
+        $userScope = 'a-user-scope';
+        $jsonKeyScope = 'a-json-key-scope';
+        $defaultScope = 'a-default-scope';
+        return [
+            // User scope always takes precendence
+            [$userScope, $jsonKeyScope, $defaultScope, 'expectedScope' => $userScope],
+            [$userScope, null, $defaultScope, 'expectedScope' => $userScope],
+            [$userScope, $jsonKeyScope, null, 'expectedScope' => $userScope],
+            [$userScope, null, null, 'expectedScope' => $userScope],
+
+            // JSON Key Scope is next
+            [null, $jsonKeyScope, $defaultScope, 'expectedScope' => $jsonKeyScope],
+            [null, $jsonKeyScope, null, 'expectedScope' => $jsonKeyScope],
+
+            // Default Scope is last
+            [null, null, $defaultScope, 'expectedScope' => $defaultScope],
+            // JSON Key scope is exists but is an empty array, still return default
+            [null, [], $defaultScope, 'expectedScope' => $defaultScope],
+
+            // No scope is empty array
+            [null, null, null, 'expectedScope' => []],
+
+            // Test empty strings and arrays
+            ['', $jsonKeyScope, null, 'expectedScope' => $jsonKeyScope],
+            [[], $jsonKeyScope, null, 'expectedScope' => $jsonKeyScope],
+            [[], '', $defaultScope, 'expectedScope' => $defaultScope],
+        ];
+    }
 }

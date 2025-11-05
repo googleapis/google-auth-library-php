@@ -87,11 +87,14 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      *     @type string[]                       $delegates The delegates to impersonate
      * }
      * @param string|null $targetAudience The audience to request an ID token.
+     * @param string|string[]|null $defaultScope The scopes to be used if no "scopes" field exists
+     *                                           in the `$jsonKey`.
      */
     public function __construct(
         string|array|null $scope,
         string|array $jsonKey,
-        private ?string $targetAudience = null
+        private ?string $targetAudience = null,
+        string|array|null $defaultScope = null,
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -110,6 +113,9 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         if (!array_key_exists('source_credentials', $jsonKey)) {
             throw new LogicException('json key is missing the source_credentials field');
         }
+
+        $jsonKeyScope = $jsonKey['scopes'] ?? null;
+        $scope = $scope ?: $jsonKeyScope ?: $defaultScope;
         if ($scope && $targetAudience) {
             throw new InvalidArgumentException(
                 'Scope and targetAudience cannot both be supplied'
