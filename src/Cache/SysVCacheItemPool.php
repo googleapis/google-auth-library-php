@@ -109,6 +109,9 @@ class SysVCacheItemPool implements CacheItemPoolInterface
         $this->items = [];
         $this->deferredItems = [];
         $this->sysvKey = ftok(__FILE__, $this->options['proj']);
+
+        // gracefully handle when `sysvsem` isn't loaded
+        // @TODO(v2): throw an exception when the extension isn't loaded
         if (extension_loaded('sysvsem')) {
             $semKey = ftok(__FILE__, $this->options['semProj']);
             $this->semId = sem_get($semKey, 1, $this->options['perm'], true);
@@ -119,7 +122,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
     {
         if ($this->semId === false) {
             // if `sysvsem` isn't loaded, or if `sem_get` fails, return true
-            // this ensures BC with previous behavior
+            // this ensures BC with previous versions of the auth library.
             // @TODO consider better handling when `sem_get` fails.
             return true;
         }
