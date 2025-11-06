@@ -2,6 +2,19 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.49.0](https://github.com/googleapis/google-auth-library-php/compare/v1.48.1...v1.49.0) (2025-11-06)
+
+
+### Features
+
+* Add semaphore locking to Sysv cache ([#640](https://github.com/googleapis/google-auth-library-php/issues/640)) ([38ea069](https://github.com/googleapis/google-auth-library-php/commit/38ea069652278928f55335fc6c4ed92be866cf0f))
+* Json key scopes in ImpersonatedServiceAccountCredentials ([#638](https://github.com/googleapis/google-auth-library-php/issues/638)) ([b6b6966](https://github.com/googleapis/google-auth-library-php/commit/b6b696696245519bbf50222514189dc7a1010bf7))
+
+
+### Bug Fixes
+
+* Filecache race condition ([#637](https://github.com/googleapis/google-auth-library-php/issues/637)) ([09042be](https://github.com/googleapis/google-auth-library-php/commit/09042be363a275b5055dce28e8c7ce10455376d9))
+
 ## [1.48.1](https://github.com/googleapis/google-auth-library-php/compare/v1.48.0...v1.48.1) (2025-09-29)
 
 
