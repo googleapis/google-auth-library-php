@@ -222,7 +222,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
 
     private function cacheFilePath(string $key): string
     {
-        return $this->cachePath . '/' . $key;
+        return $this->cachePath . DIRECTORY_SEPARATOR . $key;
     }
 
     private function validKey(string $key): bool
