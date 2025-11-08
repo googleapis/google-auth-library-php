@@ -152,7 +152,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
                 continue;
             }
 
-            if (!unlink($this->cachePath . '/' . $fileName)) {
+            if (!unlink($this->cachePath . DIRECTORY_SEPARATOR . $fileName)) {
                 return false;
             }
         }
