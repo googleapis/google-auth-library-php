@@ -33,6 +33,8 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
      */
     private array $buffer = [];
 
+    private string $tmpSuffix;
+
     /**
      * Creates a FileSystemCacheItemPool cache that stores values in local storage
      *
@@ -113,14 +115,40 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
         $itemPath = $this->cacheFilePath($item->getKey());
         $serializedItem = serialize($item->get());
 
-        $result = file_put_contents($itemPath, $serializedItem, LOCK_EX);
+        $unlink = false;
+        set_error_handler(static fn ($type, $message, $file, $line) => throw new \ErrorException($message, 0, $type, $file, $line));
+        $this->tmpSuffix ??= str_replace('/', '-', base64_encode(random_bytes(6)));
+        try {
+            $tmp = $this->cachePath.$this->tmpSuffix;
+            try {
+                $h = fopen($tmp, 'x');
+            } catch (\ErrorException $e) {
+                if (!str_contains($e->getMessage(), 'File exists')) {
+                    throw $e;
+                }
 
-        // 0 bytes write is considered a successful operation
-        if ($result === false) {
-            return false;
+                $tmp = $this->cachePath.$this->tmpSuffix = str_replace('/', '-', base64_encode(random_bytes(6)));
+                $h = fopen($tmp, 'x');
+            }
+            fwrite($h, $serializedItem);
+            fclose($h);
+            $unlink = true;
+
+            if ('\\' === \DIRECTORY_SEPARATOR) {
+                $result = copy($tmp, $itemPath);
+            } else {
+                $result = rename($tmp, $itemPath);
+                $unlink = ($result == false);
+            }
+
+            return $result;
+        } finally {
+            restore_error_handler();
+
+            if ($unlink) {
+                @unlink($tmp);
+            }
         }
-
-        return true;
     }
 
     /**
