@@ -40,7 +40,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
      */
     public function __construct(string $path)
     {
-        $this->cachePath = $path;
+        $this->cachePath = realpath($path) ?: $path;
 
         if (is_dir($this->cachePath)) {
             return;
@@ -152,7 +152,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
                 continue;
             }
 
-            if (!unlink($this->cachePath . DIRECTORY_SEPARATOR . $fileName)) {
+            if (!unlink($this->cachePath . \DIRECTORY_SEPARATOR . $fileName)) {
                 return false;
             }
         }
@@ -222,7 +222,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
 
     private function cacheFilePath(string $key): string
     {
-        return $this->cachePath . DIRECTORY_SEPARATOR . $key;
+        return $this->cachePath . \DIRECTORY_SEPARATOR . $key;
     }
 
     private function validKey(string $key): bool
