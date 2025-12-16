@@ -39,7 +39,7 @@ class OAuth2Test extends TestCase
     ];
 
     private $signingMinimal = [
-        'signingKey' => 'example_key',
+        'signingKey' => null, // added in setUp
         'signingAlgorithm' => 'HS256',
         'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
         'issuer' => 'app@example.com',
@@ -58,7 +58,7 @@ class OAuth2Test extends TestCase
     private $fetchAuthTokenMinimal = [
         'tokenCredentialUri' => 'https://tokens_r_us/test',
         'scope' => 'https://www.googleapis.com/auth/userinfo.profile',
-        'signingKey' => 'example_key',
+        'signingKey' => null, // added in setUp
         'signingAlgorithm' => 'HS256',
         'issuer' => 'app@example.com',
         'audience' => 'accounts.google.com',
@@ -71,6 +71,12 @@ class OAuth2Test extends TestCase
         'issuer' => 'an.issuer.com',
         'clientId' => 'myaccount.on.host.issuer.com',
     ];
+
+    public function setUp(): void
+    {
+        $this->signingMinimal['signingKey'] = str_repeat('x', 256);
+        $this->fetchAuthTokenMinimal['signingKey'] = file_get_contents(__DIR__ . '/fixtures/private.pem');
+    }
 
     /**
      * @group oauth2-authorization-uri
@@ -598,8 +604,8 @@ class OAuth2Test extends TestCase
     {
         $testConfig = $this->signingMinimal;
         $keys = [
-            'example_key_id1' => new Key('example_key1', 'HS256'),
-            'example_key_id2' => new Key('example_key2', 'HS256'),
+            'example_key_id1' => new Key(str_repeat('y', 256), 'HS256'),
+            'example_key_id2' => new Key(str_repeat('z', 256), 'HS256'),
         ];
         $testConfig['signingKey'] = $keys['example_key_id2']->getKeyMaterial();
         $testConfig['signingKeyId'] = 'example_key_id2';
@@ -618,8 +624,8 @@ class OAuth2Test extends TestCase
     {
         $testConfig = $this->signingMinimal;
         $keys = [
-            'example_key_id1' => new Key('example_key1', 'HS256'),
-            'example_key_id2' => new Key('example_key2', 'HS256'),
+            'example_key_id1' => new Key(str_repeat('y', 256), 'HS256'),
+            'example_key_id2' => new Key(str_repeat('z', 256), 'HS256'),
         ];
         $testConfig['signingKey'] = $keys['example_key_id2']->getKeyMaterial();
         $o = new OAuth2($testConfig);
@@ -820,7 +826,7 @@ class OAuth2Test extends TestCase
     {
         $testConfig = $this->tokenRequestMinimal;
         $o = new OAuth2($testConfig);
-        $o->setSigningKey('a_key');
+        $o->setSigningKey(str_repeat('z', 256));
         $o->setSigningAlgorithm('HS256');
 
         // Generate the request and confirm that it's correct.
