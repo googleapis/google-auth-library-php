@@ -135,7 +135,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $this->assertInstanceOf(GCECredentials::class, $creds);
 
         $uriProperty = (new ReflectionClass($creds))->getProperty('tokenUri');
-        $uriProperty->setAccessible(true);
 
         // used default scope
         $tokenUri = $uriProperty->getValue($creds);
@@ -174,7 +173,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $this->assertEquals('service_account_name@namespace.iam.gserviceaccount.com', $creds->getClientName());
 
         $sourceCredentialsProperty = (new ReflectionClass($creds))->getProperty('sourceCredentials');
-        $sourceCredentialsProperty->setAccessible(true);
 
         // used default scope
         $sourceCredentials = $sourceCredentialsProperty->getValue($creds);
@@ -197,7 +195,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $this->assertInstanceOf(UserRefreshCredentials::class, $creds);
 
         $authProperty = (new ReflectionClass($creds))->getProperty('auth');
-        $authProperty->setAccessible(true);
 
         // used default scope
         $auth = $authProperty->getValue($creds);
@@ -233,7 +230,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $this->assertInstanceOf(ServiceAccountCredentials::class, $creds);
 
         $authProperty = (new ReflectionClass($creds))->getProperty('auth');
-        $authProperty->setAccessible(true);
 
         // did not use default scope
         $auth = $authProperty->getValue($creds);
@@ -267,7 +263,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
         );
 
         $authProperty = (new ReflectionClass($creds))->getProperty('auth');
-        $authProperty->setAccessible(true);
 
         // used default scope
         $auth = $authProperty->getValue($creds);
@@ -562,7 +557,6 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $this->assertInstanceOf(UserRefreshCredentials::class, $creds);
 
         $authProperty = (new ReflectionClass($creds))->getProperty('auth');
-        $authProperty->setAccessible(true);
 
         // used default scope
         $auth = $authProperty->getValue($creds);
@@ -770,12 +764,10 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         $credsReflection = new \ReflectionClass($creds);
         $credsProp = $credsReflection->getProperty('auth');
-        $credsProp->setAccessible(true);
 
         $oauth = $credsProp->getValue($creds);
         $oauthReflection = new \ReflectionClass($oauth);
         $oauthProp = $oauthReflection->getProperty('subjectTokenFetcher');
-        $oauthProp->setAccessible(true);
 
         $subjectTokenFetcher = $oauthProp->getValue($oauth);
         $this->assertInstanceOf($expectedCredSource, $subjectTokenFetcher);

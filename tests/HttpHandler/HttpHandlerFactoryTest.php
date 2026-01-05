@@ -66,11 +66,9 @@ class HttpHandlerFactoryTest extends BaseTest
         // Get access to the default middleware stack so we can add it to our mock handler
         $handler = HttpHandlerFactory::build();
         $clientProp = (new ReflectionClass($handler))->getParentClass()->getProperty('client');
-        $clientProp->setAccessible(true);
 
         $handlerStack = $clientProp->getValue($handler)->getConfig('handler');
         $stackProp = (new ReflectionClass($handlerStack))->getProperty('stack');
-        $stackProp->setAccessible(true);
 
         foreach ($stackProp->getValue($handlerStack) as $idx => $middleware) {
             $newStack->push($middleware[0], $middleware[1]);

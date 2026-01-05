@@ -138,7 +138,6 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $creds = new ImpersonatedServiceAccountCredentials(['scope/1', 'scope/2'], $json);
 
         $sourceCredentialsProperty = (new ReflectionClass($creds))->getProperty('sourceCredentials');
-        $sourceCredentialsProperty->setAccessible(true);
         $this->assertInstanceOf($credClass, $sourceCredentialsProperty->getValue($creds));
     }
 
