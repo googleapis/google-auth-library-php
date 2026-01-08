@@ -272,9 +272,7 @@ class AccessTokenTest extends TestCase
         $token = new AccessToken();
         $reflector = new \ReflectionObject($token);
         $cacheKeyMethod = $reflector->getMethod('getCacheKeyFromCertLocation');
-        $cacheKeyMethod->setAccessible(true);
         $getCertsMethod = $reflector->getMethod('getCerts');
-        $getCertsMethod->setAccessible(true);
         $cacheKey = $cacheKeyMethod->invoke($token, $certUrl);
         $certs = $getCertsMethod->invoke(
             $token,

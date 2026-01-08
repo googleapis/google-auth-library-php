@@ -123,7 +123,6 @@ class FetchAuthTokenTest extends BaseTest
             'Google\Auth\Credentials\AppIdentityCredentials'
         );
         $property = $class->getProperty('lastReceivedToken');
-        $property->setAccessible(true);
 
         $credentials = new AppIdentityCredentials();
         $property->setValue($credentials, [
@@ -140,7 +139,6 @@ class FetchAuthTokenTest extends BaseTest
             'Google\Auth\Credentials\GCECredentials'
         );
         $property = $class->getProperty('lastReceivedToken');
-        $property->setAccessible(true);
 
         $credentials = new GCECredentials();
         $property->setValue($credentials, [
@@ -163,7 +161,6 @@ class FetchAuthTokenTest extends BaseTest
             'Google\Auth\Credentials\ServiceAccountCredentials'
         );
         $property = $class->getProperty('auth');
-        $property->setAccessible(true);
 
         $oauth2Mock = $this->getOAuth2Mock();
         $oauth2Mock->getScope()
@@ -191,7 +188,6 @@ class FetchAuthTokenTest extends BaseTest
             'Google\Auth\Credentials\ServiceAccountJwtAccessCredentials'
         );
         $property = $class->getProperty('auth');
-        $property->setAccessible(true);
 
         $credentials = new ServiceAccountJwtAccessCredentials($jsonPath);
         $property->setValue($credentials, $this->getOAuth2Mock()->reveal());
@@ -211,7 +207,6 @@ class FetchAuthTokenTest extends BaseTest
             'Google\Auth\Credentials\UserRefreshCredentials'
         );
         $property = $class->getProperty('auth');
-        $property->setAccessible(true);
 
         $credentials = new UserRefreshCredentials($this->scopes, $jsonPath);
         $property->setValue($credentials, $this->getOAuth2Mock()->reveal());

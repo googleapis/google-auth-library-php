@@ -41,7 +41,7 @@ class ServiceAccountCredentialsTest extends TestCase
             'client_id' => 'client123',
             'type' => 'service_account',
             'project_id' => 'example_project',
-            'private_key' => file_get_contents(__DIR__ . '/../fixtures' . '/private.pem'),
+            'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
         ];
     }
 

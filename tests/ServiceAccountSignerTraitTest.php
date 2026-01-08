@@ -25,9 +25,11 @@ class ServiceAccountSignerTraitTest extends TestCase
     const STRING_TO_SIGN = 'hello world';
 
     private $signedString = [
-        'ZPeNGA9xcqwMQ7OEfNdLuwgxO+rJ59mhetIZrqWncY0uv+IZN0',
-        'T4F3mg2sJVRD3awswFFdfMK20Xrnqo0dr8XdlgOkS5NIG38yrDagXsBf1ypAfji1sm22',
-        'UCyxkaPdB6eRczMXwJReu6q4LCJmx/Xr46kU/ZDNhrBkj6vjoD8yo='
+        'hlUvgzpJQm5mkIG8EWb4YiyGBsKN/VTsR8JOEfjh9je6bwaufgW3eAoAzFPY/4phMCAy7',
+        'OOl0Q+jrPMmkL9BpevbJRUG4g3fYBkVcWqpwvSZVbNW889DZiMyKf+NWb86KlLqC1o8aE',
+        'Iwh16L6rvXdg5iYA5/j/y2QYA7kACua/difsCVEpSv+XBZSzsRyMR4J6P2S52SUpyJkXU',
+        'S79uifXPLV2Lf3qeFvnqqmqG5FTg5VH6Pr7qhGmenmP9Am5YBQxX1XaM9J3tvViA+yO9H',
+        'ctvFXsGBXJyS5G2FIhHVCsGG3ScWvWlUv1HHY0QLwKvJaIusj+Q+r1aN0sOaiSE1jg==',
     ];
 
     /**
