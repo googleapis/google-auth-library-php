@@ -594,7 +594,7 @@ class AccessTokenStub extends AccessToken
     {
         if (isset($this->mocks['decode'])) {
             $claims = call_user_func_array($this->mocks['decode'], $args);
-            return new SimpleJWT(null, (array) $claims);
+            return new SimpleJWT([], (array) $claims);
         }
 
         return parent::callSimpleJwtDecode($args);
