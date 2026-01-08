@@ -61,14 +61,12 @@ class ExternalAccountCredentialsTest extends TestCase
 
         $credsReflection = new \ReflectionClass(ExternalAccountCredentials::class);
         $credsProp = $credsReflection->getProperty('auth');
-        $credsProp->setAccessible(true);
 
         $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
         $oauth = $credsProp->getValue($creds);
 
         $oauthReflection = new \ReflectionClass(OAuth2::class);
         $oauthProp = $oauthReflection->getProperty('subjectTokenFetcher');
-        $oauthProp->setAccessible(true);
         $subjectTokenFetcher = $oauthProp->getValue($oauth);
 
         $this->assertInstanceOf($expectedSourceClass, $subjectTokenFetcher);
@@ -76,7 +74,6 @@ class ExternalAccountCredentialsTest extends TestCase
         $sourceReflection = new \ReflectionClass($subjectTokenFetcher);
         foreach ($expectedProperties as $propName => $expectedPropValue) {
             $sourceProp = $sourceReflection->getProperty($propName);
-            $sourceProp->setAccessible(true);
             $this->assertEquals($expectedPropValue, $sourceProp->getValue($subjectTokenFetcher));
         }
     }
