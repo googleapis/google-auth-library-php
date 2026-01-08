@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.50.0](https://github.com/googleapis/google-auth-library-php/compare/v1.49.0...v1.50.0) (2026-01-08)
+
+
+### Features
+
+* Support firebase/php-jwt 7 ([#645](https://github.com/googleapis/google-auth-library-php/issues/645)) ([ae52b0a](https://github.com/googleapis/google-auth-library-php/commit/ae52b0aaa0d67c7e36569ab0f3ea3b3cf45c9e6a))
+
 ## [1.49.0](https://github.com/googleapis/google-auth-library-php/compare/v1.48.1...v1.49.0) (2025-11-06)
 
 
