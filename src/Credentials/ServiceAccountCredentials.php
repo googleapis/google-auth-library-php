@@ -25,6 +25,8 @@ use Google\Auth\OAuth2;
 use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\ServiceAccountSignerTrait;
 use Google\Auth\SignBlobInterface;
+use Google\Auth\TrustBoundaryInterface;
+use Google\Auth\TrustBoundaryTrait;
 use InvalidArgumentException;
 
 /**
@@ -63,9 +65,11 @@ use InvalidArgumentException;
 class ServiceAccountCredentials extends CredentialsLoader implements
     GetQuotaProjectInterface,
     SignBlobInterface,
-    ProjectIdProviderInterface
+    ProjectIdProviderInterface,
+    TrustBoundaryInterface
 {
     use ServiceAccountSignerTrait;
+    use TrustBoundaryTrait;
 
     /**
      * Used in observability metric headers
@@ -214,8 +218,24 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(?callable $httpHandler = null, array $headers = [])
     {
+        if ($this->getUniverseDomain() !== self::DEFAULT_UNIVERSE_DOMAIN) {
+            // Universe domain is not default, so trust boundary is not supported.
+            $this->suppressTrustBoundary();
+        }
+
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+
+        if ($trustBoundaryInfo = $this->refreshTrustBoundary($httpHandler, $this->auth->getIssuer())) {
+            $this->auth->setAdditionalClaims([
+                'x-goog-iam-authorization-token' => $trustBoundaryInfo['token'],
+                'x-goog-iam-authority-selector' => $trustBoundaryInfo['authority_selector'],
+            ]);
+        }
+
         if ($this->useSelfSignedJwt()) {
             $jwtCreds = $this->createJwtAccessCredentials();
+            $jwtCreds->setAdditionalClaims($this->auth->getAdditionalClaims());
 
             $accessToken = $jwtCreds->fetchAuthToken($httpHandler);
 

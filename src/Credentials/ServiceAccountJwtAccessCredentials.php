@@ -109,6 +109,11 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
         $this->projectId = $jsonKey['project_id'] ?? null;
     }
 
+    public function setAdditionalClaims(array $claims)
+    {
+        $this->auth->setAdditionalClaims($claims);
+    }
+
     /**
      * Updates metadata with the authorization token.
      *

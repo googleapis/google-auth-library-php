@@ -26,6 +26,8 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
+use Google\Auth\TrustBoundaryInterface;
+use Google\Auth\TrustBoundaryTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use LogicException;
@@ -41,10 +43,12 @@ use LogicException;
  */
 class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     SignBlobInterface,
-    GetUniverseDomainInterface
+    GetUniverseDomainInterface,
+    TrustBoundaryInterface
 {
     use CacheTrait;
     use IamSignerTrait;
+    use TrustBoundaryTrait;
 
     private const CRED_TYPE = 'imp';
     private const IAM_SCOPE = 'https://www.googleapis.com/auth/iam';
@@ -214,6 +218,16 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             'Cache-Control' => 'no-store',
             'Authorization' => sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token']),
         ], $this->isIdTokenRequest() ? 'it' : 'at');
+
+        if ($this->getUniverseDomain() !== self::DEFAULT_UNIVERSE_DOMAIN) {
+            // Universe domain is not default, so trust boundary is not supported.
+            $this->suppressTrustBoundary();
+        }
+
+        if ($trustBoundaryInfo = $this->refreshTrustBoundary($httpHandler)) {
+            $headers['x-goog-iam-authorization-token'] = $trustBoundaryInfo['token'];
+            $headers['x-goog-iam-authority-selector'] = $trustBoundaryInfo['authority_selector'];
+        }
 
         $body = match ($this->isIdTokenRequest()) {
             true => [
