@@ -43,9 +43,10 @@ class ImpersonatedServiceAccountCredentialsWithTrustBoundaryTest extends TestCas
         $impersonatedCreds = new ImpersonatedServiceAccountCredentials(
             ['scope'],
             [
-                'service_account_impersonation_url' => 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/impersonated@example.com:generateAccessToken',
+                'service_account_impersonation_url' => 'https://iamcredentials.googleapis.com/v1',
                 'source_credentials' => $sourceCreds,
-            ]
+            ],
+            enableTrustBoundary: true
         );
 
         $impersonatedCreds->fetchAuthToken($handler);
@@ -58,7 +59,10 @@ class ImpersonatedServiceAccountCredentialsWithTrustBoundaryTest extends TestCas
 
         // Second request is for trust boundary
         $trustBoundaryRequest = $container[1]['request'];
-        $this->assertStringContainsString('/computeMetadata/v1/instance/service-accounts/default/?recursive=true', (string) $trustBoundaryRequest->getUri());
+        $this->assertStringContainsString(
+            '/computeMetadata/v1/instance/service-accounts/default/?recursive=true',
+            (string) $trustBoundaryRequest->getUri()
+        );
 
         // Third request is for impersonation
         $impersonationRequest = $container[2]['request'];

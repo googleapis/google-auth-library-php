@@ -32,7 +32,7 @@ class ServiceAccountCredentialsWithTrustBoundaryTest extends TestCase
         $stack->push($history);
         $client = new Client(['handler' => $stack]);
 
-        $creds = new ServiceAccountCredentials('scope', $this->createTestJson());
+        $creds = new ServiceAccountCredentials('scope', $this->createTestJson(), enableTrustBoundary: true);
         $creds->fetchAuthToken(function ($request) use ($client) {
             return $client->send($request);
         });
@@ -41,7 +41,10 @@ class ServiceAccountCredentialsWithTrustBoundaryTest extends TestCase
 
         // First request is for trust boundary
         $trustBoundaryRequest = $container[0]['request'];
-        $this->assertStringContainsString('/computeMetadata/v1/instance/service-accounts/test@example.com/?recursive=true', (string) $trustBoundaryRequest->getUri());
+        $this->assertStringContainsString(
+            '/computeMetadata/v1/instance/service-accounts/test@example.com/?recursive=true',
+            (string) $trustBoundaryRequest->getUri()
+        );
 
         // Second request is for access token
         $accessTokenRequest = $container[1]['request'];
@@ -58,36 +61,23 @@ class ServiceAccountCredentialsWithTrustBoundaryTest extends TestCase
         $this->assertEquals('my-selector', $payload['x-goog-iam-authority-selector']);
     }
 
-    public function testFetchAuthTokenWithTrustBoundarySuppressed()
+    public function testFetchAuthTokenWithTrustBoundarySuppressedWithUniverseDomain()
     {
-        $accessTokenResponse = new Response(200, [], '{"access_token": "my-access-token", "expires_in": 3600}');
-
         $container = [];
         $history = Middleware::history($container);
-        $mock = new MockHandler([$accessTokenResponse]);
+        $mock = new MockHandler([]);
         $stack = new HandlerStack($mock);
         $stack->push($history);
         $client = new Client(['handler' => $stack]);
 
         $json = $this->createTestJson();
         $json['universe_domain'] = 'my-universe.com';
-        $creds = new ServiceAccountCredentials('scope', $json);
+        $creds = new ServiceAccountCredentials('scope', $json, enableTrustBoundary: true);
 
         $creds->fetchAuthToken(function ($request) use ($client) {
             return $client->send($request);
         });
 
-        $this->assertCount(1, $container);
-
-        $accessTokenRequest = $container[0]['request'];
-        $body = (string) $accessTokenRequest->getBody();
-        parse_str($body, $params);
-        $this->assertArrayHasKey('assertion', $params);
-        $jwt = $params['assertion'];
-        list($header, $payload, $signature) = explode('.', $jwt);
-        $payload = json_decode(base64_decode($payload), true);
-
-        $this->assertArrayNotHasKey('x-goog-iam-authorization-token', $payload);
-        $this->assertArrayNotHasKey('x-goog-iam-authority-selector', $payload);
+        $this->assertCount(0, $container);
     }
 }

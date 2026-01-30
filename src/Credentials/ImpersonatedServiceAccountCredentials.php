@@ -99,6 +99,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         string|array $jsonKey,
         private ?string $targetAudience = null,
         string|array|null $defaultScope = null,
+        bool $enableTrustBoundary = false
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -139,7 +140,11 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             }
             $jsonKey['source_credentials'] = match ($jsonKey['source_credentials']['type'] ?? null) {
                 // Do not pass $defaultScope to ServiceAccountCredentials
-                'service_account' => new ServiceAccountCredentials($scope, $jsonKey['source_credentials']),
+                'service_account' => new ServiceAccountCredentials(
+                    scope: $scope,
+                    jsonKey: $jsonKey['source_credentials'],
+                    enableTrustBoundary: $enableTrustBoundary
+                ),
                 'authorized_user' => new UserRefreshCredentials($scope, $jsonKey['source_credentials']),
                 'external_account' => new ExternalAccountCredentials($scope, $jsonKey['source_credentials']),
                 default => throw new \InvalidArgumentException('invalid value in the type field'),
@@ -156,6 +161,10 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         );
 
         $this->sourceCredentials = $jsonKey['source_credentials'];
+
+        if (!$enableTrustBoundary) {
+            $this->suppressTrustBoundary();
+        }
     }
 
     /**

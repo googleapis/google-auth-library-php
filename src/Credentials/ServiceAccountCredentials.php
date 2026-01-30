@@ -20,6 +20,8 @@ namespace Google\Auth\Credentials;
 use Firebase\JWT\JWT;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\HttpHandler\HttpClientCache;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Iam;
 use Google\Auth\OAuth2;
 use Google\Auth\ProjectIdProviderInterface;
@@ -139,7 +141,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         $scope,
         $jsonKey,
         $sub = null,
-        $targetAudience = null
+        $targetAudience = null,
+        $enableTrustBoundary = false
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -187,6 +190,10 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
         $this->projectId = $jsonKey['project_id'] ?? null;
         $this->universeDomain = $jsonKey['universe_domain'] ?? self::DEFAULT_UNIVERSE_DOMAIN;
+
+        if (!$enableTrustBoundary) {
+            $this->suppressTrustBoundary();
+        }
     }
 
     /**
