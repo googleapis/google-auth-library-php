@@ -26,7 +26,6 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
-use Google\Auth\TrustBoundaryInterface;
 use Google\Auth\TrustBoundaryTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
@@ -43,8 +42,7 @@ use LogicException;
  */
 class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     SignBlobInterface,
-    GetUniverseDomainInterface,
-    TrustBoundaryInterface
+    GetUniverseDomainInterface
 {
     use CacheTrait;
     use IamSignerTrait;

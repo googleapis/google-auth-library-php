@@ -27,7 +27,6 @@ use Google\Auth\OAuth2;
 use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\ServiceAccountSignerTrait;
 use Google\Auth\SignBlobInterface;
-use Google\Auth\TrustBoundaryInterface;
 use Google\Auth\TrustBoundaryTrait;
 use InvalidArgumentException;
 
@@ -67,8 +66,7 @@ use InvalidArgumentException;
 class ServiceAccountCredentials extends CredentialsLoader implements
     GetQuotaProjectInterface,
     SignBlobInterface,
-    ProjectIdProviderInterface,
-    TrustBoundaryInterface
+    ProjectIdProviderInterface
 {
     use ServiceAccountSignerTrait;
     use TrustBoundaryTrait;

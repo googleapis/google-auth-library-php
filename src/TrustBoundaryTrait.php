@@ -14,22 +14,24 @@ trait TrustBoundaryTrait
 {
     use CacheTrait;
 
-    private $isTrustBoundarySuppressed = false;
+    private bool $isTrustBoundarySuppressed = false;
 
-    public function suppressTrustBoundary()
+    private function suppressTrustBoundary(): void
     {
         $this->isTrustBoundarySuppressed = true;
     }
 
-    public function isTrustBoundarySuppressed()
+    private function isTrustBoundarySuppressed()
     {
         return $this->isTrustBoundarySuppressed;
     }
 
-    private function refreshTrustBoundary(callable $httpHandler, string $serviceAccountEmail = 'default')
-    {
+    private function refreshTrustBoundary(
+        callable $httpHandler,
+        string $serviceAccountEmail = 'default'
+    ): array|null {
         if ($this->isTrustBoundarySuppressed()) {
-            return;
+            return null;
         }
 
         // Return cached value if it exists
@@ -45,7 +47,7 @@ trait TrustBoundaryTrait
         return $token;
     }
 
-    private function lookupTrustBoundary(callable $httpHandler, string $serviceAccountEmail)
+    private function lookupTrustBoundary(callable $httpHandler, string $serviceAccountEmail): array|null
     {
         $url = $this->buildTrustBoundaryLookupUrl($serviceAccountEmail);
         $request = new Request('GET', $url, ['Metadata-Flavor' => 'Google']);
@@ -60,9 +62,10 @@ trait TrustBoundaryTrait
                 throw $e;
             }
         }
+        return null;
     }
 
-    private function buildTrustBoundaryLookupUrl(string $serviceAccountEmail)
+    private function buildTrustBoundaryLookupUrl(string $serviceAccountEmail): string
     {
         $metadataHost = getenv('GCE_METADATA_HOST') ?: '169.254.169.254';
         return sprintf(
