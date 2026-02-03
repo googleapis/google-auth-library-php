@@ -152,13 +152,14 @@ abstract class CredentialsLoader implements
      * @param string|string[] $scope
      * @param array<mixed> $jsonKey
      * @param string|string[] $defaultScope
+     * @param bool $enableTrustBoundary Enable the trust boundary lookup
      * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials
      */
     public static function makeCredentials(
         $scope,
         array $jsonKey,
         $defaultScope = null,
-        $enableTrustBoundary = false
+        bool $enableTrustBoundary = false
     ) {
         if (!array_key_exists('type', $jsonKey)) {
             throw new \InvalidArgumentException('json key is missing the type field');

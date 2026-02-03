@@ -136,13 +136,14 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      * @param string $sub an email address account to impersonate, in situations when
      *   the service account has been delegated domain wide access.
      * @param string $targetAudience The audience for the ID token.
+     * @param bool $enableTrustBoundary Enable the trust boundary lookup
      */
     public function __construct(
         $scope,
         $jsonKey,
         $sub = null,
         $targetAudience = null,
-        $enableTrustBoundary = false
+        bool $enableTrustBoundary = false
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {

@@ -115,9 +115,9 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
      * @param array<mixed> $additionalClaims
      * @return void
      */
-    public function setAdditionalClaims(array $claims)
+    public function setAdditionalClaims(array $additionalClaims)
     {
-        $this->auth->setAdditionalClaims($claims);
+        $this->auth->setAdditionalClaims($additionalClaims);
     }
 
     /**
