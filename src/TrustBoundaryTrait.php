@@ -21,11 +21,15 @@ trait TrustBoundaryTrait
         $this->isTrustBoundarySuppressed = true;
     }
 
-    private function isTrustBoundarySuppressed()
+    private function isTrustBoundarySuppressed(): bool
     {
         return $this->isTrustBoundarySuppressed;
     }
 
+    /**
+     * @return array{authority_selector: string, token: string}|null
+     *
+     */
     private function refreshTrustBoundary(
         callable $httpHandler,
         string $serviceAccountEmail = 'default'
@@ -47,6 +51,9 @@ trait TrustBoundaryTrait
         return $token;
     }
 
+    /**
+     * @return array{authority_selector: string, token: string}|null
+     */
     private function lookupTrustBoundary(callable $httpHandler, string $serviceAccountEmail): array|null
     {
         $url = $this->buildTrustBoundaryLookupUrl($serviceAccountEmail);
