@@ -19,7 +19,7 @@ trait TrustBoundaryTrait
     /**
      * @return null|array{locations: array<string>, encodedLocations: string}
      */
-    public function getTrustBoundary(
+    private function getTrustBoundary(
         ?callable $httpHandler = null,
         string $serviceAccountEmail = 'default'
     ): array|null {
@@ -28,7 +28,7 @@ trait TrustBoundaryTrait
             return null;
         }
 
-        if ($this->getUniverseDomain() !== GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN) {
+        if ($this->getUniverseDomain($httpHandler) !== GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN) {
             // Universe domain is not default, so trust boundary is not supported.
             return null;
         }
@@ -59,7 +59,7 @@ trait TrustBoundaryTrait
     private function lookupTrustBoundary(callable $httpHandler, string $serviceAccountEmail): array|null
     {
         $url = $this->buildTrustBoundaryLookupUrl($serviceAccountEmail);
-        $request = new Request('GET', $url, ['Metadata-Flavor' => 'Google']);
+        $request = new Request('GET', $url);
         try {
             $response = $httpHandler($request);
             return json_decode((string) $response->getBody(), true);

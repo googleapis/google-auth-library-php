@@ -226,8 +226,6 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
         if ($this->useSelfSignedJwt()) {
             $jwtCreds = $this->createJwtAccessCredentials();
-            $jwtCreds->setAdditionalClaims($this->auth->getAdditionalClaims());
-
             $accessToken = $jwtCreds->fetchAuthToken($httpHandler);
 
             if ($lastReceivedToken = $jwtCreds->getLastReceivedToken()) {

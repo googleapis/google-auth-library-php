@@ -110,17 +110,6 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
     }
 
     /**
-     * Sets additional claims to be included in the JWT token
-     *
-     * @param array<mixed> $additionalClaims
-     * @return void
-     */
-    public function setAdditionalClaims(array $additionalClaims)
-    {
-        $this->auth->setAdditionalClaims($additionalClaims);
-    }
-
-    /**
      * Updates metadata with the authorization token.
      *
      * @param array<mixed> $metadata metadata hashmap

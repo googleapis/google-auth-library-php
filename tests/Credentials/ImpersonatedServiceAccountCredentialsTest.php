@@ -403,7 +403,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
             ->shouldBeCalledOnce()
             ->willReturn(['access_token' => 'test-access-token']);
         $credentials->getUniverseDomain()
-            ->shouldBeCalledTimes(2)
+            ->shouldBeCalledOnce()
             ->willReturn($universeDomain ?: GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN);
 
         $json = [

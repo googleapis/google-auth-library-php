@@ -20,6 +20,7 @@ namespace Google\Auth\Tests\Credentials;
 use COM;
 use Exception;
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Exception\ClientException;
@@ -696,5 +697,47 @@ class GCECredentialsTest extends BaseTest
         $expected = 'example-universe.com';
         $creds = new GCECredentials(null, null, null, null, null, $expected);
         $this->assertEquals($expected, $creds->getUniverseDomain());
+    }
+
+    public function testUpdateMetadataWithTrustBoundary()
+    {
+        $timesCalled = 0;
+        $httpHandler = function () use (&$timesCalled) {
+            return match (++$timesCalled) {
+                1 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
+                2 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                3 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
+            };
+        };
+
+        $gceCreds = new GCECredentials(
+            enableTrustBoundary: true,
+            universeDomain: GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+        );
+
+        $metadata = $gceCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayHasKey('x-allowed-locations', $metadata);
+        $this->assertEquals('foo', $metadata['x-allowed-locations']);
+    }
+
+    public function testUpdateMetadataWithTrustBoundarySuppressedWithUniverseDomain()
+    {
+        $timesCalled = 0;
+        $httpHandler = function () use (&$timesCalled) {
+            return match (++$timesCalled) {
+                1 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                2 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
+            };
+        };
+
+        $gceCreds = new GCECredentials(
+            enableTrustBoundary: true,
+            universeDomain: 'foo.com'
+        );
+
+        $metadata = $gceCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayNotHasKey('x-allowed-locations', $metadata);
     }
 }
