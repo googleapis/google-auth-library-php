@@ -21,21 +21,22 @@ class TrustBoundaryTraitTest extends TestCase
 
     public function testBuildTrustBoundaryLookupUrl()
     {
-        $url = $this->impl->buildTrustBoundaryLookupUrlPublic('test@example.com');
+        $url = $this->impl->buildTrustBoundaryLookupUrl('test@example.com');
         $this->assertEquals(
-            'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/test@example.com/?recursive=true',
+            'https://iamcredentials.foo.bar/v1/projects/-/serviceAccounts/test@example.com/allowedLocations',
             $url
         );
     }
 
     public function testLookupTrustBoundary()
     {
-        $responseBody = '{"token": "my-token", "authority_selector": "my-selector"}';
+        $responseBody =
+            '{"locations": ["us-central1", "us-east1", "europe-west1", "asia-east1"], "enodedLocations": ""0xA30"}';
         $mock = new MockHandler([
             new Response(200, [], $responseBody),
         ]);
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
-        $result = $this->impl->lookupTrustBoundaryPublic($handler, 'default');
+        $result = $this->impl->lookupTrustBoundary($handler, 'default');
         $this->assertEquals(json_decode($responseBody, true), $result);
     }
 
@@ -45,7 +46,7 @@ class TrustBoundaryTraitTest extends TestCase
             new Response(404),
         ]);
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
-        $result = $this->impl->lookupTrustBoundaryPublic($handler, 'default');
+        $result = $this->impl->lookupTrustBoundary($handler, 'default');
         $this->assertNull($result);
     }
 
@@ -53,20 +54,21 @@ class TrustBoundaryTraitTest extends TestCase
     {
         $cache = new MemoryCacheItemPool();
         $this->impl->setCache($cache);
-        $responseBody = '{"token": "my-token", "authority_selector": "my-selector"}';
+        $responseBody =
+            '{"locations": ["us-central1", "us-east1", "europe-west1", "asia-east1"], "enodedLocations": ""0xA30"}';
         $mock = new MockHandler([
             new Response(200, [], $responseBody),
         ]);
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
 
         // First call, should fetch and cache
-        $result1 = $this->impl->refreshTrustBoundaryPublic($handler, 'default');
+        $result1 = $this->impl->getTrustBoundary($handler, 'default');
         $this->assertEquals(json_decode($responseBody, true), $result1);
 
         // Second call, should return from cache
         $mock->reset();
         $mock->append(new Response(500)); // This should not be called
-        $result2 = $this->impl->refreshTrustBoundaryPublic($handler, 'default');
+        $result2 = $this->impl->getTrustBoundary($handler, 'default');
         $this->assertEquals(json_decode($responseBody, true), $result2);
     }
 }
@@ -74,9 +76,9 @@ class TrustBoundaryTraitTest extends TestCase
 class TrustBoundaryTraitImpl
 {
     use TrustBoundaryTrait {
-        buildTrustBoundaryLookupUrl as public buildTrustBoundaryLookupUrlPublic;
-        lookupTrustBoundary as public lookupTrustBoundaryPublic;
-        refreshTrustBoundary as public refreshTrustBoundaryPublic;
+        buildTrustBoundaryLookupUrl as public;
+        lookupTrustBoundary as public;
+        getTrustBoundary as public;
     }
 
     private $cache;
@@ -98,5 +100,10 @@ class TrustBoundaryTraitImpl
     public function setCache($cache)
     {
         $this->cache = $cache;
+    }
+
+    public function getUniverseDomain()
+    {
+        return 'foo.bar';
     }
 }

@@ -14,27 +14,22 @@ trait TrustBoundaryTrait
 {
     use CacheTrait;
 
-    private bool $isTrustBoundarySuppressed = false;
-
-    private function suppressTrustBoundary(): void
-    {
-        $this->isTrustBoundarySuppressed = true;
-    }
-
-    private function isTrustBoundarySuppressed(): bool
-    {
-        return $this->isTrustBoundarySuppressed;
-    }
+    private bool $enableTrustBoundary = false;
 
     /**
-     * @return array{authority_selector: string, token: string}|null
-     *
+     * @return null|array{locations: array<string>, encodedLocations: string}
      */
-    private function refreshTrustBoundary(
-        callable $httpHandler,
+    public function getTrustBoundary(
+        ?callable $httpHandler = null,
         string $serviceAccountEmail = 'default'
     ): array|null {
-        if ($this->isTrustBoundarySuppressed()) {
+        if (!$this->enableTrustBoundary) {
+            // Only look up the trust boundary if the credentials have been configured to do so
+            return null;
+        }
+
+        if ($this->getUniverseDomain() !== GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN) {
+            // Universe domain is not default, so trust boundary is not supported.
             return null;
         }
 
@@ -43,16 +38,23 @@ trait TrustBoundaryTrait
             return $cached;
         }
 
-        $token = $this->lookupTrustBoundary($httpHandler, $serviceAccountEmail);
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+
+        $trustBoundary = $this->lookupTrustBoundary($httpHandler, $serviceAccountEmail);
+
+        if (null !== $trustBoundary && !array_key_exists('encodedLocations', $trustBoundary)) {
+            throw new \LogicException('Trust boundary lookup failed to return \'encodedLocations\'');
+        }
 
         // Save to cache
-        $this->setCachedValue($this->getCacheKey() . ':trustboundary', $token);
+        $this->setCachedValue($this->getCacheKey() . ':trustboundary', $trustBoundary);
 
-        return $token;
+        return $trustBoundary;
     }
 
     /**
-     * @return array{authority_selector: string, token: string}|null
+     * @return null|array{locations: array<string>, encodedLocations: string}
      */
     private function lookupTrustBoundary(callable $httpHandler, string $serviceAccountEmail): array|null
     {
@@ -74,11 +76,21 @@ trait TrustBoundaryTrait
 
     private function buildTrustBoundaryLookupUrl(string $serviceAccountEmail): string
     {
-        $metadataHost = getenv('GCE_METADATA_HOST') ?: '169.254.169.254';
         return sprintf(
-            'http://%s/computeMetadata/v1/instance/service-accounts/%s/?recursive=true',
-            $metadataHost,
+            'https://iamcredentials.%s/v1/projects/-/serviceAccounts/%s/allowedLocations',
+            $this->getUniverseDomain(),
             $serviceAccountEmail
         );
+    }
+
+    private function updateTrustBoundaryMetadata(
+        array $headers,
+        string $serviceAccountEmail,
+        ?callable $httpHandler = null,
+    ): array {
+        if ($trustBoundaryInfo = $this->getTrustBoundary($httpHandler, $serviceAccountEmail)) {
+            $headers['x-allowed-locations'] = $trustBoundaryInfo['encodedLocations'];
+        }
+        return $headers;
     }
 }

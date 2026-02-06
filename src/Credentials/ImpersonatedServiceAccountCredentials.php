@@ -27,6 +27,8 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
 use Google\Auth\TrustBoundaryTrait;
+use Google\Auth\UpdateMetadataInterface;
+use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use LogicException;
@@ -42,10 +44,12 @@ use LogicException;
  */
 class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     SignBlobInterface,
-    GetUniverseDomainInterface
+    GetUniverseDomainInterface,
+    UpdateMetadataInterface
 {
     use CacheTrait;
     use IamSignerTrait;
+    use UpdateMetadataTrait;
     use TrustBoundaryTrait;
 
     private const CRED_TYPE = 'imp';
@@ -141,7 +145,6 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
                 'service_account' => new ServiceAccountCredentials(
                     scope: $scope,
                     jsonKey: $jsonKey['source_credentials'],
-                    enableTrustBoundary: $enableTrustBoundary
                 ),
                 'authorized_user' => new UserRefreshCredentials($scope, $jsonKey['source_credentials']),
                 'external_account' => new ExternalAccountCredentials($scope, $jsonKey['source_credentials']),
@@ -159,10 +162,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         );
 
         $this->sourceCredentials = $jsonKey['source_credentials'];
-
-        if (!$enableTrustBoundary) {
-            $this->suppressTrustBoundary();
-        }
+        $this->enableTrustBoundary = $enableTrustBoundary;
     }
 
     /**
@@ -225,16 +225,6 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             'Cache-Control' => 'no-store',
             'Authorization' => sprintf('Bearer %s', $authToken['access_token'] ?? $authToken['id_token']),
         ], $this->isIdTokenRequest() ? 'it' : 'at');
-
-        if ($this->getUniverseDomain() !== self::DEFAULT_UNIVERSE_DOMAIN) {
-            // Universe domain is not default, so trust boundary is not supported.
-            $this->suppressTrustBoundary();
-        }
-
-        if ($trustBoundaryInfo = $this->refreshTrustBoundary($httpHandler)) {
-            $headers['x-goog-iam-authorization-token'] = $trustBoundaryInfo['token'];
-            $headers['x-goog-iam-authority-selector'] = $trustBoundaryInfo['authority_selector'];
-        }
 
         $body = match ($this->isIdTokenRequest()) {
             true => [
@@ -318,5 +308,34 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         return $this->sourceCredentials instanceof GetUniverseDomainInterface
             ? $this->sourceCredentials->getUniverseDomain()
             : self::DEFAULT_UNIVERSE_DOMAIN;
+    }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        ?callable $httpHandler = null
+    ) {
+        if ($this->enableTrustBoundary) {
+            if (!$this->sourceCredentials instanceof ServiceAccountCredentials) {
+                throw new LogicException(
+                    'Trust boundary lookup is only supported for service account credentials'
+                );
+            }
+            $metadata = $this->updateTrustBoundaryMetadata(
+                $metadata,
+                $this->sourceCredentials->getClientName(),
+                $httpHandler,
+            );
+        }
+
+        return parent::updateMetadata($metadata, $authUri, $httpHandler);
     }
 }

@@ -550,4 +550,58 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
             [[], '', $defaultScope, 'expectedScope' => $defaultScope],
         ];
     }
+
+    public function testUpdateMetadataWithTrustBoundary()
+    {
+        $httpHandler = getHandler([
+            new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
+            new Response(200, [], '{"access_token": "source-token", "expires_in": 3600}'),
+            new Response(200, [], '{"accessToken": "impersonated-token", "expireTime": "2026-01-01"}'),
+        ]);
+
+        $jsonKey = [
+            'service_account_impersonation_url' => 'https://iamcredentials.googleapis.com/v1',
+            'source_credentials' => [
+                'type' => 'service_account',
+                'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
+                'client_email' => 'test@example.com',
+            ],
+        ];
+        $impersonatedCreds = new ImpersonatedServiceAccountCredentials(
+            'a-scope',
+            $jsonKey,
+            enableTrustBoundary: true
+        );
+
+        $metadata = $impersonatedCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayHasKey('x-allowed-locations', $metadata);
+        $this->assertEquals('foo', $metadata['x-allowed-locations']);
+    }
+
+    public function testUpdateMetadataWithTrustBoundarySuppressedWithUniverseDomain()
+    {
+        $httpHandler = getHandler([
+            new Response(200, [], '{"accessToken": "impersonated-token", "expireTime": "2026-01-01"}'),
+        ]);
+
+        $jsonKey = [
+            'service_account_impersonation_url' => 'https://iamcredentials.googleapis.com/v1',
+            'source_credentials' => [
+                'type' => 'service_account',
+                'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
+                'client_email' => 'test@example.com',
+                'universe_domain' => 'foo.com'
+            ],
+        ];
+        $impersonatedCreds = new ImpersonatedServiceAccountCredentials(
+            'a-scope',
+            $jsonKey,
+            enableTrustBoundary: true
+        );
+
+        $metadata = $impersonatedCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayNotHasKey('x-allowed-locations', $metadata);
+    }
 }

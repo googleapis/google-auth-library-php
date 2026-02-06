@@ -189,10 +189,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
         $this->projectId = $jsonKey['project_id'] ?? null;
         $this->universeDomain = $jsonKey['universe_domain'] ?? self::DEFAULT_UNIVERSE_DOMAIN;
-
-        if (!$enableTrustBoundary) {
-            $this->suppressTrustBoundary();
-        }
+        $this->enableTrustBoundary = $enableTrustBoundary;
     }
 
     /**
@@ -224,20 +221,8 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(?callable $httpHandler = null, array $headers = [])
     {
-        if ($this->getUniverseDomain() !== self::DEFAULT_UNIVERSE_DOMAIN) {
-            // Universe domain is not default, so trust boundary is not supported.
-            $this->suppressTrustBoundary();
-        }
-
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
-
-        if ($trustBoundaryInfo = $this->refreshTrustBoundary($httpHandler, $this->auth->getIssuer())) {
-            $this->auth->setAdditionalClaims([
-                'x-goog-iam-authorization-token' => $trustBoundaryInfo['token'],
-                'x-goog-iam-authority-selector' => $trustBoundaryInfo['authority_selector'],
-            ]);
-        }
 
         if ($this->useSelfSignedJwt()) {
             $jwtCreds = $this->createJwtAccessCredentials();
@@ -343,18 +328,23 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         $authUri = null,
         ?callable $httpHandler = null
     ) {
+        $metadata = $this->updateTrustBoundaryMetadata(
+            $metadata,
+            $this->auth->getIssuer(),
+            $httpHandler,
+        );
+
         // scope exists. use oauth implementation
         if (!$this->useSelfSignedJwt()) {
             return parent::updateMetadata($metadata, $authUri, $httpHandler);
         }
 
         $jwtCreds = $this->createJwtAccessCredentials();
-        if ($this->auth->getScope()) {
-            // Prefer user-provided "scope" to "audience"
-            $updatedMetadata = $jwtCreds->updateMetadata($metadata, null, $httpHandler);
-        } else {
-            $updatedMetadata = $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
-        }
+
+        // Prefer user-provided "scope" to "audience"
+        $updatedMetadata = $this->auth->getScope()
+            ? $jwtCreds->updateMetadata($metadata, null, $httpHandler)
+            : $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
 
         if ($lastReceivedToken = $jwtCreds->getLastReceivedToken()) {
             // Keep self-signed JWTs in memory as the last received token
