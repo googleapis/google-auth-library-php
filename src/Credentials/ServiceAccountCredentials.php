@@ -329,6 +329,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         $metadata = $this->updateTrustBoundaryMetadata(
             $metadata,
             $this->auth->getIssuer(),
+            $this->getUniverseDomain(),
             $httpHandler,
         );
 

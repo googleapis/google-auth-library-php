@@ -647,11 +647,14 @@ class GCECredentials extends CredentialsLoader implements
         $authUri = null,
         ?callable $httpHandler = null
     ) {
-        $metadata = $this->updateTrustBoundaryMetadata(
-            $metadata,
-            $this->serviceAccountIdentity ?: 'default',
-            $httpHandler,
-        );
+        if ($this->enableTrustBoundary) {
+            $metadata = $this->updateTrustBoundaryMetadata(
+                $metadata,
+                $this->serviceAccountIdentity ?: 'default',
+                $this->getUniverseDomain($httpHandler),
+                $httpHandler,
+            );
+        }
 
         return parent::updateMetadata($metadata, $authUri, $httpHandler);
     }

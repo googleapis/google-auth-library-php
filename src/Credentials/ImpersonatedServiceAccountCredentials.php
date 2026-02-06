@@ -332,6 +332,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             $metadata = $this->updateTrustBoundaryMetadata(
                 $metadata,
                 $this->sourceCredentials->getClientName(),
+                $this->getUniverseDomain(),
                 $httpHandler,
             );
         }

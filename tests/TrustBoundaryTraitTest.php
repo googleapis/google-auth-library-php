@@ -62,13 +62,13 @@ class TrustBoundaryTraitTest extends TestCase
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
 
         // First call, should fetch and cache
-        $result1 = $this->impl->getTrustBoundary($handler, 'default');
+        $result1 = $this->impl->getTrustBoundary('universe.domain', $handler, 'default');
         $this->assertEquals(json_decode($responseBody, true), $result1);
 
         // Second call, should return from cache
         $mock->reset();
         $mock->append(new Response(500)); // This should not be called
-        $result2 = $this->impl->getTrustBoundary($handler, 'default');
+        $result2 = $this->impl->getTrustBoundary('universe.domain', $handler, 'default');
         $this->assertEquals(json_decode($responseBody, true), $result2);
     }
 }

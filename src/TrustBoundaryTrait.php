@@ -20,15 +20,16 @@ trait TrustBoundaryTrait
      * @return null|array{locations: array<string>, encodedLocations: string}
      */
     private function getTrustBoundary(
-        ?callable $httpHandler = null,
-        string $serviceAccountEmail = 'default'
+        string $universeDomain,
+        callable $httpHandler,
+        string $serviceAccountEmail,
     ): array|null {
         if (!$this->enableTrustBoundary) {
             // Only look up the trust boundary if the credentials have been configured to do so
             return null;
         }
 
-        if ($this->getUniverseDomain($httpHandler) !== GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN) {
+        if ($universeDomain !== GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN) {
             // Universe domain is not default, so trust boundary is not supported.
             return null;
         }
@@ -37,9 +38,6 @@ trait TrustBoundaryTrait
         if ($cached = $this->getCachedValue($this->getCacheKey() . ':trustboundary')) {
             return $cached;
         }
-
-        $httpHandler = $httpHandler
-            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
         $trustBoundary = $this->lookupTrustBoundary($httpHandler, $serviceAccountEmail);
 
@@ -56,8 +54,10 @@ trait TrustBoundaryTrait
     /**
      * @return null|array{locations: array<string>, encodedLocations: string}
      */
-    private function lookupTrustBoundary(callable $httpHandler, string $serviceAccountEmail): array|null
-    {
+    private function lookupTrustBoundary(
+        callable $httpHandler,
+        string $serviceAccountEmail
+    ): array|null {
         $url = $this->buildTrustBoundaryLookupUrl($serviceAccountEmail);
         $request = new Request('GET', $url);
         try {
@@ -83,12 +83,20 @@ trait TrustBoundaryTrait
         );
     }
 
+    /**
+     * @param array<mixed> $headers
+     * @return array<mixed>
+     */
     private function updateTrustBoundaryMetadata(
         array $headers,
         string $serviceAccountEmail,
-        ?callable $httpHandler = null,
+        string $universeDomain,
+        ?callable $httpHandler,
     ): array {
-        if ($trustBoundaryInfo = $this->getTrustBoundary($httpHandler, $serviceAccountEmail)) {
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+
+        if ($trustBoundaryInfo = $this->getTrustBoundary($universeDomain, $httpHandler, $serviceAccountEmail)) {
             $headers['x-allowed-locations'] = $trustBoundaryInfo['encodedLocations'];
         }
         return $headers;
