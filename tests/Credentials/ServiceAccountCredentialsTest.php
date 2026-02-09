@@ -41,7 +41,7 @@ class ServiceAccountCredentialsTest extends TestCase
             'client_id' => 'client123',
             'type' => 'service_account',
             'project_id' => 'example_project',
-            'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
+            'private_key' => file_get_contents(__DIR__ . '/../fixtures/fixtures1/private.pem'),
         ];
     }
 
@@ -138,13 +138,13 @@ class ServiceAccountCredentialsTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures1/does-not-exist-private.json';
         new ServiceAccountCredentials('scope/1', $keyFile);
     }
 
     public function testInitalizeFromAFile()
     {
-        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures1/private.json';
         $this->assertNotNull(
             new ServiceAccountCredentials('scope/1', $keyFile)
         );
@@ -176,7 +176,7 @@ class ServiceAccountCredentialsTest extends TestCase
     public function testFailsIfEnvSpecifiesNonExistentFile()
     {
         $this->expectException(DomainException::class);
-        $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures1/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getCredentials('a scope');
     }
@@ -184,7 +184,7 @@ class ServiceAccountCredentialsTest extends TestCase
     /** @runInSeparateProcess */
     public function testSucceedIfFileExists()
     {
-        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
     }
@@ -201,7 +201,7 @@ class ServiceAccountCredentialsTest extends TestCase
     /** @runInSeparateProcess */
     public function testSucceedIfFileIsPresent()
     {
-        setHomeEnv(__DIR__ . '/../fixtures');
+        setHomeEnv(__DIR__ . '/../fixtures/fixtures1');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -420,7 +420,7 @@ class ServiceAccountCredentialsTest extends TestCase
 
     public function testGetQuotaProject()
     {
-        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures1/private.json';
         $sa = new ServiceAccountCredentials('scope/1', $keyFile);
         $this->assertEquals('test_quota_project', $sa->getQuotaProject());
     }
