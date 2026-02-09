@@ -704,9 +704,9 @@ class GCECredentialsTest extends BaseTest
         $timesCalled = 0;
         $httpHandler = function () use (&$timesCalled) {
             return match (++$timesCalled) {
-                1 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
-                2 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-                3 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
+                1 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                2 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
+                3 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
             };
         };
 

@@ -36,7 +36,7 @@ class TrustBoundaryTraitTest extends TestCase
             new Response(200, [], $responseBody),
         ]);
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
-        $result = $this->impl->lookupTrustBoundary($handler, 'default');
+        $result = $this->impl->lookupTrustBoundary($handler, 'default', []);
         $this->assertEquals(json_decode($responseBody, true), $result);
     }
 
@@ -46,7 +46,7 @@ class TrustBoundaryTraitTest extends TestCase
             new Response(404),
         ]);
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
-        $result = $this->impl->lookupTrustBoundary($handler, 'default');
+        $result = $this->impl->lookupTrustBoundary($handler, 'default', []);
         $this->assertNull($result);
     }
 
@@ -62,13 +62,13 @@ class TrustBoundaryTraitTest extends TestCase
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
 
         // First call, should fetch and cache
-        $result1 = $this->impl->getTrustBoundary('universe.domain', $handler, 'default');
+        $result1 = $this->impl->getTrustBoundary('universe.domain', $handler, 'default', []);
         $this->assertEquals(json_decode($responseBody, true), $result1);
 
         // Second call, should return from cache
         $mock->reset();
         $mock->append(new Response(500)); // This should not be called
-        $result2 = $this->impl->getTrustBoundary('universe.domain', $handler, 'default');
+        $result2 = $this->impl->getTrustBoundary('universe.domain', $handler, 'default', []);
         $this->assertEquals(json_decode($responseBody, true), $result2);
     }
 }

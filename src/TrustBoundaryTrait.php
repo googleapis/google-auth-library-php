@@ -17,12 +17,14 @@ trait TrustBoundaryTrait
     private bool $enableTrustBoundary = false;
 
     /**
+     * @param array<mixed> $headers
      * @return null|array{locations: array<string>, encodedLocations: string}
      */
     private function getTrustBoundary(
         string $universeDomain,
         callable $httpHandler,
         string $serviceAccountEmail,
+        array $headers,
     ): array|null {
         if (!$this->enableTrustBoundary) {
             // Only look up the trust boundary if the credentials have been configured to do so
@@ -39,7 +41,16 @@ trait TrustBoundaryTrait
             return $cached;
         }
 
-        $trustBoundary = $this->lookupTrustBoundary($httpHandler, $serviceAccountEmail);
+        if (!array_key_exists('authorization', $headers)) {
+            // If we don't have an authorization token we can't look up the trust boundary
+            return null;
+        }
+
+        $trustBoundary = $this->lookupTrustBoundary(
+            $httpHandler,
+            $serviceAccountEmail,
+            $headers['authorization']
+        );
 
         if (null !== $trustBoundary && !array_key_exists('encodedLocations', $trustBoundary)) {
             throw new \LogicException('Trust boundary lookup failed to return \'encodedLocations\'');
@@ -52,24 +63,23 @@ trait TrustBoundaryTrait
     }
 
     /**
+     * @param array<string> $authHeader
      * @return null|array{locations: array<string>, encodedLocations: string}
      */
     private function lookupTrustBoundary(
         callable $httpHandler,
-        string $serviceAccountEmail
+        string $serviceAccountEmail,
+        array $authHeader
     ): array|null {
         $url = $this->buildTrustBoundaryLookupUrl($serviceAccountEmail);
         $request = new Request('GET', $url);
+        $request = $request->withHeader('authorization', $authHeader);
         try {
             $response = $httpHandler($request);
             return json_decode((string) $response->getBody(), true);
         } catch (ClientException $e) {
-            // We swallow 404s here. This is because we reasonably expect 404s
-            // to be returned from the metadata server for service accounts
-            // that do not exist or do not have the required permissions.
-            if ($e->getResponse()->getStatusCode() !== 404) {
-                throw $e;
-            }
+            // We swallow all errors here - a failed trust boundary lookup
+            // should not disrupt client authentication.
         }
         return null;
     }
@@ -96,7 +106,14 @@ trait TrustBoundaryTrait
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
-        if ($trustBoundaryInfo = $this->getTrustBoundary($universeDomain, $httpHandler, $serviceAccountEmail)) {
+        $trustBoundaryInfo = $this->getTrustBoundary(
+            $universeDomain,
+            $httpHandler,
+            $serviceAccountEmail,
+            $headers
+        );
+
+        if ($trustBoundaryInfo) {
             $headers['x-allowed-locations'] = $trustBoundaryInfo['encodedLocations'];
         }
         return $headers;

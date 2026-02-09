@@ -152,7 +152,7 @@ abstract class CredentialsLoader implements
      * @param string|string[] $scope
      * @param array<mixed> $jsonKey
      * @param string|string[] $defaultScope
-     * @param bool $enableTrustBoundary Enable the trust boundary lookup
+     * @param bool $enableTrustBoundary Lookup and include the trust boundary header.
      * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials
      */
     public static function makeCredentials(

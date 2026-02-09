@@ -153,6 +153,7 @@ class ApplicationDefaultCredentials
      * @param string|null $universeDomain Specifies a universe domain to use for the
      *   calling client library.
      * @param null|false|LoggerInterface $logger A PSR3 compliant LoggerInterface.
+     * @param bool $enableTrustBoundary Lookup and include the trust boundary header.
      *
      * @return FetchAuthTokenInterface
      * @throws DomainException if no implementation can be obtained.
@@ -289,7 +290,6 @@ class ApplicationDefaultCredentials
         ?callable $httpHandler = null,
         ?array $cacheConfig = null,
         ?CacheItemPoolInterface $cache = null,
-        bool $enableTrustBoundary = false
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -315,13 +315,11 @@ class ApplicationDefaultCredentials
                     scope: null,
                     jsonKey: $jsonKey,
                     targetAudience: $targetAudience,
-                    enableTrustBoundary: $enableTrustBoundary
                 ),
                 'service_account' => new ServiceAccountCredentials(
                     scope: null,
                     jsonKey: $jsonKey,
                     targetAudience: $targetAudience,
-                    enableTrustBoundary: $enableTrustBoundary
                 ),
                 default => throw new InvalidArgumentException('invalid value in the type field')
             };

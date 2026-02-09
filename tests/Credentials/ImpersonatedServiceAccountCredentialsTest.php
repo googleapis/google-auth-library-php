@@ -554,9 +554,9 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
     public function testUpdateMetadataWithTrustBoundary()
     {
         $httpHandler = getHandler([
-            new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
             new Response(200, [], '{"access_token": "source-token", "expires_in": 3600}'),
             new Response(200, [], '{"accessToken": "impersonated-token", "expireTime": "2026-01-01"}'),
+            new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
         ]);
 
         $jsonKey = [

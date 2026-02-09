@@ -211,7 +211,7 @@ class GCECredentials extends CredentialsLoader implements
      *   account identity name to use instead of "default".
      * @param string|null $universeDomain [optional] Specify a universe domain to use
      *   instead of fetching one from the metadata server.
-     * @param bool $enableTrustBoundary [optional] Enable the trust boundary lookup.
+     * @param bool $enableTrustBoundary Lookup and include the trust boundary header.
      */
     public function __construct(
         ?Iam $iam = null,
@@ -647,16 +647,18 @@ class GCECredentials extends CredentialsLoader implements
         $authUri = null,
         ?callable $httpHandler = null
     ) {
+        $updatedMetadata = parent::updateMetadata($metadata, $authUri, $httpHandler);
+
         if ($this->enableTrustBoundary) {
-            $metadata = $this->updateTrustBoundaryMetadata(
-                $metadata,
+            $updatedMetadata = $this->updateTrustBoundaryMetadata(
+                $updatedMetadata,
                 $this->serviceAccountIdentity ?: 'default',
                 $this->getUniverseDomain($httpHandler),
                 $httpHandler,
             );
         }
 
-        return parent::updateMetadata($metadata, $authUri, $httpHandler);
+        return $updatedMetadata;
     }
 
     /**

@@ -134,7 +134,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      * @param string $sub an email address account to impersonate, in situations when
      *   the service account has been delegated domain wide access.
      * @param string $targetAudience The audience for the ID token.
-     * @param bool $enableTrustBoundary Enable the trust boundary lookup
+     * @param bool $enableTrustBoundary Lookup and include the trust boundary header.
      */
     public function __construct(
         $scope,
@@ -326,18 +326,34 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         $authUri = null,
         ?callable $httpHandler = null
     ) {
-        $metadata = $this->updateTrustBoundaryMetadata(
-            $metadata,
+        // scope exists. use oauth implementation
+        $updatedMetadata = $this->useSelfSignedJwt()
+            ? $this->updateMetadataSelfSignedJwt($metadata, $authUri, $httpHandler)
+            : parent::updateMetadata($metadata, $authUri, $httpHandler);
+
+        $updatedMetadata = $this->updateTrustBoundaryMetadata(
+            $updatedMetadata,
             $this->auth->getIssuer(),
             $this->getUniverseDomain(),
             $httpHandler,
         );
 
-        // scope exists. use oauth implementation
-        if (!$this->useSelfSignedJwt()) {
-            return parent::updateMetadata($metadata, $authUri, $httpHandler);
-        }
+        return $updatedMetadata;
+    }
 
+    /**
+     * Updates metadata with the authorization token for SSJWTs.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    private function updateMetadataSelfSignedJwt(
+        $metadata,
+        $authUri = null,
+        ?callable $httpHandler = null
+    ) {
         $jwtCreds = $this->createJwtAccessCredentials();
 
         // Prefer user-provided "scope" to "audience"
