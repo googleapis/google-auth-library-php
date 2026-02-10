@@ -206,6 +206,9 @@ class GCECredentialsTest extends BaseTest
         $this->assertFalse(GCECredentials::onAppEngineFlexible());
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testOnAppEngineFlexIsTrueWhenGaeInstanceHasAefPrefix()
     {
         putenv('GAE_INSTANCE=aef-default-20180313t154438');
@@ -301,6 +304,7 @@ class GCECredentialsTest extends BaseTest
 
     /**
      * @dataProvider scopes
+     * @runInSeparateProcess
      */
     public function testFetchAuthTokenCustomScope($scope, $expected)
     {
@@ -388,6 +392,9 @@ class GCECredentialsTest extends BaseTest
         $this->assertEquals('', $creds->getClientName($httpHandler));
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testSignBlob()
     {
         $expectedEmail = 'test@test.com';
@@ -419,6 +426,9 @@ class GCECredentialsTest extends BaseTest
         $signature = $creds->signBlob($stringToSign);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testSignBlobWithLastReceivedAccessToken()
     {
         $expectedEmail = 'test@test.com';
@@ -460,6 +470,9 @@ class GCECredentialsTest extends BaseTest
         $signature = $creds->signBlob($stringToSign);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testSignBlobWithUniverseDomain()
     {
         $token = [
@@ -498,6 +511,9 @@ class GCECredentialsTest extends BaseTest
         $this->assertEquals('abc123', $signature);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testGetProjectId()
     {
         $expected = 'foobar';
@@ -519,6 +535,9 @@ class GCECredentialsTest extends BaseTest
         $this->assertEquals($expected, $creds->getProjectId());
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testGetProjectIdShouldBeEmptyIfNotOnGCE()
     {
         // simulate retry attempts by returning multiple 500s
@@ -706,7 +725,8 @@ class GCECredentialsTest extends BaseTest
             return match (++$timesCalled) {
                 1 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
                 2 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
-                3 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
+                3 => new Response(200, [], '{}'),
+                4 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
             };
         };
 
@@ -728,6 +748,7 @@ class GCECredentialsTest extends BaseTest
             return match (++$timesCalled) {
                 1 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
                 2 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
+                3 => new Response(200, [], '{}'),
             };
         };
 
