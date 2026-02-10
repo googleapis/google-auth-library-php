@@ -29,6 +29,11 @@ use Google\Auth\CredentialSource;
 use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\GCECache;
 use Google\Auth\Logging\StdOutLogger;
+use Google\Auth\Middleware\AuthTokenMiddleware;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
@@ -894,6 +899,51 @@ class ApplicationDefaultCredentialsTest extends TestCase
                 new Response(404),
             ]), // $httpHandler
         );
-        $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain($httpHandler));
+        $this->assertEquals(
+            CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN,
+            $creds2->getUniverseDomain($httpHandler)
+        );
+    }
+
+    public function testTrustBoundaryLookupIntegration()
+    {
+        if ('true' !== getenv('RUN_TRUST_BOUNDARY_TESTS')) {
+            $this->markTestSkipped(
+                'This test requires RUN_TRUST_BOUNDARY_TESTS=true and a set of credentials with' .
+                'Trust boundaries enabled'
+            );
+        }
+
+        $creds = ApplicationDefaultCredentials::getCredentials(
+            'https://www.googleapis.com/auth/cloud-platform',
+            enableTrustBoundary: true,
+        );
+
+        $mock = new MockHandler([
+            new Response(200, [], '{"status":"it worked!"}') // response from KMS
+        ]);
+
+        $container = [];
+        $history = Middleware::history($container);
+
+        $middleware = new AuthTokenMiddleware($creds);
+        $stack = HandlerStack::create($mock);
+        $stack->push($middleware);
+        $stack->push($history);
+
+        $client = new Client([
+            'handler' => $stack,
+            'auth' => 'google_auth'
+        ]);
+
+        $res = $client->get('https://fake.url/');
+        $this->assertEquals('{"status":"it worked!"}', (string) $res->getBody());
+
+        $this->assertCount(1, $container);
+        $this->assertArrayHasKey('request', $container[0]);
+
+        $request = $container[0]['request'];
+        $this->assertTrue($request->hasHeader('x-allowed-locations'));
+        $this->assertEquals('0x80000000000', $request->getHeaderLine('x-allowed-locations'));
     }
 }

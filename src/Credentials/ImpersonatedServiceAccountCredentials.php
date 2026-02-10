@@ -323,22 +323,15 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         $authUri = null,
         ?callable $httpHandler = null
     ) {
-        $updatedMetadata = parent::updateMetadata($metadata, $authUri, $httpHandler);
+        $metatadata = parent::updateMetadata($metadata, $authUri, $httpHandler);
 
-        if ($this->enableTrustBoundary) {
-            if (!$this->sourceCredentials instanceof ServiceAccountCredentials) {
-                throw new LogicException(
-                    'Trust boundary lookup is only supported for service account credentials'
-                );
-            }
-            $updatedMetadata = $this->updateTrustBoundaryMetadata(
-                $updatedMetadata,
-                $this->sourceCredentials->getClientName(),
-                $this->getUniverseDomain(),
-                $httpHandler,
-            );
-        }
+        $metatadata = $this->updateTrustBoundaryMetadata(
+            $metatadata,
+            $this->impersonatedServiceAccountName,
+            $this->getUniverseDomain(),
+            $httpHandler,
+        );
 
-        return $updatedMetadata;
+        return $metatadata;
     }
 }

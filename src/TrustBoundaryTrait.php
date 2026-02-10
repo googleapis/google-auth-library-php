@@ -116,6 +116,7 @@ trait TrustBoundaryTrait
         if ($trustBoundaryInfo) {
             $headers['x-allowed-locations'] = $trustBoundaryInfo['encodedLocations'];
         }
+
         return $headers;
     }
 }

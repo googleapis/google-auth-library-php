@@ -326,19 +326,18 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         $authUri = null,
         ?callable $httpHandler = null
     ) {
-        // scope exists. use oauth implementation
-        $updatedMetadata = $this->useSelfSignedJwt()
+        $metadata = $this->useSelfSignedJwt()
             ? $this->updateMetadataSelfSignedJwt($metadata, $authUri, $httpHandler)
             : parent::updateMetadata($metadata, $authUri, $httpHandler);
 
-        $updatedMetadata = $this->updateTrustBoundaryMetadata(
-            $updatedMetadata,
+        $metadata = $this->updateTrustBoundaryMetadata(
+            $metadata,
             $this->auth->getIssuer(),
             $this->getUniverseDomain(),
             $httpHandler,
         );
 
-        return $updatedMetadata;
+        return $metadata;
     }
 
     /**
@@ -356,17 +355,19 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     ) {
         $jwtCreds = $this->createJwtAccessCredentials();
 
-        // Prefer user-provided "scope" to "audience"
-        $updatedMetadata = $this->auth->getScope()
-            ? $jwtCreds->updateMetadata($metadata, null, $httpHandler)
-            : $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
+        $metadata = $jwtCreds->updateMetadata(
+            $metadata,
+            // Prefer user-provided "scope" to "audience"
+            $this->auth->getScope() ? null : $authUri,
+            $httpHandler
+        );
 
         if ($lastReceivedToken = $jwtCreds->getLastReceivedToken()) {
             // Keep self-signed JWTs in memory as the last received token
             $this->lastReceivedJwtAccessToken = $lastReceivedToken;
         }
 
-        return $updatedMetadata;
+        return $metadata;
     }
 
     /**
