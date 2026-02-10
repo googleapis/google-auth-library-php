@@ -204,7 +204,12 @@ class ApplicationDefaultCredentials
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($anyScope);
         } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
-            $creds = new GCECredentials(null, $anyScope, null, $quotaProject, null, $universeDomain);
+            $creds = new GCECredentials(
+                scope: $anyScope,
+                quotaProject: $quotaProject,
+                universeDomain: $universeDomain,
+                enableTrustBoundary: $enableTrustBoundary,
+            );
             $creds->setIsOnGce(true); // save the credentials a trip to the metadata server
         }
 
@@ -324,7 +329,7 @@ class ApplicationDefaultCredentials
                 default => throw new InvalidArgumentException('invalid value in the type field')
             };
         } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
-            $creds = new GCECredentials(null, null, $targetAudience);
+            $creds = new GCECredentials(targetAudience: $targetAudience);
             $creds->setIsOnGce(true); // save the credentials a trip to the metadata server
         }
 
