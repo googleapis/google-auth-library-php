@@ -424,4 +424,47 @@ class ServiceAccountCredentialsTest extends TestCase
         $sa = new ServiceAccountCredentials('scope/1', $keyFile);
         $this->assertEquals('test_quota_project', $sa->getQuotaProject());
     }
+
+    public function testUpdateMetadataWithTrustBoundary()
+    {
+        $httpHandler = getHandler([
+            new Response(200, [], '{"access_token": "source-token", "expires_in": 3600}'),
+            new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
+        ]);
+
+        $jsonKey = [
+            'type' => 'service_account',
+            'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
+            'client_email' => 'test@example.com',
+        ];
+        $serviceAccountCreds = new ServiceAccountCredentials(
+            'a-scope',
+            $jsonKey,
+            enableTrustBoundary: true
+        );
+
+        $metadata = $serviceAccountCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayHasKey('x-allowed-locations', $metadata);
+        $this->assertEquals('foo', $metadata['x-allowed-locations']);
+    }
+
+    public function testUpdateMetadataWithTrustBoundarySuppressedWithUniverseDomain()
+    {
+        $jsonKey = [
+            'type' => 'service_account',
+            'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
+            'client_email' => 'test@example.com',
+            'universe_domain' => 'foo.com',
+        ];
+        $serviceAccountCreds = new ServiceAccountCredentials(
+            'a-scope',
+            $jsonKey,
+            enableTrustBoundary: true
+        );
+
+        $metadata = $serviceAccountCreds->updateMetadata([]);
+
+        $this->assertArrayNotHasKey('x-allowed-locations', $metadata);
+    }
 }
