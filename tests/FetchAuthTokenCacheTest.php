@@ -195,7 +195,7 @@ class FetchAuthTokenCacheTest extends BaseTest
 
     public function testUpdateMetadataWithJwtAccess()
     {
-        $privateKey =  file_get_contents(__DIR__ . '/fixtures/private.pem');
+        $privateKey =  file_get_contents(__DIR__ . '/fixtures/fixtures1/private.pem');
         $testJson = [
             'private_key' => $privateKey,
             'private_key_id' => 'key123',

@@ -75,7 +75,9 @@ class OAuth2Test extends TestCase
     public function setUp(): void
     {
         $this->signingMinimal['signingKey'] = str_repeat('x', 256);
-        $this->fetchAuthTokenMinimal['signingKey'] = file_get_contents(__DIR__ . '/fixtures/private.pem');
+        $this->fetchAuthTokenMinimal['signingKey'] = file_get_contents(
+            __DIR__ . '/fixtures/fixtures1/private.pem'
+        );
     }
 
     /**
@@ -663,8 +665,8 @@ class OAuth2Test extends TestCase
      */
     public function testCanRS256EncodeAValidPayload()
     {
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
-        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/private.pem');
         $testConfig = $this->signingMinimal;
         $o = new OAuth2($testConfig);
         $o->setSigningAlgorithm('RS256');
@@ -681,8 +683,8 @@ class OAuth2Test extends TestCase
      */
     public function testCanHaveAdditionalClaims()
     {
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
-        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/private.pem');
         $testConfig = $this->signingMinimal;
         $targetAud = '123@456.com';
         $testConfig['additionalClaims'] = ['target_audience' => $targetAud];
@@ -1117,7 +1119,7 @@ class OAuth2Test extends TestCase
     {
         $this->expectException(UnexpectedValueException::class);
 
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
@@ -1132,8 +1134,8 @@ class OAuth2Test extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
-        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/private.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $now = time();
         $origIdToken = [
@@ -1154,8 +1156,8 @@ class OAuth2Test extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
-        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/private.pem');
         $now = time();
         $testConfig = $this->verifyIdTokenMinimal;
         $origIdToken = [
@@ -1178,7 +1180,7 @@ class OAuth2Test extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('To have multiple allowed algorithms');
 
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
@@ -1194,7 +1196,7 @@ class OAuth2Test extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('When allowed algorithms is empty');
 
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
@@ -1210,7 +1212,7 @@ class OAuth2Test extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('When allowed algorithms is empty');
 
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
@@ -1229,7 +1231,7 @@ class OAuth2Test extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('allowed algorithms must be a string or array');
 
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $not_a_jwt = 'not a jot';
         $o = new OAuth2($testConfig);
@@ -1242,8 +1244,8 @@ class OAuth2Test extends TestCase
      */
     public function testShouldReturnAValidIdToken()
     {
-        $publicKey = file_get_contents(__DIR__ . '/fixtures' . '/public.pem');
-        $privateKey = file_get_contents(__DIR__ . '/fixtures' . '/private.pem');
+        $publicKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/public.pem');
+        $privateKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/private.pem');
         $testConfig = $this->verifyIdTokenMinimal;
         $now = time();
         $origIdToken = [

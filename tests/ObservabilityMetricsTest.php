@@ -86,7 +86,7 @@ class ObservabilityMetricsTest extends TestCase
      */
     public function testServiceAccountCredentials($scope, $targetAudience, $requestTypeHeaderValue)
     {
-        $keyFile = __DIR__ . '/fixtures3/service_account_credentials.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures3/service_account_credentials.json';
         $handlerCalled = false;
         $handler = $this->getCustomHandler('sa', $requestTypeHeaderValue, $handlerCalled);
 
@@ -105,7 +105,7 @@ class ObservabilityMetricsTest extends TestCase
      */
     public function testServiceAccountJwtAccessCredentials()
     {
-        $keyFile = __DIR__ . '/fixtures3/service_account_credentials.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures3/service_account_credentials.json';
         $saJwt = new ServiceAccountJwtAccessCredentials($keyFile, 'exampleScope');
         $metadata = $saJwt->updateMetadata([self::$headerKey => ['foo']], null, null);
         $this->assertArrayHasKey(self::$headerKey, $metadata);
@@ -119,7 +119,7 @@ class ObservabilityMetricsTest extends TestCase
 
     public function testImpersonatedServiceAccountCredentials()
     {
-        $keyFile = __DIR__ . '/fixtures5/.config/gcloud/application_default_credentials.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures5/.config/gcloud/application_default_credentials.json';
         $handlerCalled = false;
         $responseFromIam = json_encode(['accessToken' => '1/abdef1234567890', 'expireTime' => '2024-01-01T00:00:00Z']);
         $handler = getHandler([
@@ -133,7 +133,7 @@ class ObservabilityMetricsTest extends TestCase
 
     public function testImpersonatedServiceAccountCredentialsWithIdTokens()
     {
-        $keyFile = __DIR__ . '/fixtures5/.config/gcloud/application_default_credentials.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures5/.config/gcloud/application_default_credentials.json';
         $handlerCalled = false;
         $responseFromIam = json_encode(['token' => '1/abdef1234567890']);
         $handler = getHandler([
@@ -151,7 +151,7 @@ class ObservabilityMetricsTest extends TestCase
      */
     public function testUserRefreshCredentials()
     {
-        $keyFile = __DIR__ . '/fixtures2/gcloud.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures2/gcloud.json';
         $handlerCalled = false;
         $handler = $this->getCustomHandler('u', 'auth-request-type/at', $handlerCalled);
 
@@ -161,7 +161,7 @@ class ObservabilityMetricsTest extends TestCase
 
     public function testUserRefreshCredentialsWithIdTokens()
     {
-        $keyFile = __DIR__ . '/fixtures2/gcloud.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures2/gcloud.json';
         $handlerCalled = false;
         $handler = $this->getCustomHandler('u', 'auth-request-type/it', $handlerCalled);
 

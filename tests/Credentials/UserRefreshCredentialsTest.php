@@ -126,7 +126,7 @@ class UserRefreshCredentialsTest extends TestCase
 
     public function testInitalizeFromAFile()
     {
-        $keyFile = __DIR__ . '/../fixtures2' . '/private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures2' . '/private.json';
         $this->assertNotNull(
             new UserRefreshCredentials('scope/1', $keyFile)
         );
@@ -151,7 +151,7 @@ class UserRefreshCredentialsTest extends TestCase
 
     public function testValid3LOauthCreds()
     {
-        $keyFile = __DIR__ . '/../fixtures2/valid_oauth_creds.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures2/valid_oauth_creds.json';
         $this->assertNotNull(
             new UserRefreshCredentials('scope/1', $keyFile)
         );
@@ -172,7 +172,7 @@ class UserRefreshCredentialsTest extends TestCase
 
     public function testSucceedIfFileExists()
     {
-        $keyFile = __DIR__ . '/../fixtures2/private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures2/private.json';
         putenv(UserRefreshCredentials::ENV_VAR . '=' . $keyFile);
         $this->assertNotNull(ApplicationDefaultCredentials::getCredentials('a scope'));
     }
@@ -187,7 +187,7 @@ class UserRefreshCredentialsTest extends TestCase
 
     public function testSucceedIfFileIsPresent()
     {
-        setHomeEnv(__DIR__ . '/../fixtures2');
+        setHomeEnv(__DIR__ . '/../fixtures/fixtures2');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -282,7 +282,7 @@ class UserRefreshCredentialsTest extends TestCase
 
     public function testGetQuotaProject()
     {
-        $keyFile = __DIR__ . '/../fixtures2' . '/private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures2' . '/private.json';
         $sa = new UserRefreshCredentials('a-scope', $keyFile);
         $this->assertEquals('test_quota_project', $sa->getQuotaProject());
     }

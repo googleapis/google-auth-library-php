@@ -293,7 +293,7 @@ class AccessTokenTest extends TestCase
 
     public function testRetrieveCertsFromLocationLocalFile()
     {
-        $certsLocation = __DIR__ . '/fixtures/federated-certs.json';
+        $certsLocation = __DIR__ . '/fixtures/fixtures1/federated-certs.json';
         $certsData = json_decode(file_get_contents($certsLocation), true);
 
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
@@ -336,7 +336,7 @@ class AccessTokenTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Failed to retrieve verification certificates from path');
 
-        $certsLocation = __DIR__ . '/fixtures/federated-certs-does-not-exist.json';
+        $certsLocation = __DIR__ . '/fixtures/fixtures1/federated-certs-does-not-exist.json';
 
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
         $item->get()
@@ -409,7 +409,7 @@ class AccessTokenTest extends TestCase
 
     public function testRetrieveCertsFromLocationRespectsCacheControl()
     {
-        $certsLocation = __DIR__ . '/fixtures/federated-certs.json';
+        $certsLocation = __DIR__ . '/fixtures/fixtures1/federated-certs.json';
         $certsJson = file_get_contents($certsLocation);
         $certsData = json_decode($certsJson, true);
 
@@ -454,7 +454,7 @@ class AccessTokenTest extends TestCase
 
     public function testRetrieveCertsFromLocationRemote()
     {
-        $certsLocation = __DIR__ . '/fixtures/federated-certs.json';
+        $certsLocation = __DIR__ . '/fixtures/fixtures1/federated-certs.json';
         $certsJson = file_get_contents($certsLocation);
         $certsData = json_decode($certsJson, true);
 
