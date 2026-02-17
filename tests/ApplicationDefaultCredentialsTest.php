@@ -59,14 +59,14 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getCredentials('a scope');
     }
 
     public function testLoadsOKIfEnvSpecifiedIsValid()
     {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
@@ -75,7 +75,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
-        setHomeEnv(__DIR__ . '/fixtures');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -164,7 +164,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testImpersonatedServiceAccountCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures5');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures5');
         $creds = ApplicationDefaultCredentials::getCredentials(
             null,
             null,
@@ -186,7 +186,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testUserRefreshCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures2');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures2');
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -221,7 +221,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testServiceAccountCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -256,7 +256,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testDefaultScopeArray()
     {
-        setHomeEnv(__DIR__ . '/fixtures2');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures2');
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -278,21 +278,21 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getMiddleware('a scope');
     }
 
     public function testGetMiddlewareLoadsOKIfEnvSpecifiedIsValid()
     {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope'));
     }
 
     public function testLGetMiddlewareoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
-        setHomeEnv(__DIR__ . '/fixtures');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope'));
     }
 
@@ -314,7 +314,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetMiddlewareWithCacheOptions()
     {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $httpHandler = getHandler([
@@ -457,14 +457,14 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $keyFile = __DIR__ . '/fixtures' . '/does-not-exist-private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/does-not-exist-private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
     }
 
     public function testGetIdTokenCredentialsLoadsOKIfEnvSpecifiedIsValid()
     {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
@@ -473,7 +473,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetIdTokenCredentialsLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
-        setHomeEnv(__DIR__ . '/fixtures');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
         $this->assertInstanceOf(ServiceAccountCredentials::class, $creds);
     }
@@ -500,14 +500,14 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetIdTokenCredentialsWithImpersonatedServiceAccountCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures5');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures5');
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials('123@456.com');
         $this->assertInstanceOf(ImpersonatedServiceAccountCredentials::class, $creds);
     }
 
     public function testGetIdTokenCredentialsWithCacheOptions()
     {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $httpHandler = getHandler([
@@ -553,7 +553,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetIdTokenCredentialsWithUserRefreshCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures2');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures2');
 
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
             $this->targetAudience,
@@ -572,7 +572,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testWithServiceAccountCredentialsAndExplicitQuotaProject()
     {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $credentials = ApplicationDefaultCredentials::getCredentials(
@@ -593,7 +593,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetCredentialsUtilizesQuotaProjectInKeyFile()
     {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $credentials = ApplicationDefaultCredentials::getCredentials();
@@ -609,7 +609,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $quotaProject = 'quota-project-from-env-var';
         putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
-        setHomeEnv(__DIR__ . '/fixtures');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
 
         $credentials = ApplicationDefaultCredentials::getCredentials();
 
@@ -624,7 +624,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $quotaProject = 'quota-project-from-parameter';
         putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=quota-project-from-env-var');
-        setHomeEnv(__DIR__ . '/fixtures');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
 
         $credentials = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -645,7 +645,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     public function testGetCredentialsUtilizesQuotaProjectEnvVarOverKeyFile()
     {
         $quotaProject = 'quota-project-from-env-var';
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
         putenv(CredentialsLoader::ENV_VAR . '=' . $keyFile);
 
@@ -659,7 +659,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testWithFetchAuthTokenCacheAndExplicitQuotaProject()
     {
-        $keyFile = __DIR__ . '/fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
         $httpHandler = getHandler([
@@ -761,7 +761,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
      */
     public function testExternalAccountCredentials(string $jsonFile, string $expectedCredSource)
     {
-        putenv(sprintf('GOOGLE_APPLICATION_CREDENTIALS=%s/fixtures6/%s', __DIR__, $jsonFile));
+        putenv(sprintf('GOOGLE_APPLICATION_CREDENTIALS=%s/fixtures/fixtures6/%s', __DIR__, $jsonFile));
 
         $creds = ApplicationDefaultCredentials::getCredentials('a_scope');
 
@@ -832,19 +832,19 @@ class ApplicationDefaultCredentialsTest extends TestCase
     public function testUniverseDomainInKeyFile()
     {
         // Test no universe domain in keyfile defaults to "googleapis.com"
-        $keyFile = __DIR__ . '/fixtures3/service_account_credentials.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures3/service_account_credentials.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $creds = ApplicationDefaultCredentials::getCredentials();
         $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds->getUniverseDomain());
 
         // Test universe domain in "service_account" keyfile
-        $keyFile = __DIR__ . '/fixtures/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $creds = ApplicationDefaultCredentials::getCredentials();
         $this->assertEquals('example-universe.com', $creds->getUniverseDomain());
 
         // Test universe domain in "authenticated_user" keyfile is not read.
-        $keyFile = __DIR__ . '/fixtures2/private.json';
+        $keyFile = __DIR__ . '/fixtures/fixtures2/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $creds2 = ApplicationDefaultCredentials::getCredentials();
         $this->assertEquals(CredentialsLoader::DEFAULT_UNIVERSE_DOMAIN, $creds2->getUniverseDomain());

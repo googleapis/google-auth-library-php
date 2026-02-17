@@ -38,7 +38,7 @@ class ServiceAccountSignerTraitTest extends TestCase
     public function testSignBlob($useOpenSsl)
     {
         $trait = new ServiceAccountSignerTraitImpl(
-            file_get_contents(__DIR__ . '/fixtures/private.pem')
+            file_get_contents(__DIR__ . '/fixtures/fixtures1/private.pem')
         );
 
         $res = $trait->signBlob(self::STRING_TO_SIGN, $useOpenSsl);

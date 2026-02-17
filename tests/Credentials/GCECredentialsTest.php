@@ -139,7 +139,6 @@ class GCECredentialsTest extends BaseTest
         $method = (new ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyWindows');
 
-
         $this->assertFalse($method->invoke(null, 'thisShouldBeFalse'));
     }
 

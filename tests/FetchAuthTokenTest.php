@@ -152,7 +152,7 @@ class FetchAuthTokenTest extends BaseTest
     public function testServiceAccountCredentialsGetLastReceivedToken()
     {
         $jsonPath = sprintf(
-            '%s/fixtures/.config/%s',
+            '%s/fixtures/fixtures1/.config/%s',
             __DIR__,
             CredentialsLoader::WELL_KNOWN_PATH
         );
@@ -179,7 +179,7 @@ class FetchAuthTokenTest extends BaseTest
     public function testServiceAccountJwtAccessCredentialsGetLastReceivedToken()
     {
         $jsonPath = sprintf(
-            '%s/fixtures/.config/%s',
+            '%s/fixtures/fixtures1/.config/%s',
             __DIR__,
             CredentialsLoader::WELL_KNOWN_PATH
         );
@@ -198,7 +198,7 @@ class FetchAuthTokenTest extends BaseTest
     public function testUserRefreshCredentialsGetLastReceivedToken()
     {
         $jsonPath = sprintf(
-            '%s/fixtures2/.config/%s',
+            '%s/fixtures/fixtures2/.config/%s',
             __DIR__,
             CredentialsLoader::WELL_KNOWN_PATH
         );

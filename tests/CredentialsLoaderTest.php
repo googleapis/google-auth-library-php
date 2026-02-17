@@ -35,7 +35,7 @@ class CredentialsLoaderTest extends TestCase
     /** @runInSeparateProcess */
     public function testGetDefaultClientCertSource()
     {
-        setHomeEnv(__DIR__ . '/fixtures4/valid');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures4/valid');
 
         $callback = CredentialsLoader::getDefaultClientCertSource();
         $this->assertNotNull($callback);
@@ -61,7 +61,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('Invalid client cert source JSON');
 
-        setHomeEnv(__DIR__ . '/fixtures4/invalidjson');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidjson');
 
         CredentialsLoader::getDefaultClientCertSource();
     }
@@ -74,7 +74,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('cert source requires "cert_provider_command"');
 
-        setHomeEnv(__DIR__ . '/fixtures4/invalidkey');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidkey');
 
         CredentialsLoader::getDefaultClientCertSource();
     }
@@ -87,7 +87,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('cert source expects "cert_provider_command" to be an array');
 
-        setHomeEnv(__DIR__ . '/fixtures4/invalidvalue');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidvalue');
 
         CredentialsLoader::getDefaultClientCertSource();
     }
@@ -115,7 +115,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('"cert_provider_command" failed with a nonzero exit code');
 
-        setHomeEnv(__DIR__ . '/fixtures4/invalidcmd');
+        setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidcmd');
 
         $callback = CredentialsLoader::getDefaultClientCertSource();
 
@@ -160,7 +160,7 @@ class CredentialsLoaderTest extends TestCase
      */
     public function testLoadJsonFromGetEnv(): void
     {
-        putenv(CredentialsLoader::ENV_VAR . '=' . __DIR__ . '/fixtures7/getenv.json');
+        putenv(CredentialsLoader::ENV_VAR . '=' . __DIR__ . '/fixtures/fixtures7/getenv.json');
 
         $json = CredentialsLoader::fromEnv();
 
@@ -173,7 +173,7 @@ class CredentialsLoaderTest extends TestCase
      */
     public function testLoadJsonFromEnv(): void
     {
-        $_ENV[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures7/env.json';
+        $_ENV[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures/fixtures7/env.json';
 
         $json = CredentialsLoader::fromEnv();
 
@@ -186,8 +186,8 @@ class CredentialsLoaderTest extends TestCase
      */
     public function testLoadJsonFromGetEnvBackwardsCompatibility(): void
     {
-        $_ENV[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures7/env.json';
-        putenv(CredentialsLoader::ENV_VAR . '=' . __DIR__ . '/fixtures7/getenv.json');
+        $_ENV[CredentialsLoader::ENV_VAR] = __DIR__ . '/fixtures/fixtures7/env.json';
+        putenv(CredentialsLoader::ENV_VAR . '=' . __DIR__ . '/fixtures/fixtures7/getenv.json');
 
         $json = CredentialsLoader::fromEnv();
 
