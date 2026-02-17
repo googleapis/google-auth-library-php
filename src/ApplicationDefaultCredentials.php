@@ -153,6 +153,7 @@ class ApplicationDefaultCredentials
      * @param string|null $universeDomain Specifies a universe domain to use for the
      *   calling client library.
      * @param null|false|LoggerInterface $logger A PSR3 compliant LoggerInterface.
+     * @param bool $enableTrustBoundary Lookup and include the trust boundary header.
      *
      * @return FetchAuthTokenInterface
      * @throws DomainException if no implementation can be obtained.
@@ -166,6 +167,7 @@ class ApplicationDefaultCredentials
         $defaultScope = null,
         ?string $universeDomain = null,
         null|false|LoggerInterface $logger = null,
+        bool $enableTrustBoundary = false
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -196,12 +198,18 @@ class ApplicationDefaultCredentials
             $creds = CredentialsLoader::makeCredentials(
                 $scope,
                 $jsonKey,
-                $defaultScope
+                $defaultScope,
+                $enableTrustBoundary
             );
         } elseif (AppIdentityCredentials::onAppEngine() && !GCECredentials::onAppEngineFlexible()) {
             $creds = new AppIdentityCredentials($anyScope);
         } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
-            $creds = new GCECredentials(null, $anyScope, null, $quotaProject, null, $universeDomain);
+            $creds = new GCECredentials(
+                scope: $anyScope,
+                quotaProject: $quotaProject,
+                universeDomain: $universeDomain,
+                enableTrustBoundary: $enableTrustBoundary,
+            );
             $creds->setIsOnGce(true); // save the credentials a trip to the metadata server
         }
 
@@ -286,7 +294,7 @@ class ApplicationDefaultCredentials
         $targetAudience,
         ?callable $httpHandler = null,
         ?array $cacheConfig = null,
-        ?CacheItemPoolInterface $cache = null
+        ?CacheItemPoolInterface $cache = null,
     ) {
         $creds = null;
         $jsonKey = CredentialsLoader::fromEnv()
@@ -308,12 +316,20 @@ class ApplicationDefaultCredentials
 
             $creds = match ($jsonKey['type']) {
                 'authorized_user' => new UserRefreshCredentials(null, $jsonKey, $targetAudience),
-                'impersonated_service_account' => new ImpersonatedServiceAccountCredentials(null, $jsonKey, $targetAudience),
-                'service_account' => new ServiceAccountCredentials(null, $jsonKey, null, $targetAudience),
+                'impersonated_service_account' => new ImpersonatedServiceAccountCredentials(
+                    scope: null,
+                    jsonKey: $jsonKey,
+                    targetAudience: $targetAudience,
+                ),
+                'service_account' => new ServiceAccountCredentials(
+                    scope: null,
+                    jsonKey: $jsonKey,
+                    targetAudience: $targetAudience,
+                ),
                 default => throw new InvalidArgumentException('invalid value in the type field')
             };
         } elseif (self::onGce($httpHandler, $cacheConfig, $cache)) {
-            $creds = new GCECredentials(null, null, $targetAudience);
+            $creds = new GCECredentials(targetAudience: $targetAudience);
             $creds->setIsOnGce(true); // save the credentials a trip to the metadata server
         }
 

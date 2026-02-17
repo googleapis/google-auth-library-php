@@ -27,6 +27,7 @@ use Google\Auth\Iam;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\SignBlobInterface;
+use Google\Auth\TrustBoundaryTrait;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -64,6 +65,7 @@ class GCECredentials extends CredentialsLoader implements
     GetQuotaProjectInterface
 {
     use IamSignerTrait;
+    use TrustBoundaryTrait;
 
     // phpcs:disable
     const cacheKey = 'GOOGLE_AUTH_PHP_GCE';
@@ -209,6 +211,7 @@ class GCECredentials extends CredentialsLoader implements
      *   account identity name to use instead of "default".
      * @param string|null $universeDomain [optional] Specify a universe domain to use
      *   instead of fetching one from the metadata server.
+     * @param bool $enableTrustBoundary Lookup and include the trust boundary header.
      */
     public function __construct(
         ?Iam $iam = null,
@@ -216,7 +219,8 @@ class GCECredentials extends CredentialsLoader implements
         $targetAudience = null,
         $quotaProject = null,
         $serviceAccountIdentity = null,
-        ?string $universeDomain = null
+        ?string $universeDomain = null,
+        bool $enableTrustBoundary = false
     ) {
         $this->iam = $iam;
 
@@ -245,6 +249,7 @@ class GCECredentials extends CredentialsLoader implements
         $this->quotaProject = $quotaProject;
         $this->serviceAccountIdentity = $serviceAccountIdentity;
         $this->universeDomain = $universeDomain;
+        $this->enableTrustBoundary = $enableTrustBoundary;
     }
 
     /**
@@ -627,6 +632,33 @@ class GCECredentials extends CredentialsLoader implements
         }
 
         return $this->universeDomain;
+    }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        ?callable $httpHandler = null
+    ) {
+        $metadata = parent::updateMetadata($metadata, $authUri, $httpHandler);
+
+        if ($this->enableTrustBoundary) {
+            $metadata = $this->updateTrustBoundaryMetadata(
+                $metadata,
+                $this->getClientName($httpHandler),
+                $this->getUniverseDomain($httpHandler),
+                $httpHandler,
+            );
+        }
+
+        return $metadata;
     }
 
     /**

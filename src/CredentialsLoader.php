@@ -152,12 +152,14 @@ abstract class CredentialsLoader implements
      * @param string|string[] $scope
      * @param array<mixed> $jsonKey
      * @param string|string[] $defaultScope
+     * @param bool $enableTrustBoundary Lookup and include the trust boundary header.
      * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials
      */
     public static function makeCredentials(
         $scope,
         array $jsonKey,
-        $defaultScope = null
+        $defaultScope = null,
+        bool $enableTrustBoundary = false
     ) {
         if (!array_key_exists('type', $jsonKey)) {
             throw new \InvalidArgumentException('json key is missing the type field');
@@ -165,7 +167,7 @@ abstract class CredentialsLoader implements
 
         if ($jsonKey['type'] == 'service_account') {
             // Do not pass $defaultScope to ServiceAccountCredentials
-            return new ServiceAccountCredentials($scope, $jsonKey);
+            return new ServiceAccountCredentials($scope, $jsonKey, enableTrustBoundary: $enableTrustBoundary);
         }
 
         if ($jsonKey['type'] == 'authorized_user') {
@@ -174,7 +176,12 @@ abstract class CredentialsLoader implements
         }
 
         if ($jsonKey['type'] == 'impersonated_service_account') {
-            return new ImpersonatedServiceAccountCredentials($scope, $jsonKey, null, $defaultScope);
+            return new ImpersonatedServiceAccountCredentials(
+                $scope,
+                $jsonKey,
+                defaultScope: $defaultScope,
+                enableTrustBoundary: $enableTrustBoundary
+            );
         }
 
         if ($jsonKey['type'] == 'external_account') {

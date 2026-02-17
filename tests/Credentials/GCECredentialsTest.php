@@ -20,6 +20,7 @@ namespace Google\Auth\Tests\Credentials;
 use COM;
 use Exception;
 use Google\Auth\Credentials\GCECredentials;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Exception\ClientException;
@@ -204,6 +205,9 @@ class GCECredentialsTest extends BaseTest
         $this->assertFalse(GCECredentials::onAppEngineFlexible());
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testOnAppEngineFlexIsTrueWhenGaeInstanceHasAefPrefix()
     {
         putenv('GAE_INSTANCE=aef-default-20180313t154438');
@@ -299,6 +303,7 @@ class GCECredentialsTest extends BaseTest
 
     /**
      * @dataProvider scopes
+     * @runInSeparateProcess
      */
     public function testFetchAuthTokenCustomScope($scope, $expected)
     {
@@ -386,6 +391,9 @@ class GCECredentialsTest extends BaseTest
         $this->assertEquals('', $creds->getClientName($httpHandler));
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testSignBlob()
     {
         $expectedEmail = 'test@test.com';
@@ -417,6 +425,9 @@ class GCECredentialsTest extends BaseTest
         $signature = $creds->signBlob($stringToSign);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testSignBlobWithLastReceivedAccessToken()
     {
         $expectedEmail = 'test@test.com';
@@ -458,6 +469,9 @@ class GCECredentialsTest extends BaseTest
         $signature = $creds->signBlob($stringToSign);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testSignBlobWithUniverseDomain()
     {
         $token = [
@@ -496,6 +510,9 @@ class GCECredentialsTest extends BaseTest
         $this->assertEquals('abc123', $signature);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testGetProjectId()
     {
         $expected = 'foobar';
@@ -517,6 +534,9 @@ class GCECredentialsTest extends BaseTest
         $this->assertEquals($expected, $creds->getProjectId());
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testGetProjectIdShouldBeEmptyIfNotOnGCE()
     {
         // simulate retry attempts by returning multiple 500s
@@ -695,5 +715,49 @@ class GCECredentialsTest extends BaseTest
         $expected = 'example-universe.com';
         $creds = new GCECredentials(null, null, null, null, null, $expected);
         $this->assertEquals($expected, $creds->getUniverseDomain());
+    }
+
+    public function testUpdateMetadataWithTrustBoundary()
+    {
+        $timesCalled = 0;
+        $httpHandler = function () use (&$timesCalled) {
+            return match (++$timesCalled) {
+                1 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                2 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
+                3 => new Response(200, [], '{}'),
+                4 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
+            };
+        };
+
+        $gceCreds = new GCECredentials(
+            enableTrustBoundary: true,
+            universeDomain: GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+        );
+
+        $metadata = $gceCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayHasKey('x-allowed-locations', $metadata);
+        $this->assertEquals('foo', $metadata['x-allowed-locations']);
+    }
+
+    public function testUpdateMetadataWithTrustBoundarySuppressedWithUniverseDomain()
+    {
+        $timesCalled = 0;
+        $httpHandler = function () use (&$timesCalled) {
+            return match (++$timesCalled) {
+                1 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                2 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
+                3 => new Response(200, [], '{}'),
+            };
+        };
+
+        $gceCreds = new GCECredentials(
+            enableTrustBoundary: true,
+            universeDomain: 'foo.com'
+        );
+
+        $metadata = $gceCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayNotHasKey('x-allowed-locations', $metadata);
     }
 }

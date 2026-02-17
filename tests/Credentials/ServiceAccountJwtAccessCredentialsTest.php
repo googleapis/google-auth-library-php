@@ -552,4 +552,28 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
         $this->assertArrayHasKey('scope', $json);
         $this->assertEquals($json['scope'], implode(' ', $scope));
     }
+
+    public function testUpdateMetadataWithTrustBoundary()
+    {
+        $httpHandler = getHandler([
+            new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
+        ]);
+
+        $jsonKey = [
+            'type' => 'service_account',
+            'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
+            'client_email' => 'test@example.com',
+        ];
+        $serviceAccountCreds = new ServiceAccountCredentials(
+            'a-scope',
+            $jsonKey,
+            enableTrustBoundary: true
+        );
+        $serviceAccountCreds->useJwtAccessWithScope();
+
+        $metadata = $serviceAccountCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayHasKey('x-allowed-locations', $metadata);
+        $this->assertEquals('foo', $metadata['x-allowed-locations']);
+    }
 }

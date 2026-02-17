@@ -26,6 +26,9 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\IamSignerTrait;
 use Google\Auth\SignBlobInterface;
+use Google\Auth\TrustBoundaryTrait;
+use Google\Auth\UpdateMetadataInterface;
+use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use LogicException;
@@ -41,10 +44,13 @@ use LogicException;
  */
 class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     SignBlobInterface,
-    GetUniverseDomainInterface
+    GetUniverseDomainInterface,
+    UpdateMetadataInterface
 {
     use CacheTrait;
     use IamSignerTrait;
+    use UpdateMetadataTrait;
+    use TrustBoundaryTrait;
 
     private const CRED_TYPE = 'imp';
     private const IAM_SCOPE = 'https://www.googleapis.com/auth/iam';
@@ -95,6 +101,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         string|array $jsonKey,
         private ?string $targetAudience = null,
         string|array|null $defaultScope = null,
+        bool $enableTrustBoundary = false
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -135,7 +142,10 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             }
             $jsonKey['source_credentials'] = match ($jsonKey['source_credentials']['type'] ?? null) {
                 // Do not pass $defaultScope to ServiceAccountCredentials
-                'service_account' => new ServiceAccountCredentials($scope, $jsonKey['source_credentials']),
+                'service_account' => new ServiceAccountCredentials(
+                    scope: $scope,
+                    jsonKey: $jsonKey['source_credentials'],
+                ),
                 'authorized_user' => new UserRefreshCredentials($scope, $jsonKey['source_credentials']),
                 'external_account' => new ExternalAccountCredentials($scope, $jsonKey['source_credentials']),
                 default => throw new \InvalidArgumentException('invalid value in the type field'),
@@ -152,6 +162,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         );
 
         $this->sourceCredentials = $jsonKey['source_credentials'];
+        $this->enableTrustBoundary = $enableTrustBoundary;
     }
 
     /**
@@ -297,5 +308,30 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         return $this->sourceCredentials instanceof GetUniverseDomainInterface
             ? $this->sourceCredentials->getUniverseDomain()
             : self::DEFAULT_UNIVERSE_DOMAIN;
+    }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        ?callable $httpHandler = null
+    ) {
+        $metatadata = parent::updateMetadata($metadata, $authUri, $httpHandler);
+
+        $metatadata = $this->updateTrustBoundaryMetadata(
+            $metatadata,
+            $this->impersonatedServiceAccountName,
+            $this->getUniverseDomain(),
+            $httpHandler,
+        );
+
+        return $metatadata;
     }
 }
