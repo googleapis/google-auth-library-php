@@ -186,7 +186,7 @@ abstract class CredentialsLoader implements
 
         if ($jsonKey['type'] == 'external_account') {
             $anyScope = $scope ?: $defaultScope;
-            return new ExternalAccountCredentials($anyScope, $jsonKey);
+            return new ExternalAccountCredentials($anyScope, $jsonKey, $enableTrustBoundary);
         }
 
         throw new \InvalidArgumentException('invalid value in the type field');

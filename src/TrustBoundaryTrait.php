@@ -6,6 +6,7 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
+use InvalidArgumentException;
 
 /**
  * @internal
@@ -23,7 +24,7 @@ trait TrustBoundaryTrait
     private function getTrustBoundary(
         string $universeDomain,
         callable $httpHandler,
-        string $serviceAccountEmail,
+        string $trustBoundaryUrl,
         array $headers,
     ): array|null {
         if (!$this->enableTrustBoundary) {
@@ -48,7 +49,7 @@ trait TrustBoundaryTrait
 
         $trustBoundary = $this->lookupTrustBoundary(
             $httpHandler,
-            $serviceAccountEmail,
+            $trustBoundaryUrl,
             $headers['authorization']
         );
 
@@ -63,43 +64,12 @@ trait TrustBoundaryTrait
     }
 
     /**
-     * @param array<string> $authHeader
-     * @return null|array{locations: array<string>, encodedLocations: string}
-     */
-    private function lookupTrustBoundary(
-        callable $httpHandler,
-        string $serviceAccountEmail,
-        array $authHeader
-    ): array|null {
-        $url = $this->buildTrustBoundaryLookupUrl($serviceAccountEmail);
-        $request = new Request('GET', $url);
-        $request = $request->withHeader('authorization', $authHeader);
-        try {
-            $response = $httpHandler($request);
-            return json_decode((string) $response->getBody(), true);
-        } catch (ClientException $e) {
-            // We swallow all errors here - a failed trust boundary lookup
-            // should not disrupt client authentication.
-        }
-        return null;
-    }
-
-    private function buildTrustBoundaryLookupUrl(string $serviceAccountEmail): string
-    {
-        return sprintf(
-            'https://iamcredentials.%s/v1/projects/-/serviceAccounts/%s/allowedLocations',
-            $this->getUniverseDomain(),
-            $serviceAccountEmail
-        );
-    }
-
-    /**
      * @param array<mixed> $headers
      * @return array<mixed>
      */
     private function updateTrustBoundaryMetadata(
         array $headers,
-        string $serviceAccountEmail,
+        string $trustBoundaryUrl,
         string $universeDomain,
         ?callable $httpHandler,
     ): array {
@@ -109,7 +79,7 @@ trait TrustBoundaryTrait
         $trustBoundaryInfo = $this->getTrustBoundary(
             $universeDomain,
             $httpHandler,
-            $serviceAccountEmail,
+            $trustBoundaryUrl,
             $headers
         );
 
@@ -118,5 +88,64 @@ trait TrustBoundaryTrait
         }
 
         return $headers;
+    }
+
+    /**
+     * Return the trust boundary lookup URL.
+     */
+    private function buildTrustBoundaryLookupUrl(
+        ?string $serviceAccountEmail = null,
+        ?string $poolId = null,
+        ?string $projectNumber = null,
+    ): string {
+        $baseUrl = 'https://iamcredentials.googleapis.com/v1';
+        if ($serviceAccountEmail) {
+            if (is_null($projectNumber) && is_null($poolId)) {
+                return sprintf(
+                    '%s/projects/-/serviceAccounts/%s/allowedLocations',
+                    $baseUrl,
+                    $serviceAccountEmail
+                );
+            }
+        } elseif ($poolId) {
+            if (is_null($projectNumber)) {
+                // Workforce Identity Pools
+                return sprintf(
+                    '%s/locations/global/workforcePools/%s/allowedLocations',
+                    $baseUrl,
+                    $poolId
+                );
+            }
+            // Workload Identity Pools
+            return sprintf(
+                '%s/projects/%s/locations/global/workloadIdentityPools/%s/allowedLocations',
+                $baseUrl,
+                $projectNumber,
+                $poolId
+            );
+        }
+
+        throw new InvalidArgumentException('Must supply $serviceAccountEmail, $poolId, or both $poolId and $projectId');
+    }
+
+    /**
+     * @param array<string> $authHeader
+     * @return null|array{locations: array<string>, encodedLocations: string}
+     */
+    private function lookupTrustBoundary(
+        callable $httpHandler,
+        string $trustBoundaryUrl,
+        array $authHeader
+    ): array|null {
+        $request = new Request('GET', $trustBoundaryUrl);
+        $request = $request->withHeader('authorization', $authHeader);
+        try {
+            $response = $httpHandler($request);
+            return json_decode((string) $response->getBody(), true);
+        } catch (ClientException $e) {
+            // We swallow all errors here - a failed trust boundary lookup
+            // should not disrupt client authentication.
+        }
+        return null;
     }
 }

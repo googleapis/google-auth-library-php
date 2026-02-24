@@ -909,8 +909,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         if ('true' !== getenv('RUN_TRUST_BOUNDARY_TESTS')) {
             $this->markTestSkipped(
-                'This test requires RUN_TRUST_BOUNDARY_TESTS=true and a set of credentials with' .
-                'Trust boundaries enabled'
+                'This test requires RUN_TRUST_BOUNDARY_TESTS=true and a set of credentials with ' .
+                'trust boundaries enabled'
             );
         }
 

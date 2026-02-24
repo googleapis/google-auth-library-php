@@ -21,9 +21,9 @@ class TrustBoundaryTraitTest extends TestCase
 
     public function testBuildTrustBoundaryLookupUrl()
     {
-        $url = $this->impl->buildTrustBoundaryLookupUrl('test@example.com');
+        $url = $this->impl->buildTrustBoundaryLookupUrl(serviceAccountEmail: 'test@example.com');
         $this->assertEquals(
-            'https://iamcredentials.foo.bar/v1/projects/-/serviceAccounts/test@example.com/allowedLocations',
+            'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/test@example.com/allowedLocations',
             $url
         );
     }
@@ -100,10 +100,5 @@ class TrustBoundaryTraitImpl
     public function setCache($cache)
     {
         $this->cache = $cache;
-    }
-
-    public function getUniverseDomain()
-    {
-        return 'foo.bar';
     }
 }
