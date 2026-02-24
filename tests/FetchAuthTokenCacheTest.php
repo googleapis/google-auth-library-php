@@ -282,7 +282,7 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals($metadata, $metadata2);
 
         // Ensure token for different URI is NOT cached
-        $metadata3 = $cachedFetcher->updateMetadata([], 'http://test-auth-uri-2');
+        $metadata3 = $cachedFetcher->updateMetadata([], 'http://test-auth-uri-2', getHandler([new Response(200)]));
         $this->assertNotEquals($metadata, $metadata3);
     }
 

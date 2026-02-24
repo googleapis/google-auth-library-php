@@ -332,7 +332,7 @@ class ExternalAccountCredentials implements
             $metadata = $this->updateTrustBoundaryMetadata(
                 $metadata,
                 $this->buildTrustBoundaryLookupUrl(),
-                $this->getUniverseDomain($httpHandler),
+                $this->getUniverseDomain(),
                 $httpHandler,
             );
         }
