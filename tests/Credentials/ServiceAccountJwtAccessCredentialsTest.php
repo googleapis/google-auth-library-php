@@ -561,7 +561,7 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
 
         $jsonKey = [
             'type' => 'service_account',
-            'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
+            'private_key' => file_get_contents(__DIR__ . '/../fixtures/fixtures1/private.pem'),
             'client_email' => 'test@example.com',
         ];
         $serviceAccountCreds = new ServiceAccountCredentials(

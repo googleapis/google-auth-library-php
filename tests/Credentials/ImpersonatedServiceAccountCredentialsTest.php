@@ -563,7 +563,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
             'service_account_impersonation_url' => 'https://iamcredentials.googleapis.com/v1',
             'source_credentials' => [
                 'type' => 'service_account',
-                'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
+                'private_key' => file_get_contents(__DIR__ . '/../fixtures/fixtures1/private.pem'),
                 'client_email' => 'test@example.com',
             ],
         ];
@@ -589,7 +589,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
             'service_account_impersonation_url' => 'https://iamcredentials.googleapis.com/v1',
             'source_credentials' => [
                 'type' => 'service_account',
-                'private_key' => file_get_contents(__DIR__ . '/../fixtures/private.pem'),
+                'private_key' => file_get_contents(__DIR__ . '/../fixtures/fixtures1/private.pem'),
                 'client_email' => 'test@example.com',
                 'universe_domain' => 'foo.com'
             ],
