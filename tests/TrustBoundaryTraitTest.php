@@ -36,7 +36,7 @@ class TrustBoundaryTraitTest extends TestCase
             new Response(200, [], $responseBody),
         ]);
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
-        $result = $this->impl->lookupTrustBoundary($handler, 'default', []);
+        $result = $this->impl->lookupTrustBoundary($handler, 'default', ['Bearer xyz']);
         $this->assertEquals(json_decode($responseBody, true), $result);
     }
 
@@ -46,7 +46,7 @@ class TrustBoundaryTraitTest extends TestCase
             new Response(404),
         ]);
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
-        $result = $this->impl->lookupTrustBoundary($handler, 'default', []);
+        $result = $this->impl->lookupTrustBoundary($handler, 'default', ['Bearer xyz']);
         $this->assertNull($result);
     }
 

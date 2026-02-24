@@ -467,6 +467,6 @@ class ExternalAccountCredentials implements
             );
         }
 
-        throw new LogicException("Invalid audience format.");
+        throw new LogicException('Invalid audience format');
     }
 }
