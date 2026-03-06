@@ -4,7 +4,7 @@ namespace Google\Auth;
 
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 
@@ -143,7 +143,7 @@ trait TrustBoundaryTrait
         try {
             $response = $httpHandler($request);
             return json_decode((string) $response->getBody(), true);
-        } catch (ClientException $e) {
+        } catch (RequestException $e) {
             // We swallow all errors here - a failed trust boundary lookup
             // should not disrupt client authentication.
         }

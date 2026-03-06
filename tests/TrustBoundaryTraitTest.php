@@ -7,7 +7,9 @@ use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\TrustBoundaryTrait;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -133,6 +135,28 @@ class TrustBoundaryTraitTest extends TestCase
             ['authorization' => ['xyz']]
         );
 
+        $this->assertNull($result1);
+    }
+
+    public function testLookupIsFailOpen()
+    {
+        $mock = new MockHandler([
+            new RequestException('Error Communicating with Server', new Request('GET', 'test'))
+        ]);
+        $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
+
+        $this->assertNull($mock->getLastRequest());
+
+        // First call, should fetch and cache
+        $result1 = $this->impl->getTrustBoundary(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            $handler,
+            'default',
+            ['authorization' => ['xyz']]
+        );
+
+        // Ensure the request was made and the error was swallowed
+        $this->assertNotNull($mock->getLastRequest());
         $this->assertNull($result1);
     }
 }
