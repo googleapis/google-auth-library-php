@@ -95,14 +95,14 @@ class TrustBoundaryTraitTest extends TestCase
     {
         $cacheItem = $this->prophesize(CacheItemInterface::class);
         $cacheItem->isHit()->shouldBeCalledOnce()->willReturn(false);
-        $cacheItem->set(Argument::any())->shouldBeCalledOnce();
-        $cacheItem->expiresAfter(6 * 60 * 60)->shouldBeCalledOnce();
+        $cacheItem->set(Argument::any())->shouldBeCalledOnce()->willReturn($cacheItem->reveal());
+        $cacheItem->expiresAfter(6 * 60 * 60)->shouldBeCalledOnce()->willReturn($cacheItem->reveal());
 
         $cache = $this->prophesize(CacheItemPoolInterface::class);
         $cache->getItem(Argument::type('string'))
             ->shouldBeCalledTimes(2)
             ->willReturn($cacheItem->reveal());
-        $cache->save($cacheItem->reveal())->shouldBeCalledOnce();
+        $cache->save($cacheItem->reveal())->shouldBeCalledOnce()->willReturn(true);
 
         $this->impl->setCache($cache->reveal());
 
