@@ -3,15 +3,22 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\Cache\MemoryCacheItemPool;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\TrustBoundaryTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Cache\CacheItemInterface;
+use Psr\Cache\CacheItemPoolInterface;
 
 class TrustBoundaryTraitTest extends TestCase
 {
+    use ProphecyTrait;
+
     private $impl;
 
     public function setUp(): void
@@ -55,21 +62,78 @@ class TrustBoundaryTraitTest extends TestCase
         $cache = new MemoryCacheItemPool();
         $this->impl->setCache($cache);
         $responseBody =
-            '{"locations": ["us-central1", "us-east1", "europe-west1", "asia-east1"], "enodedLocations": ""0xA30"}';
+            '{"locations": ["us-central1", "us-east1", "europe-west1", "asia-east1"], "encodedLocations": "0xA30"}';
         $mock = new MockHandler([
             new Response(200, [], $responseBody),
         ]);
         $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
 
         // First call, should fetch and cache
-        $result1 = $this->impl->getTrustBoundary('universe.domain', $handler, 'default', []);
+        $result1 = $this->impl->getTrustBoundary(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            $handler,
+            'default',
+            ['authorization' => ['xyz']]
+        );
         $this->assertEquals(json_decode($responseBody, true), $result1);
 
         // Second call, should return from cache
         $mock->reset();
         $mock->append(new Response(500)); // This should not be called
-        $result2 = $this->impl->getTrustBoundary('universe.domain', $handler, 'default', []);
+        $result2 = $this->impl->getTrustBoundary(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            $handler,
+            'default',
+            []
+        );
         $this->assertEquals(json_decode($responseBody, true), $result2);
+    }
+
+    public function testCacheLifetime()
+    {
+        $cacheItem = $this->prophesize(CacheItemInterface::class);
+        $cacheItem->isHit()->shouldBeCalledOnce()->willReturn(false);
+        $cacheItem->set(Argument::any())->shouldBeCalledOnce();
+        $cacheItem->expiresAfter(6 * 60 * 60)->shouldBeCalledOnce();
+
+        $cache = $this->prophesize(CacheItemPoolInterface::class);
+        $cache->getItem(Argument::type('string'))
+            ->shouldBeCalledTimes(2)
+            ->willReturn($cacheItem->reveal());
+        $cache->save($cacheItem->reveal())->shouldBeCalledOnce();
+
+        $this->impl->setCache($cache->reveal());
+
+        $responseBody =
+            '{"locations": ["us-central1", "us-east1", "europe-west1", "asia-east1"], "encodedLocations": "0xA30"}';
+        $mock = new MockHandler([
+            new Response(200, [], $responseBody),
+        ]);
+        $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
+
+        // First call, should fetch and cache
+        $result1 = $this->impl->getTrustBoundary(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            $handler,
+            'default',
+            ['authorization' => ['xyz']]
+        );
+
+        $this->assertNotNull($result1);
+        $this->assertEquals(json_decode($responseBody, true), $result1);
+    }
+
+    public function testSkipLookupOutsideDefaultUniverseDomain()
+    {
+        // First call, should fetch and cache
+        $result1 = $this->impl->getTrustBoundary(
+            'universe.domain',
+            fn () => throw new \Exception('Should not be called'),
+            'default',
+            ['authorization' => ['xyz']]
+        );
+
+        $this->assertNull($result1);
     }
 }
 
@@ -90,6 +154,7 @@ class TrustBoundaryTraitImpl
             'prefix' => '',
             'lifetime' => 1000,
         ];
+        $this->enableTrustBoundary = true;
     }
 
     public function getCacheKey()

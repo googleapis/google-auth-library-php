@@ -66,9 +66,10 @@ trait CacheTrait
      *
      * @param mixed $k
      * @param mixed $v
+     * @param int|null $lifetime
      * @return mixed
      */
-    private function setCachedValue($k, $v)
+    private function setCachedValue($k, $v, ?int $lifetime = null)
     {
         if (is_null($this->cache)) {
             return null;
@@ -81,7 +82,7 @@ trait CacheTrait
 
         $cacheItem = $this->cache->getItem($key);
         $cacheItem->set($v);
-        $cacheItem->expiresAfter($this->cacheConfig['lifetime']);
+        $cacheItem->expiresAfter($lifetime ?? $this->cacheConfig['lifetime']);
         return $this->cache->save($cacheItem);
     }
 

@@ -58,7 +58,8 @@ trait TrustBoundaryTrait
         }
 
         // Save to cache
-        $this->setCachedValue($this->getCacheKey() . ':trustboundary', $trustBoundary);
+        $tbLifetime = 6 * 60 * 60; // 6-hour cache TTL
+        $this->setCachedValue($this->getCacheKey() . ':trustboundary', $trustBoundary, $tbLifetime);
 
         return $trustBoundary;
     }
