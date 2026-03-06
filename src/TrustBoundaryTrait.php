@@ -47,13 +47,23 @@ trait TrustBoundaryTrait
             return null;
         }
 
+        if ($this->getCachedValue($this->getCacheKey() . ':trustboundary:cooldown')) {
+            // We are in a cooldown period, wait until it's over
+            return null;
+        }
+
         $trustBoundary = $this->lookupTrustBoundary(
             $httpHandler,
             $trustBoundaryUrl,
             $headers['authorization']
         );
 
-        if (null !== $trustBoundary && !array_key_exists('encodedLocations', $trustBoundary)) {
+        if (null === $trustBoundary) {
+            // Do not save null trust boundary to cache. Instead, fail open and try again on a subsequent request.
+            return null;
+        }
+
+        if (!array_key_exists('encodedLocations', $trustBoundary)) {
             throw new \LogicException('Trust boundary lookup failed to return \'encodedLocations\'');
         }
 
@@ -146,7 +156,28 @@ trait TrustBoundaryTrait
         } catch (RequestException $e) {
             // We swallow all errors here - a failed trust boundary lookup
             // should not disrupt client authentication.
+            $this->initiateCooldown();
         }
         return null;
+    }
+
+    private function initiateCooldown()
+    {
+        $cooldownKey = $this->getCacheKey() . ':trustboundary:cooldown';
+        $attempt = $this->getCachedValue($cooldownKey . ':attempt') ?? 0;
+
+        $cooldownBackoff = 15 * 60; // 15 minutes
+        $cooldownMax = 6 * 60 * 60; // 6 hours
+        $cooldownPeriod = min(++$attempt * $cooldownBackoff, $cooldownMax);
+        $this->setCachedValue(
+            $cooldownKey,
+            true,
+            $cooldownPeriod
+        );
+        $this->setCachedValue(
+            $cooldownKey . ':attempt',
+            $attempt,
+            $cooldownPeriod * 2
+        );
     }
 }

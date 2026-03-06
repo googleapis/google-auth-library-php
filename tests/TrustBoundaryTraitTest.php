@@ -99,10 +99,16 @@ class TrustBoundaryTraitTest extends TestCase
         $cacheItem->expiresAfter(6 * 60 * 60)->shouldBeCalledOnce()->willReturn($cacheItem->reveal());
 
         $cache = $this->prophesize(CacheItemPoolInterface::class);
-        $cache->getItem(Argument::type('string'))
+        $cache->getItem('testkeytrustboundary')
             ->shouldBeCalledTimes(2)
             ->willReturn($cacheItem->reveal());
         $cache->save($cacheItem->reveal())->shouldBeCalledOnce()->willReturn(true);
+
+        $cooldownCacheItem = $this->prophesize(CacheItemInterface::class);
+        $cooldownCacheItem->isHit()->shouldBeCalledOnce()->willReturn(false);
+        $cache->getItem('testkeytrustboundarycooldown')
+            ->shouldBeCalledOnce()
+            ->willReturn($cooldownCacheItem->reveal());
 
         $this->impl->setCache($cache->reveal());
 
@@ -157,6 +163,102 @@ class TrustBoundaryTraitTest extends TestCase
 
         // Ensure the request was made and the error was swallowed
         $this->assertNotNull($mock->getLastRequest());
+        $this->assertNull($result1);
+    }
+
+    public function testSkipLookupDuringCooldown()
+    {
+        $cache = $this->prophesize(CacheItemPoolInterface::class);
+
+        $cacheItem = $this->prophesize(CacheItemInterface::class);
+        $cacheItem->isHit()->shouldBeCalledOnce()->willReturn(false);
+        $cache->getItem('testkeytrustboundary')
+            ->shouldBeCalledOnce()
+            ->willReturn($cacheItem->reveal());
+
+        $cooldownCacheItem = $this->prophesize(CacheItemInterface::class);
+        $cooldownCacheItem->isHit()->shouldBeCalledOnce()->willReturn(true);
+        $cooldownCacheItem->get()->shouldBeCalledOnce()->willReturn(true);
+
+        $cache->getItem('testkeytrustboundarycooldown')
+            ->shouldBeCalledOnce()
+            ->willReturn($cooldownCacheItem->reveal());
+
+        $this->impl->setCache($cache->reveal());
+
+        // First call, should fetch and cache
+        $result1 = $this->impl->getTrustBoundary(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            fn () => throw new \Exception('Should not be called'),
+            'default',
+            ['authorization' => ['xyz']]
+        );
+
+        $this->assertNull($result1);
+    }
+
+    public function provideCooldown()
+    {
+        $fifteenMinutes = 15 * 60; // cooldown increment
+        $sixHours = 6 * 60 * 60; // max cooldown
+        return [
+            [0, $fifteenMinutes],
+            [1, $fifteenMinutes * 2],
+            [1000, $sixHours],
+        ];
+    }
+
+    /**
+     * @dataProvider provideCooldown
+     */
+    public function testCooldown(int $attempt, int $expectedExpiry)
+    {
+        $cache = $this->prophesize(CacheItemPoolInterface::class);
+
+        $cacheItem = $this->prophesize(CacheItemInterface::class);
+        $cacheItem->isHit()->shouldBeCalledOnce()->willReturn(false);
+        $cache->getItem('testkeytrustboundary')
+            ->shouldBeCalledOnce()
+            ->willReturn($cacheItem->reveal());
+
+        $cooldownCacheItem = $this->prophesize(CacheItemInterface::class);
+        $cooldownCacheItem->isHit()->shouldBeCalledOnce()->willReturn(false);
+        $cooldownCacheItem->set(true)->shouldBeCalledOnce()->willReturn($cooldownCacheItem->reveal());
+        $cooldownCacheItem->expiresAfter($expectedExpiry)->shouldBeCalledOnce()->willReturn($cooldownCacheItem->reveal());
+        $cache->getItem('testkeytrustboundarycooldown')
+            ->shouldBeCalledTimes(2)
+            ->willReturn($cooldownCacheItem->reveal());
+        $cache->save($cooldownCacheItem->reveal())->shouldBeCalledOnce()->willReturn(true);
+
+        $cooldownCacheItemAttempt = $this->prophesize(CacheItemInterface::class);
+        if (0 === $attempt) {
+            $cooldownCacheItemAttempt->isHit()->shouldBeCalledOnce()->willReturn(false);
+        } else {
+            $cooldownCacheItemAttempt->isHit()->shouldBeCalledOnce()->willReturn(true);
+            $cooldownCacheItemAttempt->get()->shouldBeCalledOnce()->willReturn($attempt);
+        }
+        $cooldownCacheItemAttempt->set($attempt + 1)->shouldBeCalledOnce()->willReturn($cooldownCacheItemAttempt->reveal());
+        $cooldownCacheItemAttempt->expiresAfter($expectedExpiry * 2)->shouldBeCalledOnce()->willReturn($cooldownCacheItemAttempt->reveal());
+        $cache->getItem('testkeytrustboundarycooldownattempt')
+            ->shouldBeCalledTimes(2)
+            ->willReturn($cooldownCacheItemAttempt->reveal());
+        $cache->save($cooldownCacheItemAttempt->reveal())->shouldBeCalledOnce()->willReturn(true);
+
+        $this->impl->setCache($cache->reveal());
+
+        $mock = new MockHandler([
+            new RequestException('Error Communicating with Server (1)', new Request('GET', 'test')),
+        ]);
+        $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
+
+        // First call, should fetch and cache
+        $result1 = $this->impl->getTrustBoundary(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            $handler,
+            'default',
+            ['authorization' => ['xyz']]
+        );
+
         $this->assertNull($result1);
     }
 }
