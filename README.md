@@ -1,15 +1,6 @@
 # Google Auth Library for PHP
 
-<dl>
-  <dt>Homepage</dt><dd><a href="http://www.github.com/google/google-auth-library-php">http://www.github.com/google/google-auth-library-php</a></dd>
-  <dt>Reference Docs</dt><dd><a href="https://googleapis.github.io/google-auth-library-php/main/">https://googleapis.github.io/google-auth-library-php/main/</a></dd>
-  <dt>Authors</dt>
-    <dd><a href="mailto:temiola@google.com">Tim Emiola</a></dd>
-    <dd><a href="mailto:stanleycheung@google.com">Stanley Cheung</a></dd>
-    <dd><a href="mailto:betterbrent@google.com">Brent Shaffer</a></dd>
-  <dt>Copyright</dt><dd>Copyright © 2015 Google, Inc.</dd>
-  <dt>License</dt><dd>Apache 2.0</dd>
-</dl>
+<a href="https://cloud.google.com/php/docs/reference/auth/latest">Reference Docs</a>
 
 ## Description
 
@@ -180,11 +171,19 @@ $jsonKey = ['key' => 'value'];
 // define the scopes for your API call
 $scopes = ['https://www.googleapis.com/auth/drive.readonly'];
 
-// Load credentials
-$creds = CredentialsLoader::makeCredentials($scopes, $jsonKey);
+// Load credentials from JSON containing service account credentials.
+$creds = new ServiceAccountCredentials($scopes, $jsonKey),
+
+// For other credentials types, create those classes explicitly using the
+// "type" field in the JSON key, for example:
+$creds = match ($jsonKey['type']) {
+    'service_account' => new ServiceAccountCredentials($scope, $jsonKey),
+    'authorized_user' => new UserRefreshCredentials($scope, $jsonKey),
+    default => throw new InvalidArgumentException('This application only supports service account and user account credentials'),
+};
 
 // optional caching
-// $creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
+$creds = new FetchAuthTokenCache($creds, $cacheConfig, $cache);
 
 // create middleware
 $middleware = new AuthTokenMiddleware($creds);

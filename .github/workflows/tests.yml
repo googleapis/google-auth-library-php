@@ -10,15 +10,12 @@ jobs:
     test:
         strategy:
             matrix:
-                php: [ "8.0", "8.1", "8.2", "8.3", "8.4" ]
-                os: [ ubuntu-latest ]
-                include:
-                  - os: windows-latest
-                    php: "8.1"
+                os: [ "ubuntu-latest", "windows-latest" ]
+                php: [ "8.1", "8.2", "8.3", "8.4", "8.5" ]
         runs-on: ${{ matrix.os }}
-        name: PHP ${{ matrix.php }} Unit Test ${{ matrix.os == 'windows-latest' && 'on Windows' || '' }}
+        name: PHP ${{ matrix.php }} Unit Test${{ matrix.os == 'windows-latest' && ' on Windows' || '' }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
@@ -31,16 +28,16 @@ jobs:
                 max_attempts: 3
                 command: composer install
             - name: Run Script
-              run: vendor/bin/phpunit ${{ matrix.os == 'windows-latest' && '--filter GCECredentialsTest' || '' }}
+              run: vendor/bin/phpunit
     test_lowest:
         runs-on: ubuntu-latest
         name: Test Prefer Lowest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: "8.0"
+                php-version: "8.1"
             - name: Install Dependencies
               uses: nick-invision/retry@v3
               with:

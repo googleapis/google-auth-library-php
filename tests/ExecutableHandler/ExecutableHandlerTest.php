@@ -26,17 +26,17 @@ class ExecutableHandlerTest extends TestCase
     public function testEnvironmentVariables()
     {
         $handler = new ExecutableHandler(['ENV_VAR_1' => 'foo', 'ENV_VAR_2' => 'bar']);
-        $this->assertEquals(0, $handler('echo $ENV_VAR_1'));
+        $this->assertEquals(0, $handler('bash -c "echo $ENV_VAR_1"'));
         $this->assertEquals("foo\n", $handler->getOutput());
 
-        $this->assertEquals(0, $handler('echo $ENV_VAR_2'));
+        $this->assertEquals(0, $handler('bash -c "echo $ENV_VAR_2"'));
         $this->assertEquals("bar\n", $handler->getOutput());
     }
 
     public function testTimeoutMs()
     {
-        $handler = new ExecutableHandler([], 300);
-        $this->assertEquals(0, $handler('sleep "0.2"'));
+        $handler = new ExecutableHandler([], 3000);
+        $this->assertEquals(0, $handler('bash -c \'sleep "0.1"\''));
     }
 
     public function testTimeoutMsExceeded()
@@ -51,7 +51,7 @@ class ExecutableHandlerTest extends TestCase
     public function testErrorOutputIsReturnedAsOutput()
     {
         $handler = new ExecutableHandler();
-        $this->assertEquals(0, $handler('echo "Bad Response." >&2'));
+        $this->assertEquals(0, $handler('bash -c \'echo "Bad Response." >&2\''));
         $this->assertEquals("Bad Response.\n", $handler->getOutput());
     }
 }

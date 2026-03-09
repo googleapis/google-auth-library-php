@@ -28,3 +28,15 @@ function getHandler(array $mockResponses = [])
 
     return new \Google\Auth\HttpHandler\Guzzle6HttpHandler($client);
 }
+
+function setHomeEnv(string|null $value): void
+{
+    $assigment = sprintf(
+        '%s%s%s',
+        PHP_OS_FAMILY === 'Windows' ? 'APPDATA' : 'HOME',
+        $value === null ? '' : '=',
+        (string) $value
+    );
+
+    putenv($assigment);
+}

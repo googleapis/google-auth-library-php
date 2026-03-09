@@ -35,6 +35,15 @@ use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 
+/**
+ * **IMPORTANT**:
+ * This class does not validate the credential configuration. A security
+ * risk occurs when a credential configuration configured with malicious urls
+ * is used.
+ * When the credential configuration is accepted from an
+ * untrusted source, you should validate it before creating this class.
+ * @see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials
+ */
 class ExternalAccountCredentials implements
     FetchAuthTokenInterface,
     UpdateMetadataInterface,
@@ -52,6 +61,8 @@ class ExternalAccountCredentials implements
     private ?string $serviceAccountImpersonationUrl;
     private ?string $workforcePoolUserProject;
     private ?string $projectId;
+    /** @var array<mixed> */
+    private ?array $lastImpersonatedAccessToken;
     private string $universeDomain;
 
     /**
@@ -270,7 +281,10 @@ class ExternalAccountCredentials implements
         $stsToken = $this->auth->fetchAuthToken($httpHandler, $headers);
 
         if (isset($this->serviceAccountImpersonationUrl)) {
-            return $this->getImpersonatedAccessToken($stsToken['access_token'], $httpHandler);
+            return $this->lastImpersonatedAccessToken = $this->getImpersonatedAccessToken(
+                $stsToken['access_token'],
+                $httpHandler
+            );
         }
 
         return $stsToken;
@@ -301,7 +315,7 @@ class ExternalAccountCredentials implements
 
     public function getLastReceivedToken()
     {
-        return $this->auth->getLastReceivedToken();
+        return $this->lastImpersonatedAccessToken ?? $this->auth->getLastReceivedToken();
     }
 
     /**

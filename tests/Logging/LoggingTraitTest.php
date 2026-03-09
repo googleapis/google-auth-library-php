@@ -86,6 +86,18 @@ class LoggingTraitTest extends BaseTest
         $this->assertEquals($event->headers, $parsedDebugEvent['jsonPayload']['response.headers']);
     }
 
+    public function testRpcNameShouldBeIncluded()
+    {
+        $event = $this->getNewLogEvent();
+        $event->headers = ['Thisis' => 'a header'];
+        $this->loggerContainer->logRequest($event);
+
+        $buffer = $this->getActualOutput();
+
+        $parsedDebugEvent = json_decode($buffer, true);
+        $this->assertEquals($event->rpcName, $parsedDebugEvent['rpcName']);
+    }
+
     private function getNewLogEvent(): RpcLogEvent
     {
         $event = new RpcLogEvent();

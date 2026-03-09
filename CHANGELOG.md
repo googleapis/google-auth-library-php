@@ -2,6 +2,87 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.50.0](https://github.com/googleapis/google-auth-library-php/compare/v1.49.0...v1.50.0) (2026-01-08)
+
+
+### Features
+
+* Support firebase/php-jwt 7 ([#645](https://github.com/googleapis/google-auth-library-php/issues/645)) ([ae52b0a](https://github.com/googleapis/google-auth-library-php/commit/ae52b0aaa0d67c7e36569ab0f3ea3b3cf45c9e6a))
+
+## [1.49.0](https://github.com/googleapis/google-auth-library-php/compare/v1.48.1...v1.49.0) (2025-11-06)
+
+
+### Features
+
+* Add semaphore locking to Sysv cache ([#640](https://github.com/googleapis/google-auth-library-php/issues/640)) ([38ea069](https://github.com/googleapis/google-auth-library-php/commit/38ea069652278928f55335fc6c4ed92be866cf0f))
+* Json key scopes in ImpersonatedServiceAccountCredentials ([#638](https://github.com/googleapis/google-auth-library-php/issues/638)) ([b6b6966](https://github.com/googleapis/google-auth-library-php/commit/b6b696696245519bbf50222514189dc7a1010bf7))
+
+
+### Bug Fixes
+
+* Filecache race condition ([#637](https://github.com/googleapis/google-auth-library-php/issues/637)) ([09042be](https://github.com/googleapis/google-auth-library-php/commit/09042be363a275b5055dce28e8c7ce10455376d9))
+
+## [1.48.1](https://github.com/googleapis/google-auth-library-php/compare/v1.48.0...v1.48.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* Remove deprecated Item class for the CacheItemPool ([#631](https://github.com/googleapis/google-auth-library-php/issues/631)) ([7ec42c6](https://github.com/googleapis/google-auth-library-php/commit/7ec42c6ccc678865958766a32e888ae986a13608))
+
+## [1.48.0](https://github.com/googleapis/google-auth-library-php/compare/v1.47.1...v1.48.0) (2025-09-16)
+
+
+### Features
+
+* Add the rpcName to the logged event ([#630](https://github.com/googleapis/google-auth-library-php/issues/630)) ([d1d9e21](https://github.com/googleapis/google-auth-library-php/commit/d1d9e214af6a67bba4f06a2906be1be7da469419))
+
+
+### Bug Fixes
+
+* Deprecate Credentials::makeCredentials ([#624](https://github.com/googleapis/google-auth-library-php/issues/624)) ([12bb6e8](https://github.com/googleapis/google-auth-library-php/commit/12bb6e8a137f0dce5e2f1c193d59df8596fde3e4))
+
+## [1.47.1](https://github.com/googleapis/google-auth-library-php/compare/v1.47.0...v1.47.1) (2025-07-08)
+
+
+### Bug Fixes
+
+* Undefined index error in cache trait ([#617](https://github.com/googleapis/google-auth-library-php/issues/617)) ([ff7ece6](https://github.com/googleapis/google-auth-library-php/commit/ff7ece65bab1e5131ef57181678cc83e04c93aef))
+
+## [1.47.0](https://github.com/googleapis/google-auth-library-php/compare/v1.46.0...v1.47.0) (2025-04-15)
+
+
+### Features
+
+* Add support for $_ENV in CredentialsLoader ([#612](https://github.com/googleapis/google-auth-library-php/issues/612)) ([3e63576](https://github.com/googleapis/google-auth-library-php/commit/3e63576bf73ab8c7a0cccecd741601c4d6800e6d))
+
+## [1.46.0](https://github.com/googleapis/google-auth-library-php/compare/v1.45.4...v1.46.0) (2025-02-12)
+
+
+### Features
+
+* Add support for Impersonating ID Tokens ([#580](https://github.com/googleapis/google-auth-library-php/issues/580)) ([66db27c](https://github.com/googleapis/google-auth-library-php/commit/66db27c671c229ff561ecab51e0b6379c6109b93))
+
+## [1.45.4](https://github.com/googleapis/google-auth-library-php/compare/v1.45.3...v1.45.4) (2025-02-05)
+
+
+### Bug Fixes
+
+* Return impersonated token as lastReceivedToken ([#606](https://github.com/googleapis/google-auth-library-php/issues/606)) ([33c3c85](https://github.com/googleapis/google-auth-library-php/commit/33c3c850973487951c6cb943d200702ba6debbb0))
+
+## [1.45.3](https://github.com/googleapis/google-auth-library-php/compare/v1.45.2...v1.45.3) (2025-02-05)
+
+
+### Documentation
+
+* fix broken reference (#602)
+
+## [1.45.2](https://github.com/googleapis/google-auth-library-php/compare/v1.45.1...v1.45.2) (2025-01-28)
+
+
+### Bug Fixes
+
+* Minor changes to allow for refdoc regeneration ([#600](https://github.com/googleapis/google-auth-library-php/issues/600)) ([608115c](https://github.com/googleapis/google-auth-library-php/commit/608115cd17fda4498ddb7d22a47ee06316e0d0cf))
+
 ## [1.45.0](https://github.com/googleapis/google-auth-library-php/compare/v1.44.0...v1.45.0) (2024-12-11)
 
 

@@ -61,14 +61,12 @@ class ExternalAccountCredentialsTest extends TestCase
 
         $credsReflection = new \ReflectionClass(ExternalAccountCredentials::class);
         $credsProp = $credsReflection->getProperty('auth');
-        $credsProp->setAccessible(true);
 
         $creds = new ExternalAccountCredentials('a-scope', $jsonCreds);
         $oauth = $credsProp->getValue($creds);
 
         $oauthReflection = new \ReflectionClass(OAuth2::class);
         $oauthProp = $oauthReflection->getProperty('subjectTokenFetcher');
-        $oauthProp->setAccessible(true);
         $subjectTokenFetcher = $oauthProp->getValue($oauth);
 
         $this->assertInstanceOf($expectedSourceClass, $subjectTokenFetcher);
@@ -76,7 +74,6 @@ class ExternalAccountCredentialsTest extends TestCase
         $sourceReflection = new \ReflectionClass($subjectTokenFetcher);
         foreach ($expectedProperties as $propName => $expectedPropValue) {
             $sourceProp = $sourceReflection->getProperty($propName);
-            $sourceProp->setAccessible(true);
             $this->assertEquals($expectedPropValue, $sourceProp->getValue($subjectTokenFetcher));
         }
     }
@@ -293,7 +290,7 @@ class ExternalAccountCredentialsTest extends TestCase
                     $this->assertEquals('service-account-impersonation-url.com', (string) $request->getUri());
                     $requestBody = json_decode((string) $request->getBody(), true);
                     $this->assertEquals(['a-scope'], $requestBody['scope']);
-                    $responseBody = json_encode(['accessToken' => 'def', 'expireTime' => $expiry]);
+                    $responseBody = json_encode(['accessToken' => 'ghi', 'expireTime' => $expiry]);
                     break;
             }
 
@@ -311,8 +308,11 @@ class ExternalAccountCredentialsTest extends TestCase
 
         $authToken = $creds->fetchAuthToken($httpHandler);
         $this->assertArrayHasKey('access_token', $authToken);
-        $this->assertEquals('def', $authToken['access_token']);
+        $this->assertEquals('ghi', $authToken['access_token']);
         $this->assertEquals(strtotime($expiry), $authToken['expires_at']);
+
+        // test that getLastReceivedToken() returns the correct token
+        $this->assertEquals($authToken, $creds->getLastReceivedToken());
     }
 
     public function testGetQuotaProject()
@@ -583,7 +583,12 @@ class ExternalAccountCredentialsTest extends TestCase
      */
     public function testExecutableCredentialSourceEnvironmentVars()
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->markTestSkipped('This test does not work on Windows');
+        }
+
         putenv('GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1');
+
         $tmpFile = tempnam(sys_get_temp_dir(), 'test');
         $outputFile = tempnam(sys_get_temp_dir(), 'output');
         $fileContents = 'foo-' . rand();
@@ -594,20 +599,23 @@ class ExternalAccountCredentialsTest extends TestCase
             'id_token' => 'abc',
             'expiration_time' => time() + 100,
         ]);
+
+        $command = sprintf(
+            'echo $GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE,$GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE,%s > %s' .
+            ' && echo \'%s\' > $GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE' .
+            ' && echo \'%s\'',
+            $fileContents,
+            $tmpFile,
+            $successJson,
+            $successJson
+        );
+
         $json = [
             'audience' => 'test-audience',
             'subject_token_type' => 'test-token-type',
             'credential_source' => [
                 'executable' => [
-                    'command' => sprintf(
-                        'echo $GOOGLE_EXTERNAL_ACCOUNT_AUDIENCE,$GOOGLE_EXTERNAL_ACCOUNT_TOKEN_TYPE,%s > %s' .
-                        ' && echo \'%s\' > $GOOGLE_EXTERNAL_ACCOUNT_OUTPUT_FILE ' .
-                        ' && echo \'%s\'',
-                        $fileContents,
-                        $tmpFile,
-                        $successJson,
-                        $successJson,
-                    ),
+                    'command' => $command,
                     'timeout_millis' => 5000,
                     'output_file' => $outputFile,
                 ],

@@ -40,7 +40,7 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
             'client_id' => 'client123',
             'type' => 'service_account',
             'project_id' => 'example_project',
-            'private_key' => file_get_contents(__DIR__ . '/../fixtures' . '/private.pem'),
+            'private_key' => file_get_contents(__DIR__ . '/../fixtures/fixtures1/private.pem'),
         ];
     }
 
@@ -48,13 +48,13 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $keyFile = __DIR__ . '/../fixtures' . '/does-not-exist-private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures1/does-not-exist-private.json';
         new ServiceAccountJwtAccessCredentials($keyFile);
     }
 
     public function testInitalizeFromAFile()
     {
-        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures1/private.json';
         $this->assertNotNull(
             new ServiceAccountJwtAccessCredentials($keyFile)
         );
@@ -392,7 +392,7 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
     /** @runInSeparateProcess */
     public function testAccessFromApplicationDefault()
     {
-        $keyFile = __DIR__ . '/../fixtures3/service_account_credentials.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures3/service_account_credentials.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -408,7 +408,7 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
 
         $this->assertArrayHasKey('authorization', $metadata);
         $token = str_replace('Bearer ', '', $metadata['authorization'][0]);
-        $key = file_get_contents(__DIR__ . '/../fixtures3/key.pub');
+        $key = file_get_contents(__DIR__ . '/../fixtures/fixtures3/key.pub');
         $result = JWT::decode($token, new Key($key, 'RS256'));
 
         $this->assertEquals($authUri, $result->aud);
@@ -509,7 +509,7 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
 
     public function testGetQuotaProject()
     {
-        $keyFile = __DIR__ . '/../fixtures' . '/private.json';
+        $keyFile = __DIR__ . '/../fixtures/fixtures1/private.json';
         $sa = new ServiceAccountJwtAccessCredentials($keyFile);
         $this->assertEquals('test_quota_project', $sa->getQuotaProject());
     }

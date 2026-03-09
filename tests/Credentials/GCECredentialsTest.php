@@ -100,7 +100,6 @@ class GCECredentialsTest extends BaseTest
 
         $method = (new ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyLinux');
-        $method->setAccessible(true);
 
         $this->assertFalse($method->invoke(null, '/nonexistant/file'));
 
@@ -139,8 +138,6 @@ class GCECredentialsTest extends BaseTest
         $method = (new ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyWindows');
 
-        $method->setAccessible(true);
-
         $this->assertFalse($method->invoke(null, 'thisShouldBeFalse'));
     }
 
@@ -159,7 +156,6 @@ class GCECredentialsTest extends BaseTest
 
         $method = (new ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyWindows');
-        $method->setAccessible(true);
 
         $this->assertFalse($method->invoke(null, $keyPathProperty . $keyName));
     }
@@ -183,7 +179,6 @@ class GCECredentialsTest extends BaseTest
 
         $method = (new ReflectionClass(GCECredentials::class))
             ->getMethod('detectResidencyWindows');
-        $method->setAccessible(true);
 
         $this->assertTrue($method->invoke(null, $keyPathProperty . $keyName));
     }

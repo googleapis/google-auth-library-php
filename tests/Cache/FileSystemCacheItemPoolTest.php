@@ -21,10 +21,12 @@ use Google\Auth\Cache\FileSystemCacheItemPool;
 use Google\Auth\Cache\TypedItem;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Filesystem\Filesystem;
 
 class FileSystemCacheItemPoolTest extends TestCase
 {
-    private string $defaultCacheDirectory = '.cache';
+    private string $cachePath;
+    private Filesystem $filesystem;
     private FileSystemCacheItemPool $pool;
     private array $invalidChars = [
         '`', '~', '!', '@', '#', '$',
@@ -36,28 +38,21 @@ class FileSystemCacheItemPoolTest extends TestCase
 
     public function setUp(): void
     {
-        $this->pool = new FileSystemCacheItemPool($this->defaultCacheDirectory);
+        $this->cachePath = sys_get_temp_dir() . '/google_auth_php_test/';
+        $this->filesystem = new Filesystem();
+        $this->filesystem->remove($this->cachePath);
+        $this->pool = new FileSystemCacheItemPool($this->cachePath);
     }
 
     public function tearDown(): void
     {
-        $files = scandir($this->defaultCacheDirectory);
-
-        foreach ($files as $fileName) {
-            if ($fileName === '.' || $fileName === '..') {
-                continue;
-            }
-
-            unlink($this->defaultCacheDirectory . '/' . $fileName);
-        }
-
-        rmdir($this->defaultCacheDirectory);
+        $this->filesystem->remove($this->cachePath);
     }
 
     public function testInstanceCreatesCacheFolder()
     {
-        $this->assertTrue(file_exists($this->defaultCacheDirectory));
-        $this->assertTrue(is_dir($this->defaultCacheDirectory));
+        $this->assertTrue(file_exists($this->cachePath));
+        $this->assertTrue(is_dir($this->cachePath));
     }
 
     public function testSaveAndGetItem()
@@ -134,10 +129,10 @@ class FileSystemCacheItemPoolTest extends TestCase
     {
         $item = $this->getNewItem();
         $this->pool->save($item);
-        $this->assertLessThan(scandir($this->defaultCacheDirectory), 2);
+        $this->assertLessThan(scandir($this->cachePath), 2);
         $this->pool->clear();
         // Clear removes all the files, but scandir returns `.` and `..` as files
-        $this->assertEquals(count(scandir($this->defaultCacheDirectory)), 2);
+        $this->assertEquals(count(scandir($this->cachePath)), 2);
     }
 
     public function testSaveDeferredAndCommit()

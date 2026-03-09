@@ -76,7 +76,7 @@ abstract class CredentialsLoader implements
      */
     public static function fromEnv()
     {
-        $path = getenv(self::ENV_VAR);
+        $path = self::getEnv(self::ENV_VAR);
         if (empty($path)) {
             return null;
         }
@@ -104,7 +104,7 @@ abstract class CredentialsLoader implements
     public static function fromWellKnownFile()
     {
         $rootEnv = self::isOnWindows() ? 'APPDATA' : 'HOME';
-        $path = [getenv($rootEnv)];
+        $path = [self::getEnv($rootEnv)];
         if (!self::isOnWindows()) {
             $path[] = self::NON_WINDOWS_WELL_KNOWN_PATH_BASE;
         }
@@ -120,19 +120,38 @@ abstract class CredentialsLoader implements
     /**
      * Create a new Credentials instance.
      *
-     * **Important**: If you accept a credential configuration (credential JSON/File/Stream) from an
-     * external source for authentication to Google Cloud Platform, you must validate it before
-     * providing it to any Google API or library. Providing an unvalidated credential configuration to
-     * Google APIs can compromise the security of your systems and data. For more information
-     * {@see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials}
+     * @deprecated This method is being deprecated because of a potential security risk.
      *
-     * @param string|string[] $scope the scope of the access request, expressed
-     *        either as an Array or as a space-delimited String.
-     * @param array<mixed> $jsonKey the JSON credentials.
-     * @param string|string[] $defaultScope The default scope to use if no
-     *   user-defined scopes exist, expressed either as an Array or as a
-     *   space-delimited string.
+     * This method does not validate the credential configuration. The security
+     * risk occurs when a credential configuration is accepted from a source
+     * that is not under your control and used without validation on your side.
      *
+     * If you know that you will be loading credential configurations of a
+     * specific type, it is recommended to use a credential-type-specific
+     * method.
+     * This will ensure that an unexpected credential type with potential for
+     * malicious intent is not loaded unintentionally. You might still have to do
+     * validation for certain credential types. Please follow the recommendation
+     * for that method. For example, if you want to load only service accounts,
+     * you can create the {@see ServiceAccountCredentials} explicitly:
+     *
+     * ```
+     * use Google\Auth\Credentials\ServiceAccountCredentials;
+     * $creds = new ServiceAccountCredentials($scopes, $json);
+     * ```
+     *
+     * If you are loading your credential configuration from an untrusted source and have
+     * not mitigated the risks (e.g. by validating the configuration yourself), make
+     * these changes as soon as possible to prevent security risks to your environment.
+     *
+     * Regardless of the method used, it is always your responsibility to validate
+     * configurations received from external sources.
+     *
+     * @see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials
+     *
+     * @param string|string[] $scope
+     * @param array<mixed> $jsonKey
+     * @param string|string[] $defaultScope
      * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials
      */
     public static function makeCredentials(
@@ -155,8 +174,7 @@ abstract class CredentialsLoader implements
         }
 
         if ($jsonKey['type'] == 'impersonated_service_account') {
-            $anyScope = $scope ?: $defaultScope;
-            return new ImpersonatedServiceAccountCredentials($anyScope, $jsonKey);
+            return new ImpersonatedServiceAccountCredentials($scope, $jsonKey, null, $defaultScope);
         }
 
         if ($jsonKey['type'] == 'external_account') {
@@ -215,7 +233,7 @@ abstract class CredentialsLoader implements
      */
     public static function quotaProjectFromEnv()
     {
-        return getenv(self::QUOTA_PROJECT_ENV_VAR) ?: null;
+        return self::getEnv(self::QUOTA_PROJECT_ENV_VAR) ?: null;
     }
 
     /**
@@ -251,7 +269,7 @@ abstract class CredentialsLoader implements
      */
     public static function shouldLoadClientCertSource()
     {
-        return filter_var(getenv(self::MTLS_CERT_ENV_VAR), FILTER_VALIDATE_BOOLEAN);
+        return filter_var(self::getEnv(self::MTLS_CERT_ENV_VAR), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -260,7 +278,7 @@ abstract class CredentialsLoader implements
     private static function loadDefaultClientCertSourceFile()
     {
         $rootEnv = self::isOnWindows() ? 'APPDATA' : 'HOME';
-        $path = sprintf('%s/%s', getenv($rootEnv), self::MTLS_WELL_KNOWN_PATH);
+        $path = sprintf('%s/%s', self::getEnv($rootEnv), self::MTLS_WELL_KNOWN_PATH);
         if (!file_exists($path)) {
             return null;
         }
@@ -291,5 +309,10 @@ abstract class CredentialsLoader implements
     public function getUniverseDomain(): string
     {
         return self::DEFAULT_UNIVERSE_DOMAIN;
+    }
+
+    private static function getEnv(string $env): mixed
+    {
+        return getenv($env) ?: $_ENV[$env] ?? null;
     }
 }
