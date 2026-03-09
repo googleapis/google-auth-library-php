@@ -161,7 +161,7 @@ trait TrustBoundaryTrait
         return null;
     }
 
-    private function initiateCooldown()
+    private function initiateCooldown(): void
     {
         $cooldownKey = $this->getCacheKey() . ':trustboundary:cooldown';
         $attempt = $this->getCachedValue($cooldownKey . ':attempt') ?? 0;
@@ -172,12 +172,12 @@ trait TrustBoundaryTrait
         $this->setCachedValue(
             $cooldownKey,
             true,
-            $cooldownPeriod
+            (int) $cooldownPeriod
         );
         $this->setCachedValue(
             $cooldownKey . ':attempt',
             $attempt,
-            $cooldownPeriod * 2
+            (int) $cooldownPeriod * 2
         );
     }
 }
