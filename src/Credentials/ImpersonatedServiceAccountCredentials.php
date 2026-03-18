@@ -72,6 +72,9 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
 
     private int $lifetime;
 
+    /**
+     * @var array<mixed>|null
+     */
     protected array|null $lastReceivedToken = null;
 
     /**
