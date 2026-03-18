@@ -2,6 +2,14 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.50.1](https://github.com/googleapis/google-auth-library-php/compare/v1.50.0...v1.50.1) (2026-03-18)
+
+
+### Bug Fixes
+
+* ImpersonatedCredentials getLastReceivedToken returns correct token ([#655](https://github.com/googleapis/google-auth-library-php/issues/655)) ([a4fe69c](https://github.com/googleapis/google-auth-library-php/commit/a4fe69c11c0c8bbe78e33eb1433c6dbcec72af2a))
+* Support psr/log 2 ([#654](https://github.com/googleapis/google-auth-library-php/issues/654)) ([4b746b8](https://github.com/googleapis/google-auth-library-php/commit/4b746b844ff60d86c6dcc940eb250a0753919181))
+
 ## [1.50.0](https://github.com/googleapis/google-auth-library-php/compare/v1.49.0...v1.50.0) (2026-01-08)
 
 
