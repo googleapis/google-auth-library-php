@@ -15,7 +15,7 @@
     "guzzlehttp/psr7": "^2.4.5",
     "psr/http-message": "^1.1||^2.0",
     "psr/cache": "^2.0||^3.0",
-    "psr/log": "^3.0"
+    "psr/log": "^2.0||^3.0"
   },
   "require-dev": {
     "guzzlehttp/promises": "^2.0",
