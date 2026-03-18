@@ -73,6 +73,11 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
     private int $lifetime;
 
     /**
+     * @var array<mixed>|null
+     */
+    protected array|null $lastReceivedToken = null;
+
+    /**
      * Instantiate an instance of ImpersonatedServiceAccountCredentials from a credentials file that
      * has be created with the --impersonate-service-account flag.
      *
@@ -252,7 +257,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
         $response = $httpHandler($request);
         $body = json_decode((string) $response->getBody(), true);
 
-        return match ($this->isIdTokenRequest()) {
+        return $this->lastReceivedToken = match ($this->isIdTokenRequest()) {
             true => ['id_token' => $body['token']],
             false => [
                 'access_token' => $body['accessToken'],
@@ -279,7 +284,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
      */
     public function getLastReceivedToken()
     {
-        return $this->sourceCredentials->getLastReceivedToken();
+        return $this->lastReceivedToken;
     }
 
     protected function getCredType(): string

@@ -186,6 +186,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $token = $creds->fetchAuthToken($httpHandler);
         $this->assertEquals('test-impersonated-access-token', $token['access_token']);
         $this->assertEquals(2, $requestCount);
+        $this->assertEquals($token, $creds->getLastReceivedToken());
     }
 
     /**
@@ -225,6 +226,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $token = $creds->fetchAuthToken($httpHandler);
         $this->assertEquals('test-impersonated-access-token', $token['access_token']);
         $this->assertEquals(3, $requestCount);
+        $this->assertEquals($token, $creds->getLastReceivedToken());
     }
 
     /**
@@ -266,6 +268,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $token = $creds->fetchAuthToken($httpHandler);
         $this->assertEquals('test-impersonated-id-token', $token['id_token']);
         $this->assertEquals(2, $requestCount);
+        $this->assertEquals($token, $creds->getLastReceivedToken());
     }
 
     public function provideAuthTokenJson()
@@ -307,6 +310,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $creds = new ImpersonatedServiceAccountCredentials(null, $json, self::TARGET_AUDIENCE);
         $token = $creds->fetchAuthToken($httpHandler);
         $this->assertEquals('test-impersonated-id-token', $token['id_token']);
+        $this->assertEquals($token, $creds->getLastReceivedToken());
     }
 
     /**
@@ -378,6 +382,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
         $token = $creds->fetchAuthToken($httpHandler);
         $this->assertEquals('test-impersonated-id-token', $token['id_token']);
         $this->assertEquals(3, $requestCount);
+        $this->assertEquals($token, $creds->getLastReceivedToken());
     }
 
     /**
@@ -416,6 +421,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
 
         $token = $creds->fetchAuthToken($httpHandler);
         $this->assertEquals('test-impersonated-id-token', $token['id_token']);
+        $this->assertEquals($token, $creds->getLastReceivedToken());
     }
 
     public function provideUniverseDomain()
@@ -455,6 +461,7 @@ class ImpersonatedServiceAccountCredentialsTest extends TestCase
 
         $token = $creds->fetchAuthToken($httpHandler);
         $this->assertEquals('test-impersonated-access-token', $token['access_token']);
+        $this->assertEquals($token, $creds->getLastReceivedToken());
     }
 
     public function testIdTokenWithAuthTokenMiddleware()
