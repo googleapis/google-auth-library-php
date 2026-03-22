@@ -30,10 +30,12 @@ use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\OAuth2;
 use Google\Auth\ProjectIdProviderInterface;
+use Google\Auth\TrustBoundaryTrait;
 use Google\Auth\UpdateMetadataInterface;
 use Google\Auth\UpdateMetadataTrait;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
+use LogicException;
 
 /**
  * **IMPORTANT**:
@@ -51,7 +53,12 @@ class ExternalAccountCredentials implements
     GetUniverseDomainInterface,
     ProjectIdProviderInterface
 {
-    use UpdateMetadataTrait;
+    use UpdateMetadataTrait {
+        updateMetadata as traitUpdateMetadata;
+    }
+    use TrustBoundaryTrait {
+        buildTrustBoundaryLookupUrl as traitBuildTrustBoundaryLookupUrl;
+    }
 
     private const EXTERNAL_ACCOUNT_TYPE = 'external_account';
     private const CLOUD_RESOURCE_MANAGER_URL = 'https://cloudresourcemanager.UNIVERSE_DOMAIN/v1/projects/%s';
@@ -69,10 +76,12 @@ class ExternalAccountCredentials implements
      * @param string|string[] $scope   The scope of the access request, expressed either as an array
      *                                 or as a space-delimited string.
      * @param array<mixed>    $jsonKey JSON credentials as an associative array.
+     * @param bool $enableTrustBoundary Lookup and include the trust boundary header.
      */
     public function __construct(
         $scope,
-        array $jsonKey
+        array $jsonKey,
+        bool $enableTrustBoundary = false
     ) {
         if (!array_key_exists('type', $jsonKey)) {
             throw new InvalidArgumentException('json key is missing the type field');
@@ -114,6 +123,7 @@ class ExternalAccountCredentials implements
         $this->quotaProject = $jsonKey['quota_project_id'] ?? null;
         $this->workforcePoolUserProject = $jsonKey['workforce_pool_user_project'] ?? null;
         $this->universeDomain = $jsonKey['universe_domain'] ?? GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN;
+        $this->enableTrustBoundary = $enableTrustBoundary;
 
         $this->auth = new OAuth2([
             'tokenCredentialUri' => $jsonKey['token_url'],
@@ -200,11 +210,8 @@ class ExternalAccountCredentials implements
             }
 
             if ($serviceAccountImpersonationUrl = $jsonKey['service_account_impersonation_url'] ?? null) {
-                // Parse email from URL. The formal looks as follows:
-                // https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/name@project-id.iam.gserviceaccount.com:generateAccessToken
-                $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
-                if (preg_match($regex, $serviceAccountImpersonationUrl, $matches)) {
-                    $env['GOOGLE_EXTERNAL_ACCOUNT_IMPERSONATED_EMAIL'] = $matches['email'];
+                if ($email = self::getServiceAccountImpersonationEmail($serviceAccountImpersonationUrl)) {
+                    $env['GOOGLE_EXTERNAL_ACCOUNT_IMPERSONATED_EMAIL'] = $email;
                 }
             }
 
@@ -218,6 +225,18 @@ class ExternalAccountCredentials implements
         }
 
         throw new InvalidArgumentException('Unable to determine credential source from json key.');
+    }
+
+    private static function getServiceAccountImpersonationEmail(string $serviceAccountImpersonationUrl): string|null
+    {
+        // Parse email from URL. The formal looks as follows:
+        // https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/name@project-id.iam.gserviceaccount.com:generateAccessToken
+        $regex = '/serviceAccounts\/(?<email>[^:]+):generateAccessToken$/';
+        if (preg_match($regex, $serviceAccountImpersonationUrl, $matches)) {
+            return $matches['email'];
+        }
+
+        return null;
     }
 
     /**
@@ -288,6 +307,37 @@ class ExternalAccountCredentials implements
         }
 
         return $stsToken;
+    }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        ?callable $httpHandler = null
+    ) {
+        $metadata = $this->traitUpdateMetadata($metadata, $authUri, $httpHandler);
+
+        if ($this->enableTrustBoundary) {
+            $clientName = $this->serviceAccountImpersonationUrl
+                ? self::getServiceAccountImpersonationEmail($this->serviceAccountImpersonationUrl)
+                : ''; // @TODO: What do we do when this is empty?
+
+            $metadata = $this->updateTrustBoundaryMetadata(
+                $metadata,
+                $this->buildTrustBoundaryLookupUrl(),
+                $this->getUniverseDomain(),
+                $httpHandler,
+            );
+        }
+
+        return $metadata;
     }
 
     /**
@@ -390,5 +440,33 @@ class ExternalAccountCredentials implements
     {
         $regex = '#//iam\.googleapis\.com/locations/[^/]+/workforcePools/#';
         return preg_match($regex, $this->auth->getAudience()) === 1;
+    }
+
+    /**
+     * Builds and returns the URL for the trust boundary lookup API.
+     */
+    private function buildTrustBoundaryLookupUrl(): string
+    {
+        // Try to parse as a workload identity pool.
+        // Audience format: //iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+        $regex = '/projects\/([^\/]+)\/locations\/global\/workloadIdentityPools\/([^\/]+)/';
+        if (preg_match($regex, $this->auth->getAudience(), $matches)) {
+            [$_, $projectNumber, $poolId] = $matches;
+
+            return $this->traitBuildTrustBoundaryLookupUrl(
+                poolId: $poolId,
+                projectNumber: $projectNumber,
+            );
+        }
+
+        // If that fails, try to parse as a workforce pool.
+        // Audience format: //iam.googleapis.com/locations/global/workforcePools/POOL_ID/providers/PROVIDER_ID
+        if (preg_match('/locations\/[^\/]+\/workforcePools\/([^\/]+)/', $this->auth->getAudience(), $matches)) {
+            return $this->traitBuildTrustBoundaryLookupUrl(
+                poolId: $matches[1],
+            );
+        }
+
+        throw new LogicException('Invalid audience format');
     }
 }
