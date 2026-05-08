@@ -74,9 +74,21 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
             ];
         }
 
-        if (!$signingVars = self::getSigningVarsFromEnv()) {
+        $signingVars = self::getSigningVarsFromEnv();
+        if (!$signingVars) {
+            // Container Credentials (ECS Fargate task role / EKS Pod Identity /
+            // AWS Greengrass etc.) expose credentials via a localhost endpoint
+            // referenced by AWS_CONTAINER_CREDENTIALS_{RELATIVE,FULL}_URI rather
+            // than by the EC2 IMDS-style securityCredentialsUrl. Try that path
+            // before falling back to the configured securityCredentialsUrl.
+            $signingVars = self::getSigningVarsFromContainerCredentials($httpHandler);
+        }
+        if (!$signingVars) {
             if (!$this->securityCredentialsUrl) {
-                throw new \LogicException('Unable to get credentials from ENV, and no security credentials URL provided');
+                throw new \LogicException(
+                    'Unable to get credentials from ENV or container credentials, '
+                    . 'and no security credentials URL provided'
+                );
             }
             $signingVars = self::getSigningVarsFromUrl(
                 $httpHandler,
@@ -326,6 +338,65 @@ class AwsNativeSource implements ExternalAccountCredentialSourceInterface
         }
 
         return null;
+    }
+
+    /**
+     * Retrieves AWS signing credentials from the container credentials
+     * provider, when running on ECS Fargate, EKS Pod Identity, AWS Greengrass,
+     * or any other environment that exposes credentials through the
+     * `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI` /
+     * `AWS_CONTAINER_CREDENTIALS_FULL_URI` interface.
+     *
+     * The endpoint returns a JSON body with `AccessKeyId`, `SecretAccessKey`
+     * and `Token` fields, mirroring the format used by the EC2 instance
+     * metadata service but addressed directly without the role-name
+     * suffix used by IMDS.
+     *
+     * @see https://docs.aws.amazon.com/sdkref/latest/guide/feature-container-credentials.html
+     *
+     * @internal
+     *
+     * @param callable $httpHandler
+     *
+     * @return array{string, string, ?string}|null `null` when neither container
+     *     credentials env var is set, signaling that the caller should fall
+     *     through to the next credentials provider.
+     */
+    public static function getSigningVarsFromContainerCredentials(callable $httpHandler): ?array
+    {
+        $relativeUri = getenv('AWS_CONTAINER_CREDENTIALS_RELATIVE_URI');
+        $fullUri = getenv('AWS_CONTAINER_CREDENTIALS_FULL_URI');
+        if (empty($relativeUri) && empty($fullUri)) {
+            return null;
+        }
+
+        $url = !empty($relativeUri)
+            ? 'http://169.254.170.2' . $relativeUri
+            : (string) $fullUri;
+
+        $headers = [];
+        if ($authToken = getenv('AWS_CONTAINER_AUTHORIZATION_TOKEN')) {
+            $headers['Authorization'] = $authToken;
+        } elseif ($authTokenFile = getenv('AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE')) {
+            if (is_readable($authTokenFile)) {
+                $headers['Authorization'] = trim((string) file_get_contents($authTokenFile));
+            }
+        }
+
+        $request = new Request('GET', $url, $headers);
+        $response = $httpHandler($request);
+        $awsCreds = json_decode((string) $response->getBody(), true);
+        if (!is_array($awsCreds)
+            || !isset($awsCreds['AccessKeyId'], $awsCreds['SecretAccessKey'])
+        ) {
+            return null;
+        }
+
+        return [
+            $awsCreds['AccessKeyId'],
+            $awsCreds['SecretAccessKey'],
+            $awsCreds['Token'] ?? null,
+        ];
     }
 
     /**
