@@ -40,23 +40,25 @@ use InvalidArgumentException;
  * It can be used to authorize requests using the AuthTokenMiddleware, but will
  * only succeed if being run on GCE:
  *
- *   use Google\Auth\Credentials\GCECredentials;
- *   use Google\Auth\Middleware\AuthTokenMiddleware;
- *   use GuzzleHttp\Client;
- *   use GuzzleHttp\HandlerStack;
+ * ```
+ * use Google\Auth\Credentials\GCECredentials;
+ * use Google\Auth\Middleware\AuthTokenMiddleware;
+ * use GuzzleHttp\Client;
+ * use GuzzleHttp\HandlerStack;
  *
- *   $gce = new GCECredentials();
- *   $middleware = new AuthTokenMiddleware($gce);
- *   $stack = HandlerStack::create();
- *   $stack->push($middleware);
+ * $gce = new GCECredentials();
+ * $middleware = new AuthTokenMiddleware($gce);
+ * $stack = HandlerStack::create();
+ * $stack->push($middleware);
  *
- *   $client = new Client([
- *      'handler' => $stack,
- *      'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
- *      'auth' => 'google_auth'
- *   ]);
+ * $client = new Client([
+ *    'handler' => $stack,
+ *    'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
+ *    'auth' => 'google_auth'
+ * ]);
  *
- *   $res = $client->get('myproject/taskqueues/myqueue');
+ * $res = $client->get('myproject/taskqueues/myqueue');
+ * ```
  */
 class GCECredentials extends CredentialsLoader implements
     SignBlobInterface,
