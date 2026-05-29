@@ -39,26 +39,28 @@ use InvalidArgumentException;
  *
  * Use it with AuthTokenMiddleware to authorize http requests:
  *
- *   use Google\Auth\Credentials\ServiceAccountCredentials;
- *   use Google\Auth\Middleware\AuthTokenMiddleware;
- *   use GuzzleHttp\Client;
- *   use GuzzleHttp\HandlerStack;
+ * ```
+ * use Google\Auth\Credentials\ServiceAccountCredentials;
+ * use Google\Auth\Middleware\AuthTokenMiddleware;
+ * use GuzzleHttp\Client;
+ * use GuzzleHttp\HandlerStack;
  *
- *   $sa = new ServiceAccountCredentials(
- *       'https://www.googleapis.com/auth/taskqueue',
- *       '/path/to/your/json/key_file.json'
- *   );
- *   $middleware = new AuthTokenMiddleware($sa);
- *   $stack = HandlerStack::create();
- *   $stack->push($middleware);
+ * $sa = new ServiceAccountCredentials(
+ *     'https://www.googleapis.com/auth/taskqueue',
+ *     '/path/to/your/json/key_file.json'
+ * );
+ * $middleware = new AuthTokenMiddleware($sa);
+ * $stack = HandlerStack::create();
+ * $stack->push($middleware);
  *
- *   $client = new Client([
- *       'handler' => $stack,
- *       'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
- *       'auth' => 'google_auth' // authorize all requests
- *   ]);
+ * $client = new Client([
+ *     'handler' => $stack,
+ *     'base_uri' => 'https://www.googleapis.com/taskqueue/v1beta2/projects/',
+ *     'auth' => 'google_auth' // authorize all requests
+ * ]);
  *
- *   $res = $client->get('myproject/taskqueues/myqueue');
+ * $res = $client->get('myproject/taskqueues/myqueue');
+ * ```
  */
 class ServiceAccountCredentials extends CredentialsLoader implements
     GetQuotaProjectInterface,
