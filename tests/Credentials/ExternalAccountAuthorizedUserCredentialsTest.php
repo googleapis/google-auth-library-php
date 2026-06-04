@@ -18,7 +18,6 @@
 namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Credentials\ExternalAccountAuthorizedUserCredentials;
-use Google\Auth\OAuth2;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;

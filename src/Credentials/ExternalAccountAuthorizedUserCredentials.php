@@ -55,7 +55,7 @@ class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader impleme
      *
      * @param string|string[]|null $scope the scope of the access request, expressed
      *   either as an Array or as a space-delimited String.
-     * @param string|array<mixed> $jsonKey JSON credential file path or JSON credentials
+     * @param array<mixed> $jsonKey JSON credential file path or JSON credentials
      *   as an associative array
      */
     public function __construct(
