@@ -38,12 +38,14 @@ class X509Source implements ExternalAccountCredentialSourceInterface
     private string $keyPath;
     private string $certPath;
 
-    public function __construct(string $trustChainPath, string $certificateConfigLocation)
-    {
+    public function __construct(
+        string $trustChainPath,
+        string $certificateConfigLocation
+    ) {
         if (!file_exists($certificateConfigLocation)) {
             throw new InvalidArgumentException('Certificate config file does not exist');
         }
-        $config = json_decode(file_get_contents($certificateConfigLocation), true);
+        $config = json_decode((string) file_get_contents($certificateConfigLocation), true);
         if (!isset($config['cert_configs']['workload']['key_path']) || !isset($config['cert_configs']['workload']['cert_path'])) {
             throw new InvalidArgumentException('Certificate config is invalid');
         }

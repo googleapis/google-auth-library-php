@@ -219,8 +219,13 @@ class ExternalAccountCredentials implements
         }
 
         if (isset($credentialSource['certificate'])) {
+            if (!array_key_exists('certificate_config_location', $credentialSource['certificate'])) {
+                throw new InvalidArgumentException(
+                    'x509 source requires a certificate_config_location to be set in the JSON file.'
+                );
+            }
             return new X509Source(
-                $credentialSource['certificate']['trust_chain_path'],
+                $credentialSource['certificate']['trust_chain_path'] ?? '',
                 $credentialSource['certificate']['certificate_config_location']
             );
         }

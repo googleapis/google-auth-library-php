@@ -663,6 +663,9 @@ class OAuth2 implements FetchAuthTokenInterface
         );
     }
 
+    /**
+     * @return array{cert?: string, ssl_key?: string}
+     */
     private function generateCredentialsRequestOptions(): array
     {
         if ($this->subjectTokenType === self::TOKEN_TYPE_MTLS

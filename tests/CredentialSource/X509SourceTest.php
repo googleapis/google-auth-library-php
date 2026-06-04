@@ -17,8 +17,8 @@
 
 namespace Google\Auth\Tests\CredentialSource;
 
-use Google\Auth\CredentialSource\X509Source;
 use Google\Auth\Credentials\ExternalAccountCredentials;
+use Google\Auth\CredentialSource\X509Source;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
