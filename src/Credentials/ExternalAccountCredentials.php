@@ -21,6 +21,7 @@ use Google\Auth\CredentialSource\AwsNativeSource;
 use Google\Auth\CredentialSource\ExecutableSource;
 use Google\Auth\CredentialSource\FileSource;
 use Google\Auth\CredentialSource\UrlSource;
+use Google\Auth\CredentialSource\X509Source;
 use Google\Auth\ExecutableHandler\ExecutableHandler;
 use Google\Auth\ExternalAccountCredentialSourceInterface;
 use Google\Auth\FetchAuthTokenInterface;
@@ -214,6 +215,13 @@ class ExternalAccountCredentials implements
                 $credentialSource['executable']['command'],
                 $outputFile,
                 $timeoutMs ? new ExecutableHandler($env, $timeoutMs) : new ExecutableHandler($env)
+            );
+        }
+
+        if (isset($credentialSource['certificate'])) {
+            return new X509Source(
+                $credentialSource['certificate']['trust_chain_path'],
+                $credentialSource['certificate']['certificate_config_location']
             );
         }
 
