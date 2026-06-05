@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright 2026 Google Inc.
  *
@@ -19,6 +20,7 @@ namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\OAuth2;
 use InvalidArgumentException;
 
@@ -44,6 +46,7 @@ class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader impleme
 
     private string $clientId;
     private string $clientSecret;
+    private string $universeDomain;
 
     /**
      * The quota project associated with the JSON credentials
@@ -84,6 +87,7 @@ class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader impleme
         }
         $this->clientId = $jsonKey['client_id'];
         $this->clientSecret = $jsonKey['client_secret'];
+        $this->universeDomain = $jsonKey['universe_domain'] ?? GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN;
         $this->auth = new OAuth2([
             'refresh_token' => $jsonKey['refresh_token'],
             'tokenCredentialUri' => $jsonKey['token_url'],
@@ -120,15 +124,18 @@ class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader impleme
 
     /**
      * Return the Cache Key for the credentials.
-     * The format for the Cache key is one of the following:
-     * ClientId.Scope
-     * ClientId.Audience
+     * The format for the Cache key is
+     * Hash(ClientId.Scope.RefreshToken)
      *
      * @return string
      */
     public function getCacheKey()
     {
-        return $this->clientId . '.' . $this->auth->getScope();
+        return hash('sha256', implode('.', [
+            $this->clientId,
+            $this->auth->getScope(),
+            $this->auth->getRefreshToken()
+        ]));
     }
 
     /**
@@ -144,9 +151,19 @@ class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader impleme
      *
      * @return string|null
      */
-    public function getQuotaProject()
+    public function getQuotaProject(): string|null
     {
         return $this->quotaProject;
+    }
+
+    /**
+     * Get the universe domain used for this API request
+     *
+     * @return string
+     */
+    public function getUniverseDomain(): string
+    {
+        return $this->universeDomain;
     }
 
     /**

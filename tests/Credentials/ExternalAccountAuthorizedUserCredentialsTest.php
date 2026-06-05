@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright 2026 Google Inc.
  *
@@ -107,7 +108,37 @@ class ExternalAccountAuthorizedUserCredentialsTest extends TestCase
     {
         $scope = 'myscope';
         $creds = new ExternalAccountAuthorizedUserCredentials($scope, $this->baseJsonKey);
-        $this->assertEquals($this->baseJsonKey['client_id'] . '.' . $scope, $creds->getCacheKey());
+        $expectedKey = hash('sha256', implode('.', [
+            $this->baseJsonKey['client_id'],
+            $scope,
+            $this->baseJsonKey['refresh_token']
+        ]));
+        $this->assertEquals($expectedKey, $creds->getCacheKey());
+    }
+
+    public function testGetCacheKeyWithDifferentRefreshTokensIsUnique()
+    {
+        $scope = 'myscope';
+        $jsonKey1 = $this->baseJsonKey;
+        $jsonKey2 = ['refresh_token' => 'different-refresh-token'] + $this->baseJsonKey;
+
+        $creds1 = new ExternalAccountAuthorizedUserCredentials($scope, $jsonKey1);
+        $creds2 = new ExternalAccountAuthorizedUserCredentials($scope, $jsonKey2);
+
+        $this->assertNotEquals($creds1->getCacheKey(), $creds2->getCacheKey());
+    }
+
+    public function testGetUniverseDomain()
+    {
+        $jsonKey = ['universe_domain' => 'my-universe.com'] + $this->baseJsonKey;
+        $creds = new ExternalAccountAuthorizedUserCredentials('scope', $jsonKey);
+        $this->assertEquals('my-universe.com', $creds->getUniverseDomain());
+    }
+
+    public function testGetUniverseDomainDefault()
+    {
+        $creds = new ExternalAccountAuthorizedUserCredentials('scope', $this->baseJsonKey);
+        $this->assertEquals('googleapis.com', $creds->getUniverseDomain());
     }
 
     public function testGetLastReceivedToken()
