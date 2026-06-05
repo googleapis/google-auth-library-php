@@ -19,6 +19,7 @@ namespace Google\Auth\Tests\CredentialSource;
 
 use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\CredentialSource\X509Source;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
@@ -53,8 +54,8 @@ class X509SourceTest extends TestCase
 
         // Get the actual output from our PHP function
         $source = new X509Source(
+            $this->x509Json['credential_source']['certificate']['certificate_config_location'],
             $this->x509Json['credential_source']['certificate']['trust_chain_path'],
-            $this->x509Json['credential_source']['certificate']['certificate_config_location']
         );
         $pemToDerB64 = new ReflectionMethod(X509Source::class, 'pemToDerB64');
         $pemToDerB64->setAccessible(true);
@@ -88,5 +89,85 @@ class X509SourceTest extends TestCase
 
         // Assert they are identical
         $this->assertEquals($expectedJson, $actualSubjectToken);
+    }
+
+    public function testConstructorThrowsExceptionWhenConfigDoesNotExist()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Certificate config file does not exist');
+
+        new X509Source('nonexistent_config_file.json', null);
+    }
+
+    public function testConstructorThrowsExceptionWhenConfigIsInvalid()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'gauth_');
+        file_put_contents($tmpFile, json_encode(['foo' => 'bar']));
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Certificate config is invalid');
+
+        try {
+            new X509Source($tmpFile, null);
+        } finally {
+            unlink($tmpFile);
+        }
+    }
+
+    public function testConstructorThrowsExceptionWhenCertFileDoesNotExist()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'gauth_');
+        $config = [
+            'cert_configs' => [
+                'workload' => [
+                    'key_path' => 'nonexistent_key_path.key',
+                    'cert_path' => 'nonexistent_cert_path.crt',
+                ]
+            ]
+        ];
+        file_put_contents($tmpFile, json_encode($config));
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('cert_path file does not exist: nonexistent_cert_path.crt');
+
+        try {
+            new X509Source($tmpFile, null);
+        } finally {
+            unlink($tmpFile);
+        }
+    }
+
+    public function testConstructorThrowsExceptionWhenKeyFileDoesNotExist()
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'gauth_');
+        $config = [
+            'cert_configs' => [
+                'workload' => [
+                    'key_path' => 'nonexistent_key_path.key',
+                    'cert_path' => __DIR__ . '/../fixtures/fixtures8/leaf.crt',
+                ]
+            ]
+        ];
+        file_put_contents($tmpFile, json_encode($config));
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('key_path file does not exist: nonexistent_key_path.key');
+
+        try {
+            new X509Source($tmpFile, null);
+        } finally {
+            unlink($tmpFile);
+        }
+    }
+
+    public function testConstructorThrowsExceptionWhenTrustChainPathIsInvalid()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Trust chain path is invalid');
+
+        new X509Source(
+            __DIR__ . '/../fixtures/fixtures8/cert_config.json',
+            'nonexistent_trust_chain.crt'
+        );
     }
 }

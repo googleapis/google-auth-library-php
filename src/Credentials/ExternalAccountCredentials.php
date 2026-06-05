@@ -225,8 +225,8 @@ class ExternalAccountCredentials implements
                 );
             }
             return new X509Source(
-                $credentialSource['certificate']['trust_chain_path'] ?? '',
-                $credentialSource['certificate']['certificate_config_location']
+                $credentialSource['certificate']['certificate_config_location'],
+                $credentialSource['certificate']['trust_chain_path'] ?? null,
             );
         }
 

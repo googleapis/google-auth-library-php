@@ -34,25 +34,25 @@ class X509Source implements ExternalAccountCredentialSourceInterface
     private const BEGIN_CERT = '-----BEGIN CERTIFICATE-----';
     private const END_CERT = '-----END CERTIFICATE-----';
 
-    private string $trustChainPath;
     private string $keyPath;
     private string $certPath;
 
     public function __construct(
-        string $trustChainPath,
-        string $certificateConfigLocation
+        string $certificateConfigLocation,
+        private string|null $trustChainPath,
     ) {
         if (!file_exists($certificateConfigLocation)) {
             throw new InvalidArgumentException('Certificate config file does not exist');
         }
         $config = json_decode((string) file_get_contents($certificateConfigLocation), true);
-        if (!isset($config['cert_configs']['workload']['key_path']) || !isset($config['cert_configs']['workload']['cert_path'])) {
+        if (!isset($config['cert_configs']['workload']['key_path'])
+            || !isset($config['cert_configs']['workload']['cert_path'])
+        ) {
             throw new InvalidArgumentException('Certificate config is invalid');
         }
 
         $this->keyPath = $config['cert_configs']['workload']['key_path'];
         $this->certPath = $config['cert_configs']['workload']['cert_path'];
-        $this->trustChainPath = $trustChainPath;
 
         if (!file_exists($this->certPath)) {
             throw new InvalidArgumentException('cert_path file does not exist: ' . $this->certPath);
@@ -60,10 +60,8 @@ class X509Source implements ExternalAccountCredentialSourceInterface
         if (!file_exists($this->keyPath)) {
             throw new InvalidArgumentException('key_path file does not exist: ' . $this->keyPath);
         }
-        if (!file_exists($this->trustChainPath)) {
-            // This is not a fatal error, the user may not have intermediate certs.
-            // The property will be an empty string.
-            $this->trustChainPath = '';
+        if ($this->trustChainPath && !file_exists($this->trustChainPath)) {
+            throw new InvalidArgumentException('Trust chain path is invalid');
         }
     }
 
