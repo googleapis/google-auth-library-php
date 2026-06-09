@@ -85,6 +85,7 @@ class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader impleme
                 'json key is missing the token_url field'
             );
         }
+
         $this->clientId = $jsonKey['client_id'];
         $this->clientSecret = $jsonKey['client_secret'];
         $this->universeDomain = $jsonKey['universe_domain'] ?? GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN;
