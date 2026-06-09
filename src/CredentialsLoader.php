@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Google\Auth\Credentials\ExternalAccountAuthorizedUserCredentials;
 use Google\Auth\Credentials\ExternalAccountCredentials;
 use Google\Auth\Credentials\ImpersonatedServiceAccountCredentials;
 use Google\Auth\Credentials\InsecureCredentials;
@@ -152,7 +153,7 @@ abstract class CredentialsLoader implements
      * @param string|string[] $scope
      * @param array<mixed> $jsonKey
      * @param string|string[] $defaultScope
-     * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials
+     * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials|ExternalAccountAuthorizedUserCredentials
      */
     public static function makeCredentials(
         $scope,
@@ -180,6 +181,11 @@ abstract class CredentialsLoader implements
         if ($jsonKey['type'] == 'external_account') {
             $anyScope = $scope ?: $defaultScope;
             return new ExternalAccountCredentials($anyScope, $jsonKey);
+        }
+
+        if ($jsonKey['type'] == 'external_account_authorized_user') {
+            $anyScope = $scope ?: $defaultScope;
+            return new ExternalAccountAuthorizedUserCredentials($anyScope, $jsonKey);
         }
 
         throw new \InvalidArgumentException('invalid value in the type field');
