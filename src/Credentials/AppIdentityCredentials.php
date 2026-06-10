@@ -28,8 +28,6 @@ use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\SignBlobInterface;
 
 /**
- * @deprecated
- *
  * AppIdentityCredentials supports authorization on Google App Engine.
  *
  * It can be used to authorize requests using the AuthTokenMiddleware or
@@ -55,6 +53,7 @@ use Google\Auth\SignBlobInterface;
  *
  * $res = $client->get('volumes?q=Henry+David+Thoreau&country=US');
  * ```
+ * @deprecated
  */
 class AppIdentityCredentials extends CredentialsLoader implements
     SignBlobInterface,
