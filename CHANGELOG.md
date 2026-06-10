@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.51.0](https://github.com/googleapis/google-auth-library-php/compare/v1.50.2...v1.51.0) (2026-06-09)
+
+
+### Features
+
+* Add ExternalAccountAuthorizedUser credentials ([#662](https://github.com/googleapis/google-auth-library-php/issues/662)) ([47b05b0](https://github.com/googleapis/google-auth-library-php/commit/47b05b060befcd7c76387c7763055705f69d4db0))
+
 ## [1.50.1](https://github.com/googleapis/google-auth-library-php/compare/v1.50.0...v1.50.1) (2026-03-18)
 
 
