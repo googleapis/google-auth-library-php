@@ -1,6 +1,5 @@
 <?php
 
-
 /*
  * Copyright 2026 Google Inc.
  *
