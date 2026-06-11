@@ -76,7 +76,6 @@ class ApplicationDefaultCredentials
     private const SDK_DEBUG_ENV_VAR = 'GOOGLE_SDK_PHP_LOGGING';
 
     /**
-     * @deprecated
      *
      * Obtains an AuthTokenSubscriber that uses the default FetchAuthTokenInterface
      * implementation to use in this environment.
@@ -84,6 +83,7 @@ class ApplicationDefaultCredentials
      * If supplied, $scope is used to in creating the credentials instance if
      * this does not fallback to the compute engine defaults.
      *
+     * @deprecated
      * @param string|string[] $scope the scope of the access request, expressed
      *        either as an Array or as a space-delimited String.
      * @param callable|null $httpHandler callback which delivers psr7 request
