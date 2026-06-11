@@ -20,6 +20,8 @@ namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\RegionalAccessBoundaryTrait;
+use Google\Auth\UpdateMetadataTrait;
 use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\OAuth2;
 use InvalidArgumentException;
@@ -32,6 +34,13 @@ use InvalidArgumentException;
  */
 class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader implements GetQuotaProjectInterface
 {
+    use RegionalAccessBoundaryTrait {
+        buildRegionalAccessBoundaryLookupUrl as traitBuildRegionalAccessBoundaryLookupUrl;
+    }
+    use UpdateMetadataTrait {
+        updateMetadata as traitUpdateMetadata;
+    }
+
     /**
      * Used in observability metric headers
      *
@@ -121,6 +130,33 @@ class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader impleme
             $httpHandler,
             $this->applyTokenEndpointMetrics($headers, 'at')
         );
+    }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        ?callable $httpHandler = null
+    ) {
+        $metadata = $this->traitUpdateMetadata($metadata, $authUri, $httpHandler);
+
+        if ($this->enableRegionalAccessBoundary) {
+            $metadata = $this->updateRegionalAccessBoundaryMetadata(
+                $metadata,
+                $this->buildRegionalAccessBoundaryLookupUrl(),
+                $this->getUniverseDomain(),
+                $httpHandler,
+            );
+        }
+
+        return $metadata;
     }
 
     /**
