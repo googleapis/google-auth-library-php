@@ -20,6 +20,8 @@ namespace Google\Auth\Credentials;
 use Firebase\JWT\JWT;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
+use Google\Auth\HttpHandler\HttpClientCache;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Auth\Iam;
 use Google\Auth\OAuth2;
 use Google\Auth\ProjectIdProviderInterface;
@@ -68,6 +70,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
     ProjectIdProviderInterface
 {
     use ServiceAccountSignerTrait;
+    use RegionalAccessBoundaryTrait;
 
     /**
      * Used in observability metric headers
@@ -132,12 +135,14 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      * @param string $sub an email address account to impersonate, in situations when
      *   the service account has been delegated domain wide access.
      * @param string $targetAudience The audience for the ID token.
+     * @param bool $enableRegionalAccessBoundary Lookup and include the regional access boundary header.
      */
     public function __construct(
         $scope,
         $jsonKey,
         $sub = null,
-        $targetAudience = null
+        $targetAudience = null,
+        bool $enableRegionalAccessBoundary = false
     ) {
         if (is_string($jsonKey)) {
             if (!file_exists($jsonKey)) {
@@ -185,6 +190,7 @@ class ServiceAccountCredentials extends CredentialsLoader implements
 
         $this->projectId = $jsonKey['project_id'] ?? null;
         $this->universeDomain = $jsonKey['universe_domain'] ?? self::DEFAULT_UNIVERSE_DOMAIN;
+        $this->enableRegionalAccessBoundary = $enableRegionalAccessBoundary;
     }
 
     /**
@@ -216,9 +222,11 @@ class ServiceAccountCredentials extends CredentialsLoader implements
      */
     public function fetchAuthToken(?callable $httpHandler = null, array $headers = [])
     {
+        $httpHandler = $httpHandler
+            ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
+
         if ($this->useSelfSignedJwt()) {
             $jwtCreds = $this->createJwtAccessCredentials();
-
             $accessToken = $jwtCreds->fetchAuthToken($httpHandler);
 
             if ($lastReceivedToken = $jwtCreds->getLastReceivedToken()) {
@@ -319,25 +327,50 @@ class ServiceAccountCredentials extends CredentialsLoader implements
         $authUri = null,
         ?callable $httpHandler = null
     ) {
-        // scope exists. use oauth implementation
-        if (!$this->useSelfSignedJwt()) {
-            return parent::updateMetadata($metadata, $authUri, $httpHandler);
-        }
+        $metadata = $this->useSelfSignedJwt()
+            ? $this->updateMetadataSelfSignedJwt($metadata, $authUri, $httpHandler)
+            : parent::updateMetadata($metadata, $authUri, $httpHandler);
 
+        $metadata = $this->updateRegionalAccessBoundaryMetadata(
+            $metadata,
+            $this->buildRegionalAccessBoundaryLookupUrl(
+                serviceAccountEmail: $this->auth->getIssuer()
+            ),
+            $this->getUniverseDomain(),
+            $httpHandler,
+        );
+
+        return $metadata;
+    }
+
+    /**
+     * Updates metadata with the authorization token for SSJWTs.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    private function updateMetadataSelfSignedJwt(
+        $metadata,
+        $authUri = null,
+        ?callable $httpHandler = null
+    ) {
         $jwtCreds = $this->createJwtAccessCredentials();
-        if ($this->auth->getScope()) {
+
+        $metadata = $jwtCreds->updateMetadata(
+            $metadata,
             // Prefer user-provided "scope" to "audience"
-            $updatedMetadata = $jwtCreds->updateMetadata($metadata, null, $httpHandler);
-        } else {
-            $updatedMetadata = $jwtCreds->updateMetadata($metadata, $authUri, $httpHandler);
-        }
+            $this->auth->getScope() ? null : $authUri,
+            $httpHandler
+        );
 
         if ($lastReceivedToken = $jwtCreds->getLastReceivedToken()) {
             // Keep self-signed JWTs in memory as the last received token
             $this->lastReceivedJwtAccessToken = $lastReceivedToken;
         }
 
-        return $updatedMetadata;
+        return $metadata;
     }
 
     /**
