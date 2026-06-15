@@ -194,6 +194,27 @@ class CredentialsLoaderTest extends TestCase
         $this->assertArrayHasKey('type', $json);
         $this->assertEquals('getenv', $json['type']);
     }
+
+    public function testMakeCredentialsMissingTypeThrowsException(): void
+    {
+        // Verify that a credential type is provided. This ensures an InvalidArgumentException
+        // is thrown when the 'type' field is missing.
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('json key is missing the type field');
+
+        CredentialsLoader::makeCredentials('scope', []);
+    }
+
+    public function testMakeCredentialsInvalidTypeThrowsException(): void
+    {
+        // Verify that unknown/unsupported credential types are rejected outright
+        // rather than defaulting to a generic client. This test asserts
+        // that an InvalidArgumentException is thrown for invalid types.
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid value in the type field');
+
+        CredentialsLoader::makeCredentials('scope', ['type' => 'invalid_type']);
+    }
 }
 
 class TestCredentialsLoader extends CredentialsLoader
