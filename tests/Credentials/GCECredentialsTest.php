@@ -724,7 +724,7 @@ class GCECredentialsTest extends BaseTest
             return match (++$timesCalled) {
                 1 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
                 2 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
-                3 => new Response(200, [], '{}'),
+                3 => new Response(200, [], '1234567890-compute@developer.gserviceaccount.com'),
                 4 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
             };
         };
@@ -747,13 +747,35 @@ class GCECredentialsTest extends BaseTest
             return match (++$timesCalled) {
                 1 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
                 2 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
-                3 => new Response(200, [], '{}'),
+                3 => new Response(200, [], '1234567890-compute@developer.gserviceaccount.com'),
             };
         };
 
         $gceCreds = new GCECredentials(
             enableRegionalAccessBoundary: true,
             universeDomain: 'foo.com'
+        );
+
+        $metadata = $gceCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayNotHasKey('x-allowed-locations', $metadata);
+    }
+
+    public function testUpdateMetadataWithInvalidEmailBypassesRegionalAccessBoundary()
+    {
+        $timesCalled = 0;
+        $httpHandler = function () use (&$timesCalled) {
+            return match (++$timesCalled) {
+                1 => new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+                2 => new Response(200, [], '{"access_token": "abc", "expires_in": 57}'),
+                3 => new Response(200, [], 'not-an-email'),
+                4 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
+            };
+        };
+
+        $gceCreds = new GCECredentials(
+            enableRegionalAccessBoundary: true,
+            universeDomain: GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
         );
 
         $metadata = $gceCreds->updateMetadata([], null, $httpHandler);
