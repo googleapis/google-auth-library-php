@@ -24,6 +24,7 @@ use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\OAuth2;
 use Google\Auth\UpdateMetadataTrait;
 use InvalidArgumentException;
+use LogicException;
 
 /**
  * Authenticates requests using External Account Authorized User credentials.

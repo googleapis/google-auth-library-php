@@ -686,7 +686,7 @@ class ExternalAccountCredentialsTest extends TestCase
             if ($count === 2) {
                 $this->assertStringContainsString('test@example', $request->getUri()->getPath());
             }
-            return match($count++) {
+            return match ($count++) {
                 0 => new Response(200, [], '{"access_token": "source-token", "expires_in": 3600}'),
                 1 => new Response(200, [], '{"accessToken": "access-token", "expireTime": 1}'),
                 2 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),

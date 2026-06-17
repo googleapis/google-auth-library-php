@@ -183,6 +183,7 @@ trait RegionalAccessBoundaryTrait
             return null;
         }
 
+        /** @var array{locations: array<string>, encodedLocations: string} $regionalAccessBoundary */
         return $regionalAccessBoundary;
     }
 
