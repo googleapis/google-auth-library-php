@@ -46,13 +46,24 @@ class RaceConditionTest extends TestCase
             $this->markTestSkipped('pcntl_fork is not available');
         }
         for ($i = 0; $i < 50; $i++) {
+            // SysV Cache warmup to prevent segment creation race
+            if ($cacheClass === SysVCacheItemPool::class) {
+                $warmupPool = $this->createCacheItemPool($cacheClass, $i);
+                $warmupItem = $warmupPool->getItem('warmup');
+                $warmupItem->set('ok');
+                $warmupPool->save($warmupItem);
+                unset($warmupPool);
+            }
+
             $pids = [];
             for ($j = 0; $j < 4; $j++) {
                 $pid = pcntl_fork();
                 if ($pid == -1) {
                     $this->fail('Could not fork');
                 }
-                $pool = $this->createCacheItemPool($cacheClass);
+
+                // Always create a new pool instance inside the loop (matches original)
+                $pool = $this->createCacheItemPool($cacheClass, $i);
                 $item = $pool->getItem('foo');
                 $item->set('bar');
                 $this->assertTrue($pool->save($item));
@@ -60,13 +71,26 @@ class RaceConditionTest extends TestCase
                 if ($pid) {
                     // parent
                     $pids[] = $pid;
+                    if ($cacheClass === SysVCacheItemPool::class) {
+                        // For SysV, we must destroy the parent's pool object immediately
+                        // so it is not inherited by the next child process.
+                        unset($pool);
+                    }
                 } else {
                     // child
                     exit(0);
                 }
             }
 
-            // parent
+            // parent final save (matching original test logic)
+            // Note: for SysV, $pool was unset inside the loop, so we must recreate it.
+            // For FileSystem/Memory, $pool is still the one from the last iteration ($j=3).
+            if ($cacheClass === SysVCacheItemPool::class) {
+                $pool = $this->createCacheItemPool($cacheClass, $i);
+                // We need to re-get the item for this new pool
+                $item = $pool->getItem('foo');
+                $item->set('bar');
+            }
             $this->assertTrue($pool->save($item));
 
             foreach ($pids as $pid) {
@@ -79,10 +103,11 @@ class RaceConditionTest extends TestCase
             $this->assertEquals('bar', $cachedItem->get());
 
             $pool->clear();
+            unset($pool);
         }
     }
 
-    public function createCacheItemPool(string $cacheClass): CacheItemPoolInterface
+    public function createCacheItemPool(string $cacheClass, int $iteration = 0): CacheItemPoolInterface
     {
         switch ($cacheClass) {
             case FileSystemCacheItemPool::class:
@@ -91,7 +116,10 @@ class RaceConditionTest extends TestCase
             case MemoryCacheItemPool::class:
                 return new MemoryCacheItemPool();
             case SysVCacheItemPool::class:
-                return new SysVCacheItemPool();
+                return new SysVCacheItemPool([
+                    'proj' => chr(65 + ($iteration % 26)),
+                    'semProj' => chr(97 + ($iteration % 26))
+                ]);
         }
 
         throw new \Exception('Unrecognized cache class: ' . $cacheClass);

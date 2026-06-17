@@ -36,7 +36,7 @@ class SysVCacheItemPool implements CacheItemPoolInterface
 
     const DEFAULT_SEM_PROJ = 'B';
 
-    const DEFAULT_MEMSIZE = 10000;
+    const DEFAULT_MEMSIZE = 100000;
 
     const DEFAULT_PERM = 0600;
 
