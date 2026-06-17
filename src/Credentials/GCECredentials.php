@@ -652,7 +652,7 @@ class GCECredentials extends CredentialsLoader implements
 
         if ($this->enableRegionalAccessBoundary) {
             $serviceAccountEmail = $this->getClientName($httpHandler);
-            if (false !== strpos($serviceAccountEmail, '@')) {
+            if (preg_match('/^[^@]+@[^@]+\.[^@]+$/', $serviceAccountEmail)) {
                 $metadata = $this->updateRegionalAccessBoundaryMetadata(
                     $metadata,
                     $this->buildRegionalAccessBoundaryLookupUrl($serviceAccountEmail),
