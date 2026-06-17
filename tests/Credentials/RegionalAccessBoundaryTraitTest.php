@@ -3,9 +3,9 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\Cache\MemoryCacheItemPool;
+use Google\Auth\Credentials\RegionalAccessBoundaryTrait;
 use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
-use Google\Auth\Credentials\RegionalAccessBoundaryTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;

@@ -3,9 +3,9 @@
 namespace Google\Auth\Credentials;
 
 use Google\Auth\CacheTrait;
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
-use Google\Auth\GetUniverseDomainInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
