@@ -22,7 +22,9 @@ use Google\Auth\CredentialsLoader;
 use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\OAuth2;
+use Google\Auth\UpdateMetadataTrait;
 use InvalidArgumentException;
+use LogicException;
 
 /**
  * Authenticates requests using External Account Authorized User credentials.
@@ -32,6 +34,13 @@ use InvalidArgumentException;
  */
 class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader implements GetQuotaProjectInterface
 {
+    use RegionalAccessBoundaryTrait {
+        buildRegionalAccessBoundaryLookupUrl as traitBuildRegionalAccessBoundaryLookupUrl;
+    }
+    use UpdateMetadataTrait {
+        updateMetadata as traitUpdateMetadata;
+    }
+
     /**
      * Used in observability metric headers
      *
@@ -124,6 +133,33 @@ class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader impleme
     }
 
     /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        ?callable $httpHandler = null
+    ) {
+        $metadata = $this->traitUpdateMetadata($metadata, $authUri, $httpHandler);
+
+        if ($this->enableRegionalAccessBoundary) {
+            $metadata = $this->updateRegionalAccessBoundaryMetadata(
+                $metadata,
+                $this->buildRegionalAccessBoundaryLookupUrl(),
+                $this->getUniverseDomain(),
+                $httpHandler,
+            );
+        }
+
+        return $metadata;
+    }
+
+    /**
      * Return the Cache Key for the credentials.
      * The format for the Cache key is
      * Hash(ClientId.Scope.RefreshToken)
@@ -180,5 +216,33 @@ class ExternalAccountAuthorizedUserCredentials extends CredentialsLoader impleme
     protected function getCredType(): string
     {
         return self::CRED_TYPE;
+    }
+
+    /**
+     * Builds and returns the URL for the RAB lookup API.
+     */
+    private function buildRegionalAccessBoundaryLookupUrl(): string
+    {
+        // Try to parse as a workload identity pool.
+        // Audience format: //iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+        $regex = '/projects\/([^\/]+)\/locations\/global\/workloadIdentityPools\/([^\/]+)/';
+        if (preg_match($regex, $this->auth->getAudience(), $matches)) {
+            [$_, $projectNumber, $poolId] = $matches;
+
+            return $this->traitBuildRegionalAccessBoundaryLookupUrl(
+                poolId: $poolId,
+                projectNumber: $projectNumber,
+            );
+        }
+
+        // If that fails, try to parse as a workforce pool.
+        // Audience format: //iam.googleapis.com/locations/global/workforcePools/POOL_ID/providers/PROVIDER_ID
+        if (preg_match('/locations\/[^\/]+\/workforcePools\/([^\/]+)/', $this->auth->getAudience(), $matches)) {
+            return $this->traitBuildRegionalAccessBoundaryLookupUrl(
+                poolId: $matches[1],
+            );
+        }
+
+        throw new LogicException('Invalid audience format');
     }
 }

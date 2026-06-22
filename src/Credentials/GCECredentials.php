@@ -66,6 +66,7 @@ class GCECredentials extends CredentialsLoader implements
     GetQuotaProjectInterface
 {
     use IamSignerTrait;
+    use RegionalAccessBoundaryTrait;
 
     // phpcs:disable
     const cacheKey = 'GOOGLE_AUTH_PHP_GCE';
@@ -211,6 +212,7 @@ class GCECredentials extends CredentialsLoader implements
      *   account identity name to use instead of "default".
      * @param string|null $universeDomain [optional] Specify a universe domain to use
      *   instead of fetching one from the metadata server.
+     * @param bool $enableRegionalAccessBoundary Lookup and include the regional access boundary header.
      */
     public function __construct(
         ?Iam $iam = null,
@@ -218,7 +220,8 @@ class GCECredentials extends CredentialsLoader implements
         $targetAudience = null,
         $quotaProject = null,
         $serviceAccountIdentity = null,
-        ?string $universeDomain = null
+        ?string $universeDomain = null,
+        bool $enableRegionalAccessBoundary = false
     ) {
         $this->iam = $iam;
 
@@ -247,6 +250,7 @@ class GCECredentials extends CredentialsLoader implements
         $this->quotaProject = $quotaProject;
         $this->serviceAccountIdentity = $serviceAccountIdentity;
         $this->universeDomain = $universeDomain;
+        $this->enableRegionalAccessBoundary = $enableRegionalAccessBoundary;
     }
 
     /**
@@ -629,6 +633,36 @@ class GCECredentials extends CredentialsLoader implements
         }
 
         return $this->universeDomain;
+    }
+
+    /**
+     * Updates metadata with the authorization token.
+     *
+     * @param array<mixed> $metadata metadata hashmap
+     * @param string $authUri optional auth uri
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
+     */
+    public function updateMetadata(
+        $metadata,
+        $authUri = null,
+        ?callable $httpHandler = null
+    ) {
+        $metadata = parent::updateMetadata($metadata, $authUri, $httpHandler);
+
+        if ($this->enableRegionalAccessBoundary) {
+            $serviceAccountEmail = $this->getClientName($httpHandler);
+            if (preg_match('/^[^@]+@[^@]+\.[^@]+$/', $serviceAccountEmail)) {
+                $metadata = $this->updateRegionalAccessBoundaryMetadata(
+                    $metadata,
+                    $this->buildRegionalAccessBoundaryLookupUrl($serviceAccountEmail),
+                    $this->getUniverseDomain($httpHandler),
+                    $httpHandler,
+                );
+            }
+        }
+
+        return $metadata;
     }
 
     /**

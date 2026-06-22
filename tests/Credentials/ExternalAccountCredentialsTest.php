@@ -24,6 +24,7 @@ use Google\Auth\CredentialSource\UrlSource;
 use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\OAuth2;
+use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -646,5 +647,72 @@ class ExternalAccountCredentialsTest extends TestCase
             'test-audience,test-token-type,' . $fileContents . PHP_EOL,
             file_get_contents($tmpFile)
         );
+    }
+
+    public function testUpdateMetadataWithRegionalAccessBoundary()
+    {
+        $httpHandler = getHandler([
+            new Response(200, [], '{"access_token": "source-token", "expires_in": 3600}'),
+            new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
+        ]);
+        $dir = sys_get_temp_dir();
+        $tokenFile = tempnam($dir, 'token');
+
+        $jsonKey = [
+            'type' => 'external_account',
+            'private_key' => file_get_contents(__DIR__ . '/../fixtures/fixtures1/private.pem'),
+            'client_email' => 'test@example.com',
+            'audience' => '//iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROJECT_ID',
+            'subject_token_type' => 'urn:ietf:params:oauth:token-type:jwt',
+            'token_url' => 'https://sts.googleapis.com/v1/token',
+            'credential_source' => ['file' => $tokenFile]
+        ];
+        $serviceAccountCreds = new ExternalAccountCredentials(
+            'a-scope',
+            $jsonKey,
+            enableRegionalAccessBoundary: true
+        );
+
+        $metadata = $serviceAccountCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayHasKey('x-allowed-locations', $metadata);
+        $this->assertEquals('foo', $metadata['x-allowed-locations']);
+    }
+
+    public function testRegionalAccessBoundaryWithImpersonationUsesServiceAccountEmail()
+    {
+        $count = 0;
+        $httpHandler = function ($request) use (&$count) {
+            if ($count === 2) {
+                $this->assertStringContainsString('test@example', $request->getUri()->getPath());
+            }
+            return match ($count++) {
+                0 => new Response(200, [], '{"access_token": "source-token", "expires_in": 3600}'),
+                1 => new Response(200, [], '{"accessToken": "access-token", "expireTime": 1}'),
+                2 => new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
+            };
+        };
+        $dir = sys_get_temp_dir();
+        $tokenFile = tempnam($dir, 'token');
+
+        $jsonKey = [
+            'type' => 'external_account',
+            'client_email' => 'test@example.com',
+            'audience' => '//iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROJECT_ID',
+            'subject_token_type' => 'urn:ietf:params:oauth:token-type:jwt',
+            'token_url' => 'https://sts.googleapis.com/v1/token',
+            'credential_source' => ['file' => $tokenFile],
+            'service_account_impersonation_url' => 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/test@example.com:generateAccessToken',
+        ];
+        $serviceAccountCreds = new ExternalAccountCredentials(
+            'a-scope',
+            $jsonKey,
+            enableRegionalAccessBoundary: true
+        );
+
+        $metadata = $serviceAccountCreds->updateMetadata([], null, $httpHandler);
+
+        $this->assertArrayHasKey('x-allowed-locations', $metadata);
+        $this->assertEquals('foo', $metadata['x-allowed-locations']);
     }
 }

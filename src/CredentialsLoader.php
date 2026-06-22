@@ -153,12 +153,14 @@ abstract class CredentialsLoader implements
      * @param string|string[] $scope
      * @param array<mixed> $jsonKey
      * @param string|string[] $defaultScope
+     * @param bool $enableRegionalAccessBoundary Lookup and include the regional access boundary header.
      * @return ServiceAccountCredentials|UserRefreshCredentials|ImpersonatedServiceAccountCredentials|ExternalAccountCredentials|ExternalAccountAuthorizedUserCredentials
      */
     public static function makeCredentials(
         $scope,
         array $jsonKey,
-        $defaultScope = null
+        $defaultScope = null,
+        bool $enableRegionalAccessBoundary = false
     ) {
         if (!array_key_exists('type', $jsonKey)) {
             throw new \InvalidArgumentException('json key is missing the type field');
@@ -166,7 +168,7 @@ abstract class CredentialsLoader implements
 
         if ($jsonKey['type'] == 'service_account') {
             // Do not pass $defaultScope to ServiceAccountCredentials
-            return new ServiceAccountCredentials($scope, $jsonKey);
+            return new ServiceAccountCredentials($scope, $jsonKey, enableRegionalAccessBoundary: $enableRegionalAccessBoundary);
         }
 
         if ($jsonKey['type'] == 'authorized_user') {
@@ -175,12 +177,22 @@ abstract class CredentialsLoader implements
         }
 
         if ($jsonKey['type'] == 'impersonated_service_account') {
-            return new ImpersonatedServiceAccountCredentials($scope, $jsonKey, null, $defaultScope);
+            return new ImpersonatedServiceAccountCredentials(
+                $scope,
+                $jsonKey,
+                defaultScope: $defaultScope,
+                enableRegionalAccessBoundary: $enableRegionalAccessBoundary
+            );
         }
 
         if ($jsonKey['type'] == 'external_account') {
             $anyScope = $scope ?: $defaultScope;
-            return new ExternalAccountCredentials($anyScope, $jsonKey);
+            return new ExternalAccountCredentials($anyScope, $jsonKey, $enableRegionalAccessBoundary);
+        }
+
+        if ($jsonKey['type'] == 'external_account_authorized_user') {
+            $anyScope = $scope ?: $defaultScope;
+            return new ExternalAccountAuthorizedUserCredentials($anyScope, $jsonKey);
         }
 
         if ($jsonKey['type'] == 'external_account_authorized_user') {
