@@ -2,6 +2,13 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.52.0](https://github.com/googleapis/google-auth-library-php/compare/v1.51.0...v1.52.0) (2026-06-23)
+
+
+### Features
+
+* Regional Access Boundaries ([#649](https://github.com/googleapis/google-auth-library-php/issues/649)) ([fe228ee](https://github.com/googleapis/google-auth-library-php/commit/fe228ee192c49e4e84065b6fbd619fe787319f63))
+
 ## [1.51.0](https://github.com/googleapis/google-auth-library-php/compare/v1.50.2...v1.51.0) (2026-06-09)
 
 
