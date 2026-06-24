@@ -96,6 +96,37 @@ class ApplicationDefaultCredentialsTest extends TestCase
         ApplicationDefaultCredentials::getCredentials('a scope', $httpHandler);
     }
 
+    /** @runInSeparateProcess */
+    public function testGracefulFailureOnMissingHomeAndAppData()
+    {
+        // Ensure that missing HOME or APPDATA environment variables result in a graceful failure.
+        // A DomainException should be thrown instead of triggering raw PHP warnings or crashing.
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Your default credentials were not found');
+
+        // Unset both HOME and APPDATA
+        putenv('HOME');
+        putenv('APPDATA');
+
+        // Ensure we don't get credentials from any other env var
+        putenv(CredentialsLoader::ENV_VAR);
+
+        // Mock GCE check to return false via cache hit
+        $mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
+        $mockCacheItem->isHit()->willReturn(true);
+        $mockCacheItem->get()->willReturn(false);
+
+        $mockCache = $this->prophesize(CacheItemPoolInterface::class);
+        $mockCache->getItem(GCECache::GCE_CACHE_KEY)->willReturn($mockCacheItem->reveal());
+
+        ApplicationDefaultCredentials::getCredentials(
+            'a scope',
+            null,
+            null,
+            $mockCache->reveal()
+        );
+    }
+
     public function testSuccedsIfNoDefaultFilesButIsOnGCE()
     {
         setHomeEnv(null);
