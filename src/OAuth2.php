@@ -19,6 +19,7 @@ namespace Google\Auth;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Google\Auth\CredentialSource\X509Source;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Psr7\Query;
@@ -42,7 +43,8 @@ class OAuth2 implements FetchAuthTokenInterface
     const DEFAULT_SKEW_SECONDS = 60; // 1 minute
     const JWT_URN = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
     const STS_URN = 'urn:ietf:params:oauth:grant-type:token-exchange';
-    private const STS_REQUESTED_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:access_token';
+    private const TOKEN_TYPE_ACCESS_TOKEN = 'urn:ietf:params:oauth:token-type:access_token';
+    private const TOKEN_TYPE_MTLS = 'urn:ietf:params:oauth:token-type:mtls';
 
     /**
      * TODO: determine known methods from the keys of JWT::methods.
@@ -627,7 +629,7 @@ class OAuth2 implements FetchAuthTokenInterface
                     'resource'             => $this->resource,
                     'audience'             => $this->audience,
                     'scope'                => $this->getScope(),
-                    'requested_token_type' => self::STS_REQUESTED_TOKEN_TYPE,
+                    'requested_token_type' => self::TOKEN_TYPE_ACCESS_TOKEN,
                     'actor_token'          => $this->actorToken,
                     'actor_token_type'     => $this->actorTokenType,
                 ]);
@@ -662,6 +664,23 @@ class OAuth2 implements FetchAuthTokenInterface
     }
 
     /**
+     * @return array{cert?: string, ssl_key?: string}
+     */
+    private function generateCredentialsRequestOptions(): array
+    {
+        if ($this->subjectTokenType === self::TOKEN_TYPE_MTLS
+            && $this->subjectTokenFetcher instanceof X509Source
+        ) {
+            return [
+                'cert' => $this->subjectTokenFetcher->getCertPath(),
+                'ssl_key' => $this->subjectTokenFetcher->getKeyPath(),
+            ];
+        }
+
+        return [];
+    }
+
+    /**
      * Fetches the auth tokens based on the current state.
      *
      * @param callable|null $httpHandler callback which delivers psr7 request
@@ -675,7 +694,10 @@ class OAuth2 implements FetchAuthTokenInterface
             $httpHandler = HttpHandlerFactory::build(HttpClientCache::getHttpClient());
         }
 
-        $response = $httpHandler($this->generateCredentialsRequest($httpHandler, $headers));
+        $response = $httpHandler(
+            $this->generateCredentialsRequest($httpHandler, $headers),
+            $this->generateCredentialsRequestOptions()
+        );
         $credentials = $this->parseTokenResponse($response);
         $this->updateToken($credentials);
         if (isset($credentials['scope'])) {
