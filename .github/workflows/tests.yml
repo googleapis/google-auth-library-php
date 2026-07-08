@@ -29,6 +29,9 @@ jobs:
                 command: composer install
             - name: Run Script
               run: vendor/bin/phpunit
+            - name: Run ECS Mock Tests
+              if: matrix.os == 'ubuntu-latest'
+              run: bash tests/fixtures/local-ecs-test/run-local-ecs-test.sh
     test_lowest:
         runs-on: ubuntu-latest
         name: Test Prefer Lowest
@@ -46,3 +49,5 @@ jobs:
                 command: composer update --prefer-lowest
             - name: Run Script
               run: vendor/bin/phpunit
+            - name: Run ECS Mock Tests
+              run: bash tests/fixtures/local-ecs-test/run-local-ecs-test.sh
