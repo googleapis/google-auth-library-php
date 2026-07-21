@@ -412,6 +412,21 @@ class AwsNativeSourceTest extends TestCase
     }
 
     /** @runInSeparateProcess */
+    public function testGetSigningVarsFromEcsThrowsExceptionOnServerError()
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Server error');
+
+        putenv('AWS_CONTAINER_CREDENTIALS_FULL_URI=http://localhost:8080/credentials');
+
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            throw new \RuntimeException('Server error');
+        };
+
+        AwsNativeSource::getSigningVarsFromEcs($httpHandler);
+    }
+
+    /** @runInSeparateProcess */
     public function testGetSigningVarsFromEcsReturnsNullWhenUrisNotSet()
     {
         // No environment variables set
