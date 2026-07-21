@@ -7,6 +7,7 @@ use Google\Auth\Credentials\RegionalAccessBoundaryTrait;
 use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Request;
@@ -93,6 +94,29 @@ class RegionalAccessBoundaryTraitTest extends TestCase
         $this->assertNull($mock->getLastRequest());
 
         // First call, should fetch and cache
+        $result1 = $this->impl->getRegionalAccessBoundary(
+            GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            $handler,
+            'default',
+            ['authorization' => ['xyz']]
+        );
+
+        // Ensure the request was made and the error was swallowed
+        $this->assertNotNull($mock->getLastRequest());
+        $this->assertNull($result1);
+    }
+
+    public function testLookupIsFailOpenOnConnectException()
+    {
+        $mock = new MockHandler([
+            new ConnectException('Connection refused', new Request('GET', 'test'))
+        ]);
+        $handler = HttpHandlerFactory::build(new Client(['handler' => $mock]));
+
+        $this->assertNull($mock->getLastRequest());
+
+        // A connection failure is not a RequestException in Guzzle 8, so it must
+        // also fail open rather than disrupting client authentication.
         $result1 = $this->impl->getRegionalAccessBoundary(
             GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
             $handler,

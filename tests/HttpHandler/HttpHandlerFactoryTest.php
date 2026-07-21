@@ -29,19 +29,8 @@ use ReflectionClass;
 
 class HttpHandlerFactoryTest extends BaseTest
 {
-    public function testBuildsGuzzle6Handler()
-    {
-        $this->onlyGuzzle6();
-
-        HttpClientCache::setHttpClient(null);
-        $handler = HttpHandlerFactory::build();
-        $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle6HttpHandler', $handler);
-    }
-
     public function testBuildsGuzzle7Handler()
     {
-        $this->onlyGuzzle7();
-
         HttpClientCache::setHttpClient(null);
         $handler = HttpHandlerFactory::build();
         $this->assertInstanceOf('Google\Auth\HttpHandler\Guzzle7HttpHandler', $handler);
@@ -49,8 +38,6 @@ class HttpHandlerFactoryTest extends BaseTest
 
     public function testBuildsGuzzle7HandlerWithExtendedTruncation()
     {
-        $this->onlyGuzzle7();
-
         // Guzzle defaults to 120 characters. We expect to see our message truncated at 240
         $defaultTruncatedLength = 240;
         $longMessage = str_repeat('x', $defaultTruncatedLength + 1);

@@ -9,6 +9,7 @@ use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
+use Psr\Http\Client\NetworkExceptionInterface;
 
 /**
  * Trait for implementing Regional Access Boundaries (RAB) in Credentials.
@@ -155,10 +156,11 @@ trait RegionalAccessBoundaryTrait
         $request = $request->withHeader('authorization', $authHeader);
         try {
             $response = $httpHandler($request);
-        } catch (RequestException $e) {
-            // An HTTP error occurred while requesting the RAB lookup
-            // We swallow all errors here as a failed RAB lookup
-            // should not disrupt client authentication.
+        } catch (RequestException | NetworkExceptionInterface $e) {
+            // An HTTP or network error occurred while requesting the RAB lookup
+            // (Guzzle 8 no longer classifies connection failures as
+            // RequestException). We swallow all errors here as a failed RAB
+            // lookup should not disrupt client authentication.
             //@TODO Add debug logging
             $this->initiateCooldown();
             return null;

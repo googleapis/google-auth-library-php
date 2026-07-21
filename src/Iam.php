@@ -99,7 +99,7 @@ class Iam
             'POST',
             $uri,
             $headers,
-            Utils::streamFor(json_encode($body))
+            Utils::streamFor((string) json_encode($body))
         );
 
         $res = ($this->httpHandler)($request);
@@ -144,7 +144,7 @@ class Iam
             'POST',
             $uri,
             $headers,
-            Utils::streamFor(json_encode($body))
+            Utils::streamFor((string) json_encode($body))
         );
 
         $res = ($this->httpHandler)($request);

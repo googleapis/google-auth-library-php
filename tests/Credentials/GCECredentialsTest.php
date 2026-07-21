@@ -24,6 +24,7 @@ use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpClientCache;
 use Google\Auth\Tests\BaseTest;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
@@ -91,6 +92,17 @@ class GCECredentialsTest extends BaseTest
             new Response(500),
             new Response(500),
             new Response(500)
+        ]);
+        $this->assertFalse(GCECredentials::onGCE($httpHandler));
+    }
+
+    public function testOnGCEIsFalseOnNetworkError()
+    {
+        // simulate retry attempts by returning multiple network errors
+        $httpHandler = getHandler([
+            new ConnectException('Connection refused', new Request('GET', 'test')),
+            new ConnectException('Connection refused', new Request('GET', 'test')),
+            new ConnectException('Connection refused', new Request('GET', 'test')),
         ]);
         $this->assertFalse(GCECredentials::onGCE($httpHandler));
     }
@@ -704,6 +716,23 @@ class GCECredentialsTest extends BaseTest
         };
 
         // Assert the default universe domain is returned instead of the empty string.
+        $this->assertEquals(
+            GCECredentials::DEFAULT_UNIVERSE_DOMAIN,
+            $creds->getUniverseDomain($httpHandler)
+        );
+    }
+
+    public function testGetUniverseDomainNotFoundReturnsDefault()
+    {
+        $creds = new GCECredentials();
+        $creds->setIsOnGce(true);
+
+        // Pretend we are on GCE and mock the MDS returning a 404 for the universe domain.
+        $httpHandler = getHandler([
+            new Response(404),
+        ]);
+
+        // Assert the default universe domain is returned instead of the error being thrown.
         $this->assertEquals(
             GCECredentials::DEFAULT_UNIVERSE_DOMAIN,
             $creds->getUniverseDomain($httpHandler)
