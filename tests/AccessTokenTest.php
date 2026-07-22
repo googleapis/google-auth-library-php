@@ -16,6 +16,7 @@
  */
 namespace Google\Auth\Tests;
 
+use Firebase\JWT\JWT;
 use Google\Auth\AccessToken;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
@@ -24,7 +25,7 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use RuntimeException;
-use SimpleJWT\JWT as SimpleJWT;
+use stdClass;
 use UnexpectedValueException;
 
 /**
@@ -87,20 +88,22 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
-            null,
-            $this->cache->reveal()
-        );
-
-        $token->mocks['decode'] = function ($token, $keys) use ($payload, $exception) {
+        $jwt = new MockJWT(function ($token, $keys, &$headers) use ($payload, $exception) {
             $this->assertEquals($this->token, $token);
+            $headers->alg = array_pop($keys)->getAlgorithm();
 
             if ($exception) {
                 throw $exception;
             }
 
             return (object) $payload;
-        };
+        });
+
+        $token = new AccessToken(
+            null,
+            $this->cache->reveal(),
+            $jwt
+        );
 
         $e = null;
         $res = false;
@@ -239,18 +242,7 @@ class AccessTokenTest extends TestCase
             $this->markTestSkipped('Set the IAP_IDENTITY_TOKEN env var');
         }
 
-        $token = new AccessTokenStub();
-        $token->mocks['decode'] = function ($token, $publicKey, $allowedAlgs) {
-            // Skip expired validation
-            $jwt = SimpleJWT::decode(
-                $token,
-                $publicKey,
-                $allowedAlgs,
-                null,
-                ['exp']
-            );
-            return $jwt->getClaims();
-        };
+        $token = new AccessToken();
 
         // Use Iap Cert URL
         $payload = $token->verify($jwt, [
@@ -295,36 +287,42 @@ class AccessTokenTest extends TestCase
     {
         $certsLocation = __DIR__ . '/fixtures/fixtures1/federated-certs.json';
         $certsData = json_decode(file_get_contents($certsLocation), true);
+        $kid = null;
+        foreach ($certsData['keys'] as $i => $cert) {
+            $certsData[$cert['kid']] = $cert;
+            $kid = $cert['kid'];
+        }
+        unset($certsData['keys']);
 
         $item = $this->prophesize('Psr\Cache\CacheItemInterface');
-        $item->get()
-            ->shouldBeCalledTimes(1)
-            ->willReturn(null);
+        $item->isHit()->shouldBeCalledTimes(1)->willReturn(false);
         $item->set($certsData)
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
-        $item->expiresAt(Argument::type('\DateTime'))
-            ->shouldBeCalledTimes(1)
-            ->willReturn($item->reveal());
 
-        $this->cache->getItem('google_auth_certs_cache|' . sha1($certsLocation))
+        $cacheKey = 'jwks' . preg_replace('|[^a-zA-Z0-9_\.!]|', '', $certsLocation);
+        $cacheKey = substr(hash('sha256', $cacheKey), 0, 64);
+        $this->cache->getItem($cacheKey)
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
         $this->cache->save(Argument::type('Psr\Cache\CacheItemInterface'))
             ->shouldBeCalledTimes(1);
 
-        $token = new AccessTokenStub(
-            null,
-            $this->cache->reveal()
-        );
-
-        $token->mocks['decode'] = function ($token, $keys) {
+        $jwt = new MockJWT(function ($token, $keys, &$headers) use ($kid) {
             $this->assertEquals($this->token, $token);
-            $this->assertEquals('RS256', array_pop($keys)->getAlgorithm());
+            $this->assertArrayHasKey($kid, $keys);
+            $this->assertEquals('RS256', $keys[$kid]->getAlgorithm());
+            $headers->alg = 'RS256';
 
             return (object) $this->payload;
-        };
+        });
+
+        $token = new AccessToken(
+            null,
+            $this->cache->reveal(),
+            $jwt
+        );
 
         $token->verify($this->token, [
             'certsLocation' => $certsLocation
@@ -347,7 +345,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             null,
             $this->cache->reveal()
         );
@@ -371,7 +369,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             null,
             $this->cache->reveal()
         );
@@ -397,7 +395,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             null,
             $this->cache->reveal()
         );
@@ -444,7 +442,7 @@ class AccessTokenTest extends TestCase
         $this->cache->save(Argument::type('Psr\Cache\CacheItemInterface'))
             ->shouldBeCalledTimes(1);
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             $httpHandler,
             $this->cache->reveal()
         );
@@ -483,17 +481,20 @@ class AccessTokenTest extends TestCase
         $this->cache->save(Argument::type('Psr\Cache\CacheItemInterface'))
             ->shouldBeCalledTimes(1);
 
-        $token = new AccessTokenStub(
-            $httpHandler,
-            $this->cache->reveal()
-        );
-
-        $token->mocks['decode'] = function ($token, $keys) {
+        $jwt = new MockJWT(function ($token, $keys, &$headers) {
             $this->assertEquals($this->token, $token);
             $this->assertEquals('RS256', array_pop($keys)->getAlgorithm());
+            $headers->alg = 'RS256';
 
             return (object) $this->payload;
-        };
+        });
+
+        $token = new AccessToken(
+            $httpHandler,
+            $this->cache->reveal(),
+            $jwt
+        );
+
 
         $token->verify($this->token);
     }
@@ -518,7 +519,7 @@ class AccessTokenTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($item->reveal());
 
-        $token = new AccessTokenStub(
+        $token = new AccessToken(
             $httpHandler,
             $this->cache->reveal()
         );
@@ -577,25 +578,25 @@ class AccessTokenTest extends TestCase
 }
 
 //@codingStandardsIgnoreStart
-class AccessTokenStub extends AccessToken
+class MockJWT extends JWT
 {
-    public $mocks = [];
+    private static $mockDecode;
 
-    protected function callJwtStatic($method, array $args = [])
+    public function __construct($mockDecode)
     {
-        return isset($this->mocks[$method])
-            ? call_user_func_array($this->mocks[$method], $args)
-            : parent::callJwtStatic($method, $args);
+        self::$mockDecode = $mockDecode;
     }
 
-    protected function callSimpleJwtDecode(array $args = [])
-    {
-        if (isset($this->mocks['decode'])) {
-            $claims = call_user_func_array($this->mocks['decode'], $args);
-            return new SimpleJWT([], (array) $claims);
+    public static function decode(
+        string $jwt,
+        $keyOrKeyArray,
+        stdClass &$headers = null
+    ): stdClass {
+        if (!isset(self::$mockDecode)) {
+            throw new RuntimeException('mockDecode not set');
         }
 
-        return parent::callSimpleJwtDecode($args);
+        return (self::$mockDecode)($jwt, $keyOrKeyArray, $headers);
     }
 }
 //@codingStandardsIgnoreEnd
