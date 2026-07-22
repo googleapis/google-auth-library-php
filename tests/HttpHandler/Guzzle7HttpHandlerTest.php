@@ -19,22 +19,55 @@ namespace Google\Auth\Tests\HttpHandler;
 
 use Google\Auth\HttpHandler\Guzzle7HttpHandler;
 use Google\Auth\Logging\StdOutLogger;
+use Google\Auth\Tests\BaseTest;
+use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * @group http-handler
  */
-class Guzzle7HttpHandlerTest extends Guzzle6HttpHandlerTest
+class Guzzle7HttpHandlerTest extends BaseTest
 {
+    use ProphecyTrait;
+
+    protected $client;
+    protected $handler;
+
     public function setUp(): void
     {
-        $this->onlyGuzzle7();
-
         $this->client = $this->prophesize('GuzzleHttp\ClientInterface');
         $this->handler = new Guzzle7HttpHandler($this->client->reveal());
+    }
+
+    public function testSuccessfullySendsRequest()
+    {
+        $request = new Request('GET', 'https://domain.tld');
+        $options = ['key' => 'value'];
+        $response = new Response(200);
+
+        $this->client->send($request, $options)->willReturn($response);
+
+        $handler = $this->handler;
+
+        $this->assertSame($response, $handler($request, $options));
+    }
+
+    public function testSuccessfullySendsRequestAsync()
+    {
+        $request = new Request('GET', 'https://domain.tld');
+        $options = ['key' => 'value'];
+        $response = new Response(200);
+        $promise = new FulfilledPromise($response);
+
+        $this->client->sendAsync($request, $options)->willReturn($promise);
+
+        $handler = $this->handler;
+
+        $this->assertSame($response, $handler->async($request, $options)->wait());
     }
 
     public function testLoggerGetsCalledIfLoggerIsPassed()

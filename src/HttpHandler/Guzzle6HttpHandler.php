@@ -23,6 +23,9 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @deprecated Guzzle 6 is no longer supported; use Guzzle7HttpHandler.
+ */
 class Guzzle6HttpHandler
 {
     use LoggingTrait;

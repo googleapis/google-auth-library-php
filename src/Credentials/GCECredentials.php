@@ -28,11 +28,11 @@ use Google\Auth\IamSignerTrait;
 use Google\Auth\ProjectIdProviderInterface;
 use Google\Auth\SignBlobInterface;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
+use Psr\Http\Client\NetworkExceptionInterface;
 
 /**
  * GCECredentials supports authorization on Google Compute Engine.
@@ -396,7 +396,7 @@ class GCECredentials extends CredentialsLoader implements
             } catch (ClientException $e) {
             } catch (ServerException $e) {
             } catch (RequestException $e) {
-            } catch (ConnectException $e) {
+            } catch (NetworkExceptionInterface $e) {
             }
         }
 
@@ -620,7 +620,7 @@ class GCECredentials extends CredentialsLoader implements
             // If the metadata server exists, but returns a 404 for the universe domain, the auth
             // libraries should safely assume this is an older metadata server running in GCU, and
             // should return the default universe domain.
-            if (!$e->hasResponse() || 404 != $e->getResponse()->getStatusCode()) {
+            if (404 !== $e->getResponse()->getStatusCode()) {
                 throw $e;
             }
             $this->universeDomain = self::DEFAULT_UNIVERSE_DOMAIN;
