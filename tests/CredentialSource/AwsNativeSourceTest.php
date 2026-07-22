@@ -258,6 +258,237 @@ class AwsNativeSourceTest extends TestCase
         $aws->fetchSubjectToken($httpHandler);
     }
 
+    /** @runInSeparateProcess */
+    public function testGetSigningVarsFromEcsWithRelativeUri()
+    {
+        putenv('AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=/v2/credentials/test');
+
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            $this->assertEquals('GET', $request->getMethod());
+            $this->assertEquals(
+                'http://169.254.170.2/v2/credentials/test',
+                (string) $request->getUri()
+            );
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn(json_encode([
+                'AccessKeyId' => 'expected-access-key-id',
+                'SecretAccessKey' => 'expected-secret-access-key',
+                'Token' => 'expected-token',
+            ]));
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+
+            return $response->reveal();
+        };
+
+        $signingVars = AwsNativeSource::getSigningVarsFromEcs($httpHandler);
+
+        $this->assertEquals('expected-access-key-id', $signingVars[0]);
+        $this->assertEquals('expected-secret-access-key', $signingVars[1]);
+        $this->assertEquals('expected-token', $signingVars[2]);
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetSigningVarsFromEcsWithFullUri()
+    {
+        putenv('AWS_CONTAINER_CREDENTIALS_FULL_URI=http://localhost:8080/credentials');
+
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            $this->assertEquals('GET', $request->getMethod());
+            $this->assertEquals(
+                'http://localhost:8080/credentials',
+                (string) $request->getUri()
+            );
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn(json_encode([
+                'AccessKeyId' => 'expected-access-key-id',
+                'SecretAccessKey' => 'expected-secret-access-key',
+            ]));
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+
+            return $response->reveal();
+        };
+
+        $signingVars = AwsNativeSource::getSigningVarsFromEcs($httpHandler);
+
+        $this->assertEquals('expected-access-key-id', $signingVars[0]);
+        $this->assertEquals('expected-secret-access-key', $signingVars[1]);
+        $this->assertNull($signingVars[2]);
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetSigningVarsFromEcsWithAuthToken()
+    {
+        putenv('AWS_CONTAINER_CREDENTIALS_FULL_URI=http://localhost:8080/credentials');
+        putenv('AWS_CONTAINER_AUTHORIZATION_TOKEN=auth-token-123');
+
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            $this->assertEquals('auth-token-123', $request->getHeaderLine('Authorization'));
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn(json_encode([
+                'AccessKeyId' => 'expected-access-key-id',
+                'SecretAccessKey' => 'expected-secret-access-key',
+            ]));
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+
+            return $response->reveal();
+        };
+
+        AwsNativeSource::getSigningVarsFromEcs($httpHandler);
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetSigningVarsFromEcsWithAuthTokenFile()
+    {
+        $tokenFile = tempnam(sys_get_temp_dir(), 'aws_token');
+        file_put_contents($tokenFile, 'auth-token-file-123');
+
+        putenv('AWS_CONTAINER_CREDENTIALS_FULL_URI=http://localhost:8080/credentials');
+        putenv('AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE=' . $tokenFile);
+        putenv('AWS_CONTAINER_AUTHORIZATION_TOKEN=auth-token-123'); // File should take precedence
+
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            $this->assertEquals('auth-token-file-123', $request->getHeaderLine('Authorization'));
+
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn(json_encode([
+                'AccessKeyId' => 'expected-access-key-id',
+                'SecretAccessKey' => 'expected-secret-access-key',
+            ]));
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+
+            return $response->reveal();
+        };
+
+        try {
+            AwsNativeSource::getSigningVarsFromEcs($httpHandler);
+        } finally {
+            if (file_exists($tokenFile)) {
+                unlink($tokenFile);
+            }
+        }
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetSigningVarsFromEcsWithUnreadableAuthTokenFile()
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Token file /does/not/exist/token is not readable');
+
+        putenv('AWS_CONTAINER_CREDENTIALS_FULL_URI=http://localhost:8080/credentials');
+        putenv('AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE=/does/not/exist/token');
+
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            $this->fail('HTTP handler should not be called');
+        };
+
+        AwsNativeSource::getSigningVarsFromEcs($httpHandler);
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetSigningVarsFromEcsThrowsUnexpectedValueExceptionOnInvalidResponse()
+    {
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('Invalid or missing ECS credentials in response');
+
+        putenv('AWS_CONTAINER_CREDENTIALS_FULL_URI=http://localhost:8080/credentials');
+
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            $body = $this->prophesize(StreamInterface::class);
+            $body->__toString()->willReturn(json_encode(['invalid' => 'response']));
+            $response = $this->prophesize(ResponseInterface::class);
+            $response->getBody()->willReturn($body->reveal());
+
+            return $response->reveal();
+        };
+
+        AwsNativeSource::getSigningVarsFromEcs($httpHandler);
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetSigningVarsFromEcsThrowsExceptionOnServerError()
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Server error');
+
+        putenv('AWS_CONTAINER_CREDENTIALS_FULL_URI=http://localhost:8080/credentials');
+
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            throw new \RuntimeException('Server error');
+        };
+
+        AwsNativeSource::getSigningVarsFromEcs($httpHandler);
+    }
+
+    /** @runInSeparateProcess */
+    public function testGetSigningVarsFromEcsReturnsNullWhenUrisNotSet()
+    {
+        // No environment variables set
+        $httpHandler = function (RequestInterface $request): ResponseInterface {
+            $this->fail('HTTP handler should not be called');
+        };
+
+        $signingVars = AwsNativeSource::getSigningVarsFromEcs($httpHandler);
+
+        $this->assertNull($signingVars);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testFetchSubjectTokenFromEcs()
+    {
+        $aws = new AwsNativeSource(
+            $this->audience,
+            $this->regionUrl,
+            $this->regionalCredVerificationUrl,
+        );
+
+        putenv('AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=/v2/credentials/test');
+
+        // Mock response from AWS ECS Metadata Server
+        $awsTokenBody = $this->prophesize(StreamInterface::class);
+        $awsTokenBody->__toString()->willReturn(json_encode([
+            'AccessKeyId' => 'expected-access-key-id',
+            'SecretAccessKey' => 'expected-secret-access-key',
+            'Token' => 'expected-token',
+        ]));
+        $awsTokenResponse = $this->prophesize(ResponseInterface::class);
+        $awsTokenResponse->getBody()->willReturn($awsTokenBody->reveal());
+
+        // Mock response from Region URL
+        $regionBody = $this->prophesize(StreamInterface::class);
+        $regionBody->__toString()->willReturn('us-east-2b');
+        $regionResponse = $this->prophesize(ResponseInterface::class);
+        $regionResponse->getBody()->willReturn($regionBody->reveal());
+
+        $requestCount = 0;
+        $httpHandler = function (RequestInterface $request) use (
+            $awsTokenResponse,
+            $regionResponse,
+            &$requestCount
+        ): ResponseInterface {
+            $requestCount++;
+            switch ($requestCount) {
+                case 1: return $awsTokenResponse->reveal();
+                case 2: return $regionResponse->reveal();
+            }
+            throw new \Exception('Unexpected request');
+        };
+
+        $subjectToken = $aws->fetchSubjectToken($httpHandler);
+        $unserializedToken = json_decode(urldecode($subjectToken), true);
+        $this->assertArrayHasKey('headers', $unserializedToken);
+        $this->assertArrayHasKey('method', $unserializedToken);
+        $this->assertArrayHasKey('url', $unserializedToken);
+    }
+
     /**
      * @runInSeparateProcess
      */
