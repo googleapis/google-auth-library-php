@@ -2,6 +2,14 @@
 
  * [feat]: add support for Firebase v6.0 (#391)
 
+## [1.53.0](https://github.com/googleapis/google-auth-library-php/compare/v1.52.0...v1.53.0) (2026-07-22)
+
+
+### Features
+
+* Add support for Guzzle 8 ([#677](https://github.com/googleapis/google-auth-library-php/issues/677)) ([6f4c5f6](https://github.com/googleapis/google-auth-library-php/commit/6f4c5f655607edfc332e6e9b63742cf13bbcfdd3))
+* Add workload identity federation support for AWS ECS tasks ([#496](https://github.com/googleapis/google-auth-library-php/issues/496)) ([#674](https://github.com/googleapis/google-auth-library-php/issues/674)) ([ed26eec](https://github.com/googleapis/google-auth-library-php/commit/ed26eec39b983ec00b26f0ff42a82d1786ff7f73))
+
 ## [1.52.0](https://github.com/googleapis/google-auth-library-php/compare/v1.51.0...v1.52.0) (2026-06-23)
 
 
