@@ -305,6 +305,34 @@ class GCECredentialsTest extends BaseTest
         $this->assertEquals(2, $timesCalled);
     }
 
+    public function testFetchAuthTokenAppendsFullFormatToIdTokenRequest()
+    {
+        $expectedToken = ['id_token' => 'idtoken12345'];
+        $timesCalled = 0;
+        $httpHandler = function ($request) use (&$timesCalled, $expectedToken) {
+            $timesCalled++;
+            if ($timesCalled == 1) {
+                return new Psr7\Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']);
+            }
+            $this->assertEquals(
+                'audience=a+target+audience&format=full',
+                $request->getUri()->getQuery()
+            );
+            return new Psr7\Response(200, [], Utils::streamFor($expectedToken['id_token']));
+        };
+        $g = new GCECredentials(null, null, 'a+target+audience', null, null, null, false, 'full');
+        $this->assertEquals($expectedToken, $g->fetchAuthToken($httpHandler));
+        $this->assertEquals(2, $timesCalled);
+    }
+
+    public function testInvalidIdTokenFormatThrowsException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid idTokenFormat, must be one of "standard" or "full"');
+
+        new GCECredentials(null, null, 'a+target+audience', null, null, null, false, 'invalid');
+    }
+
     public function testSettingBothScopeAndTargetAudienceThrowsException()
     {
         $this->expectException(InvalidArgumentException::class);
