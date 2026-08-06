@@ -44,7 +44,7 @@ class GCECredentialsTest extends BaseTest
 
     protected function tearDown(): void
     {
-        skipGceCheck(false);
+        skipResidencyCheck(false);
         parent::tearDown();
     }
 
@@ -80,18 +80,9 @@ class GCECredentialsTest extends BaseTest
         $this->assertTrue($handerInvoked);
     }
 
-    public function testOnGceIsFalseWhenNoGceCheckEnvVarSet()
-    {
-        skipGceCheck();
-        $httpHandler = getHandler([
-            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
-        ]);
-        $this->assertFalse(GCECredentials::onGce($httpHandler));
-    }
-
     public function testOnGCEIsFalseOnClientErrorStatus()
     {
-        skipGceCheck();
+        skipResidencyCheck();
 
         // simulate retry attempts by returning multiple 400s
         $httpHandler = getHandler([
@@ -104,7 +95,7 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnGCEIsFalseOnServerErrorStatus()
     {
-        skipGceCheck();
+        skipResidencyCheck();
 
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
@@ -117,7 +108,7 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnGCEIsFalseOnNetworkError()
     {
-        skipGceCheck();
+        skipResidencyCheck();
 
         // simulate retry attempts by returning multiple network errors
         $httpHandler = getHandler([
@@ -256,7 +247,7 @@ class GCECredentialsTest extends BaseTest
 
     public function testFetchAuthTokenShouldBeEmptyIfNotOnGCE()
     {
-        skipGceCheck();
+        skipResidencyCheck();
 
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
@@ -415,7 +406,7 @@ class GCECredentialsTest extends BaseTest
 
     public function testGetClientNameShouldBeEmptyIfNotOnGCE()
     {
-        skipGceCheck();
+        skipResidencyCheck();
 
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([

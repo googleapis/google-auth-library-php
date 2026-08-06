@@ -41,14 +41,12 @@ function setHomeEnv(string|null $value): void
     putenv($assigment);
 }
 
-function skipGceCheck(bool $skip = true): void
+function skipResidencyCheck(bool $skip = true): void
 {
-    $assignment = sprintf(
-        '%s%s',
-        \Google\Auth\Credentials\GCECredentials::NO_GCE_CHECK_ENV_VAR,
-        $skip ? '=true' : ''
+    $prop = new \ReflectionProperty(
+        \Google\Auth\Credentials\GCECredentials::class,
+        'checkResidency'
     );
-
-    putenv($assignment);
+    $prop->setAccessible(true);
+    $prop->setValue(null, !$skip);
 }
-
