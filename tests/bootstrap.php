@@ -47,6 +47,5 @@ function skipResidencyCheck(bool $skip = true): void
         \Google\Auth\Credentials\GCECredentials::class,
         'checkResidency'
     );
-    $prop->setAccessible(true);
     $prop->setValue(null, !$skip);
 }
