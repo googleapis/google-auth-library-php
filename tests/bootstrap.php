@@ -40,3 +40,15 @@ function setHomeEnv(string|null $value): void
 
     putenv($assigment);
 }
+
+function skipGceCheck(bool $skip = true): void
+{
+    $assignment = sprintf(
+        '%s%s',
+        \Google\Auth\Credentials\GCECredentials::NO_GCE_CHECK_ENV_VAR,
+        $skip ? '=true' : ''
+    );
+
+    putenv($assignment);
+}
+

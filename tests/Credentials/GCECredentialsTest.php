@@ -42,6 +42,12 @@ class GCECredentialsTest extends BaseTest
 {
     use ProphecyTrait;
 
+    protected function tearDown(): void
+    {
+        skipGceCheck(false);
+        parent::tearDown();
+    }
+
     public function testOnGceMetadataFlavorHeader()
     {
         $hasHeader = false;
@@ -74,8 +80,19 @@ class GCECredentialsTest extends BaseTest
         $this->assertTrue($handerInvoked);
     }
 
+    public function testOnGceIsFalseWhenNoGceCheckEnvVarSet()
+    {
+        skipGceCheck();
+        $httpHandler = getHandler([
+            new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
+        ]);
+        $this->assertFalse(GCECredentials::onGce($httpHandler));
+    }
+
     public function testOnGCEIsFalseOnClientErrorStatus()
     {
+        skipGceCheck();
+
         // simulate retry attempts by returning multiple 400s
         $httpHandler = getHandler([
             new Response(400),
@@ -87,6 +104,8 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnGCEIsFalseOnServerErrorStatus()
     {
+        skipGceCheck();
+
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
             new Response(500),
@@ -98,6 +117,8 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnGCEIsFalseOnNetworkError()
     {
+        skipGceCheck();
+
         // simulate retry attempts by returning multiple network errors
         $httpHandler = getHandler([
             new ConnectException('Connection refused', new Request('GET', 'test')),
@@ -235,6 +256,8 @@ class GCECredentialsTest extends BaseTest
 
     public function testFetchAuthTokenShouldBeEmptyIfNotOnGCE()
     {
+        skipGceCheck();
+
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
             new Response(500),
@@ -392,6 +415,8 @@ class GCECredentialsTest extends BaseTest
 
     public function testGetClientNameShouldBeEmptyIfNotOnGCE()
     {
+        skipGceCheck();
+
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
             new Response(500),

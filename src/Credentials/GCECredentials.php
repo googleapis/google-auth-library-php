@@ -111,6 +111,11 @@ class GCECredentials extends CredentialsLoader implements
     const FLAVOR_HEADER = 'Metadata-Flavor';
 
     /**
+     * The environment variable that indicates that the check for GCE should be skipped.
+     */
+    const NO_GCE_CHECK_ENV_VAR = 'NO_GCE_CHECK';
+
+    /**
      * The Linux file which contains the product name.
      */
     private const GKE_PRODUCT_NAME_FILE = '/sys/class/dmi/id/product_name';
@@ -366,6 +371,10 @@ class GCECredentials extends CredentialsLoader implements
      */
     public static function onGce(?callable $httpHandler = null)
     {
+        if (getenv(self::NO_GCE_CHECK_ENV_VAR)) {
+            return false;
+        }
+
         $httpHandler = $httpHandler
             ?: HttpHandlerFactory::build(HttpClientCache::getHttpClient());
 
