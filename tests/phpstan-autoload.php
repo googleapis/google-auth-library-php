@@ -1,5 +1,8 @@
 <?php
 
+// Adding this ignoreFile as this is used for testing only
+// phpcs:ignoreFile
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // moc the windows-only COM class so that phpstan understands it

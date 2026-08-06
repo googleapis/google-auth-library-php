@@ -167,10 +167,9 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
      */
     private function getCachedExecutableResponse(): ?array
     {
-        if (
-            $this->outputFile
-            && file_exists($this->outputFile)
-            && !empty(trim($outputFileContents = (string) file_get_contents($this->outputFile)))
+        if ($this->outputFile &&
+            file_exists($this->outputFile) &&
+            !empty(trim($outputFileContents = (string) file_get_contents($this->outputFile)))
         ) {
             try {
                 $executableResponse = $this->parseExecutableResponse($outputFileContents);
@@ -219,7 +218,11 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
         // Validate required fields for a successful response.
         if ($executableResponse['success']) {
             // Validate token type field.
-            $tokenTypes = [self::SAML_SUBJECT_TOKEN_TYPE, self::OIDC_SUBJECT_TOKEN_TYPE1, self::OIDC_SUBJECT_TOKEN_TYPE2];
+            $tokenTypes = [
+                self::SAML_SUBJECT_TOKEN_TYPE,
+                self::OIDC_SUBJECT_TOKEN_TYPE1,
+                self::OIDC_SUBJECT_TOKEN_TYPE2
+            ];
             if (!isset($executableResponse['token_type'])) {
                 throw new ExecutableResponseError(
                     'Executable response must contain a "token_type" field when successful'
@@ -263,7 +266,9 @@ class ExecutableSource implements ExternalAccountCredentialSourceInterface
                 throw new ExecutableResponseError('Executable response must contain a "code" field when unsuccessful.');
             }
             if (empty($executableResponse['message'])) {
-                throw new ExecutableResponseError('Executable response must contain a "message" field when unsuccessful.');
+                throw new ExecutableResponseError(
+                    'Executable response must contain a "message" field when unsuccessful.'
+                );
             }
         }
 

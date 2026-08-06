@@ -37,9 +37,30 @@ class ServiceAccountSignerTraitTest extends TestCase
      */
     public function testSignBlob($useOpenSsl)
     {
-        $trait = new ServiceAccountSignerTraitImpl(
-            file_get_contents(__DIR__ . '/fixtures/fixtures1/private.pem')
-        );
+        $signingKey = file_get_contents(__DIR__ . '/fixtures/fixtures1/private.pem');
+
+        $authStub = new class($signingKey) {
+            public $signingKey;
+            public function __construct($signingKey)
+            {
+                $this->signingKey = $signingKey;
+            }
+            public function getSigningKey()
+            {
+                return $this->signingKey;
+            }
+        };
+
+        $trait = new class($authStub) {
+            use ServiceAccountSignerTrait;
+
+            private $auth;
+
+            public function __construct($auth)
+            {
+                $this->auth = $auth;
+            }
+        };
 
         $res = $trait->signBlob(self::STRING_TO_SIGN, $useOpenSsl);
 
@@ -49,28 +70,5 @@ class ServiceAccountSignerTraitTest extends TestCase
     public function useOpenSsl()
     {
         return [[true], [false]];
-    }
-}
-
-class ServiceAccountSignerTraitImpl
-{
-    use ServiceAccountSignerTrait;
-
-    private $auth;
-
-    public function __construct($signingKey)
-    {
-        $this->auth = new AuthStub();
-        $this->auth->signingKey = $signingKey;
-    }
-}
-
-class AuthStub
-{
-    public $signingKey;
-
-    public function getSigningKey()
-    {
-        return $this->signingKey;
     }
 }

@@ -32,6 +32,7 @@ use RuntimeException;
 
 class FetchAuthTokenCacheTest extends BaseTest
 {
+    use HelperTrait;
     use ProphecyTrait;
 
     private $mockFetcher;
@@ -243,7 +244,7 @@ class FetchAuthTokenCacheTest extends BaseTest
     public function testUpdateMetadataWithGceCredForIdToken()
     {
         $idToken = '123asdfghjkl';
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
             new Response(200, [], Utils::streamFor($idToken)),
         ]);
@@ -282,7 +283,11 @@ class FetchAuthTokenCacheTest extends BaseTest
         $this->assertEquals($metadata, $metadata2);
 
         // Ensure token for different URI is NOT cached
-        $metadata3 = $cachedFetcher->updateMetadata([], 'http://test-auth-uri-2', getHandler([new Response(200)]));
+        $metadata3 = $cachedFetcher->updateMetadata(
+            [],
+            'http://test-auth-uri-2',
+            $this->getHandler([new Response(200)])
+        );
         $this->assertNotEquals($metadata, $metadata3);
     }
 

@@ -23,6 +23,7 @@ use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\ServiceAccountJwtAccessCredentials;
 use Google\Auth\CredentialsLoader;
+use Google\Auth\Tests\HelperTrait;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use LogicException;
@@ -31,6 +32,8 @@ use UnexpectedValueException;
 
 class ServiceAccountJwtAccessCredentialsTest extends TestCase
 {
+    use HelperTrait;
+
     private function createTestJson()
     {
         return [
@@ -127,7 +130,7 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
         );
         $this->assertNotNull($sa);
 
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200),
         ]);
         $result = $sa->fetchAuthToken($httpHandler); // authUri has not been set
@@ -555,7 +558,7 @@ class ServiceAccountJwtAccessCredentialsTest extends TestCase
 
     public function testUpdateMetadataWithRegionalAccessBoundary()
     {
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
         ]);
 

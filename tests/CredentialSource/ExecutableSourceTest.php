@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright 2024 Google Inc.
  *
@@ -75,9 +76,30 @@ class ExecutableSourceTest extends TestCase
     public function provideFetchSubjectToken()
     {
         return [
-            ['{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:id_token", "id_token": "abc"}'],
-            ['{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt", "id_token": "abc"}'],
-            ['{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:saml2", "saml_response": "abc"}']
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
+                    'id_token' => 'abc',
+                ]),
+            ],
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:jwt',
+                    'id_token' => 'abc',
+                ]),
+            ],
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:saml2',
+                    'saml_response' => 'abc',
+                ]),
+            ],
         ];
     }
 
@@ -117,36 +139,108 @@ class ExecutableSourceTest extends TestCase
             [1, 'error', 'The executable failed to run with the following error: error'],
             [0, '{', 'The executable returned an invalid response: {'],
             [0, '{}', 'Executable response must contain a "version" field'],
-            [0, '{"version": 1}', 'Executable response must contain a "success" field'],
-            [0, '{"version": 1, "success": false}', 'Executable response must contain a "code" field when unsuccessful'],
-            [0, '{"version": 1, "success": false, "code": 1}', 'Executable response must contain a "message" field when unsuccessful'],
-            [0, '{"version": 1, "success": false, "code": 1, "message": "error!"}', 'error!'],
-            [0, '{"version": 1, "success": true}', 'Executable response must contain a "token_type" field'],
-            [0, '{"version": 1, "success": true, "token_type": "wrong"}', 'Executable response "token_type" field must be one of'],
             [
                 0,
-                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:saml2"}',
-                'Executable response must contain a "saml_response" field when token_type=urn:ietf:params:oauth:token-type:saml2'
+                json_encode([
+                    'version' => 1,
+                ]),
+                'Executable response must contain a "success" field',
             ],
             [
                 0,
-                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:id_token"}',
-                'Executable response must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:id_token'
+                json_encode([
+                    'version' => 1,
+                    'success' => false,
+                ]),
+                'Executable response must contain a "code" field when unsuccessful',
             ],
             [
                 0,
-                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt"}',
-                'Executable response must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:jwt'
+                json_encode([
+                    'version' => 1,
+                    'success' => false,
+                    'code' => 1,
+                ]),
+                'Executable response must contain a "message" field when unsuccessful',
             ],
             [
                 0,
-                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt", "id_token": "abc", "expiration_time": 1}',
+                json_encode([
+                    'version' => 1,
+                    'success' => false,
+                    'code' => 1,
+                    'message' => 'error!',
+                ]),
+                'error!',
+            ],
+            [
+                0,
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                ]),
+                'Executable response must contain a "token_type" field',
+            ],
+            [
+                0,
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'wrong',
+                ]),
+                'Executable response "token_type" field must be one of',
+            ],
+            [
+                0,
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:saml2',
+                ]),
+                'Executable response must contain a "saml_response" field when ' .
+                'token_type=urn:ietf:params:oauth:token-type:saml2',
+            ],
+            [
+                0,
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
+                ]),
+                'Executable response must contain a "id_token" field when ' .
+                'token_type=urn:ietf:params:oauth:token-type:id_token',
+            ],
+            [
+                0,
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:jwt',
+                ]),
+                'Executable response must contain a "id_token" field when ' .
+                'token_type=urn:ietf:params:oauth:token-type:jwt',
+            ],
+            [
+                0,
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:jwt',
+                    'id_token' => 'abc',
+                    'expiration_time' => 1,
+                ]),
                 'Executable response is expired.',
             ],
             [
                 0,
-                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt", "id_token": "abc"}',
-                'The executable response must contain a "expiration_time" field for successful responses when an output_file has been specified in the configuration.',
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:jwt',
+                    'id_token' => 'abc',
+                ]),
+                'The executable response must contain a "expiration_time" field for successful ' .
+                'responses when an output_file has been specified in the configuration.',
                 '/some/output/file',
             ],
         ];
@@ -180,28 +274,94 @@ class ExecutableSourceTest extends TestCase
     public function provideCachedTokenWithError()
     {
         return [
-            ['{', 'Error in output file: Error code INVALID_RESPONSE: The executable returned an invalid response: {'],
-            ['{}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "version" field'],
-            ['{"version": 1}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "success" field'],
-            ['{"version": 1, "success": false}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "code" field when unsuccessful'],
-            ['{"version": 1, "success": false, "code": 1}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "message" field when unsuccessful'],
-            ['{"version": 1, "success": true}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "token_type" field'],
-            ['{"version": 1, "success": true, "token_type": "wrong"}', 'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response "token_type" field must be one of'],
             [
-                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:saml2"}',
-                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "saml_response" field when token_type=urn:ietf:params:oauth:token-type:saml2'
+                '{',
+                'Error in output file: Error code INVALID_RESPONSE: The executable returned an ' .
+                'invalid response: {',
             ],
             [
-                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:id_token"}',
-                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:id_token'
+                '{}',
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response ' .
+                'must contain a "version" field',
             ],
             [
-                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt"}',
-                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:jwt'
+                json_encode([
+                    'version' => 1,
+                ]),
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response ' .
+                'must contain a "success" field',
             ],
             [
-                '{"version": 1, "success": true, "token_type": "urn:ietf:params:oauth:token-type:jwt", "id_token": "abc"}',
-                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: The executable response must contain a "expiration_time" field for successful responses when an output_file has been specified in the configuration.'
+                json_encode([
+                    'version' => 1,
+                    'success' => false,
+                ]),
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response ' .
+                'must contain a "code" field when unsuccessful',
+            ],
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => false,
+                    'code' => 1,
+                ]),
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response ' .
+                'must contain a "message" field when unsuccessful',
+            ],
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                ]),
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response ' .
+                'must contain a "token_type" field',
+            ],
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'wrong',
+                ]),
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response ' .
+                '"token_type" field must be one of',
+            ],
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:saml2',
+                ]),
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response ' .
+                'must contain a "saml_response" field when token_type=urn:ietf:params:oauth:token-type:saml2',
+            ],
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:id_token',
+                ]),
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response ' .
+                'must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:id_token',
+            ],
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:jwt',
+                ]),
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: Executable response ' .
+                'must contain a "id_token" field when token_type=urn:ietf:params:oauth:token-type:jwt',
+            ],
+            [
+                json_encode([
+                    'version' => 1,
+                    'success' => true,
+                    'token_type' => 'urn:ietf:params:oauth:token-type:jwt',
+                    'id_token' => 'abc',
+                ]),
+                'Error in output file: Error code INVALID_EXECUTABLE_RESPONSE: The executable response ' .
+                'must contain a "expiration_time" field for successful responses when an output_file ' .
+                'has been specified in the configuration.',
             ],
         ];
     }

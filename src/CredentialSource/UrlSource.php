@@ -41,8 +41,8 @@ class UrlSource implements ExternalAccountCredentialSourceInterface
     /**
      * @param string $url                        The URL to fetch the subject token from.
      * @param string|null $format                The format of the token in the response. Can be null or "json".
-     * @param string|null $subjectTokenFieldName The name of the field containing the token in the response. This is required
-     *                                      when format is "json".
+     * @param string|null $subjectTokenFieldName The name of the field containing the token in the response.
+     *                                           This is required when format is "json".
      * @param array<string, string|string[]>|null $headers Request headers to send in with the request to the URL.
      */
     public function __construct(

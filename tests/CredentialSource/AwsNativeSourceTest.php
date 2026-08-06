@@ -33,7 +33,8 @@ class AwsNativeSourceTest extends TestCase
 {
     use ProphecyTrait;
 
-    private string $audience = '"//iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/byoid-pool-php/providers/PROJECT_ID';
+    private string $audience = '"//iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/'
+        . 'workloadIdentityPools/byoid-pool-php/providers/PROJECT_ID';
     private string $regionUrl = 'https://test.regional.url';
     private string $regionalCredVerificationUrl = 'https://{region}.regional.cred.verification.url';
     private string $securityCredentialsUrl = 'https://test.security.credentials.url';
@@ -476,8 +477,10 @@ class AwsNativeSourceTest extends TestCase
         ): ResponseInterface {
             $requestCount++;
             switch ($requestCount) {
-                case 1: return $awsTokenResponse->reveal();
-                case 2: return $regionResponse->reveal();
+                case 1:
+                    return $awsTokenResponse->reveal();
+                case 2:
+                    return $regionResponse->reveal();
             }
             throw new \Exception('Unexpected request');
         };
@@ -524,8 +527,10 @@ class AwsNativeSourceTest extends TestCase
         ): ResponseInterface {
             $requestCount++;
             switch ($requestCount) {
-                case 1: return $awsTokenResponse->reveal();
-                case 2: return $regionResponse->reveal();
+                case 1:
+                    return $awsTokenResponse->reveal();
+                case 2:
+                    return $regionResponse->reveal();
             }
             throw new \Exception('Unexpected request');
         };
@@ -585,10 +590,14 @@ class AwsNativeSourceTest extends TestCase
         ): ResponseInterface {
             $requestCount++;
             switch ($requestCount) {
-                case 1: return $awsTokenResponse->reveal();
-                case 2: return $roleResponse->reveal();
-                case 3: return $securityCredentialsResponse->reveal();
-                case 4: return $regionResponse->reveal();
+                case 1:
+                    return $awsTokenResponse->reveal();
+                case 2:
+                    return $roleResponse->reveal();
+                case 3:
+                    return $securityCredentialsResponse->reveal();
+                case 4:
+                    return $regionResponse->reveal();
             }
             throw new \Exception('Unexpected request');
         };

@@ -440,6 +440,7 @@ class GCECredentials extends CredentialsLoader implements
         $productName = null;
 
         try {
+            // @phpstan-ignore method.notFound
             $productName = $shell->regRead($registryProductKey);
         } catch (com_exception) {
             // This means that we tried to read a key that doesn't exist on the registry

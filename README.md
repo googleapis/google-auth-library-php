@@ -1,6 +1,10 @@
 # Google Auth Library for PHP
 
-<a href="https://cloud.google.com/php/docs/reference/auth/latest">Reference Docs</a>
+* [API documentation](https://cloud.google.com/php/docs/reference/auth/latest)
+
+**NOTE:** This repository is part of [Google Cloud PHP](https://github.com/googleapis/google-cloud-php). Any
+support requests, bug reports, or development contributions should be directed to
+that project.
 
 ## Description
 

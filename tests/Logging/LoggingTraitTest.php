@@ -106,7 +106,9 @@ class LoggingTraitTest extends BaseTest
         $event->url = 'test.com';
         $event->headers = [
             'header1' => 'test',
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.cThIIoDvwdueQB468K5xDc5633seEFoqwxjF_xSJyQQ'
+            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIx'
+                . 'MjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.'
+                . 'cThIIoDvwdueQB468K5xDc5633seEFoqwxjF_xSJyQQ'
         ];
         $event->payload = json_encode(['param' => 'test']);
         $event->status = 200;

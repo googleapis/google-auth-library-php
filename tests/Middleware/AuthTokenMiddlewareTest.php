@@ -93,7 +93,6 @@ class AuthTokenMiddlewareTest extends BaseTest
             ->willReturn($this->mockRequest->reveal());
 
         $this->runTestCase($this->mockFetcher->reveal());
-
     }
 
     public function testUsesCachedAccessToken()
@@ -368,32 +367,6 @@ class AuthTokenMiddlewareTest extends BaseTest
             [[new MiddlewareCallback(), 'methodInvoke']],
             [new MiddlewareCallback()],
         ];
-    }
-}
-
-class MiddlewareCallback
-{
-    public static $phpunit;
-    public static $expectedKey;
-    public static $expectedValue;
-    public static $called = false;
-
-    public function __invoke($key, $value)
-    {
-        self::$phpunit->assertEquals(self::$expectedKey, $key);
-        self::$phpunit->assertEquals(self::$expectedValue, $value);
-        self::$called = true;
-    }
-
-    public function methodInvoke($key, $value)
-    {
-        return $this($key, $value);
-    }
-
-    public static function staticInvoke($key, $value)
-    {
-        $instance = new self();
-        return $instance($key, $value);
     }
 }
 

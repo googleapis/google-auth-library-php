@@ -32,6 +32,8 @@ use UnexpectedValueException;
 
 class OAuth2Test extends TestCase
 {
+    use HelperTrait;
+
     private $minimal = [
         'authorizationUri' => 'https://accounts.test.org/insecure/url',
         'redirectUri' => 'https://accounts.test.org/redirect/url',
@@ -895,7 +897,7 @@ class OAuth2Test extends TestCase
         $this->expectException(\GuzzleHttp\Exception\ClientException::class);
 
         $testConfig = $this->fetchAuthTokenMinimal;
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(400),
         ]);
         $o = new OAuth2($testConfig);
@@ -910,7 +912,7 @@ class OAuth2Test extends TestCase
         $this->expectException(\GuzzleHttp\Exception\ServerException::class);
 
         $testConfig = $this->fetchAuthTokenMinimal;
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(500),
         ]);
         $o = new OAuth2($testConfig);
@@ -927,7 +929,7 @@ class OAuth2Test extends TestCase
 
         $testConfig = $this->fetchAuthTokenMinimal;
         $notJson = '{"foo": , this is cannot be passed as json" "bar"}';
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], Utils::streamFor($notJson)),
         ]);
         $o = new OAuth2($testConfig);
@@ -941,7 +943,7 @@ class OAuth2Test extends TestCase
     {
         $testConfig = $this->fetchAuthTokenMinimal;
         $json = '{"foo": "bar"}';
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], Utils::streamFor($json)),
         ]);
         $o = new OAuth2($testConfig);
@@ -956,7 +958,7 @@ class OAuth2Test extends TestCase
     {
         $testConfig = $this->fetchAuthTokenMinimal;
         $json = 'foo=bar&spice=nice';
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(
                 200,
                 ['Content-Type' => 'application/x-www-form-urlencoded'],
@@ -985,7 +987,7 @@ class OAuth2Test extends TestCase
             'scope' => 'scope1 scope2',
         ];
         $json = json_encode($wanted_updates);
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], Utils::streamFor($json)),
         ]);
         $o = new OAuth2($testConfig);
@@ -1020,7 +1022,7 @@ class OAuth2Test extends TestCase
             'id_token' => 'an_id_token',
         ];
         $json = json_encode($wanted_updates);
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], Utils::streamFor($json)),
         ]);
         $o = new OAuth2($testConfig);
@@ -1266,72 +1268,5 @@ class OAuth2Test extends TestCase
         // Test with string alg
         $roundTrip2 = $o->verifyIdToken($publicKey, $alg);
         $this->assertEquals($origIdToken['aud'], $roundTrip2->aud);
-    }
-}
-
-class OAuth2StsTest extends TestCase
-{
-    use ProphecyTrait;
-
-    private $publicKey;
-    private $privateKey;
-    private $stsMinimal = [
-        'tokenCredentialUri' => 'https://tokens_r_us/test',
-        'subjectTokenType' => 'urn:ietf:params:aws:token-type:aws4_request',
-    ];
-
-    public function testStsGrantType()
-    {
-        $credentialSource = $this->prophesize(ExternalAccountCredentialSourceInterface::class);
-        $o = new OAuth2($this->stsMinimal + ['subjectTokenFetcher' => $credentialSource->reveal()]);
-        $this->assertEquals(OAuth2::STS_URN, $o->getGrantType());
-    }
-
-    public function testStsCredentialsRequestMinimal()
-    {
-        $credentialSource = $this->prophesize(ExternalAccountCredentialSourceInterface::class);
-        $credentialSource->fetchSubjectToken(null)
-            ->shouldBeCalledOnce()
-            ->willReturn('xyz');
-        $o = new OAuth2($this->stsMinimal + ['subjectTokenFetcher' => $credentialSource->reveal()]);
-        $request = $o->generateCredentialsRequest();
-        $this->assertEquals('POST', $request->getMethod());
-        $this->assertEquals($this->stsMinimal['tokenCredentialUri'], (string) $request->getUri());
-        parse_str((string) $request->getBody(), $requestParams);
-        $this->assertCount(4, $requestParams);
-        $this->assertEquals(OAuth2::STS_URN, $requestParams['grant_type']);
-        $this->assertEquals('xyz', $requestParams['subject_token']);
-        $this->assertEquals($this->stsMinimal['subjectTokenType'], $requestParams['subject_token_type']);
-    }
-
-    public function testStsCredentialsRequestFull()
-    {
-        $credentialSource = $this->prophesize(ExternalAccountCredentialSourceInterface::class);
-        $credentialSource->fetchSubjectToken(null)
-            ->shouldBeCalledOnce()
-            ->willReturn('xyz');
-        $stsMinimal = $this->stsMinimal + [
-            'subjectTokenFetcher' => $credentialSource->reveal(),
-            'resource' => 'abc',
-            'scope' => ['scope1', 'scope2'],
-            'audience' => 'def',
-            'actorToken' => '123',
-            'actorTokenType' => 'urn:ietf:params:oauth:token-type:access_token',
-        ];
-        $o = new OAuth2($stsMinimal);
-        $request = $o->generateCredentialsRequest();
-        $this->assertEquals('POST', $request->getMethod());
-        $this->assertEquals($this->stsMinimal['tokenCredentialUri'], (string) $request->getUri());
-        parse_str((string) $request->getBody(), $requestParams);
-
-        $this->assertCount(9, $requestParams);
-        $this->assertEquals(OAuth2::STS_URN, $requestParams['grant_type']);
-        $this->assertEquals('xyz', $requestParams['subject_token']);
-        $this->assertEquals($stsMinimal['subjectTokenType'], $requestParams['subject_token_type']);
-        $this->assertEquals($stsMinimal['resource'], $requestParams['resource']);
-        $this->assertEquals('scope1 scope2', $requestParams['scope']);
-        $this->assertEquals($stsMinimal['audience'], $requestParams['audience']);
-        $this->assertEquals($stsMinimal['actorToken'], $requestParams['actor_token']);
-        $this->assertEquals($stsMinimal['actorTokenType'], $requestParams['actor_token_type']);
     }
 }
