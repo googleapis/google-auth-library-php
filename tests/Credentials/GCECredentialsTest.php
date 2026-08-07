@@ -42,6 +42,12 @@ class GCECredentialsTest extends BaseTest
 {
     use ProphecyTrait;
 
+    protected function tearDown(): void
+    {
+        skipResidencyCheck(false);
+        parent::tearDown();
+    }
+
     public function testOnGceMetadataFlavorHeader()
     {
         $hasHeader = false;
@@ -76,6 +82,8 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnGCEIsFalseOnClientErrorStatus()
     {
+        skipResidencyCheck();
+
         // simulate retry attempts by returning multiple 400s
         $httpHandler = getHandler([
             new Response(400),
@@ -87,6 +95,8 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnGCEIsFalseOnServerErrorStatus()
     {
+        skipResidencyCheck();
+
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
             new Response(500),
@@ -98,6 +108,8 @@ class GCECredentialsTest extends BaseTest
 
     public function testOnGCEIsFalseOnNetworkError()
     {
+        skipResidencyCheck();
+
         // simulate retry attempts by returning multiple network errors
         $httpHandler = getHandler([
             new ConnectException('Connection refused', new Request('GET', 'test')),
@@ -235,6 +247,8 @@ class GCECredentialsTest extends BaseTest
 
     public function testFetchAuthTokenShouldBeEmptyIfNotOnGCE()
     {
+        skipResidencyCheck();
+
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
             new Response(500),
@@ -392,6 +406,8 @@ class GCECredentialsTest extends BaseTest
 
     public function testGetClientNameShouldBeEmptyIfNotOnGCE()
     {
+        skipResidencyCheck();
+
         // simulate retry attempts by returning multiple 500s
         $httpHandler = getHandler([
             new Response(500),

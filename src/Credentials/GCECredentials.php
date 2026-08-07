@@ -111,6 +111,11 @@ class GCECredentials extends CredentialsLoader implements
     const FLAVOR_HEADER = 'Metadata-Flavor';
 
     /**
+     * Flag used to determine whether to perform the GCE residency check. Used for testing.
+     */
+    private static bool $checkResidency = true;
+
+    /**
      * The Linux file which contains the product name.
      */
     private const GKE_PRODUCT_NAME_FILE = '/sys/class/dmi/id/product_name';
@@ -398,6 +403,10 @@ class GCECredentials extends CredentialsLoader implements
             } catch (RequestException $e) {
             } catch (NetworkExceptionInterface $e) {
             }
+        }
+
+        if (!self::$checkResidency) {
+            return false;
         }
 
         if (PHP_OS === 'Windows' || PHP_OS === 'WINNT') {

@@ -85,6 +85,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
+        skipResidencyCheck();
         setHomeEnv(__DIR__ . '/not_exist_fixtures');
         // simulate not being GCE and retry attempts by returning multiple 500s
         $httpHandler = getHandler([
@@ -300,6 +301,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
+        skipResidencyCheck();
         setHomeEnv(__DIR__ . '/not_exist_fixtures');
 
         // simulate not being GCE and retry attempts by returning multiple 500s
@@ -483,6 +485,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Your default credentials were not found');
 
+        skipResidencyCheck();
         setHomeEnv(__DIR__ . '/not_exist_fixtures');
 
         // simulate not being GCE and retry attempts by returning multiple 500s
