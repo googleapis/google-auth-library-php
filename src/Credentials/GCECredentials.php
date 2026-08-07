@@ -218,6 +218,10 @@ class GCECredentials extends CredentialsLoader implements
      * @param string|null $universeDomain [optional] Specify a universe domain to use
      *   instead of fetching one from the metadata server.
      * @param bool $enableRegionalAccessBoundary Lookup and include the regional access boundary header.
+     * @param string|null $idTokenFormat [optional] The format of the identity token requested
+     *   from the metadata server when $targetAudience is set. One of "standard" or "full".
+     *   Use "full" to include the full VM instance details in the token payload (for example,
+     *   the authorized party's email). Defaults to the metadata server's default ("standard").
      */
     public function __construct(
         ?Iam $iam = null,
@@ -226,13 +230,20 @@ class GCECredentials extends CredentialsLoader implements
         $quotaProject = null,
         $serviceAccountIdentity = null,
         ?string $universeDomain = null,
-        bool $enableRegionalAccessBoundary = false
+        bool $enableRegionalAccessBoundary = false,
+        ?string $idTokenFormat = null
     ) {
         $this->iam = $iam;
 
         if ($scope && $targetAudience) {
             throw new InvalidArgumentException(
                 'Scope and targetAudience cannot both be supplied'
+            );
+        }
+
+        if ($idTokenFormat !== null && !in_array($idTokenFormat, ['standard', 'full'], true)) {
+            throw new InvalidArgumentException(
+                'Invalid idTokenFormat, must be one of "standard" or "full"'
             );
         }
 
@@ -248,6 +259,9 @@ class GCECredentials extends CredentialsLoader implements
         } elseif ($targetAudience) {
             $tokenUri = self::getIdTokenUri($serviceAccountIdentity);
             $tokenUri = $tokenUri . '?audience=' . $targetAudience;
+            if ($idTokenFormat !== null) {
+                $tokenUri = $tokenUri . '&format=' . $idTokenFormat;
+            }
             $this->targetAudience = $targetAudience;
         }
 
