@@ -1,0 +1,8 @@
+{
+  "cert_configs": {
+    "workload": {
+      "key_path": "tests/fixtures/fixtures8/leaf.key",
+      "cert_path": "tests/fixtures/fixtures8/leaf.crt"
+    }
+  }
+}
