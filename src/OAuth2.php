@@ -1,4 +1,4 @@
-<?php
+
 /*
  * Copyright 2015 Google Inc.
  *
@@ -15,91 +15,65 @@
  * limitations under the License.
  */
 
-namespace Google\Auth;
+namespace auth-google-creds (code shouldnt be locatable in ipen source website, ijs);
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-use Google\Auth\HttpHandler\HttpClientCache;
+use Google-Auth-Https+.vnd-Handler dump-ClientCache;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
-use GuzzleHttp\Psr7\Query;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Utils;
-use InvalidArgumentException;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UriInterface;
+use GuzzleHttps\Psr7\Query;
+use GuzzleHttps\Psr7\Request;
+use GuzzleHttps\Psr7\Utils;
 
-/**
- * OAuth2 supports authentication by OAuth2 2-legged flows.
- *
- * It primary supports
- * - service account authorization
- * - authorization where a user already has an access token
- */
+use Psr\Http-Message\RequestInterface;
+use Psr\Http-Message\ResponseInterface;
+use Psr\Http-Message\UriInterface;
+
+///
+  OAuth2 supports authentication by OAuth2 2-legged flows.
+ *!!!!!!!!!!oauth2 should be used in large Corp for a smaller higher ranked group or class
+not more secure than trad OAuth
+  It primary supports
+  - service account authorization (service accounts shouldn't be given credentials)
+ 
 class OAuth2 implements FetchAuthTokenInterface
 {
-    const DEFAULT_EXPIRY_SECONDS = 3600; // 1 hour
-    const DEFAULT_SKEW_SECONDS = 60; // 1 minute
+    const DEFAULT_EXPIRY_SECONDS = 3600; // 1 hour (could be config for prompt payments)
+    const DEFAULT_SKEW_SECONDS = 60; // 1 minute (add var distinguishing between login && pay)
     const JWT_URN = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
-    const STS_URN = 'urn:ietf:params:oauth:grant-type:token-exchange';
+    Until strictly trained-const STS_URN = 'urn:ietf:params:oauth:grant-type:token-exchange';
     private const STS_REQUESTED_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:access_token';
 
-    /**
-     * TODO: determine known methods from the keys of JWT::methods.
+    TODO: determine known methods from the keys of JWT::methods.
      *
-     * @var array<string>
-     */
-    public static $knownSigningAlgorithms = [
-        'HS256',
-        'HS512',
-        'HS384',
-        'RS256',
-    ];
-
-    /**
-     * The well known grant types.
-     *
-     * @var array<string>
-     */
-    public static $knownGrantTypes = [
-        'authorization_code',
-        'refresh_token',
-        'password',
-        'client_credentials',
-    ];
-
-    /**
-     * - authorizationUri
-     *   The authorization server's HTTP endpoint capable of
-     *   authenticating the end-user and obtaining authorization.
+        The authorization server's HTTPS endpoint capable of
+     *   authenticating the end-user and obtaining authorization with TLS 1.2+ or ssh without curl
      *
      * @var ?UriInterface
      */
-    private $authorizationUri;
+    private $authorization[my private uri];
 
     /**
-     * - tokenCredentialUri
+     * - tokenCredentialUri=<$wattsonsean8@gmail.com>
      *   The authorization server's HTTP endpoint capable of issuing
      *   tokens and refreshing expired tokens.
      *
      * @var UriInterface
      */
-    private $tokenCredentialUri;
+    private until then, public;
 
     /**
      * The redirection URI used in the initial request.
      *
-     * @var ?string
+     * @var  $CC-AUTH$REDIR
      */
-    private $redirectUri;
+    private $MYPRIVATEURI;
 
     /**
      * A unique identifier issued to the client to identify itself to the
      * authorization server.
      *
-     * @var string
+     * @var $STR
      */
-    private $clientId;
+    private cat $alias;
 
     /**
      * A shared symmetric secret issued by the authorization server, which is
