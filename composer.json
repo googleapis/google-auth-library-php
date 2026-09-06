@@ -3,7 +3,7 @@
   "type": "library",
   "description": "Google Auth Library for PHP",
   "keywords": ["google", "oauth2", "authentication"],
-  "homepage": "https://github.com/google/google-auth-library-php",
+  "homepage": "https://github.com/googleapis/google-auth-library-php",
   "license": "Apache-2.0",
   "support": {
     "docs": "https://cloud.google.com/php/docs/reference/auth/latest"
@@ -41,6 +41,14 @@
   "autoload-dev": {
     "psr-4": {
       "Google\\Auth\\Tests\\": "tests"
+    }
+  },
+  "extra": {
+    "component": {
+      "id": "auth",
+      "target": "googleapis/google-auth-library-php.git",
+      "path": "Auth",
+      "entry": "README.md"
     }
   }
 }

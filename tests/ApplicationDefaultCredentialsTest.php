@@ -47,6 +47,7 @@ use ReflectionClass;
  */
 class ApplicationDefaultCredentialsTest extends TestCase
 {
+    use HelperTrait;
     use ProphecyTrait;
 
     private $originalHome;
@@ -75,7 +76,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures1');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -84,11 +85,11 @@ class ApplicationDefaultCredentialsTest extends TestCase
     public function testFailsIfNotOnGceAndNoDefaultFileFound()
     {
         $this->expectException(DomainException::class);
+        $this->skipResidencyCheck();
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
 
-        skipResidencyCheck();
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
         // simulate not being GCE and retry attempts by returning multiple 500s
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(500),
             new Response(500),
             new Response(500)
@@ -99,7 +100,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testSuccedsIfNoDefaultFilesButIsOnGCE()
     {
-        setHomeEnv(null);
+        $this->setHomeEnv(null);
 
         $wantedTokens = [
             'access_token' => '1/abdef1234567890',
@@ -109,7 +110,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $jsonTokens = json_encode($wantedTokens);
 
         // simulate the response from GCE.
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
             new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
@@ -122,13 +123,13 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGceCredentials()
     {
-        setHomeEnv(null);
+        $this->setHomeEnv(null);
 
         $jsonTokens = json_encode(['access_token' => 'abc']);
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
-            $httpHandler = getHandler([
+            $httpHandler = $this->getHandler([
                 new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
                 new Response(200, [], Utils::streamFor($jsonTokens)),
             ]), // $httpHandler
@@ -148,7 +149,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             'a+user+scope', // $scope
-            getHandler([
+            $this->getHandler([
                 new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
                 new Response(200, [], Utils::streamFor($jsonTokens)),
             ]), // $httpHandler
@@ -165,7 +166,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testImpersonatedServiceAccountCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures5');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures5');
         $creds = ApplicationDefaultCredentials::getCredentials(
             null,
             null,
@@ -187,7 +188,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testUserRefreshCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures2');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures2');
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -222,7 +223,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testServiceAccountCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures1');
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -257,7 +258,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testDefaultScopeArray()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures2');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures2');
 
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -293,7 +294,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testLGetMiddlewareoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures1');
         $this->assertNotNull(ApplicationDefaultCredentials::getMiddleware('a scope'));
     }
 
@@ -301,11 +302,11 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        skipResidencyCheck();
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $this->skipResidencyCheck();
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
 
         // simulate not being GCE and retry attempts by returning multiple 500s
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(500),
             new Response(500),
             new Response(500)
@@ -319,7 +320,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200),
         ]);
 
@@ -346,7 +347,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $jsonTokens = json_encode($wantedTokens);
 
         // simulate the response from GCE.
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
             new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
@@ -358,7 +359,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
 
         $mockCacheItem = $this->prophesize('Psr\Cache\CacheItemInterface');
         $mockCacheItem->isHit()
@@ -382,7 +383,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testOnGceCacheWithoutHit()
     {
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
 
         $gceIsCalled = false;
         $dummyHandler = function ($request) use (&$gceIsCalled) {
@@ -418,7 +419,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testOnGceCacheWithOptions()
     {
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
 
         $prefix = 'test_prefix_';
         $lifetime = '70707';
@@ -475,7 +476,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetIdTokenCredentialsLoadsDefaultFileIfPresentAndEnvVarIsNotSet()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures1');
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials($this->targetAudience);
         $this->assertInstanceOf(ServiceAccountCredentials::class, $creds);
     }
@@ -485,11 +486,11 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Your default credentials were not found');
 
-        skipResidencyCheck();
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $this->skipResidencyCheck();
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
 
         // simulate not being GCE and retry attempts by returning multiple 500s
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(500),
             new Response(500),
             new Response(500)
@@ -503,7 +504,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetIdTokenCredentialsWithImpersonatedServiceAccountCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures5');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures5');
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials('123@456.com');
         $this->assertInstanceOf(ImpersonatedServiceAccountCredentials::class, $creds);
     }
@@ -513,7 +514,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200),
         ]);
 
@@ -532,7 +533,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetIdTokenCredentialsSuccedsIfNoDefaultFilesButIsOnGCE()
     {
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
         $wantedTokens = [
             'access_token' => '1/abdef1234567890',
             'expires_in' => '57',
@@ -541,7 +542,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $jsonTokens = json_encode($wantedTokens);
 
         // simulate the response from GCE.
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
             new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
@@ -556,7 +557,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testGetIdTokenCredentialsWithUserRefreshCredentials()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures2');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures2');
 
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
             $this->targetAudience,
@@ -612,7 +613,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $quotaProject = 'quota-project-from-env-var';
         putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=' . $quotaProject);
-        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures1');
 
         $credentials = ApplicationDefaultCredentials::getCredentials();
 
@@ -627,7 +628,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $quotaProject = 'quota-project-from-parameter';
         putenv(CredentialsLoader::QUOTA_PROJECT_ENV_VAR . '=quota-project-from-env-var');
-        setHomeEnv(__DIR__ . '/fixtures/fixtures1');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures1');
 
         $credentials = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
@@ -665,7 +666,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $keyFile = __DIR__ . '/fixtures/fixtures1/private.json';
         putenv(ServiceAccountCredentials::ENV_VAR . '=' . $keyFile);
 
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200),
         ]);
 
@@ -690,7 +691,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
 
     public function testWithGCECredentials()
     {
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
         $wantedTokens = [
             'access_token' => '1/abdef1234567890',
             'expires_in' => '57',
@@ -699,7 +700,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         $jsonTokens = json_encode($wantedTokens);
 
         // simulate the response from GCE.
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
             new Response(200, [], Utils::streamFor($jsonTokens)),
         ]);
@@ -723,7 +724,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
     public function testAppEngineStandard()
     {
         $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
         $this->assertInstanceOf(
             'Google\Auth\Credentials\AppIdentityCredentials',
             ApplicationDefaultCredentials::getCredentials()
@@ -734,8 +735,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
         putenv('GAE_INSTANCE=aef-default-20180313t154438');
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
-        $httpHandler = getHandler([
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $httpHandler = $this->getHandler([
             new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         ]);
         $this->assertInstanceOf(
@@ -748,8 +749,8 @@ class ApplicationDefaultCredentialsTest extends TestCase
     {
         $_SERVER['SERVER_SOFTWARE'] = 'Google App Engine';
         putenv('GAE_INSTANCE=aef-default-20180313t154438');
-        setHomeEnv(__DIR__ . '/not_exist_fixtures');
-        $httpHandler = getHandler([
+        $this->setHomeEnv(__DIR__ . '/not_exist_fixtures');
+        $httpHandler = $this->getHandler([
             new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
         ]);
         $creds = ApplicationDefaultCredentials::getIdTokenCredentials(
@@ -868,12 +869,12 @@ class ApplicationDefaultCredentialsTest extends TestCase
     /** @runInSeparateProcess */
     public function testUniverseDomainInGceCredentials()
     {
-        setHomeEnv(null);
+        $this->setHomeEnv(null);
 
         $expectedUniverseDomain = 'example-universe.com';
         $creds = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
-            $httpHandler = getHandler([
+            $httpHandler = $this->getHandler([
                 new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
                 new Response(200, [], Utils::streamFor($expectedUniverseDomain)),
             ]) // $httpHandler
@@ -883,7 +884,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         // test passing in a different universe domain overrides metadata server
         $creds2 = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
-            $httpHandler = getHandler([
+            $httpHandler = $this->getHandler([
                 new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
             ]), // $httpHandler
             null, // $cacheConfig
@@ -897,7 +898,7 @@ class ApplicationDefaultCredentialsTest extends TestCase
         // test error response returns default universe domain
         $creds2 = ApplicationDefaultCredentials::getCredentials(
             null, // $scope
-            $httpHandler = getHandler([
+            $httpHandler = $this->getHandler([
                 new Response(200, [GCECredentials::FLAVOR_HEADER => 'Google']),
                 new Response(404),
             ]), // $httpHandler

@@ -50,7 +50,7 @@ class CacheTraitTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($this->mockCacheItem->reveal());
 
-        $implementation = new CacheTraitImplementation([
+        $implementation = $this->getCacheTraitImplementation([
             'cache' => $this->mockCache->reveal(),
         ]);
 
@@ -73,7 +73,7 @@ class CacheTraitTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($this->mockCacheItem->reveal());
 
-        $implementation = new CacheTraitImplementation([
+        $implementation = $this->getCacheTraitImplementation([
             'cache' => $this->mockCache->reveal(),
         ]);
 
@@ -98,7 +98,7 @@ class CacheTraitTest extends TestCase
             ->shouldBeCalledTimes(1)
             ->willReturn($this->mockCacheItem->reveal());
 
-        $implementation = new CacheTraitImplementation([
+        $implementation = $this->getCacheTraitImplementation([
             'cache' => $this->mockCache->reveal(),
         ]);
 
@@ -108,7 +108,7 @@ class CacheTraitTest extends TestCase
 
     public function testFailsPullFromCacheWithNoCache()
     {
-        $implementation = new CacheTraitImplementation();
+        $implementation = $this->getCacheTraitImplementation();
 
         $cachedValue = $implementation->getCachedValue('key');
         $this->assertEquals(null, $cachedValue);
@@ -116,7 +116,7 @@ class CacheTraitTest extends TestCase
 
     public function testFailsPullFromCacheWithoutKey()
     {
-        $implementation = new CacheTraitImplementation([
+        $implementation = $this->getCacheTraitImplementation([
             'cache' => $this->mockCache->reveal(),
         ]);
 
@@ -138,7 +138,7 @@ class CacheTraitTest extends TestCase
         $this->mockCache->save(Argument::type('Psr\Cache\CacheItemInterface'))
             ->shouldBeCalled();
 
-        $implementation = new CacheTraitImplementation([
+        $implementation = $this->getCacheTraitImplementation([
             'cache' => $this->mockCache->reveal(),
         ]);
 
@@ -147,7 +147,7 @@ class CacheTraitTest extends TestCase
 
     public function testFailsSetToCacheWithNoCache()
     {
-        $implementation = new CacheTraitImplementation();
+        $implementation = $this->getCacheTraitImplementation();
 
         $implementation->setCachedValue('key', '1234');
 
@@ -157,7 +157,7 @@ class CacheTraitTest extends TestCase
 
     public function testFailsSetToCacheWithoutKey()
     {
-        $implementation = new CacheTraitImplementation([
+        $implementation = $this->getCacheTraitImplementation([
             'cache' => $this->mockCache->reveal(),
             'key'   => null,
         ]);
@@ -165,21 +165,23 @@ class CacheTraitTest extends TestCase
         $cachedValue = $implementation->setCachedValue(null, '1234');
         $this->assertNull($cachedValue);
     }
-}
 
-class CacheTraitImplementation
-{
-    use CacheTrait {
-        getCachedValue as public;
-        setCachedValue as public;
-    }
-
-    public function __construct(array $config = [])
+    private function getCacheTraitImplementation(array $config = [])
     {
-        $this->cache = $config['cache'] ?? null;
-        $this->cacheConfig = [
-            'prefix' => '',
-            'lifetime' => 1000,
-        ];
+        return new class($config) {
+            use CacheTrait {
+                getCachedValue as public;
+                setCachedValue as public;
+            }
+
+            public function __construct(array $config = [])
+            {
+                $this->cache = $config['cache'] ?? null;
+                $this->cacheConfig = [
+                    'prefix' => '',
+                    'lifetime' => 1000,
+                ];
+            }
+        };
     }
 }

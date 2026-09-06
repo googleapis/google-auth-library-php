@@ -21,6 +21,7 @@ use DomainException;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 use Google\Auth\OAuth2;
+use Google\Auth\Tests\HelperTrait;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use InvalidArgumentException;
@@ -29,6 +30,8 @@ use PHPUnit\Framework\TestCase;
 
 class UserRefreshCredentialsTest extends TestCase
 {
+    use HelperTrait;
+
     private $originalHome;
 
     protected function setUp(): void
@@ -40,7 +43,7 @@ class UserRefreshCredentialsTest extends TestCase
     {
         putenv(UserRefreshCredentials::ENV_VAR);  // removes it from
         if ($this->originalHome != getenv('HOME')) {
-            setHomeEnv($this->originalHome);
+            $this->setHomeEnv($this->originalHome);
         }
     }
 
@@ -179,7 +182,7 @@ class UserRefreshCredentialsTest extends TestCase
 
     public function testIsNullIfFileDoesNotExist()
     {
-        setHomeEnv(__DIR__ . '/../not_exist_fixtures');
+        $this->setHomeEnv(__DIR__ . '/../not_exist_fixtures');
         $this->assertNull(
             UserRefreshCredentials::fromWellKnownFile('a scope')
         );
@@ -187,7 +190,7 @@ class UserRefreshCredentialsTest extends TestCase
 
     public function testSucceedIfFileIsPresent()
     {
-        setHomeEnv(__DIR__ . '/../fixtures/fixtures2');
+        $this->setHomeEnv(__DIR__ . '/../fixtures/fixtures2');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -198,7 +201,7 @@ class UserRefreshCredentialsTest extends TestCase
         $this->expectException(\GuzzleHttp\Exception\ClientException::class);
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(400),
         ]);
         $sa = new UserRefreshCredentials(
@@ -213,7 +216,7 @@ class UserRefreshCredentialsTest extends TestCase
         $this->expectException(\GuzzleHttp\Exception\ServerException::class);
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(500),
         ]);
         $sa = new UserRefreshCredentials(
@@ -228,7 +231,7 @@ class UserRefreshCredentialsTest extends TestCase
         $testJson = $this->createTestJson();
         $testJsonText = json_encode($testJson);
         $scope = ['scope/1', 'scope/2'];
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], Utils::streamFor($testJsonText)),
         ]);
         $sa = new UserRefreshCredentials(
@@ -242,7 +245,7 @@ class UserRefreshCredentialsTest extends TestCase
     public function testGetGrantedScope()
     {
         $responseJson = json_encode(['scope' => 'scope/1 scope/2']);
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], Utils::streamFor($responseJson)),
         ]);
         $sa = new UserRefreshCredentials(

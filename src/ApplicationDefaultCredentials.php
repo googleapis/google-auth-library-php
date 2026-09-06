@@ -363,7 +363,11 @@ class ApplicationDefaultCredentials
         // Env Var is not true
         if ($loggingFlag !== 'true') {
             if ($loggingFlag !== 'false') {
-                trigger_error('The ' . self::SDK_DEBUG_ENV_VAR . ' is set, but it is set to another value than false or true. Logging is disabled');
+                trigger_error(
+                    'The ' .
+                    self::SDK_DEBUG_ENV_VAR .
+                    ' is set, but it is set to another value than false or true. Logging is disabled'
+                );
             }
 
             return null;

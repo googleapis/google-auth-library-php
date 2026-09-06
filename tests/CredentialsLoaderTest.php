@@ -24,9 +24,26 @@ use UnexpectedValueException;
 
 class CredentialsLoaderTest extends TestCase
 {
+    use HelperTrait;
+
     public function testUpdateMetadataSkipsWhenAuthenticationisSet()
     {
-        $creds = new TestCredentialsLoader();
+        $creds = new class() extends CredentialsLoader {
+            public function getCacheKey()
+            {
+                return 'test';
+            }
+
+            public function fetchAuthToken(?callable $httpHandler = null)
+            {
+                return 'test';
+            }
+
+            public function getLastReceivedToken()
+            {
+                return null;
+            }
+        };
         $metadata = $creds->updateMetadata(['authentication' => 'foo']);
         $this->assertArrayHasKey('authentication', $metadata);
         $this->assertEquals('foo', $metadata['authentication']);
@@ -35,7 +52,7 @@ class CredentialsLoaderTest extends TestCase
     /** @runInSeparateProcess */
     public function testGetDefaultClientCertSource()
     {
-        setHomeEnv(__DIR__ . '/fixtures/fixtures4/valid');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures4/valid');
 
         $callback = CredentialsLoader::getDefaultClientCertSource();
         $this->assertNotNull($callback);
@@ -47,7 +64,7 @@ class CredentialsLoaderTest extends TestCase
     /** @runInSeparateProcess */
     public function testNonExistantDefaultClientCertSource()
     {
-        setHomeEnv(null);
+        $this->setHomeEnv(null);
 
         $callback = CredentialsLoader::getDefaultClientCertSource();
         $this->assertNull($callback);
@@ -61,7 +78,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('Invalid client cert source JSON');
 
-        setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidjson');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidjson');
 
         CredentialsLoader::getDefaultClientCertSource();
     }
@@ -74,7 +91,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('cert source requires "cert_provider_command"');
 
-        setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidkey');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidkey');
 
         CredentialsLoader::getDefaultClientCertSource();
     }
@@ -87,7 +104,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(UnexpectedValueException::class);
         $this->expectExceptionMessage('cert source expects "cert_provider_command" to be an array');
 
-        setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidvalue');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidvalue');
 
         CredentialsLoader::getDefaultClientCertSource();
     }
@@ -115,7 +132,7 @@ class CredentialsLoaderTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('"cert_provider_command" failed with a nonzero exit code');
 
-        setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidcmd');
+        $this->setHomeEnv(__DIR__ . '/fixtures/fixtures4/invalidcmd');
 
         $callback = CredentialsLoader::getDefaultClientCertSource();
 
@@ -193,23 +210,5 @@ class CredentialsLoaderTest extends TestCase
 
         $this->assertArrayHasKey('type', $json);
         $this->assertEquals('getenv', $json['type']);
-    }
-}
-
-class TestCredentialsLoader extends CredentialsLoader
-{
-    public function getCacheKey()
-    {
-        return 'test';
-    }
-
-    public function fetchAuthToken(?callable $httpHandler = null)
-    {
-        return 'test';
-    }
-
-    public function getLastReceivedToken()
-    {
-        return null;
     }
 }

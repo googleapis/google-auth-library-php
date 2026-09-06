@@ -22,6 +22,7 @@ use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
+use Google\Auth\Tests\HelperTrait;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
@@ -32,6 +33,8 @@ use PHPUnit\Framework\TestCase;
 
 class ServiceAccountCredentialsTest extends TestCase
 {
+    use HelperTrait;
+
     private function createTestJson()
     {
         return [
@@ -192,7 +195,7 @@ class ServiceAccountCredentialsTest extends TestCase
     /** @runInSeparateProcess */
     public function testIsNullIfFileDoesNotExist()
     {
-        setHomeEnv(__DIR__ . '/../not_exists_fixtures');
+        $this->setHomeEnv(__DIR__ . '/../not_exists_fixtures');
         $this->assertNull(
             ServiceAccountCredentials::fromWellKnownFile()
         );
@@ -201,7 +204,7 @@ class ServiceAccountCredentialsTest extends TestCase
     /** @runInSeparateProcess */
     public function testSucceedIfFileIsPresent()
     {
-        setHomeEnv(__DIR__ . '/../fixtures/fixtures1');
+        $this->setHomeEnv(__DIR__ . '/../fixtures/fixtures1');
         $this->assertNotNull(
             ApplicationDefaultCredentials::getCredentials('a scope')
         );
@@ -213,7 +216,7 @@ class ServiceAccountCredentialsTest extends TestCase
 
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(400),
         ]);
         $sa = new ServiceAccountCredentials(
@@ -229,7 +232,7 @@ class ServiceAccountCredentialsTest extends TestCase
 
         $testJson = $this->createTestJson();
         $scope = ['scope/1', 'scope/2'];
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(500),
         ]);
         $sa = new ServiceAccountCredentials(
@@ -244,7 +247,7 @@ class ServiceAccountCredentialsTest extends TestCase
         $testJson = $this->createTestJson();
         $testJsonText = json_encode($testJson);
         $scope = ['scope/1', 'scope/2'];
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], Utils::streamFor($testJsonText)),
         ]);
         $sa = new ServiceAccountCredentials(
@@ -261,7 +264,7 @@ class ServiceAccountCredentialsTest extends TestCase
         $scope = ['scope/1', 'scope/2'];
         $access_token = 'accessToken123';
         $responseText = json_encode(['access_token' => $access_token]);
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], Utils::streamFor($responseText)),
         ]);
         $sa = new ServiceAccountCredentials(
@@ -427,7 +430,7 @@ class ServiceAccountCredentialsTest extends TestCase
 
     public function testUpdateMetadataWithRegionalAccessBoundary()
     {
-        $httpHandler = getHandler([
+        $httpHandler = $this->getHandler([
             new Response(200, [], '{"access_token": "source-token", "expires_in": 3600}'),
             new Response(200, [], '{"locations": [], "encodedLocations": "foo"}'),
         ]);

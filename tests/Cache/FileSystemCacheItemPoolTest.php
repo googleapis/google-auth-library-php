@@ -151,7 +151,9 @@ class FileSystemCacheItemPoolTest extends TestCase
     public function testGetItemWithIncorrectKeyShouldThrowAnException($char)
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $this->expectExceptionMessage(
+            "The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|"
+        );
         $item = $this->getNewItem($char);
         $this->pool->getItem($item->getKey());
     }
@@ -162,7 +164,9 @@ class FileSystemCacheItemPoolTest extends TestCase
     public function testGetItemsWithIncorrectKeyShouldThrowAnException($char)
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $this->expectExceptionMessage(
+            "The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|"
+        );
         $item = $this->getNewItem($char);
         $this->pool->getItems([$item->getKey()]);
     }
@@ -173,7 +177,9 @@ class FileSystemCacheItemPoolTest extends TestCase
     public function testHasItemWithIncorrectKeyShouldThrowAnException($char)
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $this->expectExceptionMessage(
+            "The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|"
+        );
         $item = $this->getNewItem($char);
         $this->pool->hasItem($item->getKey());
     }
@@ -184,7 +190,9 @@ class FileSystemCacheItemPoolTest extends TestCase
     public function testDeleteItemWithIncorrectKeyShouldThrowAnException($char)
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $this->expectExceptionMessage(
+            "The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|"
+        );
         $item = $this->getNewItem($char);
         $this->pool->deleteItem($item->getKey());
     }
@@ -195,7 +203,9 @@ class FileSystemCacheItemPoolTest extends TestCase
     public function testDeleteItemsWithIncorrectKeyShouldThrowAnException($char)
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|");
+        $this->expectExceptionMessage(
+            "The key '$char' is not valid. The key should follow the pattern |^[a-zA-Z0-9_\.! ]+$|"
+        );
         $item = $this->getNewItem($char);
         $this->pool->deleteItems([$item->getKey()]);
     }

@@ -136,8 +136,7 @@ class ImpersonatedServiceAccountCredentials extends CredentialsLoader implements
             if (!array_key_exists('type', $jsonKey['source_credentials'])) {
                 throw new InvalidArgumentException('json key source credentials are missing the type field');
             }
-            if (
-                $targetAudience !== null
+            if ($targetAudience !== null
                 && $jsonKey['source_credentials']['type'] === 'service_account'
             ) {
                 // Service account tokens MUST request a scope, and as this token is only used to impersonate

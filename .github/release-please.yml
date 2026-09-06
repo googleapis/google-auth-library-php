@@ -1,4 +1,0 @@
-releaseType: simple
-handleGHRelease: true
-primaryBranch: main
-versionFile: VERSION

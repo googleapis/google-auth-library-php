@@ -1,11 +1,12 @@
 <?php
 
-namespace Google\Auth\Tests;
+namespace Google\Auth\Tests\Credentials;
 
 use Google\Auth\Cache\MemoryCacheItemPool;
 use Google\Auth\Credentials\RegionalAccessBoundaryTrait;
 use Google\Auth\GetUniverseDomainInterface;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\Tests\HelperTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -20,13 +21,14 @@ use Psr\Cache\CacheItemPoolInterface;
 
 class RegionalAccessBoundaryTraitTest extends TestCase
 {
+    use HelperTrait;
     use ProphecyTrait;
 
-    private RegionalAccessBoundaryTraitImpl $impl;
+    private $impl;
 
     public function setUp(): void
     {
-        $this->impl = new RegionalAccessBoundaryTraitImpl();
+        $this->impl = $this->getRegionalAccessBoundaryTraitImpl();
     }
 
     public function testBuildRegionalAccessBoundaryLookupUrl()
@@ -42,7 +44,7 @@ class RegionalAccessBoundaryTraitTest extends TestCase
     {
         $responseBody =
             '{"locations": ["us-central1", "us-east1", "europe-west1", "asia-east1"], "enodedLocations": ""0xA30"}';
-        $handler = getHandler([
+        $handler = $this->getHandler([
             new Response(200, [], $responseBody),
         ]);
         $result = $this->impl->lookupRegionalAccessBoundary($handler, 'default', ['Bearer xyz']);
@@ -51,7 +53,7 @@ class RegionalAccessBoundaryTraitTest extends TestCase
 
     public function testLookupRegionalAccessBoundary404()
     {
-        $handler = getHandler([
+        $handler = $this->getHandler([
             new Response(404)
         ]);
         $result = $this->impl->lookupRegionalAccessBoundary($handler, 'default', ['Bearer xyz']);
@@ -135,7 +137,7 @@ class RegionalAccessBoundaryTraitTest extends TestCase
         $this->impl->setCache($cache);
         $responseBody =
             '{"locations": ["us-central1", "us-east1", "europe-west1", "asia-east1"], "encodedLocations": "0xA30"}';
-        $handler = getHandler([
+        $handler = $this->getHandler([
             new Response(200, [], $responseBody),
         ]);
 
@@ -149,7 +151,7 @@ class RegionalAccessBoundaryTraitTest extends TestCase
         $this->assertEquals(json_decode($responseBody, true), $result1);
 
         // Second call, should return from cache
-        $handler = getHandler([
+        $handler = $this->getHandler([
             new Response(500), // This should not be called
         ]);
         $result2 = $this->impl->getRegionalAccessBoundary(
@@ -189,7 +191,7 @@ class RegionalAccessBoundaryTraitTest extends TestCase
         // Second call, should return from HTTP call
         $responseBody =
             '{"locations": ["noncached-locations"], "encodedLocations": "0xA30"}';
-        $handler = getHandler([
+        $handler = $this->getHandler([
             new Response(200, [], $responseBody),
         ]);
 
@@ -225,7 +227,7 @@ class RegionalAccessBoundaryTraitTest extends TestCase
 
         $responseBody =
             '{"locations": ["us-central1", "us-east1", "europe-west1", "asia-east1"], "encodedLocations": "0xA30"}';
-        $handler = getHandler([
+        $handler = $this->getHandler([
             new Response(200, [], $responseBody)
         ]);
         // First call, should fetch and cache
@@ -284,7 +286,7 @@ class RegionalAccessBoundaryTraitTest extends TestCase
 
         $result = $this->impl->getRegionalAccessBoundary(
             GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
-            getHandler([new Response(200, [], '{"encodedLocations": "0xA30"}')]),
+            $this->getHandler([new Response(200, [], '{"encodedLocations": "0xA30"}')]),
             'default',
             ['authorization' => ['xyz']]
         );
@@ -319,7 +321,9 @@ class RegionalAccessBoundaryTraitTest extends TestCase
         $cooldownCacheItem = $this->prophesize(CacheItemInterface::class);
         $cooldownCacheItem->isHit()->shouldBeCalledOnce()->willReturn(false);
         $cooldownCacheItem->set(true)->shouldBeCalledOnce()->willReturn($cooldownCacheItem->reveal());
-        $cooldownCacheItem->expiresAfter($expectedExpiry)->shouldBeCalledOnce()->willReturn($cooldownCacheItem->reveal());
+        $cooldownCacheItem->expiresAfter($expectedExpiry)
+            ->shouldBeCalledOnce()
+            ->willReturn($cooldownCacheItem->reveal());
         $cache->getItem('testkeyrabcooldown')
             ->shouldBeCalledTimes(2)
             ->willReturn($cooldownCacheItem->reveal());
@@ -332,8 +336,12 @@ class RegionalAccessBoundaryTraitTest extends TestCase
             $cooldownCacheItemAttempt->isHit()->shouldBeCalledOnce()->willReturn(true);
             $cooldownCacheItemAttempt->get()->shouldBeCalledOnce()->willReturn($attempt);
         }
-        $cooldownCacheItemAttempt->set($attempt + 1)->shouldBeCalledOnce()->willReturn($cooldownCacheItemAttempt->reveal());
-        $cooldownCacheItemAttempt->expiresAfter($expectedExpiry * 2)->shouldBeCalledOnce()->willReturn($cooldownCacheItemAttempt->reveal());
+        $cooldownCacheItemAttempt->set($attempt + 1)
+            ->shouldBeCalledOnce()
+            ->willReturn($cooldownCacheItemAttempt->reveal());
+        $cooldownCacheItemAttempt->expiresAfter($expectedExpiry * 2)
+            ->shouldBeCalledOnce()
+            ->willReturn($cooldownCacheItemAttempt->reveal());
         $cache->getItem('testkeyrabcooldownattempt')
             ->shouldBeCalledTimes(2)
             ->willReturn($cooldownCacheItemAttempt->reveal());
@@ -373,7 +381,7 @@ class RegionalAccessBoundaryTraitTest extends TestCase
     public function testMalformedResponseFromAllowLocationsLookup(int $statusCode, string $responseBody)
     {
         $this->impl->setCache(new MemoryCacheItemPool());
-        $handler = getHandler([
+        $handler = $this->getHandler([
             new Response($statusCode, [], $responseBody),
         ]);
         $result = $this->impl->getRegionalAccessBoundary(
@@ -386,40 +394,42 @@ class RegionalAccessBoundaryTraitTest extends TestCase
         $this->assertNull($result);
         $this->assertTrue($this->impl->cooldownIsActive());
     }
-}
 
-class RegionalAccessBoundaryTraitImpl
-{
-    use RegionalAccessBoundaryTrait {
-        buildRegionalAccessBoundaryLookupUrl as public;
-        lookupRegionalAccessBoundary as public;
-        getRegionalAccessBoundary as public;
-    }
-
-    private $cache;
-    private $cacheConfig;
-
-    public function __construct(array $config = [])
+    private function getRegionalAccessBoundaryTraitImpl(array $config = [])
     {
-        $this->cacheConfig = [
-            'prefix' => '',
-            'lifetime' => 1000,
-        ];
-        $this->enableRegionalAccessBoundary = true;
-    }
+        return new class($config) {
+            use RegionalAccessBoundaryTrait {
+                buildRegionalAccessBoundaryLookupUrl as public;
+                lookupRegionalAccessBoundary as public;
+                getRegionalAccessBoundary as public;
+            }
 
-    public function getCacheKey()
-    {
-        return 'test-key';
-    }
+            private $cache;
+            private $cacheConfig;
 
-    public function setCache($cache)
-    {
-        $this->cache = $cache;
-    }
+            public function __construct(array $config = [])
+            {
+                $this->cacheConfig = [
+                    'prefix' => '',
+                    'lifetime' => 1000,
+                ];
+                $this->enableRegionalAccessBoundary = true;
+            }
 
-    public function cooldownIsActive(): bool
-    {
-        return (bool) $this->getCachedValue($this->getCacheKey() . ':rab:cooldown');
+            public function getCacheKey()
+            {
+                return 'test-key';
+            }
+
+            public function setCache($cache)
+            {
+                $this->cache = $cache;
+            }
+
+            public function cooldownIsActive(): bool
+            {
+                return (bool) $this->getCachedValue($this->getCacheKey() . ':rab:cooldown');
+            }
+        };
     }
 }

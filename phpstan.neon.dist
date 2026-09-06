@@ -3,7 +3,3 @@ parameters:
     level: 7
     paths:
     - src
-    featureToggles:
-      disableRuntimeReflectionProvider: true
-    excludePaths:
-    - src/Cache/Item.php

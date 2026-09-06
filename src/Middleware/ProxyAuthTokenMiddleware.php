@@ -142,9 +142,9 @@ class ProxyAuthTokenMiddleware
     }
 
     /**
-     * @return string|null;
+     * @return string|null
      */
-    private function getQuotaProject()
+    private function getQuotaProject(): ?string
     {
         if ($this->fetcher instanceof GetQuotaProjectInterface) {
             return $this->fetcher->getQuotaProject();

@@ -33,8 +33,8 @@ class FileSource implements ExternalAccountCredentialSourceInterface
     /**
      * @param string $file                       The file to read the subject token from.
      * @param string|null $format                The format of the token in the file. Can be null or "json".
-     * @param string|null $subjectTokenFieldName The name of the field containing the token in the file. This is required
-     *                                           when format is "json".
+     * @param string|null $subjectTokenFieldName The name of the field containing the token in the file.
+     *                                           This is required when format is "json".
      */
     public function __construct(
         string $file,
