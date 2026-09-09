@@ -1,0 +1,37 @@
+<?php
+/*
+ * Copyright 2018 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace Google\Auth\Tests\Cache;
+
+$file = dirname(__DIR__, 2) . '/vendor/autoload.php';
+if (!file_exists($file)) {
+    $file = dirname(__DIR__, 3) . '/vendor/autoload.php';
+    if (!file_exists($file)) {
+        throw new \Exception('composer autoload.php not found');
+    }
+}
+require_once $file;
+
+use Google\Auth\Cache\SysVCacheItemPool;
+use Google\Auth\Cache\TypedItem;
+
+$value = $argv[1];
+// Use the same variableKey in the test.
+$pool = new SysVCacheItemPool(['variableKey' => 99]);
+$item = new TypedItem('separate-process-item');
+$item->set($value);
+$pool->save($item);
