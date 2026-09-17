@@ -13,4 +13,7 @@
       <directory suffix="Test.php">tests</directory>
     </testsuite>
   </testsuites>
+  <php>
+    <env name="GRPC_ENABLE_FORK_SUPPORT" value="1"/>
+  </php>
 </phpunit>
