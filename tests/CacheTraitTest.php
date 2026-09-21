@@ -58,6 +58,25 @@ class CacheTraitTest extends TestCase
         $this->assertEquals($expectedValue, $cachedValue);
     }
 
+    public function testFailsPullFromCacheWhenItemIsNotHit()
+    {
+        $this->mockCacheItem->isHit()
+            ->shouldBeCalledTimes(1)
+            ->willReturn(false);
+        $this->mockCacheItem->get()
+            ->shouldNotBeCalled();
+        $this->mockCache->getItem('key')
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->mockCacheItem->reveal());
+
+        $implementation = $this->getCacheTraitImplementation([
+            'cache' => $this->mockCache->reveal(),
+        ]);
+
+        $cachedValue = $implementation->getCachedValue('key');
+        $this->assertNull($cachedValue);
+    }
+
     public function testSuccessfullyPullsFromCacheWithInvalidKey()
     {
         $key = 'this-key-has-@-illegal-characters';

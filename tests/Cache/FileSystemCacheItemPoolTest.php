@@ -17,6 +17,7 @@
 
 namespace Google\Auth\Tests\Cache;
 
+use DateTime;
 use Google\Auth\Cache\FileSystemCacheItemPool;
 use Google\Auth\Cache\TypedItem;
 use PHPUnit\Framework\TestCase;
@@ -64,6 +65,29 @@ class FileSystemCacheItemPoolTest extends TestCase
 
         $this->assertTrue($retrievedItem->isHit());
         $this->assertEquals($retrievedItem->get(), $item->get());
+    }
+
+    public function testSaveAndGetExpiredItem()
+    {
+        $item = $this->getNewItem();
+        $item->expiresAt(new DateTime('yesterday'));
+        $this->pool->save($item);
+        $retrievedItem = $this->pool->getItem($item->getKey());
+
+        $this->assertFalse($retrievedItem->isHit());
+        $this->assertNull($retrievedItem->get());
+    }
+
+    public function testGetItemLegacyCacheFile()
+    {
+        $key = 'LegacyItem';
+        $itemPath = $this->cachePath . '/' . $key;
+        file_put_contents($itemPath, serialize('legacyValue'));
+
+        $retrievedItem = $this->pool->getItem($key);
+
+        $this->assertTrue($retrievedItem->isHit());
+        $this->assertEquals('legacyValue', $retrievedItem->get());
     }
 
     public function testHasItem()

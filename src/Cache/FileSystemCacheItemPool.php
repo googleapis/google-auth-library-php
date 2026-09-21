@@ -64,21 +64,26 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
             );
         }
 
-        $item = new TypedItem($key);
-
         $itemPath = $this->cacheFilePath($key);
 
         if (!file_exists($itemPath)) {
-            return $item;
+            return new TypedItem($key);
         }
 
         $serializedItem = file_get_contents($itemPath);
 
         if ($serializedItem === false) {
-            return $item;
+            return new TypedItem($key);
         }
 
-        $item->set(unserialize($serializedItem));
+        $data = unserialize($serializedItem);
+
+        if ($data instanceof CacheItemInterface) {
+            return $data;
+        }
+
+        $item = new TypedItem($key);
+        $item->set($data);
 
         return $item;
     }
@@ -113,7 +118,7 @@ class FileSystemCacheItemPool implements CacheItemPoolInterface
         }
 
         $itemPath = $this->cacheFilePath($item->getKey());
-        $serializedItem = serialize($item->get());
+        $serializedItem = serialize($item);
 
         $result = file_put_contents($itemPath, $serializedItem, LOCK_EX);
 

@@ -59,6 +59,8 @@ trait CacheTrait
         if ($cacheItem->isHit()) {
             return $cacheItem->get();
         }
+
+        return null;
     }
 
     /**
