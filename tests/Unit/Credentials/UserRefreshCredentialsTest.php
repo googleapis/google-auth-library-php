@@ -36,13 +36,13 @@ class UserRefreshCredentialsTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->originalHome = getenv('HOME');
+        $this->originalHome = $this->getHomeEnv();
     }
 
     protected function tearDown(): void
     {
         putenv(UserRefreshCredentials::ENV_VAR);  // removes it from
-        if ($this->originalHome != getenv('HOME')) {
+        if ($this->originalHome !== $this->getHomeEnv()) {
             $this->setHomeEnv($this->originalHome);
         }
     }

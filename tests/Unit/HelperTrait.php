@@ -33,6 +33,13 @@ trait HelperTrait
         return new Guzzle7HttpHandler($client);
     }
 
+    private function getHomeEnv(): ?string
+    {
+        $value = getenv(PHP_OS_FAMILY === "Windows" ? "APPDATA" : "HOME");
+
+        return $value === false ? null : $value;
+    }
+
     private function setHomeEnv(?string $value): void
     {
         $assigment = sprintf(

@@ -1,8 +1,8 @@
 <?php
 
-$file = dirname(__DIR__, 2) . '/vendor/autoload.php';
+$file = dirname(__DIR__, 3) . '/vendor/autoload.php';
 if (!file_exists($file)) {
-    $file = dirname(__DIR__, 3) . '/vendor/autoload.php';
+    $file = dirname(__DIR__, 4) . '/vendor/autoload.php';
     if (!file_exists($file)) {
         throw new \Exception('composer autoload.php not found');
     }

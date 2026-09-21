@@ -10,7 +10,7 @@
   </coverage>
   <testsuites>
     <testsuite name="google-auth-tests">
-      <directory suffix="Test.php">tests</directory>
+      <directory suffix="Test.php">tests/Unit</directory>
     </testsuite>
   </testsuites>
   <php>
