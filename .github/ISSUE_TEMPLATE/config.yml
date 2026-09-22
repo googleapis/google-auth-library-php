@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: File an issue in googleapis/google-cloud-php
+    url: https://github.com/googleapis/google-cloud-php/issues/new/choose
+    about: >
+      This repository is a read-only split of googleapis/google-cloud-php, and
+      does not accept new issues. Existing issues remain here for historical
+      reference.
