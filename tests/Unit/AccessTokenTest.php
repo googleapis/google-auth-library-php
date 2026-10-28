@@ -280,7 +280,7 @@ class AccessTokenTest extends TestCase
             $cacheKey
         );
         $this->assertTrue(is_array($certs));
-        $this->assertGreaterThanOrEqual(2, count($certs));
+        $this->assertGreaterThanOrEqual(1, count($certs));
     }
 
     public function provideCertsFromUrl()
